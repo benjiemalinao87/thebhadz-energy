@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-04 Strategy — BADJJ Energy Systems</title>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-04 · MANUFACTURING &amp; LOGISTICS STRATEGY <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>From bench to business</h1>
+    <p class="lede">
+      Equipment and capex per stage, the Philippine regulatory and incentive path, certification,
+      freight, and the honest competitive math against imported modules.
+    </p>
+
+    <div class="callout info">
+      <span class="label">Evidence grades</span>
+      §3 (incentives &amp; registration) is research-backed with cited sources dated 2026-07-06.
+      Equipment prices, certification costs, and freight figures are engineering estimates marked
+      <span class="unverified">EST</span> — quote before budgeting.
+    </div>
+
+    <h2><span class="sec">§ 1</span>Stage gates</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Stage</th><th>Output</th><th>You may advance when</th></tr>
+        <tr>
+          <td><strong>1 · Prototype</strong></td>
+          <td>3–5 hand-built modules</td>
+          <td>Modules meet SC-02 §12 exit criteria; you can explain every failure you produced; per-module
+              materials cost is within 20% of the SC-03 prototype column.</td>
+        </tr>
+        <tr>
+          <td><strong>2 · Small batch</strong></td>
+          <td>50–500 modules/month, workshop line</td>
+          <td>Yield ≥ 95% at rated power; EL defect rate trending down; IEC 61215/61730 certification
+              passed (or in final sequence); ≥ 2 pilot customers installing and paying.</td>
+        </tr>
+        <tr>
+          <td><strong>3 · Production</strong></td>
+          <td>10–50 MW/yr registered manufacturer</td>
+          <td>Certified module family; BOI/DOE registrations active; distribution agreements signed;
+              unit economics positive against §5 import benchmark without incentives.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 2</span>Equipment &amp; capex per stage</h2>
+
+    <h3>Stage 1 — bench (see SC-02 §0)</h3>
+    <p>Soldering, metering, glass handling, and either a small laminator or a DIY vacuum rig.
+       Budget <span class="mono">$3k–12k <span class="unverified">EST</span></span> depending on whether
+       you buy a benchtop laminator (the single most worthwhile purchase) and a used EL camera.</p>
+
+    <h3>Stage 2 — workshop line</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>Minimum credible small-batch line — 2026-07 estimates <span class="unverified">EST</span></caption>
+        <tr><th>Station</th><th>Option</th><th class="num">Price (USD)</th><th>Manual OK?</th></tr>
+        <tr><td>Tabbing/stringing</td><td>Trained hand stations + jigs, or entry semi-auto stringer</td><td class="num">1k–60k</td><td>Yes — quality-gated by EL</td></tr>
+        <tr><td>Layup + bussing</td><td>Table, templates, hand solder</td><td class="num">1k–3k</td><td>Yes</td></tr>
+        <tr><td>EL tester (pre/post-lam)</td><td>Dark enclosure + cooled IR camera package</td><td class="num">4k–15k</td><td><strong>No — non-negotiable</strong></td></tr>
+        <tr><td>Laminator</td><td>Single-chamber, ≥ 1.8 × 1.2 m platen</td><td class="num">10k–35k</td><td><strong>No — the process anchor</strong></td></tr>
+        <tr><td>Framing</td><td>Manual corner press + silicone gun (semi-auto later)</td><td class="num">2k–15k</td><td>Yes</td></tr>
+        <tr><td>Flash tester (sun simulator)</td><td>Class AAA single-pulse, IV + label print</td><td class="num">15k–45k</td><td><strong>No — you cannot sell watts you cannot measure</strong></td></tr>
+        <tr><td>Hi-pot / ground / wet leakage</td><td>Combined PV safety tester</td><td class="num">3k–8k</td><td>No</td></tr>
+        <tr><td><strong>Total stage 2</strong></td><td>Chinese vendors dominate (Ooitech, Horad, Radiant PV class); buy laminator + testers new, tolerate used elsewhere</td><td class="num"><strong>~$40k–180k</strong></td><td></td></tr>
+      </table>
+    </div>
+
+    <h3>Stage 3 — production line</h3>
+    <p>
+      Turnkey 10–25 MW/yr semi-automated lines (auto stringer, conveyorized layup, multi-stage laminator,
+      auto framing, integrated EL + flash) are sold as packages by the same Chinese vendors at roughly
+      <span class="mono">$300k–1.2M <span class="unverified">EST</span></span> plus facility:
+      1,500–3,000 m² floor, ~150–300 kVA power, 15–40 operators. At 25 MW that is ~60,000 modules/yr —
+      size the market read in §5 before this cheque.
+    </p>
+
+    <h2><span class="sec">§ 3</span>Philippine registration &amp; incentives — research-backed</h2>
+
+    <h3>3.1 The two incentive regimes (pick one per project)</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th></th><th>RE Act route — RA 9513 §21</th><th>CREATE/CREATE MORE route (BOI)</th></tr>
+        <tr>
+          <td class="mono">Who</td>
+          <td>DOE-accredited manufacturer of RE equipment, registered with BOI on DOE's accreditation</td>
+          <td>Any RBE whose activity qualifies under the SIPP</td>
+        </tr>
+        <tr>
+          <td class="mono">Income tax</td>
+          <td><strong>7-year ITH</strong> from accreditation, on RE-equipment sales income</td>
+          <td>ITH 4–7 yrs by tier × location, then 10 yrs of 5% SCIT or Enhanced Deductions
+              (CIT cut to 20% under EDR per CREATE MORE)</td>
+        </tr>
+        <tr>
+          <td class="mono">Imports</td>
+          <td>Duty- <strong>and VAT-free</strong> import of components/materials not made locally,
+              per-shipment DOE endorsement required</td>
+          <td>Duty exemption on capital equipment/raw materials; VAT zero-rating keyed to
+              ≥ 70% export sales (domestic-market RBEs rely on duty exemption + income incentives)</td>
+        </tr>
+        <tr>
+          <td class="mono">Domestic buys</td>
+          <td>Zero-rated VAT from local suppliers + tax credit = 100% of duties/VAT that imports would have paid</td>
+          <td>Enhanced deductions menu (+50% labor, +100% power, +100% R&amp;D…)</td>
+        </tr>
+        <tr>
+          <td class="mono">Catch</td>
+          <td>BIR RR 7-2022: availing RE-Act incentives <strong>bars double-dipping</strong> into the CREATE menu</td>
+          <td>Solar module manufacturing is not named verbatim in the 2022 SIPP Tier II "green ecosystems"
+              list — tier assignment is a BOI evaluation call; 2026 SIPP guidelines were still unpublished
+              as of 2026-07-06 (due Q3 2026)</td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      For a domestic-market module assembler the RE Act route is usually the stronger package
+      (7-yr ITH regardless of tier/location + VAT-free inputs), at the cost of DOE accreditation
+      paperwork and per-shipment endorsements. Decide with counsel at stage-2 entry; nothing is needed
+      for stage-1 prototyping beyond ordinary imports.
+    </p>
+
+    <h3>3.2 BOI vs PEZA</h3>
+    <ul>
+      <li><strong>BOI is the default</strong> for a domestic or mixed-market manufacturer. Process:
+        SEC/DTI registration → BOI Form 501 + project study → evaluation → Board approval; typically
+        10–20 working days after complete filing, deemed approved if not acted on in 20; registration
+        fee ≈ 0.1% of project cost. Projects ≤ ₱15B are approved at IPA level (post-CREATE MORE).</li>
+      <li><strong>PEZA only fits exporters:</strong> ecozones are outside customs territory, so every
+        module sold into the Philippine market from a zone bears duty + 12% VAT, with domestic sales
+        capped around 30%. If the plan is PH rooftops, PEZA is the wrong tool.</li>
+      <li><strong>Foreign ownership</strong> (if you take foreign investors): 100% foreign equity is
+        allowed for manufacturing; a &gt;40% foreign-owned domestic-market enterprise needs US$200k
+        paid-in capital, reducible to US$100k with ≥15 Filipino direct employees or DOST-certified
+        advanced technology.</li>
+      <li><strong>Also required regardless:</strong> mayor's permit, BIR registration, and — for a plant —
+        DENR environmental compliance (ECC or Certificate of Non-Coverage; a small assembly workshop
+        typically starts as non-covered).</li>
+    </ul>
+
+    <h3>3.3 Certification to sell</h3>
+    <ul>
+      <li><strong>IEC 61215 (design qualification) + IEC 61730 (safety)</strong> are the passport —
+        required by serious buyers, financiers, and for export. Testing consumes ~15–30 modules and runs
+        through labs with SEA presence (TÜV Rheinland, TÜV SÜD, SGS, Intertek, UL Solutions).
+        Budget <span class="mono">$30k–80k and 6–12 months <span class="unverified">EST</span></span>
+        per module family — one reason to certify once, at stage 2, on a frozen design.</li>
+      <li><strong>Philippine market:</strong> confirm current Bureau of Philippine Standards treatment of
+        PV modules (mandatory ICC/PS coverage has historically applied to other electrical products;
+        PV module status needs a direct BPS check <span class="unverified">UNVERIFIED</span>) and DOE
+        accreditation requirements for net-metering equipment lists.</li>
+      <li><strong>Warranty to match the market:</strong> 12-yr product / 25–30-yr performance
+        (≥ ~87% at year 25/30) is the imported-module standard your brand will be compared against.</li>
+    </ul>
+
+    <h2><span class="sec">§ 4</span>Logistics</h2>
+    <ul>
+      <li><strong>Inbound:</strong> consolidate China-side via one forwarder; LCL sea to Manila for sheet
+        goods and frames, air for cells at prototype scale. At stage 2+, inputs arrive FCL and the
+        RE-Act/BOI duty treatment (§3) applies. Rule: never let one late component idle the laminator —
+        hold 4–6 weeks of input buffer once you have a line.</li>
+      <li><strong>Packaging finished modules:</strong> vertical on-edge in pallet boxes, ~26–36 modules
+        per pallet, corner protectors, strap-not-shrink. Design the pallet before designing the truck route.</li>
+      <li><strong>Inter-island distribution</strong> (Visayas/Mindanao) via RoRo/domestic container adds
+        cost and breakage risk — launch in Luzon within trucking distance of the plant; expand island by
+        island only with a local partner who owns last-mile handling.</li>
+      <li><strong>Breakage accounting:</strong> track it as a named cost line from day one
+        (imported-module distributors quote ~0.5–2% <span class="unverified">EST</span>); your warranty
+        terms must exclude transit damage after handover.</li>
+    </ul>
+
+    <h2><span class="sec">§ 5</span>The competitive math — read before stage 3</h2>
+    <div class="callout warn">
+      <span class="label">The uncomfortable number</span>
+      Tier-1 Chinese modules have sold in the ~$0.09–0.13/W FOB range through 2025–26
+      <span class="unverified">EST</span>. Your batch-scale materials alone are ~$0.12–0.18/W (SC-03 §4)
+      before labor, yield loss, capex, and certification. <strong>A small Philippine assembler will not win
+      on price per watt against imports.</strong> The plan must win somewhere else.
+    </div>
+    <p>Where a local assembler can actually win:</p>
+    <ul>
+      <li><strong>Niche formats imports don't serve:</strong> non-standard sizes for jeepney/tricycle/marine
+        and off-grid retrofits, custom colors/transparency for BIPV, small-format panels — segments where
+        the giants' 500 W glass slabs don't fit and per-watt price is not the buying criterion.</li>
+      <li><strong>Lead time and service:</strong> weeks-not-months delivery, local warranty honored by a
+        company that physically exists here, replacement singles (importers hate shipping one panel).</li>
+      <li><strong>Assembler-as-brand for installers:</strong> white-label for PH installer networks who
+        want a differentiated "Philippine-made" line — the sales channel is installers and distributors,
+        not homeowners directly.</li>
+      <li><strong>Incentive-adjusted domestic pricing:</strong> RE-Act VAT-free inputs + 7-yr ITH (§3)
+        narrows — not closes — the import gap.</li>
+      <li><strong>Export arbitrage <span class="unverified">UNVERIFIED</span>:</strong> US tariff actions
+        have hit Chinese and (2024–25) Vietnamese/Thai/Malaysian/Cambodian modules; whether
+        Philippine-assembled modules currently enjoy a tariff advantage — and the non-circumvention rules
+        on Chinese cells — changes quarter to quarter. This was in the interrupted research scope;
+        re-verify before building any plan on it.</li>
+    </ul>
+    <p>
+      <strong>Strategic bottom line:</strong> stages 1–2 are justified by learning, certification, and the
+      niche/service market — a real but modest business. Stage 3 at commodity scale only makes sense with
+      either a locked distribution channel (utility/government/installer-network offtake) or a verified
+      export-tariff advantage. Let the stage-2 sales data make that decision, not enthusiasm.
+    </p>
+
+    <h2><span class="sec">§ 6</span>Sources — §3 research (accessed/dated 2026-07-06)</h2>
+    <ul class="sources">
+      <li>FIRB, "Incentives Available" (ITH/SCIT/EDR matrix, duty exemption durations) — firb.gov.ph/incentives-available/</li>
+      <li>RA 9513 (Renewable Energy Act 2008) §21 full text — lawphil.net/statutes/repacts/ra2008/ra_9513_2008.html</li>
+      <li>DOE DC 2009-07-0010 (RE manufacturer accreditation; 3-yr validity) — elibrary.judiciary.gov.ph/thebookshelf/showdocs/11/48926</li>
+      <li>BIR RR 7-2022 via Ocampo &amp; Suralvo (RE incentives mechanics; no double-dipping), 2022-07-13 — ocamposuralvo.com</li>
+      <li>Grant Thornton PH on CREATE MORE (RA 12066, signed 2024-11-11: EDR 20% CIT, +100% power deduction, RBE local tax ≤2%, VAT "directly attributable") — grantthornton.com.ph</li>
+      <li>MO 61 s.2022 (2022 SIPP tiers; Tier II "green ecosystems") — lawphil.net/executive/mo/mo2022/mo_61_2022.html</li>
+      <li>2026 SIPP approved via MO 47, guidelines pending Q3 2026 — pco.gov.ph, dof.gov.ph (FIRB), rappler.com Tax Whiz</li>
+      <li>FIRB Res. 003-24 (IPA approval threshold ₱15B) — firb.gov.ph, 2024-02-19; MTF Counsel on CREATE MORE FIRB/IPA roles, 2025-07-17</li>
+      <li>PEZA FAQ (incentives, export orientation) — peza.gov.ph; BIR RMC 74-99 (ecozone sales as imports) — elibrary.judiciary.gov.ph; ASEAN Briefing, "PEZA vs BOI"</li>
+      <li>FIA (RA 7042 as amended by RA 11647): 100% foreign ownership, US$200k/US$100k thresholds — UNCTAD Investment Laws Navigator; Philippine Embassy Berlin summary</li>
+      <li>BOI registration process/timeline/fees — Emerhub, InCorp, Kittelson &amp; Carpo guides; BOI FAQs (fee schedule PDF unverifiable — 403)</li>
+      <li>Known open items flagged by the research: SCIT for domestic-market RBEs post-CREATE MORE (FIRB page vs practitioner notes conflict); solar module manufacturing's exact SIPP tier; 2026 SIPP specific guidelines; BOI fee brackets.</li>
+    </ul>
+
+    <hr>
+    <p class="asof">
+      NEXT RESEARCH PASS (after session-limit reset): live cell/component quotes · equipment vendor quotes
+      (Ooitech/Horad/Radiant class) · certification lab quotes · CN→MNL freight rates · US/ASEAN tariff
+      status for PH-assembled modules · BPS/DOE product-certification confirmation.
+    </p>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>

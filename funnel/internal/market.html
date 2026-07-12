@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-06 Market &amp; pricing — BADJJ Energy Systems</title>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  /* Package cards — priced offers */
+  .pkgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 24px 0 8px; }
+  .pkg {
+    background: var(--sheet); border: 1px solid var(--hairline);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .pkg.feature { border: 2px solid var(--copper); }
+  .pkg .pk-top { background: var(--silicon); color: #dbe4ef; padding: 18px 20px; }
+  .pkg.feature .pk-top { background: var(--copper); color: #fff; }
+  .pkg .pk-tag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0.85;
+  }
+  .pkg .pk-name { font-size: 20px; font-weight: 750; margin: 6px 0 2px; }
+  .pkg .pk-price { font-family: var(--mono); font-size: 30px; font-weight: 600; margin-top: 8px; }
+  .pkg .pk-price small { font-size: 13px; opacity: 0.8; font-weight: 500; }
+  .pkg .pk-body { padding: 16px 20px; flex: 1; }
+  .pkg .pk-body ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+  .pkg .pk-body li { margin: 6px 0; }
+  .pkg .pk-foot {
+    font-family: var(--mono); font-size: 11.5px; color: var(--faint);
+    border-top: 1px solid var(--hairline); padding: 12px 20px; line-height: 1.7;
+  }
+  .pkg .pk-for { font-size: 13px; color: var(--faint); margin: 0 0 10px; }
+  @media (max-width: 960px) { .pkgs { grid-template-columns: 1fr; } }
+</style>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-06 · MARKET, PACKAGING &amp; PRICING <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>Selling it: the ₱80–100k homeowner package</h1>
+    <p class="lede">
+      Who we sell to, how we package the offer, and a price point a Filipino homeowner can actually say
+      yes to. The flagship is a <strong>₱99,500 solar package</strong> in three variants — on-grid,
+      off-grid, and hybrid-ready — engineered to land inside the ₱80–100k window without hiding costs.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Price basis</span>
+      Prices are 2026-07 <strong>planning targets</strong> marked <span class="unverified">EST</span>,
+      built from the SC-05 §4 cost stack. Lock final SRPs only after live equipment quotes
+      (post-research-reset). The ₱99,500 anchor is chosen to sit just under the ₱100k psychological
+      ceiling while leaving the margin shown in SC-05.
+    </div>
+
+    <div class="callout qc">
+      <span class="label">Live funnel</span>
+      The conversion-optimized customer funnel implementing this strategy is live at
+      <a href="https://solar-city-funnel.pages.dev/">solar-city-funnel.pages.dev</a> —
+      persuasive copy, illustrated package images, and a lead-capture form.
+      This page (SC-06) is the internal strategy; the funnel is its public-facing execution.
+    </div>
+
+    <h2><span class="sec">§ 1</span>Who buys, and why</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Target segments</caption>
+        <tr><th>Segment</th><th>Pain</th><th>What wins them</th><th>Fit package</th></tr>
+        <tr>
+          <td><strong>Grid-tied homeowner</strong> (Meralco/DU, ₱5–15k/mo bill)</td>
+          <td>Rising electricity bills; wants payback, not off-grid</td>
+          <td>Bill cut + honest payback math + net-metering done for them</td>
+          <td class="mono">LIWANAG (on-grid)</td>
+        </tr>
+        <tr>
+          <td><strong>Off-grid / brownout-prone</strong> (provincial, island, farm)</td>
+          <td>Unreliable or no grid; runs a generator; wants lights, fans, fridge, phones</td>
+          <td>Reliability + fuel savings + silence vs a genset</td>
+          <td class="mono">ILAW (off-grid)</td>
+        </tr>
+        <tr>
+          <td><strong>Backup-seeker</strong> (has grid, fears outages/typhoons)</td>
+          <td>Wants the grid <em>and</em> a safety net</td>
+          <td>Seamless switchover + storage they can grow</td>
+          <td class="mono">SANDIGAN (hybrid)</td>
+        </tr>
+        <tr>
+          <td><strong>Small business / sari-sari / clinic</strong></td>
+          <td>Bill + downtime both hurt revenue</td>
+          <td>Uptime + operating-cost cut, invoiced</td>
+          <td class="mono">Scaled LIWANAG/SANDIGAN</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 2</span>The ₱99,500 flagship — three ways</h2>
+    <p>One memorable price, three configurations. Same install quality, same warranty, same brand — the
+       homeowner picks by their grid situation, not by decoding a spec sheet.</p>
+
+    <div class="pkgs">
+      <div class="pkg">
+        <div class="pk-top">
+          <span class="pk-tag">On-grid · bill reducer</span>
+          <div class="pk-name">LIWANAG</div>
+          <div class="pk-price">₱99,500 <small>installed</small></div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-for">For a grid-tied home with a ₱6–12k/month bill wanting the fastest payback.</p>
+          <ul>
+            <li>~2.3 kWp — 5–6 × 400–460 W panels</li>
+            <li>Grid-tie / hybrid-ready inverter (2–3 kW)</li>
+            <li>No battery — daytime self-consumption</li>
+            <li>BADJJ typhoon-rated racking + power box</li>
+            <li>Net-metering application handled for you</li>
+            <li>Full install, testing, owner training</li>
+          </ul>
+        </div>
+        <div class="pk-foot">
+          OFFSET: ~250–320 kWh/mo <span class="unverified">EST</span><br>
+          BILL CUT: ~₱2.5–4k/mo · PAYBACK: ~3–4 yr
+        </div>
+      </div>
+
+      <div class="pkg feature">
+        <div class="pk-top">
+          <span class="pk-tag">Off-grid · independence</span>
+          <div class="pk-name">ILAW</div>
+          <div class="pk-price">₱99,500 <small>installed</small></div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-for">For homes with no grid, weak grid, or frequent brownouts. Runs the essentials, silently.</p>
+          <ul>
+            <li>~1.6 kWp — 4 × 400–460 W panels</li>
+            <li>Off-grid / hybrid inverter (2–3 kW)</li>
+            <li>2.5–3 kWh LiFePO₄ battery + BMS</li>
+            <li>Ventilated, rodent-proof outdoor cabinet (built by us)</li>
+            <li>Powers lights, fans, TV, fridge, phones through the evening</li>
+            <li>Full install, commissioning, owner training</li>
+          </ul>
+        </div>
+        <div class="pk-foot">
+          BACKS: essential loads ~4–8 hr <span class="unverified">EST</span><br>
+          REPLACES: a noisy, fuel-hungry genset
+        </div>
+      </div>
+
+      <div class="pkg">
+        <div class="pk-top">
+          <span class="pk-tag">Hybrid · grid + backup</span>
+          <div class="pk-name">SANDIGAN</div>
+          <div class="pk-price">₱99,500 <small>installed</small></div>
+        </div>
+        <div class="pk-body">
+          <p class="pk-for">For grid-tied homes that also want outage protection during typhoons and blackouts.</p>
+          <ul>
+            <li>~1.8 kWp — 4–5 × 400–460 W panels</li>
+            <li>Hybrid inverter with automatic switchover</li>
+            <li>2.5 kWh LiFePO₄ battery, expandable</li>
+            <li>Racking + power box + backup sub-panel</li>
+            <li>Net-metering handled + backup circuit wiring</li>
+            <li>Full install, testing, owner training</li>
+          </ul>
+        </div>
+        <div class="pk-foot">
+          DAY: cuts the bill · NIGHT/OUTAGE: keeps essentials on<br>
+          GROWTH: add batteries later, no re-wiring
+        </div>
+      </div>
+    </div>
+    <p class="asof" style="margin-top:6px">
+      All three land at the same ₱99,500 anchor by trading panel count against battery — on-grid buys
+      more panels and no battery; off-grid trades panels for storage. This keeps one price in the
+      customer's head and the configuration decision on our side.
+    </p>
+
+    <h2><span class="sec">§ 3</span>The pricing ladder</h2>
+    <p>The ₱99,500 flagship is the middle rung. A cheaper entry point pulls first-timers in; upsells
+       lift the average ticket without inventing new products.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Residential ladder <span class="unverified">EST</span></caption>
+        <tr><th>Tier</th><th>Config</th><th class="num">Price</th><th>Role</th></tr>
+        <tr><td class="mono">STARTER — "Piso-saver"</td><td>~0.8–1.2 kWp on-grid, or lights-only off-grid kit</td><td class="num">₱49,500</td><td>Door-opener; low-risk first yes</td></tr>
+        <tr><td class="mono">FLAGSHIP — LIWANAG/ILAW/SANDIGAN</td><td>~1.6–2.3 kWp, §2 above</td><td class="num">₱99,500</td><td>The hero; most volume</td></tr>
+        <tr><td class="mono">PLUS</td><td>~3.5–4 kWp on-grid or 5 kWh off-grid</td><td class="num">₱149,500–189,500</td><td>Bigger homes, faster payback</td></tr>
+        <tr><td class="mono">ADD-ONS</td><td>+2.5 kWh battery · extra panels · surge protection · monitoring upgrade · EV-ready circuit</td><td class="num">₱18–45k each</td><td>Margin without a new SKU</td></tr>
+      </table>
+    </div>
+    <div class="callout info">
+      <span class="label">Financing is the real unlock</span>
+      Even ₱99,500 is a stretch as cash for many households. Partner with a lender or offer 12–24-month
+      installments (~₱4.5–9k/month) so the story becomes <strong>"your solar payment is less than the
+      bill it replaces."</strong> This single move widens the market more than any price cut.
+    </div>
+
+    <h2><span class="sec">§ 4</span>Packaging &amp; brand</h2>
+    <ul>
+      <li><strong>Named packages, not kilowatts.</strong> LIWANAG (light), ILAW (light/lamp),
+        SANDIGAN (support/backbone) — Filipino words a homeowner remembers and repeats. The kWp spec
+        lives in the fine print; the promise lives in the name.</li>
+      <li><strong>Physical packaging that signals quality:</strong> panels and our built components
+        arrive on a branded pallet with corner protection (SC-04 §4); the power box, harness, and
+        racking wear BADJJ labels; the owner gets a printed handover pack — system spec, wiring
+        map, warranty card, monitoring login, and a one-page "what to do in a typhoon."</li>
+      <li><strong>Warranty as a headline, not a footnote:</strong> match the market — 10–12 yr on our
+        built hardware and workmanship, pass-through of panel (25–30 yr performance) and inverter
+        warranties, and — our edge — a <em>local</em> company that answers the phone and ships a single
+        replacement panel (importers won't).</li>
+      <li><strong>Proof over adjectives:</strong> every install is a case study — before/after bill,
+        photos, a short testimonial, a map pin. Solar in the Philippines sells house-to-house and
+        barangay-to-barangay; a visible neighbor's system outsells any ad.</li>
+    </ul>
+
+    <h2><span class="sec">§ 5</span>Marketing strategy</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Channels, ranked by fit</caption>
+        <tr><th>Channel</th><th>Play</th><th>Why it works here</th></tr>
+        <tr><td><strong>Facebook / TikTok</strong></td><td>Bill-cut testimonials, install time-lapses, typhoon-backup demos, live Q&amp;A</td><td>Where Filipino homeowners research big purchases; social proof travels</td></tr>
+        <tr><td><strong>Referral program</strong></td><td>₱2–5k credit per referred install, both sides</td><td>Trust-driven market; your best salesperson is a happy neighbor</td></tr>
+        <tr><td><strong>Barangay / community demos</strong></td><td>One flagship reference install per area, open house</td><td>Localized, visible, converts fence-sitters who "want to see it working"</td></tr>
+        <tr><td><strong>Marketplace listings</strong></td><td>Lazada/Shopee/Marketplace with the named packages + financing</td><td>Captures active searchers; price transparency builds trust</td></tr>
+        <tr><td><strong>Installer/dealer wholesale</strong></td><td>Sell our racking + power boxes + (later) modules to other installers</td><td>B2B revenue that also seeds Model A's channel (SC-05 §5)</td></tr>
+        <tr><td><strong>SME / co-op / LGU</strong></td><td>Direct outreach for clinics, schools, water districts, farms</td><td>Bigger tickets, budget cycles, uptime-driven buyers</td></tr>
+      </table>
+    </div>
+    <ul>
+      <li><strong>The core message:</strong> "Cut your Meralco bill — or keep the lights on when the grid
+        goes down — for around ₱99,500, installed, by a Philippine company that stands behind it."</li>
+      <li><strong>Lead the pitch with the customer's number,</strong> not ours: upload a bill photo →
+        get a same-day estimate of monthly savings and payback (this is <a href="/internal/designer.html">SC-01</a>
+        sizing turned into a sales tool).</li>
+      <li><strong>Season the calendar:</strong> push backup/hybrid before and during typhoon season;
+        push bill-cut/on-grid during summer rate spikes.</li>
+    </ul>
+
+    <h2><span class="sec">§ 6</span>Feasibility check — is ₱80–100k real?</h2>
+    <p>
+      Yes, at residential essential-load scale. The SC-05 §4 cost stack lands the on-grid flagship at
+      ₱62–86k cost against a ₱99,500 price (14–38% gross), and the off-grid flagship works
+      <em>if the battery is held to 2.5–3 kWh</em> — a bigger battery is the one thing that breaks the
+      price point, which is exactly why storage is an upsell, not a default. What ₱80–100k does
+      <strong>not</strong> buy: a whole-home off-grid system, large batteries, or 5 kWp+ arrays — those
+      are the PLUS tier and up, and honest sizing at the door protects both the customer and our margin.
+    </p>
+    <div class="callout qc">
+      <span class="label">Go / no-go before launch</span>
+      Confirm live equipment quotes hit the SC-05 §4 cost bands · line up a financing partner ·
+      build one reference install per package · price the add-on ladder · verify DU net-metering
+      turnaround in your launch city. Green on all five → launch LIWANAG first (fastest payback story),
+      then ILAW where the grid is weakest.
+    </div>
+
+    <hr>
+    <p class="asof">
+      DEPENDS ON: <a href="/internal/sourcing.html">SC-05</a> cost stack · post-reset equipment quotes ·
+      financing-partner terms · per-DU net-metering timelines. Update prices here once quotes land.
+    </p>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>

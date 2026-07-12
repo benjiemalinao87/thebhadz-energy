@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="ILAW off-grid solar package: a provincial home lit at night while the neighborhood is dark, powered by solar and a battery instead of a noisy generator">
+  <defs>
+    <linearGradient id="il-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1130"/>
+      <stop offset="0.6" stop-color="#16224e"/>
+      <stop offset="1" stop-color="#243a63"/>
+    </linearGradient>
+    <radialGradient id="il-moon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fdfbe8"/>
+      <stop offset="0.55" stop-color="#e8ecc4"/>
+      <stop offset="1" stop-color="#e8ecc4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="il-glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#ffe9a8" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="il-panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#26406b"/>
+      <stop offset="1" stop-color="#16294a"/>
+    </linearGradient>
+    <linearGradient id="il-badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb43e"/>
+      <stop offset="1" stop-color="#e78a1c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- night sky -->
+  <rect width="800" height="600" fill="url(#il-sky)"/>
+  <circle cx="120" cy="110" r="120" fill="url(#il-moon)"/>
+  <circle cx="120" cy="110" r="40" fill="#f6f4d8"/>
+  <g fill="#dfe6ff">
+    <circle cx="300" cy="70" r="2"/><circle cx="360" cy="130" r="1.6"/><circle cx="470" cy="60" r="2.2"/>
+    <circle cx="560" cy="120" r="1.6"/><circle cx="640" cy="70" r="2"/><circle cx="720" cy="150" r="1.6"/>
+    <circle cx="240" cy="150" r="1.4"/><circle cx="420" cy="100" r="1.4"/>
+  </g>
+
+  <!-- ground -->
+  <rect y="440" width="800" height="160" fill="#1c2e22"/>
+  <rect y="440" width="800" height="12" fill="#25402e"/>
+
+  <!-- DARK neighbor house (left) -->
+  <g opacity="0.85">
+    <rect x="70" y="352" width="150" height="96" fill="#111a2e" stroke="#0a1120" stroke-width="2"/>
+    <path d="M58 356 L145 300 L232 356 Z" fill="#0d1626"/>
+    <rect x="98" y="384" width="34" height="30" fill="#1b2540"/>
+    <rect x="160" y="384" width="34" height="30" fill="#1b2540"/>
+    <text x="145" y="474" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#66739a">brownout</text>
+  </g>
+
+  <!-- LIT solar home (right/center) -->
+  <g>
+    <ellipse cx="470" cy="400" rx="230" ry="150" fill="url(#il-glow)"/>
+    <!-- body -->
+    <rect x="330" y="322" width="280" height="146" fill="#f2ead9" stroke="#c9bda3" stroke-width="2"/>
+    <path d="M314 326 L470 232 L626 326 Z" fill="#b45f40"/>
+    <path d="M314 326 L470 232 L626 326 Z" fill="none" stroke="#8c4527" stroke-width="3"/>
+    <!-- glowing door + windows -->
+    <rect x="452" y="392" width="42" height="76" fill="#a9773f"/>
+    <rect x="360" y="360" width="50" height="42" fill="#fff2b8" stroke="#8c5a33" stroke-width="3"/>
+    <rect x="532" y="360" width="50" height="42" fill="#fff2b8" stroke="#8c5a33" stroke-width="3"/>
+    <line x1="385" y1="360" x2="385" y2="402" stroke="#8c5a33" stroke-width="2"/>
+    <line x1="557" y1="360" x2="557" y2="402" stroke="#8c5a33" stroke-width="2"/>
+  </g>
+
+  <!-- rooftop panels -->
+  <g transform="translate(470 282) rotate(-31)">
+    <g transform="translate(-124 -30)">
+      <rect x="0" y="0" width="124" height="60" rx="3" fill="url(#il-panel)" stroke="#5f7ba3" stroke-width="2"/>
+      <g stroke="#7f9ec2" stroke-width="1" opacity="0.7">
+        <line x1="41" y1="2" x2="41" y2="58"/><line x1="82" y1="2" x2="82" y2="58"/><line x1="2" y1="30" x2="122" y2="30"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- battery cabinet, glowing status -->
+  <g transform="translate(628 388)">
+    <rect x="0" y="0" width="60" height="80" rx="8" fill="#20304f" stroke="#3c527a" stroke-width="2"/>
+    <rect x="10" y="12" width="40" height="6" rx="3" fill="#7fe0a0"/>
+    <rect x="10" y="24" width="40" height="6" rx="3" fill="#7fe0a0"/>
+    <rect x="10" y="36" width="40" height="6" rx="3" fill="#7fe0a0"/>
+    <rect x="10" y="48" width="40" height="6" rx="3" fill="#3c527a"/>
+    <text x="30" y="70" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#9fe8bb">3 kWh</text>
+  </g>
+
+  <!-- top banner -->
+  <g>
+    <rect x="0" y="0" width="800" height="72" fill="#0c1322" opacity="0.82"/>
+    <text x="36" y="34" font-family="system-ui,sans-serif" font-size="30" font-weight="800" fill="#ffffff" letter-spacing="3">ILAW</text>
+    <text x="36" y="58" font-family="ui-monospace,Menlo,monospace" font-size="14" fill="#ffb43e" letter-spacing="2">OFF-GRID · LIGHTS ON WHEN THE GRID IS OUT</text>
+  </g>
+
+  <!-- price badge -->
+  <g transform="translate(566 92)">
+    <rect x="0" y="0" width="210" height="92" rx="12" fill="url(#il-badge)"/>
+    <text x="105" y="34" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400" letter-spacing="1">FREE ESTIMATE</text>
+    <text x="105" y="64" text-anchor="middle" font-family="system-ui,sans-serif" font-size="27" font-weight="800" fill="#241500">Get your price</text>
+    <text x="105" y="82" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400">SAME-DAY REPLY →</text>
+  </g>
+
+  <!-- benefit chips -->
+  <g font-family="system-ui,sans-serif" font-size="15" font-weight="600">
+    <g transform="translate(36 508)">
+      <rect x="0" y="0" width="236" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">🔋 Fridge, fans &amp; lights all night</text>
+    </g>
+    <g transform="translate(284 508)">
+      <rect x="0" y="0" width="204" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">🔇 No more noisy generator</text>
+    </g>
+    <g transform="translate(500 508)">
+      <rect x="0" y="0" width="264" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">⛽ Stop burning money on fuel</text>
+    </g>
+  </g>
+</svg>

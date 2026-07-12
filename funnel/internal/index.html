@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Founder home — BADJJ Energy Systems</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  /* ============================================================
+     BADJJ Founder Command Center — dashboard
+     Self-contained "monitor / terminal" theme, modeled on the
+     customer-command-center design system. Everything is namespaced
+     under .cc- so it can't collide with the shared internal styles
+     used by the SC doc pages.
+     ============================================================ */
+
+  .cc-root {
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "IBM Plex Mono", Menlo, Monaco, Consolas, monospace;
+    --display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+    --bg: #020202;
+    --panel-a: rgba(12, 12, 12, 0.96);
+    --panel-b: rgba(5, 5, 5, 0.98);
+
+    --z-900: #18181b; --z-800: #27272a; --z-700: #3f3f46; --z-600: #52525b;
+    --z-500: #71717a; --z-400: #a1a1aa; --z-300: #d4d4d8; --z-200: #e4e4e7;
+    --z-100: #f4f4f5; --z-50: #fafafa;
+
+    --cyan: #67e8f9; --green: #4ade80; --yellow: #facc15; --red: #fb7185;
+    --purple: #c084fc; --blue: #60a5fa; --amber: #f59e0b;
+
+    --cyan-bd: rgba(103,232,249,0.25); --green-bd: rgba(74,222,128,0.22);
+    --yellow-bd: rgba(250,204,21,0.24); --red-bd: rgba(251,113,133,0.28);
+    --purple-bd: rgba(192,132,252,0.24); --blue-bd: rgba(96,165,250,0.22);
+
+    --sidebar-w: 248px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body.cc-body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,0.05), transparent 55%),
+      radial-gradient(1000px 500px at 100% -5%, rgba(250,204,21,0.035), transparent 50%),
+      var(--bg);
+    color: var(--z-100);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .cc-root * { box-sizing: border-box; }
+  .cc-root a { color: inherit; text-decoration: none; }
+  .cc-root ::selection { background: rgba(103,232,249,0.25); color: #fff; }
+
+  /* scanline overlay */
+  .cc-body::before {
+    content: ""; position: fixed; inset: 0; z-index: 90; pointer-events: none;
+    opacity: 0.09;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.10) 1px, transparent 1px);
+    background-size: 100% 4px;
+  }
+
+  .cc-layout { display: flex; min-height: 100vh; }
+
+  /* ---------- SIDEBAR ---------- */
+  .cc-sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    position: sticky; top: 0; align-self: flex-start; height: 100vh;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(10,10,11,0.96), rgba(3,3,3,0.98));
+    border-right: 1px solid var(--z-800); z-index: 60;
+  }
+  .cc-sidebar::after {
+    content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(103,232,249,0.25), transparent);
+    pointer-events: none;
+  }
+  .cc-sb-head {
+    display: flex; align-items: center; gap: 11px; padding: 18px;
+    border-bottom: 1px dashed rgba(63,63,70,0.9);
+  }
+  .cc-sb-mark {
+    width: 34px; height: 34px; flex: none; display: grid; place-items: center;
+    border-radius: 10px; background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.3); color: var(--amber);
+  }
+  .cc-sb-title { display: flex; flex-direction: column; line-height: 1.15; }
+  .cc-sb-title .brand { font-family: var(--display); font-size: 14px; font-weight: 600; color: var(--z-50); letter-spacing: 0.02em; }
+  .cc-sb-title .sub { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.24em; color: var(--z-500); margin-top: 2px; }
+
+  .cc-sb-user {
+    margin: 12px 12px 4px; display: flex; align-items: center; gap: 8px;
+    padding: 8px 11px; border-radius: 10px; background: rgba(9,9,11,0.7); border: 1px solid var(--z-800);
+  }
+  .cc-sb-user svg { color: var(--cyan); flex: none; }
+  .cc-sb-user span { font-size: 11px; color: var(--z-300); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .cc-sb-nav { flex: 1; overflow-y: auto; padding: 10px 12px 4px; scrollbar-width: thin; scrollbar-color: rgba(113,113,122,0.6) transparent; }
+  .cc-sb-nav::-webkit-scrollbar { width: 8px; }
+  .cc-sb-nav::-webkit-scrollbar-thumb { background: rgba(113,113,122,0.5); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+
+  .cc-sb-group { margin-bottom: 12px; }
+  .cc-sb-group-label { padding: 0 10px; margin-bottom: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.22em; color: var(--z-600); }
+
+  .cc-sb-item {
+    position: relative; width: 100%; display: flex; align-items: center; gap: 11px;
+    padding: 8px 10px; border-radius: 9px; font-size: 12.5px; font-weight: 500;
+    color: var(--z-400); background: transparent; border: 1px solid transparent;
+    cursor: pointer; transition: background 0.14s, color 0.14s, border-color 0.14s; text-align: left;
+  }
+  .cc-sb-item svg { width: 17px; height: 17px; flex: none; opacity: 0.85; }
+  .cc-sb-item:hover { background: rgba(255,255,255,0.03); color: var(--z-100); }
+  .cc-sb-item.active { background: rgba(103,232,249,0.08); border-color: var(--cyan-bd); color: var(--cyan); }
+  .cc-sb-item.active::before { content: ""; position: absolute; left: -12px; top: 50%; transform: translateY(-50%); width: 3px; height: 18px; border-radius: 0 3px 3px 0; background: var(--cyan); }
+  .cc-sb-item .tail { margin-left: auto; font-size: 9px; letter-spacing: 0.12em; color: var(--z-500); font-variant-numeric: tabular-nums; }
+  .cc-sb-item .dot-badge { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 8px rgba(250,204,21,0.6); }
+
+  .cc-sb-foot { padding: 12px; border-top: 1px dashed rgba(63,63,70,0.9); display: flex; flex-direction: column; gap: 6px; }
+  .cc-sb-btn {
+    display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: 9px;
+    font-size: 12px; font-weight: 500; color: var(--z-300); background: transparent;
+    border: 1px solid transparent; cursor: pointer; width: 100%; text-align: left;
+    transition: background 0.14s, color 0.14s; font-family: var(--mono);
+  }
+  .cc-sb-btn svg { width: 17px; height: 17px; flex: none; }
+  .cc-sb-btn:hover { background: rgba(255,255,255,0.03); color: var(--z-50); }
+  .cc-sb-btn.danger { color: var(--red); }
+  .cc-sb-btn.danger:hover { background: rgba(251,113,133,0.08); }
+
+  /* ---------- MAIN ---------- */
+  .cc-main { flex: 1; min-width: 0; padding: clamp(18px, 3vw, 36px); max-width: 1200px; }
+  .cc-main section[id] { scroll-margin-top: 20px; }
+
+  .cc-masthead {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+    gap: 20px; padding-bottom: 22px; border-bottom: 1px dashed rgba(63,63,70,0.9);
+  }
+  .cc-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.32em; color: var(--z-500); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cc-eyebrow .brand { color: var(--amber); font-weight: 600; }
+  .cc-eyebrow .dot { color: var(--z-700); }
+  .cc-main h1 { font-family: var(--display); font-size: clamp(1.8rem, 3.6vw, 2.6rem); font-weight: 600; letter-spacing: 0.01em; line-height: 1.05; margin: 14px 0 0; color: var(--z-50); text-wrap: balance; }
+  .cc-lede { margin: 14px 0 0; max-width: 62ch; font-size: 13.5px; color: var(--z-400); line-height: 1.65; }
+  .cc-lede a { color: var(--amber); border-bottom: 1px dashed rgba(245,158,11,0.5); }
+  .cc-lede a:hover { color: #fbbf24; }
+
+  .cc-head-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .cc-badge { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.28em; border: 1px solid rgba(74,222,128,0.35); background: rgba(74,222,128,0.10); color: #bbf7d0; }
+  .cc-badge .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: cc-pulse 2s infinite; }
+  @keyframes cc-pulse { 0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); } 70% { box-shadow: 0 0 0 6px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
+  .cc-updated { font-size: 10px; text-transform: uppercase; letter-spacing: 0.24em; color: var(--z-500); display: flex; align-items: center; gap: 6px; }
+
+  /* ---------- panel base ---------- */
+  .cc-panel {
+    position: relative; overflow: hidden; border-radius: 18px; border: 1px solid var(--z-800);
+    background: linear-gradient(180deg, var(--panel-a), var(--panel-b)), #000;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(0,0,0,0.30);
+  }
+  .cc-panel::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent); opacity: 0.5; pointer-events: none; }
+  .cc-panel::after { content: ""; position: absolute; inset: 1px; border: 1px solid rgba(255,255,255,0.03); border-radius: inherit; pointer-events: none; }
+  .cc-panel > * { position: relative; z-index: 1; }
+  .cc-panel[data-tone="cyan"]   { border-color: var(--cyan-bd);   box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(8,145,178,0.16); }
+  .cc-panel[data-tone="green"]  { border-color: var(--green-bd);  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(34,197,94,0.14); }
+  .cc-panel[data-tone="yellow"] { border-color: var(--yellow-bd); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(202,138,4,0.14); }
+  .cc-panel[data-tone="purple"] { border-color: var(--purple-bd); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(147,51,234,0.14); }
+  .cc-panel[data-tone="blue"]   { border-color: var(--blue-bd);   box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 38px rgba(37,99,235,0.14); }
+
+  /* ---------- stat strip ---------- */
+  .cc-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 26px; }
+  .cc-stat { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+  .cc-stat .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.28em; }
+  .cc-stat .value { font-family: var(--display); font-size: 1.9rem; font-weight: 600; letter-spacing: -0.01em; color: var(--z-50); font-variant-numeric: tabular-nums; }
+  .cc-stat .sub { font-size: 11px; color: var(--z-500); }
+  .cc-stat .value.tone-green  { color: var(--green); }
+  .cc-stat .value.tone-cyan   { color: var(--cyan); }
+  .cc-stat .value.tone-yellow { color: var(--yellow); }
+  .cc-stat .value.tone-purple { color: var(--purple); }
+
+  .cc-section-head { display: flex; align-items: center; gap: 14px; margin: 40px 0 16px; }
+  .cc-section-head .tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3em; color: var(--z-400); white-space: nowrap; }
+  .cc-section-head .rule { flex: 1; height: 1px; background: repeating-linear-gradient(90deg, var(--z-800) 0 6px, transparent 6px 12px); }
+  .cc-section-head .count { font-size: 11px; color: var(--z-600); letter-spacing: 0.1em; }
+
+  /* ---------- console cards ---------- */
+  .cc-consoles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .cc-console { padding: 22px; display: block; transition: transform 0.18s; }
+  .cc-console.wide { grid-column: 1 / -1; }
+  .cc-console:hover { transform: translateY(-2px); }
+  .cc-console:hover .arrow { transform: translateX(4px); }
+  .cc-console .kicker { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.28em; margin-bottom: 14px; }
+  .cc-console .row { display: flex; align-items: center; gap: 14px; }
+  .cc-console .ico { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+  .cc-console h2 { font-family: var(--display); font-size: 1.35rem; font-weight: 600; margin: 0; color: var(--z-50); display: flex; align-items: center; gap: 10px; }
+  .cc-console .arrow { transition: transform 0.18s; display: inline-block; }
+  .cc-console p { margin: 12px 0 0; font-size: 13px; color: var(--z-400); line-height: 1.6; }
+  .cc-console .meta { margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(63,63,70,0.7); display: flex; gap: 20px; flex-wrap: wrap; font-size: 11px; color: var(--z-500); font-variant-numeric: tabular-nums; }
+  .cc-console .meta b { color: var(--z-200); font-weight: 600; }
+  .cc-ico.cyan   { background: rgba(103,232,249,0.10); color: var(--cyan); }
+  .cc-ico.purple { background: rgba(192,132,252,0.10); color: var(--purple); }
+  .cc-ico.amber  { background: rgba(245,158,11,0.10);  color: var(--amber); }
+
+  /* ---------- two-model ---------- */
+  .cc-models { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cc-model { padding: 18px 20px; }
+  .cc-model .mk { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.28em; margin-bottom: 8px; }
+  .cc-model h4 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 6px; color: var(--z-50); font-weight: 600; }
+  .cc-model p { margin: 0; font-size: 12px; color: var(--z-400); line-height: 1.55; }
+  .cc-model .mk.a { color: var(--cyan); }
+  .cc-model .mk.b { color: var(--green); }
+
+  /* ---------- doc grid ---------- */
+  .cc-docs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cc-doc { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; transition: transform 0.16s; }
+  .cc-doc:hover { transform: translateY(-2px); }
+  .cc-doc:hover .doc-arrow { opacity: 1; transform: translateX(3px); }
+  .cc-doc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .cc-doc .code { font-size: 10.5px; font-weight: 600; letter-spacing: 0.24em; }
+  .cc-doc .status { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }
+  .cc-status.ready  { color: var(--green);  border-color: var(--green-bd);  background: rgba(74,222,128,0.08); }
+  .cc-status.review { color: var(--yellow); border-color: var(--yellow-bd); background: rgba(250,204,21,0.08); }
+  .cc-status.wip    { color: var(--blue);   border-color: var(--blue-bd);   background: rgba(96,165,250,0.08); }
+  .cc-doc h3 { font-family: var(--display); font-size: 1.15rem; font-weight: 600; margin: 0; color: var(--z-50); display: flex; align-items: center; gap: 8px; }
+  .cc-doc-arrow { opacity: 0.4; transition: opacity 0.16s, transform 0.16s; color: var(--z-400); }
+  .cc-doc p { margin: 0; font-size: 12.5px; color: var(--z-400); line-height: 1.55; }
+  .cc-doc .foot { margin-top: 2px; font-size: 10.5px; color: var(--z-600); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .cc-foot-strip { margin-top: 40px; padding-top: 20px; border-top: 1px dashed rgba(63,63,70,0.9); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--z-600); letter-spacing: 0.08em; }
+  .cc-foot-strip .k { color: var(--z-500); }
+
+  /* ---------- mobile ---------- */
+  .cc-menu-toggle { display: none; position: fixed; top: 14px; left: 14px; z-index: 80; width: 42px; height: 42px; border-radius: 11px; background: rgba(10,10,11,0.9); border: 1px solid var(--z-700); color: var(--z-100); cursor: pointer; place-items: center; }
+  .cc-scrim { display: none; }
+
+  @media (max-width: 980px) {
+    .cc-menu-toggle { display: grid; }
+    .cc-sidebar { position: fixed; top: 0; left: 0; height: 100vh; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .cc-body.nav-open .cc-sidebar { transform: translateX(0); }
+    .cc-body.nav-open .cc-scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+    .cc-main { padding-top: 68px; max-width: 100%; }
+    .cc-strip { grid-template-columns: repeat(2, 1fr); }
+    .cc-consoles, .cc-docs, .cc-models { grid-template-columns: 1fr; }
+    .cc-head-actions { align-items: flex-start; }
+  }
+  @media (max-width: 460px) { .cc-strip { grid-template-columns: 1fr 1fr; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .cc-root * { transition: none !important; animation: none !important; } }
+  .cc-root :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 6px; }
+</style>
+</head>
+<body class="cc-body cc-root">
+
+<button class="cc-menu-toggle" type="button" aria-label="Toggle navigation" onclick="document.body.classList.toggle('nav-open')">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="cc-layout">
+  <div class="cc-scrim" onclick="document.body.classList.remove('nav-open')"></div>
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="cc-sidebar">
+    <div class="cc-sb-head">
+      <div class="cc-sb-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.3 6.3 2.9 2.9"/><path d="M2 12h4"/><circle cx="12" cy="12" r="4"/><path d="m14.8 9.2 2.9-2.9"/><path d="M18 12h4"/><path d="m14.8 14.8 2.9 2.9"/><path d="M12 18v4"/><path d="m6.3 17.7 2.9-2.9"/></svg>
+      </div>
+      <div class="cc-sb-title">
+        <span class="brand">Command Center</span>
+        <span class="sub">BADJJ · Founder</span>
+      </div>
+    </div>
+
+    <div class="cc-sb-user">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+      <span>Founder access · confidential</span>
+    </div>
+
+    <nav class="cc-sb-nav" aria-label="Primary">
+      <div class="cc-sb-group">
+        <div class="cc-sb-group-label">Overview</div>
+        <a class="cc-sb-item active" href="#top" data-nav>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a class="cc-sb-item" href="#models" data-nav>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+          Operating Model
+        </a>
+      </div>
+
+      <div class="cc-sb-group">
+        <div class="cc-sb-group-label">Operations</div>
+        <a class="cc-sb-item" href="/internal/leads.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Contacts
+          <span class="tail">37</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/meetings.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Meeting Log
+          <span class="dot-badge" title="Open action items"></span>
+        </a>
+        <a class="cc-sb-item" href="/internal/notes.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 21v-5h5"/></svg>
+          Team Notes
+        </a>
+        <a class="cc-sb-item" href="/internal/principles.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          Vision &amp; Values
+        </a>
+      </div>
+
+      <div class="cc-sb-group">
+        <div class="cc-sb-group-label">Documentation</div>
+        <a class="cc-sb-item" href="/internal/overview.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"/></svg>
+          Overview <span class="tail">00</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/designer.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M3 20h4"/><path d="M3 4h18"/><path d="M8 4v16"/><path d="M14 4v8"/></svg>
+          Panel Designer <span class="tail">01</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/build-guide.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          Build Guide <span class="tail">02</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/bom.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+          BOM &amp; Suppliers <span class="tail">03</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/strategy.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          Strategy <span class="tail">04</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/sourcing.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 9 5 3h14l2 6"/><path d="M12 3v6"/></svg>
+          Source &amp; Install <span class="tail">05</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/market.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>
+          Market &amp; Pricing <span class="tail">06</span>
+        </a>
+      </div>
+
+      <div class="cc-sb-group">
+        <div class="cc-sb-group-label">System</div>
+        <a class="cc-sb-item" href="https://solar-city-funnel.pages.dev/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          Public Funnel
+        </a>
+      </div>
+    </nav>
+
+    <div class="cc-sb-foot">
+      <a class="cc-sb-btn danger" href="/api/founder-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="cc-main">
+    <span id="top"></span>
+
+    <header class="cc-masthead">
+      <div>
+        <div class="cc-eyebrow">
+          <span class="brand">BADJJ ENERGY SYSTEMS</span>
+          <span class="dot">·</span><span>FOUNDER ACCESS</span>
+          <span class="dot">·</span><span>INTERNAL</span>
+        </div>
+        <h1>Module Engineering File</h1>
+        <p class="cc-lede">
+          The internal manufacturing, sourcing, strategy, and go-to-market documentation
+          (SC-00–06), the live leads pipeline, and the founders' meeting log. Confidential —
+          founders only. The public funnel lives at
+          <a href="https://solar-city-funnel.pages.dev/">solar-city-funnel.pages.dev</a>.
+        </p>
+      </div>
+      <div class="cc-head-actions">
+        <span class="cc-badge"><span class="pulse" aria-hidden="true"></span> LIVE FEED</span>
+        <span class="cc-updated">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Placeholder metrics
+        </span>
+      </div>
+    </header>
+
+    <!-- STAT STRIP -->
+    <section class="cc-strip" aria-label="Key metrics">
+      <div class="cc-panel cc-stat" data-tone="cyan">
+        <span class="label" style="color:var(--cyan)">Open Leads</span>
+        <span class="value tone-cyan">37</span>
+        <span class="sub">In pipeline · 6 stages</span>
+      </div>
+      <div class="cc-panel cc-stat" data-tone="green">
+        <span class="label" style="color:var(--green)">Deposits Paid</span>
+        <span class="value tone-green">4</span>
+        <span class="sub">₱398,000 committed</span>
+      </div>
+      <div class="cc-panel cc-stat" data-tone="yellow">
+        <span class="label" style="color:var(--yellow)">Flagship Price</span>
+        <span class="value tone-yellow">₱99.5k</span>
+        <span class="sub">Homeowner package</span>
+      </div>
+      <div class="cc-panel cc-stat" data-tone="purple">
+        <span class="label" style="color:var(--purple)">Docs Live</span>
+        <span class="value tone-purple">7 / 7</span>
+        <span class="sub">SC-00 → SC-06</span>
+      </div>
+    </section>
+
+    <!-- CONSOLES -->
+    <section id="operations">
+      <div class="cc-section-head">
+        <span class="tag">Operations</span>
+        <span class="rule" aria-hidden="true"></span>
+        <span class="count">LIVE CONSOLES</span>
+      </div>
+      <div class="cc-consoles">
+        <a class="cc-panel cc-console" data-tone="cyan" href="/internal/leads.html">
+          <div class="kicker" style="color:var(--cyan)">Operations</div>
+          <div class="row">
+            <span class="cc-ico cyan" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <h2>Contacts <span class="arrow" aria-hidden="true">→</span></h2>
+          </div>
+          <p>The CRM contacts table — sort, filter, and triage every funnel lead across the six sales stages.</p>
+          <div class="meta"><span><b>37</b> open</span><span><b>4</b> deposits</span><span>Placeholder counts</span></div>
+        </a>
+
+        <a class="cc-panel cc-console" data-tone="purple" href="/internal/meetings.html">
+          <div class="kicker" style="color:var(--purple)">Founders</div>
+          <div class="row">
+            <span class="cc-ico purple" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+            <h2>Meeting log <span class="arrow" aria-hidden="true">→</span></h2>
+          </div>
+          <p>Weekly summaries with highlighted action items and owners. Updated weekly.</p>
+          <div class="meta"><span>Summaries</span><span>Action items</span><span>Updated <b>weekly</b></span></div>
+        </a>
+
+        <a class="cc-panel cc-console wide" data-tone="amber" href="/internal/principles.html" style="border-color:rgba(245,158,11,0.24)">
+          <div class="kicker" style="color:var(--amber)">Foundation</div>
+          <div class="row">
+            <span class="cc-ico amber" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+            <h2>Vision, mission, goals &amp; values <span class="arrow" aria-hidden="true">→</span></h2>
+          </div>
+          <p>Who we are and how we work — merged from Jundhel's draft, filtered through the founder operating system (the ten-book canon). For founder review.</p>
+          <div class="meta"><span>Status <b style="color:var(--yellow)">In review</b></span><span>Source <b>Jundhel draft</b></span><span>Gates <b>7 red-flag rules</b></span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- TWO-MODEL -->
+    <section id="models">
+      <div class="cc-section-head">
+        <span class="tag">Operating Model</span>
+        <span class="rule" aria-hidden="true"></span>
+        <span class="count">TWO IN PARALLEL</span>
+      </div>
+      <div class="cc-models">
+        <div class="cc-panel cc-model" data-tone="cyan">
+          <div class="mk a">Model A — the moat</div>
+          <h4>Build our own modules</h4>
+          <p>SC-01…04. Assemble ~400W half-cut monocrystalline panels from purchased cells. Long-term defensibility.</p>
+        </div>
+        <div class="cc-panel cc-model" data-tone="green">
+          <div class="mk b">Model B — the engine</div>
+          <h4>Source &amp; install</h4>
+          <p>SC-05…06. Buy what's uneconomical to reproduce, earn as installer. Near-term revenue and Model A's sales channel.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section id="documentation">
+      <div class="cc-section-head">
+        <span class="tag">Documentation</span>
+        <span class="rule" aria-hidden="true"></span>
+        <span class="count">SC-00 — SC-06</span>
+      </div>
+      <div class="cc-docs">
+        <a class="cc-panel cc-doc" data-tone="blue" href="/internal/overview.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—00</span><span class="status cc-status ready">Ready</span></div>
+          <h3>Overview <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>The two-model plan (build vs. source &amp; install) and the ground rules that gate every decision.</p>
+          <span class="foot">Frames both models</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="cyan" href="/internal/designer.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—01</span><span class="status cc-status ready">Ready</span></div>
+          <h3>Panel designer <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Interactive module designer — cell layout, series/parallel electricals, live IV curve and computed specs.</p>
+          <span class="foot">D3 · interactive</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="cyan" href="/internal/build-guide.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—02</span><span class="status cc-status ready">Ready</span></div>
+          <h3>Build guide <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Hand-build process, parameters, QC gates, and the full flash / EL / hipot test sequence.</p>
+          <span class="foot">Tabbing → framing → test</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="green" href="/internal/bom.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—03</span><span class="status cc-status ready">Ready</span></div>
+          <h3>BOM &amp; suppliers <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Bill of materials, suppliers, PH / SE-Asia sourcing, China-direct import, and the cost roll-up.</p>
+          <span class="foot">Dated · research-backed</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="yellow" href="/internal/strategy.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—04</span><span class="status cc-status review">In review</span></div>
+          <h3>Manufacturing strategy <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Three-stage roadmap: DIY prototype → workshop line → factory. Capex, certs (IEC 61215/61730), freight.</p>
+          <span class="foot">DOE / BOI / PEZA angles</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="green" href="/internal/sourcing.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—05</span><span class="status cc-status ready">Ready</span></div>
+          <h3>Source &amp; install <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Model B in depth — buy-vs-build table, install ops, unit economics. Stage-0 revenue that funds Model A.</p>
+          <span class="foot">Revenue engine</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="purple" href="/internal/market.html">
+          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—06</span><span class="status cc-status wip">Drafting</span></div>
+          <h3>Market &amp; pricing <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
+          <p>Segments, named packages (LIWANAG / ILAW / SANDIGAN), the ₱99,500 flagship, pricing ladder, marketing plan.</p>
+          <span class="foot">₱80–100k window</span>
+        </a>
+        <a class="cc-panel cc-doc" data-tone="cyan" href="https://solar-city-funnel.pages.dev/" target="_blank" rel="noopener">
+          <div class="cc-doc-top"><span class="code" style="color:var(--green)">FUNNEL</span><span class="status cc-status ready">Deployed</span></div>
+          <h3>Public conversion funnel <span class="cc-doc-arrow" aria-hidden="true">↗</span></h3>
+          <p>The warm, mobile-first landing page selling the three ₱99,500 homeowner packages. Cloudflare Pages.</p>
+          <span class="foot">solar-city-funnel.pages.dev</span>
+        </a>
+      </div>
+    </section>
+
+    <footer class="cc-foot-strip">
+      <span><span class="k">SYSTEM</span> BADJJ Module Engineering File · v2</span>
+      <span><span class="k">SCOPE</span> Founders only · confidential</span>
+      <span><span class="k">STATUS</span> All systems nominal</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Active-state sync for in-page anchors + mobile drawer close.
+  (function () {
+    var items = Array.prototype.slice.call(document.querySelectorAll('.cc-sb-item[href^="#"]'));
+    var byHash = {};
+    items.forEach(function (el) { byHash[el.getAttribute('href')] = el; });
+
+    function setActive(hash) {
+      items.forEach(function (el) { el.classList.remove('active'); });
+      if (byHash[hash]) byHash[hash].classList.add('active');
+    }
+
+    items.forEach(function (el) {
+      el.addEventListener('click', function () {
+        setActive(el.getAttribute('href'));
+        document.body.classList.remove('nav-open');
+      });
+    });
+
+    var targets = items
+      .map(function (el) { return document.querySelector(el.getAttribute('href')); })
+      .filter(Boolean);
+
+    if ('IntersectionObserver' in window && targets.length) {
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) setActive('#' + entry.target.id);
+        });
+      }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+      targets.forEach(function (t) { spy.observe(t); });
+    }
+  })();
+</script>
+</body>
+</html>

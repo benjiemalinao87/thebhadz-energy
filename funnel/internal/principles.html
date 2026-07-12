@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision, mission, goals & values — BADJJ Energy Systems</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  :root{
+    --bg:#0c1c30; --bg2:#102a44; --panel:#14314f; --panel2:#183a5c;
+    --line:#274b6e; --ink:#eaf2fb; --soft:#9db6d1; --faint:#6a86a5;
+    --navy:#12283f; --orange:#f07d1a; --orange-soft:#ffb35e;
+    --blue:#2b6cb0; --blue-soft:#7fb0e0; --green:#4a8b3a; --green-soft:#a7d99a;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --sans:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);color:var(--ink);
+    background:
+      radial-gradient(1000px 520px at 82% -10%, rgba(240,125,26,0.12) 0, rgba(0,0,0,0) 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    min-height:100vh;line-height:1.62;}
+  a{color:var(--orange-soft);}
+
+  .bar{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);
+    background:rgba(12,28,48,0.72);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;text-decoration:none;color:var(--ink);letter-spacing:0.02em;}
+  .brand img{width:32px;height:32px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;}
+  .bar h1{font-size:16px;font-weight:600;color:var(--soft);margin:0;}
+  .bar .sp{flex:1;}
+  .bar .link{font-family:var(--mono);font-size:12.5px;color:var(--soft);text-decoration:none;border:1px solid var(--line);padding:7px 12px;border-radius:6px;}
+  .bar .link:hover{color:var(--ink);border-color:var(--faint);}
+
+  .wrap{max-width:980px;margin:0 auto;padding:44px 28px 110px;}
+  .ey{font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange);margin:0 0 10px;}
+
+  /* Vision hero */
+  .vision{
+    background:linear-gradient(135deg,#12283f,#1c4266);border:1px solid var(--line);
+    border-radius:18px;padding:44px 40px;margin-bottom:22px;position:relative;overflow:hidden;
+  }
+  .vision::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,125,26,0.28),rgba(240,125,26,0) 70%);}
+  .vision .ey{color:var(--orange-soft);}
+  .vision .statement{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;line-height:1.14;margin:0;max-width:17ch;position:relative;}
+  .vision .statement .hl{color:var(--orange-soft);}
+  .vision .gloss{color:var(--soft);font-size:16.5px;max-width:58ch;margin:18px 0 0;position:relative;}
+
+  /* Mission */
+  .mission{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:32px 36px;margin-bottom:34px;}
+  .mission h2{font-size:13px;font-family:var(--mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--orange);margin:0 0 12px;}
+  .mission .statement{font-size:clamp(19px,2.6vw,25px);font-weight:700;line-height:1.32;letter-spacing:-0.01em;margin:0;}
+  .mission .statement b{color:var(--orange-soft);font-weight:700;}
+  .mission .gloss{color:var(--soft);font-size:15.5px;margin:16px 0 0;max-width:66ch;}
+
+  /* section heads */
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:36px 0 4px;}
+  .sec-head h2{font-size:24px;margin:0;letter-spacing:-0.01em;}
+  .sec-head .n{font-family:var(--mono);font-size:13px;color:var(--faint);}
+  .sec-sub{color:var(--soft);font-size:15px;max-width:66ch;margin:6px 0 20px;}
+
+  /* Goals list */
+  .goals{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .goal{display:flex;gap:13px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:16px 18px;}
+  .goal .g-n{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--orange-soft);flex:0 0 auto;line-height:1.5;}
+  .goal p{margin:0;font-size:14.5px;color:#d6e3f0;}
+
+  /* Values */
+  .values{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .val{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:12px;padding:20px 22px;}
+  .val h3{font-size:18px;margin:0 0 6px;letter-spacing:-0.01em;}
+  .val p{color:#d6e3f0;font-size:14px;margin:0 0 10px;}
+  .val .prac{border-top:1px solid var(--line);padding-top:10px;font-size:13.5px;color:var(--soft);}
+  .val .prac b{color:var(--orange-soft);font-family:var(--mono);font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;display:block;margin-bottom:5px;font-weight:600;}
+  .val:nth-child(2){border-left-color:var(--blue);}
+  .val:nth-child(3){border-left-color:var(--green);}
+  .val:nth-child(4){border-left-color:var(--orange);}
+  .val:nth-child(5){border-left-color:var(--green);}
+  .val:nth-child(6){border-left-color:var(--blue);}
+  .val:nth-child(7){border-left-color:var(--orange);}
+
+  /* motto */
+  .motto{margin-top:34px;background:linear-gradient(135deg,#183a5c,#0f2a45);border:1px solid var(--orange);border-radius:14px;padding:30px 32px;text-align:center;}
+  .motto .ey{color:var(--orange-soft);}
+  .motto p{font-size:clamp(19px,2.8vw,26px);font-weight:800;line-height:1.35;margin:0;letter-spacing:-0.01em;}
+  .motto p .hl{color:var(--orange-soft);}
+
+  .note{margin-top:26px;font-family:var(--mono);font-size:12.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:16px;line-height:1.7;}
+  .credit{color:var(--green-soft);}
+
+  @media (max-width:760px){
+    .wrap{padding:30px 18px 80px;}
+    .vision,.mission{padding:28px 24px;}
+    .goals,.values{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="brand" href="/internal/"><img src="/assets/img/badjj-logo.png" alt="BADJJ"> BADJJ</a>
+    <h1>Vision, mission, goals &amp; values</h1>
+    <div class="sp"></div>
+    <a class="link" href="/internal/">↩ Founder home</a>
+    <a class="link" href="/api/founder-logout">Log out</a>
+  </div>
+
+  <div class="wrap">
+
+    <!-- VISION -->
+    <section class="vision">
+      <p class="ey">Our Vision · where we're going</p>
+      <p class="statement">To be the Philippines' leading homegrown <span class="hl">energy and engineering</span> company.</p>
+      <p class="gloss">
+        Recognized for engineering excellence, innovation, and integrity — empowering homes, businesses,
+        and communities with clean, efficient, and reliable power. We're building the Filipino-built energy
+        company that drives national progress and puts <strong>light in every home</strong>.
+      </p>
+    </section>
+
+    <!-- MISSION -->
+    <section class="mission">
+      <h2>Our Mission · what we do every day</h2>
+      <p class="statement">
+        We deliver <b>reliable, sustainable energy and electrical-engineering solutions</b> — high-quality
+        solar power, electrical systems, and advanced energy technology — done <b>right</b>, priced
+        <b>honestly</b>, and backed by a local team that stands behind the work.
+      </p>
+      <p class="gloss">
+        For homes, businesses, and communities across the Philippines. We exceed expectations by being safe,
+        efficient, and cost-effective — and by staying accountable for the life of every system. Trust,
+        not the cheapest quote, is how this industry is won, and how we build toward a cleaner, more
+        sustainable future.
+      </p>
+    </section>
+
+    <!-- COMPANY GOALS -->
+    <div class="sec-head">
+      <h2>Company Goals</h2>
+      <span class="n">what we're driving toward · 7</span>
+    </div>
+    <p class="sec-sub">Concrete objectives that turn the mission into a plan. We measure ourselves against these.</p>
+    <div class="goals">
+      <div class="goal"><span class="g-n">1</span><p>Deliver world-class solar and electrical-engineering solutions that meet the highest standards of quality and safety.</p></div>
+      <div class="goal"><span class="g-n">2</span><p>Make renewable energy accessible — affordable, efficient solar power systems that ordinary Filipinos can say yes to.</p></div>
+      <div class="goal"><span class="g-n">3</span><p>Keep investing in new technology and in our people, so we stay at the front of the energy industry.</p></div>
+      <div class="goal"><span class="g-n">4</span><p>Build lasting client partnerships through exceptional service, transparency, and trust.</p></div>
+      <div class="goal"><span class="g-n">5</span><p>Cut carbon emissions and support the Philippines' transition to sustainable energy.</p></div>
+      <div class="goal"><span class="g-n">6</span><p>Expand nationwide while holding our standard of excellence on every project.</p></div>
+      <div class="goal"><span class="g-n">7</span><p>Create real value for our people, clients, and stakeholders through ethical practice and continuous improvement.</p></div>
+    </div>
+
+    <!-- CORE VALUES -->
+    <div class="sec-head">
+      <h2>Core Values</h2>
+      <span class="n">how we behave · 7</span>
+    </div>
+    <p class="sec-sub">
+      Not wall decoration — the behaviors we hire for, decide by, and hold each other to. Each one comes
+      with what it actually looks like on a normal Tuesday.
+    </p>
+    <div class="values">
+
+      <div class="val">
+        <h3>Integrity</h3>
+        <p>We conduct business with honesty, transparency, and accountability.</p>
+        <div class="prac"><b>In practice</b>Say the hard thing to each other's face, never behind backs. Quote real numbers. If we're wrong, we own it.</div>
+      </div>
+
+      <div class="val">
+        <h3>Innovation</h3>
+        <p>We embrace technology and continuously improve our solutions.</p>
+        <div class="prac"><b>In practice</b>Try the better way, measure it, keep what works. Yesterday's method isn't sacred.</div>
+      </div>
+
+      <div class="val">
+        <h3>Excellence</h3>
+        <p>We strive for the highest standard in every project we undertake.</p>
+        <div class="prac"><b>In practice</b>If our name is on it, it lasts. We'd rather lose a sale than ship something we'd be ashamed of.</div>
+      </div>
+
+      <div class="val">
+        <h3>Safety</h3>
+        <p>We protect the well-being of our people, clients, and communities.</p>
+        <div class="prac"><b>In practice</b>Philippine Electrical Code, every time. Typhoon-rated, no exceptions. Nobody gets hurt to hit a deadline.</div>
+      </div>
+
+      <div class="val">
+        <h3>Sustainability</h3>
+        <p>We protect the environment through clean and renewable energy.</p>
+        <div class="prac"><b>In practice</b>Every install we complete is one less home on dirty, expensive power. That's the point, not a slogan.</div>
+      </div>
+
+      <div class="val">
+        <h3>Customer Commitment</h3>
+        <p>We build lasting relationships through reliable solutions and outstanding service.</p>
+        <div class="prac"><b>In practice</b>Size honestly, don't oversell, treat their money like our own. Honor the warranty — ship the single replacement panel.</div>
+      </div>
+
+      <div class="val">
+        <h3>Teamwork</h3>
+        <p>We foster collaboration, respect, and continuous learning to achieve shared success.</p>
+        <div class="prac"><b>In practice</b>Company first, role second, ego last. Cover for each other; win or lose together, aligned 100%.</div>
+      </div>
+
+    </div>
+
+    <!-- MOTTO -->
+    <section class="motto">
+      <p class="ey">Company Motto</p>
+      <p><span class="hl">Empowering Lives.</span> Engineering a Sustainable Future.</p>
+    </section>
+
+    <p class="note">
+      REV B · 2026-07-06 · <span class="credit">Merged from Jundhel's draft (mission, vision, goals, 7 values, motto)</span>
+      with sharpened, BADJJ-specific language and a "what this looks like in practice" line on each value.
+      Still a <b>draft for founder review</b> — refine together at the next meeting, then lock.
+      Once approved, we can add a short public "Our Mission" section to the funnel.
+    </p>
+
+  </div>
+</body>
+</html>

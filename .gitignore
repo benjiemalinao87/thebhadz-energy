@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / tooling
+.cursor/
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Cloudflare Wrangler local state (may cache D1 data)
+.wrangler/
+**/.wrangler/
+
+# Secrets — never commit
+.env
+.env.*
+.dev.vars
+**/.dev.vars
+
+# Build output
+dist/
+build/

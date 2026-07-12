@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="SANDIGAN hybrid solar package: a home that stays powered through a typhoon and blackout, running on solar plus battery with automatic switchover from the grid">
+  <defs>
+    <linearGradient id="sd-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a4c6b"/>
+      <stop offset="0.55" stop-color="#5a6f8f"/>
+      <stop offset="1" stop-color="#8497b0"/>
+    </linearGradient>
+    <radialGradient id="sd-glow" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#ffe9a8" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sd-panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#213a61"/>
+      <stop offset="1" stop-color="#132542"/>
+    </linearGradient>
+    <linearGradient id="sd-badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb43e"/>
+      <stop offset="1" stop-color="#e78a1c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- stormy sky -->
+  <rect width="800" height="600" fill="url(#sd-sky)"/>
+  <!-- storm clouds -->
+  <g fill="#42506b" opacity="0.9">
+    <ellipse cx="180" cy="110" rx="130" ry="46"/>
+    <ellipse cx="300" cy="90" rx="110" ry="40"/>
+    <ellipse cx="560" cy="120" rx="150" ry="50"/>
+    <ellipse cx="700" cy="95" rx="110" ry="42"/>
+  </g>
+  <g fill="#333f57" opacity="0.85">
+    <ellipse cx="420" cy="150" rx="200" ry="46"/>
+  </g>
+  <!-- rain -->
+  <g stroke="#aeb9d0" stroke-width="2" opacity="0.35" stroke-linecap="round">
+    <line x1="140" y1="180" x2="126" y2="220"/><line x1="220" y1="200" x2="206" y2="240"/>
+    <line x1="300" y1="185" x2="286" y2="225"/><line x1="640" y1="195" x2="626" y2="235"/>
+    <line x1="720" y1="180" x2="706" y2="220"/><line x1="560" y1="205" x2="546" y2="245"/>
+  </g>
+  <!-- lightning -->
+  <path d="M690 150 L676 196 L698 190 L680 244" fill="none" stroke="#ffe27a" stroke-width="4" stroke-linejoin="round" opacity="0.9"/>
+
+  <!-- ground, wet -->
+  <rect y="440" width="800" height="160" fill="#3a4634"/>
+  <rect y="440" width="800" height="12" fill="#46543d"/>
+  <ellipse cx="250" cy="560" rx="120" ry="14" fill="#5a6f8f" opacity="0.4"/>
+  <ellipse cx="600" cy="575" rx="140" ry="16" fill="#5a6f8f" opacity="0.4"/>
+
+  <!-- powered home -->
+  <g>
+    <ellipse cx="420" cy="400" rx="250" ry="160" fill="url(#sd-glow)"/>
+    <rect x="280" y="318" width="290" height="150" fill="#f4edde" stroke="#cabd9f" stroke-width="2"/>
+    <path d="M262 322 L425 224 L588 322 Z" fill="#b45f40"/>
+    <path d="M262 322 L425 224 L588 322 Z" fill="none" stroke="#8c4527" stroke-width="3"/>
+    <!-- lit interior -->
+    <rect x="405" y="390" width="44" height="78" fill="#a9773f"/>
+    <rect x="312" y="356" width="52" height="44" fill="#fff2b8" stroke="#8c5a33" stroke-width="3"/>
+    <rect x="486" y="356" width="52" height="44" fill="#fff2b8" stroke="#8c5a33" stroke-width="3"/>
+    <line x1="338" y1="356" x2="338" y2="400" stroke="#8c5a33" stroke-width="2"/>
+    <line x1="512" y1="356" x2="512" y2="400" stroke="#8c5a33" stroke-width="2"/>
+  </g>
+
+  <!-- rooftop panels -->
+  <g transform="translate(425 276) rotate(-31)">
+    <g transform="translate(-130 -32)">
+      <rect x="0" y="0" width="130" height="64" rx="3" fill="url(#sd-panel)" stroke="#5a7699" stroke-width="2"/>
+      <g stroke="#7f9ec2" stroke-width="1" opacity="0.75">
+        <line x1="43" y1="2" x2="43" y2="62"/><line x1="87" y1="2" x2="87" y2="62"/><line x1="2" y1="32" x2="128" y2="32"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- hybrid switch: grid X, battery ✓ -->
+  <g transform="translate(596 372)">
+    <rect x="0" y="0" width="96" height="96" rx="10" fill="#132542" stroke="#3c527a" stroke-width="2"/>
+    <text x="48" y="22" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#9fb0c8" font-weight="700">AUTO-SWITCH</text>
+    <!-- grid off -->
+    <g transform="translate(14 32)">
+      <rect x="0" y="0" width="30" height="24" rx="4" fill="#2a3a58"/>
+      <text x="15" y="16" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#e57373">GRID✕</text>
+    </g>
+    <!-- battery on -->
+    <g transform="translate(52 32)">
+      <rect x="0" y="0" width="30" height="24" rx="4" fill="#1c3a2a"/>
+      <text x="15" y="16" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#7fe0a0">BAT✓</text>
+    </g>
+    <rect x="14" y="66" width="68" height="8" rx="4" fill="#2a3a58"/>
+    <rect x="14" y="66" width="46" height="8" rx="4" fill="#7fe0a0"/>
+    <text x="48" y="90" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#9fe8bb">STILL ON</text>
+  </g>
+
+  <!-- top banner -->
+  <g>
+    <rect x="0" y="0" width="800" height="72" fill="#0c1322" opacity="0.86"/>
+    <text x="36" y="34" font-family="system-ui,sans-serif" font-size="30" font-weight="800" fill="#ffffff" letter-spacing="3">SANDIGAN</text>
+    <text x="36" y="58" font-family="ui-monospace,Menlo,monospace" font-size="14" fill="#ffb43e" letter-spacing="2">HYBRID · GRID SAVINGS + BLACKOUT BACKUP</text>
+  </g>
+
+  <!-- price badge -->
+  <g transform="translate(566 92)">
+    <rect x="0" y="0" width="210" height="92" rx="12" fill="url(#sd-badge)"/>
+    <text x="105" y="34" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400" letter-spacing="1">FREE ESTIMATE</text>
+    <text x="105" y="64" text-anchor="middle" font-family="system-ui,sans-serif" font-size="27" font-weight="800" fill="#241500">Get your price</text>
+    <text x="105" y="82" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400">SAME-DAY REPLY →</text>
+  </g>
+
+  <!-- benefit chips -->
+  <g font-family="system-ui,sans-serif" font-size="15" font-weight="600">
+    <g transform="translate(36 508)">
+      <rect x="0" y="0" width="238" height="34" rx="17" fill="#ffffff" opacity="0.96"/>
+      <text x="16" y="23" fill="#1a2432">🌀 Stay powered through typhoons</text>
+    </g>
+    <g transform="translate(286 508)">
+      <rect x="0" y="0" width="214" height="34" rx="17" fill="#ffffff" opacity="0.96"/>
+      <text x="16" y="23" fill="#1a2432">🔁 Automatic — no switching</text>
+    </g>
+    <g transform="translate(512 508)">
+      <rect x="0" y="0" width="252" height="34" rx="17" fill="#ffffff" opacity="0.96"/>
+      <text x="16" y="23" fill="#1a2432">➕ Add batteries anytime</text>
+    </g>
+  </g>
+</svg>

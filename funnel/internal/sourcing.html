@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-05 Source &amp; install — BADJJ Energy Systems</title>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-05 · SOURCE &amp; INSTALL <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>Model B: buy the hard parts, build the rest, install everything</h1>
+    <p class="lede">
+      The alternative to manufacturing modules (SC-01…04 = Model A): source the components that are
+      uneconomical to reproduce — panels, inverters, batteries — fabricate everything we credibly can,
+      and make our money as the system builder and installer. This model earns revenue in weeks,
+      not years, and later becomes the sales channel for our own modules.
+    </p>
+
+    <div class="callout info">
+      <span class="label">How A and B fit together</span>
+      Model B is not a retreat from Model A — it is <strong>stage 0 revenue</strong>. Installing sourced
+      panels teaches us the customer, the roof, the permitting process, and the service economics, and
+      builds the distribution channel that a factory would otherwise have to buy. When Model A reaches
+      stage 2 (certified modules), our own panels drop into an install pipeline that already exists.
+    </div>
+
+    <h2><span class="sec">§ 1</span>Buy vs build — the honest split</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Decision per component — 2026-07 assessment</caption>
+        <tr><th>Component</th><th>Verdict</th><th>Why</th></tr>
+        <tr>
+          <td><strong>Solar panels</strong></td>
+          <td class="mono">BUY</td>
+          <td>Imported tier-1/2 modules land at prices our small-scale assembly cannot beat (SC-04 §5).
+              Buy certified 400–600 W modules from Manila distributors; move to direct container import
+              (~₱9–13/W wholesale <span class="unverified">EST</span>) once volume justifies.</td>
+        </tr>
+        <tr>
+          <td><strong>Inverters</strong> (grid-tie, hybrid, off-grid)</td>
+          <td class="mono">BUY</td>
+          <td>Power electronics with certification and firmware ecosystems — Deye, Growatt, Solis,
+              Victron class. Never build; do standardize on 1–2 brands so crews and spare parts stay simple.</td>
+        </tr>
+        <tr>
+          <td><strong>Batteries</strong></td>
+          <td class="mono">BUY (packs)</td>
+          <td>Buy finished LiFePO₄ packs with BMS. Assembling packs from cells is a plausible
+              <em>later</em> business (Model A-adjacent) but a fire and warranty liability to start with.</td>
+        </tr>
+        <tr>
+          <td><strong>Mounting / racking</strong></td>
+          <td class="mono">BUILD</td>
+          <td>Our first real product. Rails, roof hooks, tilt frames, ground mounts — cut, drilled,
+              hot-dip galvanized steel or anodized aluminum from Philippine fabricators at a fraction of
+              imported racking prices, sized for local roof types (GI sheet, tile, concrete deck) and wind zones.</td>
+        </tr>
+        <tr>
+          <td><strong>Wiring harnesses</strong></td>
+          <td class="mono">BUILD</td>
+          <td>Pre-cut PV wire with genuine MC4s, labeled per design, tested before leaving the shop.
+              Cuts install time on the roof — where labor is most expensive and mistakes matter most.</td>
+        </tr>
+        <tr>
+          <td><strong>Combiner / distribution boxes</strong></td>
+          <td class="mono">ASSEMBLE</td>
+          <td>Buy enclosures, breakers, SPDs, fuses (ABB/Schneider/Chint class); assemble, label, and
+              test as branded "BADJJ power boxes." This is where our electrical quality is visible.</td>
+        </tr>
+        <tr>
+          <td><strong>Battery / inverter enclosures</strong></td>
+          <td class="mono">BUILD</td>
+          <td>Ventilated, rodent-proof, typhoon-rated outdoor cabinets — local sheet-metal work,
+              a genuine gap in provincial installs.</td>
+        </tr>
+        <tr>
+          <td><strong>Monitoring</strong></td>
+          <td class="mono">BUY + BRAND</td>
+          <td>Use the inverter vendor's platform; wrap it in our onboarding and alerts. Custom software later, if ever.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 2</span>Sourcing channels for the bought parts</h2>
+    <ul>
+      <li><strong>Start (installs 1–20):</strong> buy panels/inverters/batteries from Metro Manila solar
+        distributors and importers — pay the middleman margin in exchange for zero inventory risk, local
+        warranty handling, and next-day availability. Get dealer accounts with 2–3 distributors
+        and make them compete per order.</li>
+      <li><strong>Scale (20+ installs/quarter):</strong> direct import — one 20-ft container holds roughly
+        300–360 panels (~130–150 kWp), enough for 50–70 residential systems. This is where per-watt cost
+        drops 20–35% <span class="unverified">EST</span> and the SC-04 §4 logistics playbook (freight,
+        packaging, breakage accounting) starts applying to us as the importer.</li>
+      <li><strong>Selection rules:</strong> only IEC 61215/61730-certified modules from makers with a PH
+        warranty presence; only inverters on the DU's approved/net-metering-friendly lists; LiFePO₄ only,
+        with BMS documentation. Every SKU we standardize on halves our training and spares problem.</li>
+    </ul>
+
+    <h2><span class="sec">§ 3</span>The install operation</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Residential install crew — steady-state</caption>
+        <tr><th>Role</th><th class="num">Count</th><th>Notes</th></tr>
+        <tr><td>Licensed electrician / lead</td><td class="num">1</td><td>Owns electrical work, testing, sign-off prep</td></tr>
+        <tr><td>Installers / roof crew</td><td class="num">2</td><td>Racking, panels, harness routing</td></tr>
+        <tr><td>Registered Electrical Engineer (PEE/REE)</td><td class="num">retainer</td><td>Plan signing for permits and net-metering applications</td></tr>
+        <tr><td>Sales / site assessor</td><td class="num">1</td><td>Roof survey, bill analysis, quote (see SC-06)</td></tr>
+      </table>
+    </div>
+    <ul>
+      <li><strong>Throughput:</strong> a trained crew completes a 2–3 kWp residential install in 1–2 days;
+        one crew ≈ 10–14 installs/month sustained.</li>
+      <li><strong>Process per job:</strong> site survey + bill analysis → design (panel layout, string
+        sizing — reuse <a href="/internal/designer.html">SC-01</a> thinking) → quote → electrical permit (LGU,
+        REE-signed plans) → install → testing (insulation, polarity, torque map) → DU net-metering
+        application (on-grid) or commissioning + owner training (off-grid) → handover pack.</li>
+      <li><strong>Net metering (on-grid):</strong> RA 9513's net-metering program covers systems up to
+        100 kW; the distribution utility (e.g. Meralco) processes the application, inspects, and swaps
+        the meter. Budget 4–12 weeks and make the paperwork our job, not the customer's — it is a core
+        part of what they pay for. Exported energy is credited at the DU's blended generation rate
+        (lower than retail), so systems are sized for self-consumption first.</li>
+      <li><strong>Safety/compliance:</strong> Philippine Electrical Code throughout; typhoon-rated
+        mounting (our racking's selling point); anti-islanding verified on every grid-tie commissioning.</li>
+    </ul>
+
+    <h2><span class="sec">§ 4</span>Unit economics</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Per-install economics at the SC-06 flagship price points <span class="unverified">EST</span></caption>
+        <tr><th>Line</th><th class="num">On-grid 2.3 kWp @ ₱99.5k</th><th class="num">Off-grid 1.6 kWp @ ₱99.5k</th></tr>
+        <tr><td>Panels (bought)</td><td class="num">₱23–28k</td><td class="num">₱16–20k</td></tr>
+        <tr><td>Inverter (bought)</td><td class="num">₱16–24k</td><td class="num">₱18–26k</td></tr>
+        <tr><td>Battery (bought)</td><td class="num">—</td><td class="num">₱22–32k (2.5–5 kWh LiFePO₄)</td></tr>
+        <tr><td>Racking + boxes + harness (built)</td><td class="num">₱10–14k</td><td class="num">₱9–13k</td></tr>
+        <tr><td>Labor + transport</td><td class="num">₱7–10k</td><td class="num">₱6–9k</td></tr>
+        <tr><td>Permits + net-metering processing</td><td class="num">₱6–10k</td><td class="num">₱2–4k</td></tr>
+        <tr><td><strong>Total cost</strong></td><td class="num"><strong>₱62–86k</strong></td><td class="num"><strong>₱73–104k</strong></td></tr>
+        <tr><td><strong>Gross margin</strong></td><td class="num"><strong>₱14–38k (14–38%)</strong></td><td class="num"><strong>−₱5k–27k → spec the battery tier carefully</strong></td></tr>
+      </table>
+    </div>
+    <p>
+      Two crews at 10 installs/month each, blended gross ~₱20–25k/install, is roughly
+      <span class="mono">₱400–500k/month gross</span> <span class="unverified">EST</span> — funding
+      Model A's stage 2 out of operations instead of investors. The off-grid column shows the trap:
+      at ₱99.5k the battery size makes or breaks margin — hold the line at 2.5–3 kWh in the base
+      package and sell storage upgrades separately (SC-06 §3).
+    </p>
+
+    <h2><span class="sec">§ 5</span>What "we build the rest" makes true</h2>
+    <ul>
+      <li><strong>Differentiation an installer can't fake:</strong> our own typhoon-rated racking,
+        tested harnesses, and branded power boxes make the quote physically different from the
+        three other quotes the homeowner collected.</li>
+      <li><strong>Margin capture:</strong> fabricated racking + assembled boxes move ~₱10–14k per install
+        from a supplier's pocket into ours.</li>
+      <li><strong>A product ladder:</strong> racking and power boxes are sellable wholesale to other
+        installers — a second revenue line that costs us nothing extra to develop.</li>
+      <li><strong>The bridge to Model A:</strong> every install is a future retrofit/expansion customer
+        for BADJJ-branded modules the day our stage-2 line is certified.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="label">Decision framing</span>
+      Model B first, Model A in parallel at prototype scale. Kill neither: B pays the bills and builds
+      the channel; A builds the moat. Revisit the split when B reaches ~20 installs/month or A reaches
+      certification — whichever comes first.
+    </div>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-01 Panel designer — Solar City</title>
+<link rel="stylesheet" href="assets/style.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-01 · PANEL DESIGNER <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>Panel designer</h1>
+    <p class="lede">
+      Pick a cell, a layout, and a wiring topology. The map, electrical figures, and IV curve update live.
+      All electrical inputs are <strong>full-cell</strong> STC values from the cell datasheet — the model
+      handles half-cutting for you.
+    </p>
+
+    <div class="presets" role="group" aria-label="Presets"></div>
+
+    <div id="readout" class="readout" aria-live="polite"></div>
+
+    <div class="designer-grid">
+      <div class="panel-controls">
+        <h3>Configuration</h3>
+        <div class="ctl">
+          <label for="ctl-format">Cell format</label>
+          <select id="ctl-format"></select>
+        </div>
+        <div class="ctl">
+          <label for="ctl-cols">Columns</label>
+          <div class="range-row">
+            <input type="range" id="ctl-cols" min="2" max="8" step="1" value="6">
+            <span class="range-val" id="ctl-cols-val">6</span>
+          </div>
+        </div>
+        <div class="ctl">
+          <label for="ctl-rows">Rows</label>
+          <div class="range-row">
+            <input type="range" id="ctl-rows" min="4" max="28" step="1" value="18">
+            <span class="range-val" id="ctl-rows-val">18</span>
+          </div>
+        </div>
+        <div class="ctl">
+          <label for="ctl-topo">Topology</label>
+          <select id="ctl-topo">
+            <option value="twin">Half-cut twin — 2 halves in parallel</option>
+            <option value="series">All cells in series</option>
+          </select>
+        </div>
+        <div class="ctl">
+          <label for="ctl-diodes">Bypass diodes</label>
+          <select id="ctl-diodes">
+            <option value="auto">Auto (columns ÷ 2)</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <h3>Cell electrical (full cell, STC)</h3>
+        <div class="ctl">
+          <label for="ctl-voc">Voc — open-circuit voltage (V)</label>
+          <input type="number" id="ctl-voc" step="0.005" min="0.3" max="1">
+        </div>
+        <div class="ctl">
+          <label for="ctl-isc">Isc — short-circuit current (A)</label>
+          <input type="number" id="ctl-isc" step="0.05" min="1" max="25">
+        </div>
+        <div class="ctl">
+          <label for="ctl-vmp">Vmp — voltage at max power (V)</label>
+          <input type="number" id="ctl-vmp" step="0.005" min="0.2" max="1">
+        </div>
+        <div class="ctl">
+          <label for="ctl-imp">Imp — current at max power (A)</label>
+          <input type="number" id="ctl-imp" step="0.05" min="1" max="25">
+        </div>
+      </div>
+
+      <div class="stage">
+        <div id="panel-svg-wrap">
+          <svg id="panel-svg" role="img" aria-label="Live diagram of the configured solar module"></svg>
+        </div>
+        <figure style="margin:8px 0 0">
+          <figcaption>
+            COPPER TRACE = STRING WIRING · AMBER DASHED BOX = ONE BYPASS-DIODE GROUP ·
+            CENTER STRIP (HALF-CUT) = BUS RIBBON + SPLIT J-BOXES
+          </figcaption>
+        </figure>
+
+        <div id="iv-wrap">
+          <h3>IV &amp; power curve</h3>
+          <p class="asof" style="margin:0 0 10px">STC: 1000 W/m² · CELL 25 °C · AM 1.5 — EMPIRICAL FILL-FACTOR MODEL, ±2% VS DATASHEET</p>
+          <svg id="iv-svg" role="img" aria-label="Current-voltage and power-voltage curves for the configured module"></svg>
+        </div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 1</span>Reading the numbers</h2>
+    <ul>
+      <li><strong>Voc / Isc</strong> — open-circuit voltage and short-circuit current: the two extremes of
+        the IV curve. Voc sets your string sizing against inverter limits; Isc sizes fuses and connectors.</li>
+      <li><strong>Vmp / Imp / Pmax</strong> — the maximum power point. Pmax = Vmp × Imp is the number on
+        the nameplate. A real module loses 1–3% vs the sum of its cells (cell-to-module loss: ribbon
+        resistance, mismatch) and gains some back from cell spacing and backsheet reflection.</li>
+      <li><strong>Why half-cut wins.</strong> Cutting cells halves the current per cell.
+        Resistive loss scales with I², so half current = quarter the I²R loss in ribbon
+        — that's worth ~5–8 W on a 400 W module, plus better shade behavior because the two halves
+        are independent parallel circuits.</li>
+      <li><strong>Series × parallel.</strong> Series stacks voltage; parallel stacks current.
+        A 108HC twin module is 54S × 2P: 54 half-cells in series per branch, two branches in parallel —
+        same voltage as a 54-full-cell module, same current as one full cell.</li>
+      <li><strong>Bypass diodes</strong> protect shaded cells from reverse-bias heating (hot spots).
+        Each diode shorts out its column group when that group is shaded; with 3 diodes you lose ⅓ of
+        the module to hard shade instead of all of it. Never build without them.</li>
+    </ul>
+
+    <div class="callout info">
+      <span class="label">Handoff</span>
+      Freeze your configuration here, then take it to <a href="build-guide.html">SC-02</a> — the build
+      steps reference this page's cell count, string map, and diode grouping. Quantities for purchasing
+      derive from it in <a href="bom.html">SC-03</a>.
+    </div>
+  </main>
+</div>
+
+<script src="vendor/d3.min.js"></script>
+<script src="assets/site.js"></script>
+<script src="assets/designer.js"></script>
+</html>

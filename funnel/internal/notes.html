@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team notes — BADJJ Energy Systems</title>
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* ============================================================
+     BADJJ Team Notes — shared founder notebook
+     Command-center "monitor" theme (matches /internal dashboard).
+     Backed by /api/notes (D1) + /api/note-image (R2 attachments).
+     ============================================================ */
+  :root{
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
+    --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --bg:#020202; --panel-a:rgba(12,12,12,0.96); --panel-b:rgba(5,5,5,0.98);
+    --z-900:#18181b; --z-800:#27272a; --z-700:#3f3f46; --z-600:#52525b;
+    --z-500:#71717a; --z-400:#a1a1aa; --z-300:#d4d4d8; --z-200:#e4e4e7; --z-100:#f4f4f5; --z-50:#fafafa;
+    --cyan:#67e8f9; --green:#4ade80; --yellow:#facc15; --red:#fb7185; --purple:#c084fc; --blue:#60a5fa; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; min-height:100vh; font-family:var(--mono); color:var(--z-100); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,0.05), transparent 55%),
+      radial-gradient(1000px 500px at 100% -5%, rgba(250,204,21,0.035), transparent 50%),
+      var(--bg);
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:rgba(103,232,249,0.25);color:#fff;}
+  body::before{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0.08;
+    background-image:linear-gradient(to bottom,rgba(255,255,255,0.10) 1px,transparent 1px);background-size:100% 4px;}
+
+  .wrap{max-width:860px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+
+  /* ---- top bar ---- */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px dashed rgba(63,63,70,0.9);}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-400);
+    border:1px solid var(--z-800);border-radius:999px;padding:8px 14px;transition:border-color .15s,color .15s;}
+  .back:hover{border-color:var(--z-500);color:var(--z-50);}
+  .titles{display:flex;flex-direction:column;gap:3px;}
+  .titles .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:var(--z-500);}
+  .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--z-50);letter-spacing:0.01em;}
+  .bar .sp{flex:1;}
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:10px;text-transform:uppercase;letter-spacing:0.24em;
+    border:1px solid rgba(192,132,252,0.35);background:rgba(192,132,252,0.10);color:#e9d5ff;}
+  .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
+  .logout:hover{background:rgba(251,113,133,0.08);}
+
+  /* ---- panel base ---- */
+  .panel{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--z-800);
+    background:linear-gradient(180deg,var(--panel-a),var(--panel-b)),#000;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 18px 38px rgba(0,0,0,0.30);}
+  .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);opacity:.5;pointer-events:none;}
+  .panel>*{position:relative;z-index:1;}
+
+  /* ---- composer ---- */
+  .composer{margin-top:22px;padding:20px;border-color:rgba(192,132,252,0.24);}
+  .composer .kicker{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.28em;color:var(--purple);margin-bottom:14px;}
+  .frow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .frow input{flex:1;min-width:160px;}
+  input[type="text"],textarea{
+    background:rgba(9,9,11,0.7);border:1px solid var(--z-800);border-radius:10px;color:var(--z-100);
+    font-family:var(--mono);font-size:13px;padding:10px 12px;width:100%;
+  }
+  input[type="text"]::placeholder,textarea::placeholder{color:var(--z-600);}
+  input[type="text"]:focus,textarea:focus{outline:none;border-color:rgba(192,132,252,0.5);}
+  #f-author{flex:0 1 200px;}
+  textarea{min-height:96px;resize:vertical;line-height:1.6;}
+
+  .attach-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .attach-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.16em;
+    color:var(--z-300);background:rgba(9,9,11,0.6);border:1px dashed var(--z-700);border-radius:10px;padding:9px 14px;cursor:pointer;transition:all .14s;}
+  .attach-btn:hover{border-color:var(--z-500);color:var(--z-50);}
+  .attach-hint{font-size:10.5px;color:var(--z-600);}
+  .attach-row .sp{flex:1;}
+  .save-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.2em;
+    color:#0a0a0b;background:var(--purple);border:0;border-radius:10px;padding:11px 20px;cursor:pointer;transition:filter .14s;}
+  .save-btn:hover{filter:brightness(1.1);}
+  .save-btn:disabled{opacity:0.5;cursor:default;filter:none;}
+
+  .previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .previews:empty{display:none;}
+  .pv{position:relative;width:78px;height:78px;border-radius:10px;overflow:hidden;border:1px solid var(--z-700);}
+  .pv img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pv .rm{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(0,0,0,0.72);color:var(--z-100);font-size:13px;line-height:1;display:grid;place-items:center;}
+  .pv .rm:hover{background:rgba(251,113,133,0.85);}
+  .pv .up{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,0.55);font-size:10px;color:var(--z-200);letter-spacing:0.1em;}
+
+  /* ---- feed ---- */
+  .feed-head{display:flex;align-items:center;gap:14px;margin:34px 0 14px;}
+  .feed-head .tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.3em;color:var(--z-400);white-space:nowrap;}
+  .feed-head .rule{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--z-800) 0 6px,transparent 6px 12px);}
+  .feed-head .count{font-size:11px;color:var(--z-600);letter-spacing:0.1em;font-variant-numeric:tabular-nums;}
+  .search{position:relative;margin-bottom:14px;}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--z-500);}
+  .search input{padding-left:34px;}
+
+  .note{padding:18px 20px;margin-bottom:14px;}
+  .note .nh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .note .who{font-size:12px;font-weight:600;color:var(--cyan);letter-spacing:0.04em;}
+  .note .when{font-size:11px;color:var(--z-500);font-variant-numeric:tabular-nums;}
+  .note .nh .sp{flex:1;}
+  .note .act{background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;color:var(--z-500);padding:3px 6px;border-radius:6px;}
+  .note .act:hover{color:var(--z-100);background:rgba(255,255,255,0.04);}
+  .note .act.del:hover{color:var(--red);background:rgba(251,113,133,0.08);}
+  .note h3{font-family:var(--display);font-size:1.08rem;font-weight:600;color:var(--z-50);margin:10px 0 0;}
+  .note .body{margin-top:8px;font-size:13px;color:var(--z-300);line-height:1.7;white-space:pre-wrap;word-wrap:break-word;}
+  .note .imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:14px;}
+  .note .imgs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--z-800);aspect-ratio:4/3;background:rgba(9,9,11,0.7);}
+  .note .imgs img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .18s;}
+  .note .imgs a:hover img{transform:scale(1.04);}
+  .note .editing textarea{margin-top:8px;}
+  .note .edit-actions{display:flex;gap:8px;margin-top:10px;}
+  .note .edit-actions .save-btn{padding:8px 16px;}
+  .note .edit-actions .cancel{background:none;border:1px solid var(--z-700);color:var(--z-300);border-radius:10px;padding:8px 16px;cursor:pointer;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.16em;}
+
+  .empty{padding:48px 20px;text-align:center;color:var(--z-500);font-size:13px;}
+  .empty svg{opacity:0.4;margin-bottom:10px;}
+
+  /* ---- lightbox ---- */
+  .lightbox{position:fixed;inset:0;z-index:120;display:none;place-items:center;background:rgba(0,0,0,0.88);cursor:zoom-out;padding:24px;}
+  .lightbox.open{display:grid;}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
+
+  /* ---- toast ---- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:130;opacity:0;pointer-events:none;
+    background:#0a0a0b;border:1px solid var(--z-700);border-radius:999px;padding:10px 20px;font-size:12px;color:var(--z-100);
+    transition:opacity .2s,transform .2s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .loading{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,2,2,0.7);z-index:70;color:var(--z-400);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;}
+
+  @media (max-width:560px){
+    .titles h1{font-size:1.2rem;}
+    .note .imgs{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+  :focus-visible{outline:2px solid var(--purple);outline-offset:3px;border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <a class="back" href="/internal/">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Founder home
+    </a>
+    <div class="titles">
+      <span class="eyebrow">BADJJ · Founders · Confidential</span>
+      <h1>Team notes</h1>
+    </div>
+    <div class="sp"></div>
+    <span class="badge">Shared notebook</span>
+    <a class="logout" href="/api/founder-logout">Log out</a>
+  </div>
+
+  <!-- ---- composer ---- -->
+  <section class="panel composer" aria-label="New note">
+    <div class="kicker">New note</div>
+    <div class="frow">
+      <input type="text" id="f-author" placeholder="Your name" autocomplete="name" maxlength="80">
+      <input type="text" id="f-title" placeholder="Title (optional)" maxlength="200">
+    </div>
+    <textarea id="f-body" placeholder="Site survey findings, supplier call notes, install photos, ideas for the next meeting…" maxlength="8000"></textarea>
+    <div class="previews" id="previews"></div>
+    <div class="attach-row">
+      <input type="file" id="f-files" accept="image/png,image/jpeg,image/webp,image/gif,image/heic" multiple hidden>
+      <button type="button" class="attach-btn" id="attach">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+        Add images
+      </button>
+      <span class="attach-hint">PNG / JPG / WebP · max 8 MB each · up to 12</span>
+      <span class="sp"></span>
+      <button type="button" class="save-btn" id="save">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        Save note
+      </button>
+    </div>
+  </section>
+
+  <!-- ---- feed ---- -->
+  <div class="feed-head">
+    <span class="tag">Notes</span>
+    <span class="rule" aria-hidden="true"></span>
+    <span class="count" id="count">—</span>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="search" placeholder="Search notes…">
+  </div>
+  <div id="feed"></div>
+
+</div>
+
+<div class="lightbox" id="lightbox" aria-hidden="true"><img id="lightbox-img" alt=""></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="loading" id="loading">Loading notes…</div>
+
+<script>
+(function(){
+  function el(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function imgUrl(key){return "/api/note-image?key="+encodeURIComponent(key);}
+  function fmtDate(iso){
+    if(!iso)return "—";
+    var d=new Date(iso); if(isNaN(d))return "—";
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+
+           d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  }
+  var toastTimer=null;
+  function toast(msg){
+    var t=el("toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2400);
+  }
+
+  var notes=[], filter="", editingId=null;
+
+  // ---------- load ----------
+  function load(){
+    fetch("/api/notes")
+      .then(function(r){
+        if(r.status===401){location.href="/login.html?next="+encodeURIComponent("/internal/notes.html");throw new Error("auth");}
+        return r.json();
+      })
+      .then(function(d){
+        el("loading").style.display="none";
+        if(!d.ok){toast(d.error||"Couldn't load notes");return;}
+        notes=d.notes||[]; render();
+      })
+      .catch(function(e){ if(e.message!=="auth"){el("loading").style.display="none";toast("Network error loading notes");} });
+  }
+
+  // ---------- composer ----------
+  var pending=[]; // {file, key|null, uploading}
+  el("f-author").value=localStorage.getItem("badjj_note_author")||"";
+  el("attach").onclick=function(){el("f-files").click();};
+  el("f-files").addEventListener("change",function(){
+    Array.prototype.forEach.call(this.files,function(f){
+      if(pending.length>=12){toast("Max 12 images per note");return;}
+      if(f.size>8*1024*1024){toast(esc(f.name)+" is over 8 MB — skipped");return;}
+      var item={file:f,key:null,uploading:true};
+      pending.push(item);
+      renderPreviews();
+      upload(item);
+    });
+    this.value="";
+  });
+
+  function upload(item){
+    var fd=new FormData(); fd.append("file",item.file);
+    fetch("/api/note-image",{method:"POST",body:fd})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        item.uploading=false;
+        if(d.ok){item.key=d.key;}
+        else{pending=pending.filter(function(p){return p!==item;});toast(d.error||"Upload failed");}
+        renderPreviews();
+      })
+      .catch(function(){
+        item.uploading=false;
+        pending=pending.filter(function(p){return p!==item;});
+        toast("Upload failed — network error"); renderPreviews();
+      });
+  }
+
+  function renderPreviews(){
+    var c=el("previews"); c.innerHTML="";
+    pending.forEach(function(item,i){
+      var d=document.createElement("div"); d.className="pv";
+      var img=document.createElement("img"); img.alt="";
+      img.src=URL.createObjectURL(item.file);
+      img.onload=function(){URL.revokeObjectURL(img.src);};
+      d.appendChild(img);
+      if(item.uploading){
+        var up=document.createElement("span"); up.className="up"; up.textContent="…"; d.appendChild(up);
+      }
+      var rm=document.createElement("button"); rm.className="rm"; rm.type="button"; rm.setAttribute("aria-label","Remove image"); rm.textContent="×";
+      rm.onclick=function(){pending.splice(i,1);renderPreviews();};
+      d.appendChild(rm);
+      c.appendChild(d);
+    });
+  }
+
+  el("save").onclick=function(){
+    var author=el("f-author").value.trim();
+    var title=el("f-title").value.trim();
+    var body=el("f-body").value;
+    if(pending.some(function(p){return p.uploading;})){toast("Images still uploading — one sec");return;}
+    var images=pending.map(function(p){return p.key;}).filter(Boolean);
+    if(!title&&!body.trim()&&!images.length){toast("Note is empty");return;}
+    if(author)localStorage.setItem("badjj_note_author",author);
+
+    var btn=el("save"); btn.disabled=true;
+    fetch("/api/notes",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({author:author,title:title,body:body,images:images})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        btn.disabled=false;
+        if(!d.ok){toast(d.error||"Save failed");return;}
+        notes.unshift(d.note);
+        el("f-title").value=""; el("f-body").value=""; pending=[]; renderPreviews();
+        render(); toast("Note saved ✓");
+      })
+      .catch(function(){btn.disabled=false;toast("Network error — not saved");});
+  };
+
+  // ---------- feed ----------
+  function visible(){
+    if(!filter)return notes;
+    return notes.filter(function(n){
+      return ((n.author||"")+" "+(n.title||"")+" "+(n.body||"")).toLowerCase().indexOf(filter)>-1;
+    });
+  }
+
+  function render(){
+    var rows=visible();
+    el("count").textContent=rows.length+(rows.length===1?" note":" notes");
+    var feed=el("feed"); feed.innerHTML="";
+
+    if(!rows.length){
+      feed.innerHTML='<div class="panel empty">'+
+        '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 21v-5h5"/></svg>'+
+        '<div>'+(notes.length?"No notes match this search.":"No notes yet — write the first one above.")+'</div></div>';
+      return;
+    }
+
+    rows.forEach(function(n){
+      var card=document.createElement("article");
+      card.className="panel note"; card.dataset.id=n.id;
+
+      var imgs=[]; try{imgs=JSON.parse(n.images||"[]");}catch(e){}
+      var imgsHtml=imgs.length
+        ? '<div class="imgs">'+imgs.map(function(k){
+            return '<a href="'+esc(imgUrl(k))+'" data-full="'+esc(imgUrl(k))+'"><img loading="lazy" src="'+esc(imgUrl(k))+'" alt="Note attachment"></a>';
+          }).join("")+'</div>'
+        : "";
+      var edited=(n.updated_at&&n.updated_at!==n.created_at)?' · edited':'';
+
+      card.innerHTML=
+        '<div class="nh">'+
+          '<span class="who">'+esc(n.author||"Unsigned")+'</span>'+
+          '<span class="when">'+fmtDate(n.created_at)+edited+'</span>'+
+          '<span class="sp"></span>'+
+          '<button class="act edit" type="button">Edit</button>'+
+          '<button class="act del" type="button">Delete</button>'+
+        '</div>'+
+        (n.title?'<h3>'+esc(n.title)+'</h3>':'')+
+        (n.body?'<div class="body">'+esc(n.body)+'</div>':'')+
+        imgsHtml;
+
+      card.querySelector(".del").onclick=function(){
+        if(!confirm("Delete this note"+(imgs.length?" and its "+imgs.length+" image(s)":"")+" permanently?"))return;
+        fetch("/api/notes",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:n.id})})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if(d.ok){notes=notes.filter(function(x){return x.id!=n.id;});render();toast("Note deleted");}
+            else toast(d.error||"Delete failed");
+          })
+          .catch(function(){toast("Network error");});
+      };
+
+      card.querySelector(".edit").onclick=function(){startEdit(card,n);};
+
+      Array.prototype.forEach.call(card.querySelectorAll(".imgs a"),function(a){
+        a.addEventListener("click",function(e){
+          e.preventDefault();
+          el("lightbox-img").src=a.dataset.full;
+          el("lightbox").classList.add("open");
+        });
+      });
+
+      feed.appendChild(card);
+    });
+  }
+
+  function startEdit(card,n){
+    if(editingId!==null){render();} // close any other editor
+    editingId=n.id;
+    var box=document.createElement("div"); box.className="editing";
+    box.innerHTML=
+      '<input type="text" class="e-title" placeholder="Title (optional)" maxlength="200" value="'+esc(n.title||"")+'">'+
+      '<textarea class="e-body" maxlength="8000">'+esc(n.body||"")+'</textarea>'+
+      '<div class="edit-actions"><button class="save-btn e-save" type="button">Save</button>'+
+      '<button class="cancel e-cancel" type="button">Cancel</button></div>';
+    var title=card.querySelector("h3"), body=card.querySelector(".body");
+    if(title)title.remove(); if(body)body.remove();
+    var imgsEl=card.querySelector(".imgs");
+    card.insertBefore(box,imgsEl||null);
+
+    box.querySelector(".e-cancel").onclick=function(){editingId=null;render();};
+    box.querySelector(".e-save").onclick=function(){
+      var t=box.querySelector(".e-title").value.trim();
+      var b=box.querySelector(".e-body").value;
+      fetch("/api/notes",{method:"PATCH",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id:n.id,title:t,body:b})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.ok){n.title=t;n.body=b;n.updated_at=new Date().toISOString();editingId=null;render();toast("Note updated ✓");}
+          else toast(d.error||"Save failed");
+        })
+        .catch(function(){toast("Network error");});
+    };
+  }
+
+  // ---------- lightbox / search ----------
+  el("lightbox").addEventListener("click",function(){this.classList.remove("open");el("lightbox-img").src="";});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")el("lightbox").classList.remove("open");});
+  el("search").addEventListener("input",function(){filter=this.value.trim().toLowerCase();render();});
+
+  load();
+})();
+</script>
+</body>
+</html>

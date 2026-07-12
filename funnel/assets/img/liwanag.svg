@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="LIWANAG on-grid solar package: a Filipino home in bright daytime with rooftop panels feeding the meter, cutting the electric bill">
+  <defs>
+    <linearGradient id="lw-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd0ff"/>
+      <stop offset="0.55" stop-color="#cdecff"/>
+      <stop offset="1" stop-color="#fff4d6"/>
+    </linearGradient>
+    <radialGradient id="lw-sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff7de"/>
+      <stop offset="0.5" stop-color="#ffe89b"/>
+      <stop offset="1" stop-color="#ffe89b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lw-panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b3a63"/>
+      <stop offset="1" stop-color="#0f2544"/>
+    </linearGradient>
+    <linearGradient id="lw-badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb43e"/>
+      <stop offset="1" stop-color="#e78a1c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect width="800" height="600" fill="url(#lw-sky)"/>
+  <circle cx="655" cy="120" r="150" fill="url(#lw-sun)"/>
+  <circle cx="655" cy="120" r="46" fill="#ffe27a"/>
+
+  <!-- distant palms -->
+  <g opacity="0.5" fill="#6fae86">
+    <path d="M120 360 q-8-40 4-70 q-20 18-30 20 q18-6 26-30 q-24 8-34 4 q22-4 34-26 q6 24 6 46 q10-18 26-22 q-16 14-20 34 q14-10 28-8 q-20 8-28 28 q-6 20-6 30z"/>
+    <rect x="122" y="350" width="6" height="60" fill="#5b8f6f"/>
+  </g>
+
+  <!-- ground -->
+  <rect y="430" width="800" height="170" fill="#a9d18e"/>
+  <rect y="430" width="800" height="14" fill="#95c079"/>
+
+  <!-- house -->
+  <g>
+    <!-- body -->
+    <rect x="250" y="300" width="330" height="170" fill="#fbf6ec" stroke="#d8ccb4" stroke-width="2"/>
+    <!-- roof -->
+    <path d="M232 305 L415 205 L598 305 Z" fill="#c96a48"/>
+    <path d="M232 305 L415 205 L598 305 Z" fill="none" stroke="#a4502f" stroke-width="3"/>
+    <!-- door -->
+    <rect x="392" y="378" width="46" height="92" fill="#8a5a3c"/>
+    <circle cx="428" cy="424" r="3" fill="#ffd98a"/>
+    <!-- windows, lit -->
+    <rect x="288" y="352" width="52" height="46" fill="#ffe9a8" stroke="#8a5a3c" stroke-width="3"/>
+    <rect x="490" y="352" width="52" height="46" fill="#ffe9a8" stroke="#8a5a3c" stroke-width="3"/>
+    <line x1="314" y1="352" x2="314" y2="398" stroke="#8a5a3c" stroke-width="2"/>
+    <line x1="516" y1="352" x2="516" y2="398" stroke="#8a5a3c" stroke-width="2"/>
+  </g>
+
+  <!-- rooftop solar array (6 panels) -->
+  <g transform="translate(415 258) rotate(-28.7)">
+    <g transform="translate(-150 -34)">
+      <rect x="0" y="0" width="150" height="70" rx="3" fill="url(#lw-panel)" stroke="#5a7699" stroke-width="2"/>
+      <g stroke="#7f9ec2" stroke-width="1" opacity="0.8">
+        <line x1="50" y1="2" x2="50" y2="68"/><line x1="100" y1="2" x2="100" y2="68"/>
+        <line x1="2" y1="35" x2="148" y2="35"/>
+      </g>
+      <g fill="#9fc0e6" opacity="0.25"><rect x="4" y="4" width="42" height="27"/></g>
+    </g>
+  </g>
+
+  <!-- sun-to-panel rays -->
+  <g stroke="#ffdf7a" stroke-width="3" stroke-linecap="round" opacity="0.85">
+    <line x1="600" y1="175" x2="520" y2="240"/>
+    <line x1="640" y1="190" x2="560" y2="250"/>
+  </g>
+
+  <!-- electric meter, spinning down -->
+  <g transform="translate(600 355)">
+    <rect x="0" y="0" width="70" height="86" rx="8" fill="#eef2f5" stroke="#c2ccd6" stroke-width="2"/>
+    <circle cx="35" cy="34" r="24" fill="#fff" stroke="#c2ccd6" stroke-width="2"/>
+    <text x="35" y="40" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" fill="#2e7d4f" font-weight="700">₱↓</text>
+    <rect x="12" y="66" width="46" height="12" rx="2" fill="#0f2544"/>
+    <text x="35" y="75" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#7fe0a0">SAVING</text>
+  </g>
+
+  <!-- top banner -->
+  <g>
+    <rect x="0" y="0" width="800" height="72" fill="#0c1322" opacity="0.9"/>
+    <text x="36" y="34" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-size="30" font-weight="800" fill="#ffffff" letter-spacing="3">LIWANAG</text>
+    <text x="36" y="58" font-family="ui-monospace,Menlo,monospace" font-size="14" fill="#ffb43e" letter-spacing="2">ON-GRID · CUT YOUR MERALCO BILL</text>
+  </g>
+
+  <!-- price teaser badge -->
+  <g transform="translate(566 92)">
+    <rect x="0" y="0" width="210" height="92" rx="12" fill="url(#lw-badge)"/>
+    <text x="105" y="34" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400" letter-spacing="1">FREE ESTIMATE</text>
+    <text x="105" y="64" text-anchor="middle" font-family="system-ui,sans-serif" font-size="27" font-weight="800" fill="#241500">Get your price</text>
+    <text x="105" y="82" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#3a2400">SAME-DAY REPLY →</text>
+  </g>
+
+  <!-- benefit chips -->
+  <g font-family="system-ui,sans-serif" font-size="15" font-weight="600">
+    <g transform="translate(36 508)">
+      <rect x="0" y="0" width="216" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">☀ Lower your monthly bill</text>
+    </g>
+    <g transform="translate(264 508)">
+      <rect x="0" y="0" width="210" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">⚡ Pays for itself over time</text>
+    </g>
+    <g transform="translate(486 508)">
+      <rect x="0" y="0" width="278" height="34" rx="17" fill="#ffffff" opacity="0.95"/>
+      <text x="16" y="23" fill="#1a2432">📄 Net-metering handled for you</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar City — Module Engineering File</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* Hero exploded-stack animation (index only) */
+  .layer { animation: settle 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i) * 130ms); }
+  @keyframes settle {
+    from { transform: translateY(-16px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+</style>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="hero">
+      <p class="doc-eyebrow">SC-00 · OVERVIEW <span class="rev">· REV A · 2026-07-06</span></p>
+      <h1>Bare cells in. 400&nbsp;W modules out.</h1>
+      <p class="lede">
+        This file is the working manual for designing, hand-building, and then mass-producing
+        our own crystalline-silicon solar modules in the Philippines. We do not fabricate cells —
+        nobody outside a wafer fab does. We buy cells and engineer everything after that:
+        the module, the process, the line, and the route to market.
+      </p>
+
+      <div class="hero-diagram">
+        <svg viewBox="0 0 880 600" width="880" height="600" role="img"
+             aria-label="Exploded view of a solar module laminate: front glass, encapsulant, cell matrix, encapsulant, backsheet">
+          <defs>
+            <!-- flat sheet coords: u 0..340, v 0..95 ; mapped to isometric parallelogram -->
+          </defs>
+
+          <!-- Layer 1: front glass -->
+          <g class="layer" style="--i:0">
+            <g transform="matrix(1 0 1.5789 -1 60 160)">
+              <rect x="0" y="0" width="340" height="95" fill="#7fa8c9" opacity="0.30" stroke="#b8d4ea" stroke-width="1.2"/>
+            </g>
+            <path d="M 60 160 L 400 160 L 400 169 L 60 169 Z" fill="#5c86a8" opacity="0.55"/>
+            <path d="M 400 160 L 550 65 L 550 74 L 400 169 Z" fill="#42688a" opacity="0.55"/>
+            <line x1="480" y1="112" x2="596" y2="112" stroke="#4a5c78" stroke-dasharray="3 4"/>
+            <text x="604" y="108" fill="#e8eef6" font-family="system-ui" font-size="15" font-weight="650">Front glass</text>
+            <text x="604" y="126" fill="#8fa0b5" font-family="ui-monospace, Menlo, monospace" font-size="11.5">3.2 mm low-iron tempered · AR coated</text>
+          </g>
+
+          <!-- Layer 2: encapsulant (front) -->
+          <g class="layer" style="--i:1">
+            <g transform="matrix(1 0 1.5789 -1 60 262)">
+              <rect x="0" y="0" width="340" height="95" fill="#e8eef4" opacity="0.14" stroke="#9db0c4" stroke-width="1" stroke-dasharray="5 4"/>
+            </g>
+            <line x1="480" y1="214" x2="596" y2="214" stroke="#4a5c78" stroke-dasharray="3 4"/>
+            <text x="604" y="210" fill="#e8eef6" font-family="system-ui" font-size="15" font-weight="650">Encapsulant, front</text>
+            <text x="604" y="228" fill="#8fa0b5" font-family="ui-monospace, Menlo, monospace" font-size="11.5">EVA 0.45 mm (POE for glass-glass)</text>
+          </g>
+
+          <!-- Layer 3: cell matrix -->
+          <g class="layer" style="--i:2">
+            <g transform="matrix(1 0 1.5789 -1 60 364)">
+              <rect x="0" y="0" width="340" height="95" fill="#0f1d33" stroke="#3a4f75" stroke-width="1.2"/>
+              <!-- 6 columns x 3 rows of half-cells -->
+              <g fill="#1b3055" stroke="#8fa0b5" stroke-width="0.5">
+                <rect x="6"   y="7"  width="51" height="24"/><rect x="61"  y="7"  width="51" height="24"/><rect x="116" y="7"  width="51" height="24"/><rect x="171" y="7"  width="51" height="24"/><rect x="226" y="7"  width="51" height="24"/><rect x="281" y="7"  width="51" height="24"/>
+                <rect x="6"   y="35" width="51" height="24"/><rect x="61"  y="35" width="51" height="24"/><rect x="116" y="35" width="51" height="24"/><rect x="171" y="35" width="51" height="24"/><rect x="226" y="35" width="51" height="24"/><rect x="281" y="35" width="51" height="24"/>
+                <rect x="6"   y="63" width="51" height="24"/><rect x="61"  y="63" width="51" height="24"/><rect x="116" y="63" width="51" height="24"/><rect x="171" y="63" width="51" height="24"/><rect x="226" y="63" width="51" height="24"/><rect x="281" y="63" width="51" height="24"/>
+              </g>
+              <!-- busbar hints -->
+              <g stroke="#c8d6e6" stroke-width="0.7" opacity="0.8">
+                <line x1="19" y1="7" x2="19" y2="87"/><line x1="31" y1="7" x2="31" y2="87"/><line x1="44" y1="7" x2="44" y2="87"/>
+                <line x1="129" y1="7" x2="129" y2="87"/><line x1="141" y1="7" x2="141" y2="87"/><line x1="154" y1="7" x2="154" y2="87"/>
+                <line x1="239" y1="7" x2="239" y2="87"/><line x1="251" y1="7" x2="251" y2="87"/><line x1="264" y1="7" x2="264" y2="87"/>
+              </g>
+            </g>
+            <line x1="480" y1="316" x2="596" y2="316" stroke="#4a5c78" stroke-dasharray="3 4"/>
+            <text x="604" y="312" fill="#e8eef6" font-family="system-ui" font-size="15" font-weight="650">Cell matrix</text>
+            <text x="604" y="330" fill="#8fa0b5" font-family="ui-monospace, Menlo, monospace" font-size="11.5">108 half-cut M10 cells · 6 strings</text>
+          </g>
+
+          <!-- Layer 4: encapsulant (rear) -->
+          <g class="layer" style="--i:3">
+            <g transform="matrix(1 0 1.5789 -1 60 466)">
+              <rect x="0" y="0" width="340" height="95" fill="#e8eef4" opacity="0.14" stroke="#9db0c4" stroke-width="1" stroke-dasharray="5 4"/>
+            </g>
+            <line x1="480" y1="418" x2="596" y2="418" stroke="#4a5c78" stroke-dasharray="3 4"/>
+            <text x="604" y="414" fill="#e8eef6" font-family="system-ui" font-size="15" font-weight="650">Encapsulant, rear</text>
+            <text x="604" y="432" fill="#8fa0b5" font-family="ui-monospace, Menlo, monospace" font-size="11.5">EVA 0.45 mm</text>
+          </g>
+
+          <!-- Layer 5: backsheet -->
+          <g class="layer" style="--i:4">
+            <g transform="matrix(1 0 1.5789 -1 60 568)">
+              <rect x="0" y="0" width="340" height="95" fill="#dfe6ee" opacity="0.9" stroke="#f4f7fa" stroke-width="1"/>
+            </g>
+            <path d="M 60 568 L 400 568 L 400 572 L 60 572 Z" fill="#aeb9c6"/>
+            <path d="M 400 568 L 550 473 L 550 477 L 400 572 Z" fill="#93a0af"/>
+            <line x1="480" y1="520" x2="596" y2="520" stroke="#4a5c78" stroke-dasharray="3 4"/>
+            <text x="604" y="516" fill="#e8eef6" font-family="system-ui" font-size="15" font-weight="650">Backsheet</text>
+            <text x="604" y="534" fill="#8fa0b5" font-family="ui-monospace, Menlo, monospace" font-size="11.5">TPT/KPK 0.30 mm · white</text>
+          </g>
+
+          <text x="60" y="594" fill="#5d6f88" font-family="ui-monospace, Menlo, monospace" font-size="11.5" letter-spacing="1">
+            NOT SHOWN: AL FRAME · JUNCTION BOX, 3 BYPASS DIODES · EDGE SEALANT — SEE SC-02 STEPS 8–10
+          </text>
+        </svg>
+      </div>
+    </header>
+
+    <h2><span class="sec">§ 1</span>The route</h2>
+    <p>
+      Three stages, each one de-risking the next. Do not skip a stage: every later stage reuses the
+      process knowledge, supplier relationships, and test data from the one before it.
+    </p>
+
+    <div class="stages">
+      <div class="stage-card">
+        <span class="tag">Stage 1 · Now</span>
+        <h3>Hand-built prototypes</h3>
+        <p>Build 3–5 modules on a bench: tab, string, lay up, laminate, frame, test.
+           Goal is process literacy — knowing exactly why each layer, temperature, and tolerance exists.</p>
+        <div class="facts">
+          QTY: 3–5 modules<br>
+          CAPEX: benchtop scale<br>
+          EXIT: a module that survives testing<br>
+          DOCS: SC-01 → SC-02 → SC-03
+        </div>
+      </div>
+      <div class="stage-card s2">
+        <span class="tag">Stage 2</span>
+        <h3>Small-batch workshop</h3>
+        <p>A workshop line — laminator, stringer or trained tabbing stations, EL and flash test —
+           producing tens to hundreds of modules per month for pilot customers and certification units.</p>
+        <div class="facts">
+          QTY: 50–500 modules/mo<br>
+          CAPEX: workshop line<br>
+          EXIT: IEC 61215/61730 certificate<br>
+          DOCS: SC-03 → SC-04
+        </div>
+      </div>
+      <div class="stage-card s3">
+        <span class="tag">Stage 3</span>
+        <h3>Production line</h3>
+        <p>A registered manufacturing operation with an automated line, certified module family,
+           and a distribution strategy that survives contact with imported-module pricing.</p>
+        <div class="facts">
+          QTY: 10–50 MW/yr<br>
+          CAPEX: full line + facility<br>
+          EXIT: sustained sell-through<br>
+          DOCS: SC-04
+        </div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 2</span>The file</h2>
+    <div class="toc-cards">
+      <a class="toc-card" href="designer.html">
+        <span class="code">SC-01</span>
+        <h3>Panel designer</h3>
+        <p>Interactive. Pick cell format and string layout; get the live cell map, wiring topology,
+           Voc/Isc/Vmp/Imp, wattage, dimensions, and IV curve.</p>
+      </a>
+      <a class="toc-card" href="build-guide.html">
+        <span class="code">SC-02</span>
+        <h3>Build guide</h3>
+        <p>The full hand-build process with parameters: tabbing, stringing, layup, lamination,
+           framing, junction box, and the test sequence.</p>
+      </a>
+      <a class="toc-card" href="bom.html">
+        <span class="code">SC-03</span>
+        <h3>BOM &amp; suppliers</h3>
+        <p>Every component with spec, named suppliers, prices, MOQs, and the Philippines
+           sourcing picture. Research-backed and dated.</p>
+      </a>
+      <a class="toc-card" href="strategy.html">
+        <span class="code">SC-04</span>
+        <h3>Manufacturing &amp; logistics strategy</h3>
+        <p>Equipment and capex per stage, certification path, PH regulatory and incentives,
+           freight, and distribution channels.</p>
+      </a>
+      <a class="toc-card" href="sourcing.html">
+        <span class="code">SC-05</span>
+        <h3>Source &amp; install</h3>
+        <p>Model B: buy the parts we can't reproduce (panels, inverters, batteries), fabricate
+           racking and boxes, and earn as the installer. Stage-0 revenue and the sales channel.</p>
+      </a>
+      <a class="toc-card" href="market.html">
+        <span class="code">SC-06</span>
+        <h3>Market, packaging &amp; pricing</h3>
+        <p>Segments, named packages, and the ₱99,500 homeowner flagship — on-grid, off-grid, and
+           hybrid — with the pricing ladder and marketing plan.</p>
+      </a>
+    </div>
+
+    <h2><span class="sec">§ 3</span>Two models, one company</h2>
+    <p>
+      This file holds two routes to the same destination — Solar City as a Philippine solar brand —
+      and they run in parallel, not in sequence.
+    </p>
+    <div class="stages" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="stage-card s2">
+        <span class="tag">Model A · the moat</span>
+        <h3>Build our own modules</h3>
+        <p>Manufacture panels: prototype → small batch → certified line.
+           Slow, capital-hungry, and the long-term differentiator.</p>
+        <div class="facts">DOCS: SC-01 → SC-02 → SC-03 → SC-04<br>PAYS OFF: years</div>
+      </div>
+      <div class="stage-card s3">
+        <span class="tag">Model B · the engine</span>
+        <h3>Source &amp; install now</h3>
+        <p>Buy panels/inverters/batteries, build racking/boxes/harnesses, install and service.
+           Revenue in weeks; funds Model A and becomes its sales channel.</p>
+        <div class="facts">DOCS: SC-05 → SC-06<br>PAYS OFF: weeks</div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 4</span>Ground rules</h2>
+    <ul>
+      <li><strong>Scope.</strong> We are a module assembler, not a cell fab. Cell fabrication is a
+          multi-hundred-million-dollar semiconductor process; module assembly is precision manufacturing
+          you can start on a workbench. Every serious module company outside China started exactly here.</li>
+      <li><strong>Target product.</strong> Standard residential module: ~400&nbsp;W, 108 half-cut M10
+          monocrystalline cells, glass front, aluminum frame. The build guide starts you on a smaller
+          36-cell trainer first — cheap mistakes before expensive ones.</li>
+      <li><strong>Numbers are dated.</strong> Cell prices, freight rates, and equipment quotes move
+          monthly. Every figure in SC-03/SC-04 carries an as-of date; anything we could not verify is
+          marked <span class="unverified">UNVERIFIED</span>. Re-quote before committing money.</li>
+      <li><strong>Safety.</strong> Lamination runs at ~150&nbsp;°C, hi-pot testing at up to 3&nbsp;kV DC,
+          and a lit module string is a current source that does not care about your multimeter's fuse.
+          Safety callouts in SC-02 are process steps, not suggestions.</li>
+    </ul>
+
+    <hr>
+    <p class="asof">FILE STATUS: SC-01/SC-02 complete · SC-03/SC-04 populated from research dated 2026-07-06 · Open <a href="designer.html">SC-01</a> to start.</p>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+</html>
