@@ -25,11 +25,13 @@ funnel/
 │   ├── api/
 │   │   ├── lead.js            # POST /api/lead  (public) → validate + insert into D1
 │   │   ├── leads.js           # GET/PATCH/DELETE /api/leads (founder-gated) → pipeline data
+│   │   ├── notes.js           # GET/POST/PATCH/DELETE /api/notes (founder-gated) → team notes
+│   │   ├── note-image.js      # POST upload / GET serve note images (founder-gated, R2)
 │   │   ├── founder-login.js   # POST → verify password, set signed cookie
 │   │   └── founder-logout.js  # clear cookie
 │   └── internal/_middleware.js  # gate: valid cookie or redirect to /login
-├── wrangler.toml              # D1 binding (DB → solar-city-leads)
-├── schema.sql                 # leads table schema
+├── wrangler.toml              # D1 binding (DB) + R2 binding (NOTES_R2 → solar-city-notes)
+├── schema.sql                 # leads + notes table schemas
 ├── _headers                   # security + cache headers
 └── README.md
 ```
@@ -159,6 +161,20 @@ Query leads directly anytime:
 ```bash
 npx wrangler d1 execute solar-city-leads --remote --command "SELECT name, phone, stage FROM leads ORDER BY created_at DESC;"
 ```
+
+### Team notes (D1 + R2-backed)
+
+**`/internal/notes.html`** is the founders' shared notebook — write a note (name, optional
+title, text), attach photos, save. Everyone with founder access sees, edits, and deletes the
+same feed. Use it for site-survey findings, supplier call notes, install photos, meeting prep.
+
+- **Text** lives in the same D1 database (`notes` table, `schema.sql`).
+- **Images** live in the R2 bucket **`solar-city-notes`** (bound as `NOTES_R2` in
+  `wrangler.toml`). The bucket is private — images are streamed through the founder-gated
+  `GET /api/note-image?key=…`, never exposed publicly. Deleting a note also deletes its
+  images from R2. Accepted: PNG/JPEG/WebP/GIF/HEIC, ≤ 8 MB each, ≤ 12 per note.
+- Provisioning (already done once): `npx wrangler r2 bucket create solar-city-notes` and
+  the `schema.sql` apply above. Local dev gets its own simulated bucket + DB automatically.
 
 ### Deploy note
 
