@@ -7,6 +7,7 @@ compatibility_date = "2024-11-01"
 binding = "DB"
 database_name = "solar-city-leads"
 database_id = "ed3892aa-1dce-41ce-9727-2a831a4ec1f1"
+preview_database_id = "DB"
 
 # R2 bucket for team-note image attachments (accessed as env.NOTES_R2 in Functions)
 [[r2_buckets]]

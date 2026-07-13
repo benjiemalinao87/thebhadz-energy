@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-07 Project board — Solar City</title>
+<link rel="stylesheet" href="assets/style.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-07 · INTERNAL PROJECT BOARD <span class="rev">· REV A · 2026-07-13</span></p>
+    <h1>Run the week from one board.</h1>
+    <p class="lede">
+      A D1-backed tracker for the work that moves Solar City toward paid installs: owners,
+      deadlines, traction/product balance, blockers, and Friday review.
+    </p>
+
+    <div class="callout qc">
+      <span class="label">Persistence</span>
+      When served through Cloudflare Pages, this board saves through <code>/api/projects</code>
+      to D1. When opened directly from disk, it falls back to this browser only.
+      <span class="status-badge" id="pm-storage">Storage: checking</span>
+    </div>
+
+    <section class="pm-shell" aria-label="Project management board">
+      <div class="pm-toolbar">
+        <div class="pm-metric">
+          <span class="k">Open</span>
+          <span class="v" data-pm-count="open">0</span>
+        </div>
+        <div class="pm-metric">
+          <span class="k">Due this week</span>
+          <span class="v" data-pm-count="week">0</span>
+        </div>
+        <div class="pm-metric">
+          <span class="k">Blocked</span>
+          <span class="v" data-pm-count="blocked">0</span>
+        </div>
+        <div class="pm-metric">
+          <span class="k">Traction share</span>
+          <span class="v" data-pm-count="traction">0%</span>
+        </div>
+      </div>
+
+      <form class="pm-form" id="pm-form">
+        <div class="ctl">
+          <label for="pm-title">Task</label>
+          <input id="pm-title" name="title" required maxlength="96" placeholder="Book 3 homeowner interviews">
+        </div>
+        <div class="ctl">
+          <label for="pm-owner">Owner</label>
+          <input id="pm-owner" name="owner" maxlength="36" placeholder="Founder">
+        </div>
+        <div class="ctl">
+          <label for="pm-type">Type</label>
+          <select id="pm-type" name="type">
+            <option>Traction</option>
+            <option>Product</option>
+            <option>Ops</option>
+          </select>
+        </div>
+        <div class="ctl">
+          <label for="pm-due">Due</label>
+          <input id="pm-due" name="due" type="date">
+        </div>
+        <div class="ctl pm-notes-field">
+          <label for="pm-notes">Notes</label>
+          <input id="pm-notes" name="notes" maxlength="160" placeholder="Countable commitment or exit condition">
+        </div>
+        <button type="submit">Add task</button>
+      </form>
+
+      <div class="pm-actions" aria-label="Board controls">
+        <label>
+          Filter
+          <select id="pm-filter">
+            <option value="all">All active tasks</option>
+            <option value="Traction">Traction</option>
+            <option value="Product">Product</option>
+            <option value="Ops">Ops</option>
+            <option value="Done">Done</option>
+          </select>
+        </label>
+        <button type="button" id="pm-export">Export JSON</button>
+        <label class="pm-import">
+          Import JSON
+          <input type="file" id="pm-import" accept="application/json">
+        </label>
+      </div>
+
+      <div class="pm-board" id="pm-board" aria-live="polite"></div>
+    </section>
+
+    <h2><span class="sec">§ 1</span>Friday review</h2>
+    <ul>
+      <li><strong>Close the loop:</strong> move completed work to Done, leave blocked work visible, and export a copy before the meeting.</li>
+      <li><strong>Check balance:</strong> traction should not fall below half of active work while the first deposits are still unproven.</li>
+      <li><strong>Report outcomes:</strong> write surveys booked, deposits paid, quotes delivered, and interviews logged before listing page or document work.</li>
+    </ul>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/projects.js"></script>
+</html>

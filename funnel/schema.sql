@@ -37,3 +37,21 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at);
+
+-- Internal project board tasks
+CREATE TABLE IF NOT EXISTS project_tasks (
+  id          TEXT PRIMARY KEY,
+  title       TEXT NOT NULL,
+  owner       TEXT,
+  type        TEXT NOT NULL DEFAULT 'Traction'
+              CHECK (type IN ('Traction', 'Product', 'Ops')),
+  due         TEXT,
+  status      TEXT NOT NULL DEFAULT 'Backlog'
+              CHECK (status IN ('Backlog', 'This week', 'Doing', 'Blocked', 'Done')),
+  notes       TEXT,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_project_tasks_due ON project_tasks(due);

@@ -47,11 +47,10 @@ fully editable, and requiring no external assets (Cloudflare Pages serves them a
 4. **Packages** — three ₱99,500 offers with images, benefit-led bullets, per-package CTAs
    that pre-fill the form.
 5. **How it works** — 4 low-friction steps.
-6. **Proof** — testimonials (placeholder — swap for real ones ASAP; social proof converts hardest).
-7. **FAQ** — handles price, financing, savings, typhoons, warranty, paperwork objections.
-8. **Lead form** — the goal: name + mobile + goal (required), bill range / package / financing
+6. **FAQ** — handles price, financing, savings, typhoons, warranty, paperwork objections.
+7. **Lead form** — the goal: name + mobile + goal (required), bill range / package / financing
    (optional). Package CTAs deep-link here and pre-select.
-9. **Final CTA + sticky mobile bar** — urgency close, always-visible mobile button.
+8. **Final CTA + sticky mobile bar** — urgency close, always-visible mobile button.
 
 Every CTA points to the single conversion action: **the free savings estimate.**
 
@@ -91,8 +90,8 @@ Both are optional and additive; the lead is stored regardless.
 
 - **Phone number** `0900 000 0000` — in `index.html` topbar + footer (`tel:` links).
 - **Messenger link** `https://m.me/` — success-screen button (point to your page: `m.me/<yourpage>`).
-- **Testimonials** — currently representative examples with shortened names. Swap in real,
-  permissioned customer quotes; this section drives the most lift.
+- **Proof section** — add only real, permissioned customer quotes, install photos, or founder-roof
+  R&D proof. Do not publish representative testimonials, ratings, or install counts.
 - **Prices / savings numbers** — the ₱99,500 anchor and savings estimates come from
   `SC-06` planning targets. Confirm against live equipment quotes (see the engineering file)
   before advertising specific figures.
