@@ -49,6 +49,7 @@
   ];
 
   var state = { tasks: [] };
+  var editingId = null;
   var form = document.getElementById("pm-form");
   var board = document.getElementById("pm-board");
   var filter = document.getElementById("pm-filter");
@@ -83,6 +84,8 @@
     if (usingApi) await refreshFromApi();
     form.reset();
     render();
+    var titleInput = document.getElementById("pm-title");
+    if (titleInput) titleInput.focus();
   });
 
   filter.addEventListener("change", render);
@@ -92,23 +95,35 @@
   board.addEventListener("click", async function (event) {
     var button = event.target.closest("button[data-action]");
     if (!button) return;
+    var action = button.getAttribute("data-action");
     var task = findTask(button.getAttribute("data-id"));
     if (!task) return;
 
-    if (button.getAttribute("data-action") === "move") {
-      var status = button.getAttribute("data-status");
-      if (usingApi && !(await api("PATCH", { id: task.id, status: status }))) return;
-      task.status = status;
+    if (action === "edit") {
+      editingId = task.id;
+      render();
+      return;
     }
-    if (button.getAttribute("data-action") === "delete") {
+    if (action === "close-edit") {
+      editingId = null;
+      render();
+      return;
+    }
+    if (action === "delete") {
       if (usingApi && !(await api("DELETE", { id: task.id }))) return;
       state.tasks = state.tasks.filter(function (item) { return item.id !== task.id; });
+      if (editingId === task.id) editingId = null;
+      if (!usingApi) saveLocal();
+      render();
     }
-    if (!usingApi) saveLocal();
-    render();
   });
 
   board.addEventListener("change", async function (event) {
+    var mover = event.target.closest("select[data-action='move']");
+    if (mover) {
+      await moveTask(mover.getAttribute("data-id"), mover.value);
+      return;
+    }
     var field = event.target.closest("[data-field]");
     if (!field) return;
     var task = findTask(field.getAttribute("data-id"));
@@ -123,6 +138,62 @@
     if (!usingApi) saveLocal();
     renderCounts();
   });
+
+  board.addEventListener("dragstart", function (event) {
+    var card = event.target.closest('.pm-card[draggable="true"]');
+    if (!card) return;
+    event.dataTransfer.setData("text/plain", card.getAttribute("data-id"));
+    event.dataTransfer.effectAllowed = "move";
+    card.classList.add("is-dragging");
+  });
+
+  board.addEventListener("dragend", function (event) {
+    var card = event.target.closest(".pm-card");
+    if (card) card.classList.remove("is-dragging");
+    clearDropTargets();
+  });
+
+  board.addEventListener("dragover", function (event) {
+    var lane = event.target.closest(".pm-lane");
+    if (!lane) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    lane.classList.add("is-drop");
+  });
+
+  board.addEventListener("dragleave", function (event) {
+    var lane = event.target.closest(".pm-lane");
+    if (lane && !lane.contains(event.relatedTarget)) lane.classList.remove("is-drop");
+  });
+
+  board.addEventListener("drop", async function (event) {
+    var lane = event.target.closest(".pm-lane");
+    if (!lane) return;
+    event.preventDefault();
+    clearDropTargets();
+    await moveTask(event.dataTransfer.getData("text/plain"), lane.getAttribute("data-lane"));
+  });
+
+  async function moveTask(id, status) {
+    var task = findTask(id);
+    if (!task || !status || task.status === status) {
+      render();
+      return;
+    }
+    if (usingApi && !(await api("PATCH", { id: task.id, status: status }))) {
+      render();
+      return;
+    }
+    task.status = status;
+    if (!usingApi) saveLocal();
+    render();
+  }
+
+  function clearDropTargets() {
+    board.querySelectorAll(".pm-lane.is-drop").forEach(function (lane) {
+      lane.classList.remove("is-drop");
+    });
+  }
 
   init();
 
@@ -201,7 +272,7 @@
             : task.type === selected && task.status !== "Done";
         return laneMatch && filterMatch;
       });
-      return '<section class="pm-lane">' +
+      return '<section class="pm-lane" data-lane="' + escapeAttr(lane.key) + '">' +
         '<h2><span>' + escapeHtml(lane.label) + '</span><b>' + tasks.length + '</b></h2>' +
         '<div class="pm-cards">' +
         (tasks.length ? tasks.map(renderTask).join("") : '<p class="pm-empty">No tasks.</p>') +
@@ -212,15 +283,35 @@
   }
 
   function renderTask(task) {
-    var statusButtons = lanes.filter(function (lane) { return lane.key !== task.status; }).map(function (lane) {
-      return '<button type="button" data-action="move" data-id="' + task.id + '" data-status="' + lane.key + '">' + escapeHtml(lane.label) + '</button>';
-    }).join("");
-    var overdue = task.due && new Date(task.due + "T00:00:00") < startOfToday() && task.status !== "Done";
+    var overdue = isOverdue(task);
+    if (task.id === editingId) return renderTaskEditor(task, overdue);
 
-    return '<article class="pm-card ' + (overdue ? "is-overdue" : "") + '">' +
+    var moveOptions = lanes.map(function (lane) {
+      return '<option value="' + escapeAttr(lane.key) + '"' + (lane.key === task.status ? " selected" : "") + '>' + escapeHtml(lane.label) + '</option>';
+    }).join("");
+
+    return '<article class="pm-card is-read ' + (overdue ? "is-overdue" : "") + '" draggable="true" data-id="' + escapeAttr(task.id) + '">' +
       '<div class="pm-card-head">' +
         '<span class="pm-pill ' + escapeHtml(task.type.toLowerCase()) + '">' + escapeHtml(task.type) + '</span>' +
-        (task.due ? '<time datetime="' + escapeHtml(task.due) + '">' + formatDate(task.due) + '</time>' : '<span class="pm-muted">No due date</span>') +
+        (task.due
+          ? '<time datetime="' + escapeHtml(task.due) + '"' + (overdue ? ' class="is-late"' : '') + '>' + dueLabel(task.due) + '</time>'
+          : '<span class="pm-muted">No due date</span>') +
+      '</div>' +
+      '<h3 class="pm-card-title">' + escapeHtml(task.title) + '</h3>' +
+      (task.owner ? '<p class="pm-card-owner">' + escapeHtml(task.owner) + '</p>' : "") +
+      (task.notes ? '<p class="pm-card-notes">' + escapeHtml(task.notes) + '</p>' : "") +
+      '<div class="pm-card-foot">' +
+        '<select data-action="move" data-id="' + escapeAttr(task.id) + '" aria-label="Move task to lane">' + moveOptions + '</select>' +
+        '<button type="button" data-action="edit" data-id="' + escapeAttr(task.id) + '">Edit</button>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function renderTaskEditor(task, overdue) {
+    return '<article class="pm-card is-editing ' + (overdue ? "is-overdue" : "") + '" data-id="' + escapeAttr(task.id) + '">' +
+      '<div class="pm-card-head">' +
+        '<span class="pm-pill ' + escapeHtml(task.type.toLowerCase()) + '">' + escapeHtml(task.type) + '</span>' +
+        '<button type="button" data-action="close-edit" data-id="' + escapeAttr(task.id) + '">Done editing</button>' +
       '</div>' +
       '<label class="pm-edit-label">Task<input data-field="title" data-id="' + task.id + '" value="' + escapeAttr(task.title) + '"></label>' +
       '<div class="pm-card-grid">' +
@@ -228,9 +319,21 @@
         '<label>Due<input type="date" data-field="due" data-id="' + task.id + '" value="' + escapeAttr(task.due) + '"></label>' +
       '</div>' +
       '<label>Notes<textarea data-field="notes" data-id="' + task.id + '" rows="3">' + escapeHtml(task.notes) + '</textarea></label>' +
-      '<div class="pm-move">' + statusButtons + '</div>' +
       '<button class="pm-delete" type="button" data-action="delete" data-id="' + task.id + '">Delete</button>' +
     '</article>';
+  }
+
+  function isOverdue(task) {
+    return Boolean(task.due) && new Date(task.due + "T00:00:00") < startOfToday() && task.status !== "Done";
+  }
+
+  function dueLabel(value) {
+    var due = new Date(value + "T00:00:00");
+    var days = Math.round((due - startOfToday()) / 86400000);
+    var hint = days === 0 ? "today"
+      : days > 0 ? "in " + days + "d"
+      : Math.abs(days) + "d late";
+    return formatDate(value) + " · " + hint;
   }
 
   function renderCounts() {
@@ -244,9 +347,19 @@
       return due >= startOfToday() && due <= weekEnd;
     }).length);
     setCount("blocked", active.filter(function (task) { return task.status === "Blocked"; }).length);
-    setCount("traction", active.length
-      ? Math.round(active.filter(function (task) { return task.type === "Traction"; }).length / active.length * 100) + "%"
-      : "0%");
+    var tractionPct = active.length
+      ? Math.round(active.filter(function (task) { return task.type === "Traction"; }).length / active.length * 100)
+      : 0;
+    setCount("traction", tractionPct + "%");
+    var gauge = document.getElementById("pm-gauge");
+    if (gauge) {
+      var low = active.length > 0 && tractionPct < 50;
+      gauge.classList.toggle("is-low", low);
+      gauge.querySelector("i").style.width = tractionPct + "%";
+      gauge.setAttribute("title", low
+        ? "Traction share is below the 50% floor — Monday/Tuesday go traction-only."
+        : "Traction share is at or above the 50% floor.");
+    }
   }
 
   function setCount(name, value) {
