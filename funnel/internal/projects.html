@@ -1,71 +1,230 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SC-07 Project board — Solar City</title>
-<link rel="stylesheet" href="assets/style.css">
+<title>Project Board — BADJJ Energy Systems</title>
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* ============================================================
+     BADJJ Project Board — SC-07
+     Command-center "monitor" theme (matches /internal dashboard
+     and the Contacts / Meeting Log operations pages).
+     Backed by /api/projects (GET list, POST, PATCH, DELETE, PUT).
+     ============================================================ */
+  :root{
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
+    --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --bg:#020202; --panel-a:rgba(12,12,12,0.96); --panel-b:rgba(5,5,5,0.98);
+    --z-900:#18181b; --z-800:#27272a; --z-700:#3f3f46; --z-600:#52525b;
+    --z-500:#71717a; --z-400:#a1a1aa; --z-300:#d4d4d8; --z-200:#e4e4e7; --z-100:#f4f4f5; --z-50:#fafafa;
+    --cyan:#67e8f9; --green:#4ade80; --yellow:#facc15; --red:#fb7185; --purple:#c084fc; --blue:#60a5fa; --amber:#f59e0b;
+    /* type tones */
+    --traction:#4ade80; --product:#f59e0b; --ops:#60a5fa;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; min-height:100vh; font-family:var(--mono); color:var(--z-100); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,0.05), transparent 55%),
+      radial-gradient(1000px 500px at 100% -5%, rgba(250,204,21,0.035), transparent 50%),
+      var(--bg);
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:rgba(103,232,249,0.25);color:#fff;}
+  body::before{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0.08;
+    background-image:linear-gradient(to bottom,rgba(255,255,255,0.10) 1px,transparent 1px);background-size:100% 4px;}
 
-<div class="frame">
-  <aside class="sidebar">
-    <div class="brand">
-      <a href="overview.html">
-        <span class="wordmark">Solar City</span>
-        <span class="sub">MODULE ENGINEERING FILE</span>
+  .wrap{max-width:1360px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+
+  /* ---- top bar ---- */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px dashed rgba(63,63,70,0.9);}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-400);
+    border:1px solid var(--z-800);border-radius:999px;padding:8px 14px;transition:border-color .15s,color .15s;}
+  .back:hover{border-color:var(--z-500);color:var(--z-50);}
+  .titles{display:flex;flex-direction:column;gap:3px;}
+  .titles .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:var(--z-500);}
+  .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--z-50);letter-spacing:0.01em;}
+  .bar .sp{flex:1;}
+  .store-badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;
+    border:1px solid var(--z-800);background:rgba(9,9,11,0.6);color:var(--z-400);}
+  .store-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--z-600);}
+  .store-badge.live{border-color:rgba(74,222,128,0.35);background:rgba(74,222,128,0.10);color:#bbf7d0;}
+  .store-badge.live .dot{background:var(--green);box-shadow:0 0 8px rgba(74,222,128,0.6);}
+  .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
+  .logout:hover{background:rgba(251,113,133,0.08);}
+
+  /* ---- stat strip ---- */
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px;}
+  .panel{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--z-800);
+    background:linear-gradient(180deg,var(--panel-a),var(--panel-b)),#000;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 18px 38px rgba(0,0,0,0.30);}
+  .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);opacity:.5;pointer-events:none;}
+  .panel>*{position:relative;z-index:1;}
+  .panel[data-tone="cyan"]{border-color:rgba(103,232,249,0.25);}
+  .panel[data-tone="green"]{border-color:rgba(74,222,128,0.22);}
+  .panel[data-tone="yellow"]{border-color:rgba(250,204,21,0.24);}
+  .panel[data-tone="red"]{border-color:rgba(251,113,133,0.28);}
+  .stat{padding:15px 16px;display:flex;flex-direction:column;gap:3px;}
+  .stat .k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.24em;color:var(--z-500);}
+  .stat .v{font-family:var(--display);font-size:1.7rem;font-weight:600;color:var(--z-50);font-variant-numeric:tabular-nums;line-height:1.1;}
+  .stat.cyan .k{color:var(--cyan);} .stat.cyan .v{color:var(--cyan);}
+  .stat.green .k{color:var(--green);} .stat.green .v{color:var(--green);}
+  .stat.red .k{color:var(--red);} .stat.red .v{color:var(--red);}
+  /* traction gauge */
+  .gauge{position:relative;margin-top:8px;height:6px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid var(--z-800);overflow:visible;}
+  .gauge i{display:block;height:100%;border-radius:999px;width:0;background:var(--green);transition:width .25s ease;}
+  .gauge.low i{background:var(--red);}
+  .gauge::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--z-500);}
+  .stat .floor{font-size:10px;color:var(--z-600);letter-spacing:0.08em;text-transform:uppercase;margin-top:7px;}
+  .stat.low .v{color:var(--red);}
+
+  /* ---- add-task form ---- */
+  .compose{margin-top:14px;padding:16px;}
+  .compose form{display:grid;grid-template-columns:2fr 1fr 150px 150px;gap:12px;align-items:end;}
+  .compose .ctl{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .compose .ctl.notes{grid-column:1 / -2;}
+  .compose label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:var(--z-500);}
+  .compose input,.compose select{width:100%;background:rgba(9,9,11,0.7);border:1px solid var(--z-800);border-radius:10px;color:var(--z-100);
+    font-family:var(--mono);font-size:13px;padding:9px 11px;}
+  .compose input::placeholder{color:var(--z-600);}
+  .compose input:focus,.compose select:focus{outline:none;border-color:rgba(103,232,249,0.5);}
+  .compose select option{background:#0a0a0b;color:var(--z-100);}
+  .compose .add{background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.4);color:var(--cyan);
+    font-family:var(--mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;padding:10px 16px;border-radius:10px;cursor:pointer;transition:background .15s;}
+  .compose .add:hover{background:rgba(103,232,249,0.2);}
+
+  /* ---- board controls ---- */
+  .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 14px;}
+  .controls .ctl-label{font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:var(--z-500);display:inline-flex;align-items:center;gap:8px;}
+  .controls select{background:rgba(9,9,11,0.7);border:1px solid var(--z-800);border-radius:10px;color:var(--z-100);font-family:var(--mono);font-size:12px;padding:8px 11px;cursor:pointer;}
+  .controls select:focus{outline:none;border-color:rgba(103,232,249,0.5);}
+  .controls select option{background:#0a0a0b;color:var(--z-100);}
+  .controls .sp{flex:1;}
+  .ghost-btn{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--z-300);
+    background:rgba(9,9,11,0.6);border:1px solid var(--z-800);border-radius:10px;padding:8px 13px;cursor:pointer;transition:border-color .15s,color .15s;}
+  .ghost-btn:hover{border-color:var(--z-600);color:var(--z-50);}
+  .import-lbl{display:inline-flex;align-items:center;gap:8px;}
+  .import-lbl input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;}
+
+  /* ---- board ---- */
+  .board{display:grid;grid-template-columns:repeat(5,minmax(200px,1fr));gap:12px;align-items:start;}
+  .lane{border-radius:16px;border:1px solid var(--z-800);background:rgba(9,9,11,0.5);min-width:0;transition:border-color .15s,background .15s;}
+  .lane.drop{border-color:rgba(103,232,249,0.5);background:rgba(103,232,249,0.06);}
+  .lane-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px dashed rgba(63,63,70,0.7);}
+  .lane-head .name{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.18em;color:var(--z-400);}
+  .lane-head .n{font-size:11px;color:var(--z-600);font-variant-numeric:tabular-nums;}
+  .lane.blocked .lane-head .name{color:var(--red);}
+  .lane.done .lane-head .name{color:var(--green);}
+  .cards{display:flex;flex-direction:column;gap:10px;padding:12px;min-height:44px;}
+  .empty-lane{font-size:11.5px;color:var(--z-600);text-align:center;padding:14px 8px;letter-spacing:0.04em;}
+
+  .card{border-radius:12px;border:1px solid var(--z-800);background:linear-gradient(180deg,rgba(18,18,20,0.9),rgba(8,8,9,0.95));
+    padding:12px;position:relative;}
+  .card.read{cursor:grab;}
+  .card.read:active{cursor:grabbing;}
+  .card.dragging{opacity:0.4;}
+  .card.overdue{border-left:3px solid var(--red);}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .pill{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;border:1px solid transparent;border-radius:999px;padding:3px 9px;}
+  .pill.traction{color:var(--traction);border-color:rgba(74,222,128,0.35);background:rgba(74,222,128,0.10);}
+  .pill.product{color:var(--product);border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.10);}
+  .pill.ops{color:var(--ops);border-color:rgba(96,165,250,0.35);background:rgba(96,165,250,0.10);}
+  .due{font-size:10.5px;color:var(--z-500);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .due.late{color:var(--red);}
+  .card-title{font-family:var(--display);font-size:13.5px;font-weight:600;color:var(--z-50);line-height:1.35;margin:10px 0 0;}
+  .card-owner{font-size:11px;color:var(--z-400);margin:5px 0 0;}
+  .card-notes{font-size:11.5px;color:var(--z-500);line-height:1.45;margin:6px 0 0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-foot{display:flex;align-items:center;gap:8px;margin-top:11px;}
+  .move-sel{flex:1;min-width:0;appearance:none;-webkit-appearance:none;font-family:var(--mono);font-size:11px;color:var(--z-200);
+    background:rgba(9,9,11,0.8);border:1px solid var(--z-800);border-radius:8px;padding:6px 24px 6px 10px;cursor:pointer;
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 8px center;}
+  .move-sel:focus{outline:none;border-color:rgba(103,232,249,0.5);}
+  .move-sel option{background:#0a0a0b;color:var(--z-100);}
+  .edit-btn{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--z-300);
+    background:rgba(9,9,11,0.6);border:1px solid var(--z-800);border-radius:8px;padding:6px 11px;cursor:pointer;transition:border-color .15s,color .15s;}
+  .edit-btn:hover{border-color:var(--z-600);color:var(--z-50);}
+
+  /* card editor */
+  .card.editing{border-color:rgba(103,232,249,0.4);}
+  .card .efield{display:block;margin-top:10px;}
+  .card .efield .lbl{display:block;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--z-500);margin-bottom:5px;}
+  .card .efield input,.card .efield textarea{width:100%;background:rgba(9,9,11,0.8);border:1px solid var(--z-800);border-radius:8px;color:var(--z-100);
+    font-family:var(--mono);font-size:12.5px;padding:8px 10px;}
+  .card .efield input:focus,.card .efield textarea:focus{outline:none;border-color:rgba(103,232,249,0.5);}
+  .card .efield textarea{resize:vertical;line-height:1.5;min-height:64px;}
+  .card .egrid{display:flex;gap:8px;}
+  .card .egrid .efield{flex:1;}
+  .del-btn{margin-top:12px;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--red);
+    background:none;border:1px solid var(--z-800);border-radius:8px;padding:7px 12px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .del-btn:hover{border-color:var(--red);background:rgba(251,113,133,0.08);}
+
+  /* ---- review note ---- */
+  .review{margin-top:34px;padding:20px 22px;border-radius:16px;border:1px solid var(--z-800);background:rgba(9,9,11,0.5);}
+  .review h2{font-family:var(--display);font-size:1rem;font-weight:600;color:var(--z-100);margin:0 0 12px;display:flex;align-items:center;gap:10px;}
+  .review h2 .tag{font-size:10px;font-weight:600;letter-spacing:0.2em;color:var(--amber);}
+  .review ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;}
+  .review li{font-size:12.5px;color:var(--z-400);line-height:1.55;padding-left:16px;position:relative;}
+  .review li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--z-600);}
+  .review li b{color:var(--z-200);font-weight:600;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:95;
+    background:#0a0a0b;border:1px solid var(--z-700);color:var(--z-100);padding:11px 20px;border-radius:999px;font-size:13px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);transition:transform .2s;max-width:88vw;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.err{border-color:rgba(251,113,133,0.5);}
+
+  @media (max-width:1080px){ .board{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:820px){
+    .strip{grid-template-columns:1fr 1fr;}
+    .compose form{grid-template-columns:1fr 1fr;}
+    .compose .ctl.notes{grid-column:1 / -1;}
+    .compose .add{grid-column:1 / -1;}
+  }
+  @media (max-width:560px){ .board{grid-template-columns:1fr;} .compose form{grid-template-columns:1fr;} .compose .ctl.notes{grid-column:auto;} }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- TOP BAR -->
+    <div class="bar">
+      <a class="back" href="/internal/">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Command Center
       </a>
-    </div>
-    <nav class="nav" aria-label="Document sections">
-      <a href="overview.html"><span class="code">SC-00</span>Overview</a>
-      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
-      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
-      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
-      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
-      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
-      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
-      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
-    </nav>
-    <div class="foot">
-      REV A · 2026-07<br>
-      TARGET: 400&nbsp;W · 108HC M10<br>
-      SITE: PHILIPPINES
-    </div>
-  </aside>
-
-  <main class="content">
-    <p class="doc-eyebrow">SC-07 · INTERNAL PROJECT BOARD <span class="rev">· REV A · 2026-07-13</span></p>
-    <h1>Run the week from one board.</h1>
-    <p class="lede">
-      A D1-backed tracker for the work that moves Solar City toward paid installs: owners,
-      deadlines, traction/product balance, blockers, and Friday review.
-    </p>
-
-    <div class="callout qc">
-      <span class="label">Persistent database</span>
-      This internal version saves through <code>/api/projects</code> to the Cloudflare D1 binding
-      <code>DB</code>. Export/import remains available for backups.
-      <span class="status-badge" id="pm-storage">Storage: checking</span>
-    </div>
-
-    <section class="pm-shell" aria-label="Project management board">
-      <div class="pm-toolbar">
-        <div class="pm-metric">
-          <span class="k">Open</span>
-          <span class="v" data-pm-count="open">0</span>
-        </div>
-        <div class="pm-metric">
-          <span class="k">Due this week</span>
-          <span class="v" data-pm-count="week">0</span>
-        </div>
-        <div class="pm-metric">
-          <span class="k">Blocked</span>
-          <span class="v" data-pm-count="blocked">0</span>
-        </div>
-        <div class="pm-metric">
-          <span class="k">Traction share</span>
-          <span class="v" data-pm-count="traction">0%</span>
-        </div>
+      <div class="titles">
+        <span class="eyebrow">BADJJ · Operations · SC-07</span>
+        <h1>Project Board</h1>
       </div>
+      <div class="sp"></div>
+      <span class="store-badge" id="store-badge"><span class="dot" aria-hidden="true"></span> Storage: checking</span>
+      <a class="logout" href="/api/founder-logout">Log out</a>
+    </div>
 
-      <form class="pm-form" id="pm-form">
+    <!-- STAT STRIP -->
+    <div class="strip">
+      <div class="panel stat cyan" data-tone="cyan"><span class="k">Open</span><span class="v" data-count="open">0</span></div>
+      <div class="panel stat" data-tone="yellow"><span class="k">Due this week</span><span class="v" data-count="week">0</span></div>
+      <div class="panel stat red" data-tone="red"><span class="k">Blocked</span><span class="v" data-count="blocked">0</span></div>
+      <div class="panel stat green" id="traction-stat" data-tone="green">
+        <span class="k">Traction share</span>
+        <span class="v" data-count="traction">0%</span>
+        <span class="gauge" id="gauge" aria-hidden="true"><i></i></span>
+        <span class="floor">Floor 50% · marker at midpoint</span>
+      </div>
+    </div>
+
+    <!-- ADD TASK -->
+    <div class="panel compose">
+      <form id="pm-form">
         <div class="ctl">
           <label for="pm-title">Task</label>
           <input id="pm-title" name="title" required maxlength="96" placeholder="Book 3 homeowner interviews">
@@ -83,46 +242,313 @@
           </select>
         </div>
         <div class="ctl">
-          <label for="pm-due">Due</label>
-          <input id="pm-due" name="due" type="date">
+          <label for="pm-lane">Lane</label>
+          <select id="pm-lane" name="status">
+            <option>This week</option>
+            <option>Backlog</option>
+            <option>Doing</option>
+            <option>Blocked</option>
+          </select>
         </div>
-        <div class="ctl pm-notes-field">
+        <div class="ctl notes">
           <label for="pm-notes">Notes</label>
           <input id="pm-notes" name="notes" maxlength="160" placeholder="Countable commitment or exit condition">
         </div>
-        <button type="submit">Add task</button>
+        <button type="submit" class="add">Add task</button>
       </form>
+    </div>
 
-      <div class="pm-actions" aria-label="Board controls">
-        <label>
-          Filter
-          <select id="pm-filter">
-            <option value="all">All active tasks</option>
-            <option value="Traction">Traction</option>
-            <option value="Product">Product</option>
-            <option value="Ops">Ops</option>
-            <option value="Done">Done</option>
-          </select>
-        </label>
-        <button type="button" id="pm-export">Export JSON</button>
-        <label class="pm-import">
-          Import JSON
-          <input type="file" id="pm-import" accept="application/json">
-        </label>
-      </div>
+    <!-- CONTROLS -->
+    <div class="controls">
+      <span class="ctl-label">Filter
+        <select id="pm-filter">
+          <option value="all">All active tasks</option>
+          <option value="Traction">Traction</option>
+          <option value="Product">Product</option>
+          <option value="Ops">Ops</option>
+          <option value="Done">Done</option>
+        </select>
+      </span>
+      <span class="sp"></span>
+      <button type="button" class="ghost-btn" id="pm-export">Export JSON</button>
+      <label class="ghost-btn import-lbl">Import JSON<input type="file" id="pm-import" accept="application/json"></label>
+    </div>
 
-      <div class="pm-board" id="pm-board" aria-live="polite"></div>
-    </section>
+    <!-- BOARD -->
+    <div class="board" id="pm-board" aria-live="polite"></div>
 
-    <h2><span class="sec">§ 1</span>Friday review</h2>
-    <ul>
-      <li><strong>Close the loop:</strong> move completed work to Done, leave blocked work visible, and export a copy before the meeting.</li>
-      <li><strong>Check balance:</strong> traction should not fall below half of active work while the first deposits are still unproven.</li>
-      <li><strong>Report outcomes:</strong> write surveys booked, deposits paid, quotes delivered, and interviews logged before listing page or document work.</li>
-    </ul>
-  </main>
-</div>
+    <!-- FRIDAY REVIEW -->
+    <div class="review">
+      <h2><span class="tag">§1</span> Friday review</h2>
+      <ul>
+        <li><b>Close the loop:</b> move completed work to Done, leave blocked work visible, and export a copy before the meeting.</li>
+        <li><b>Check balance:</b> traction should not fall below half of active work while the first deposits are still unproven.</li>
+        <li><b>Report outcomes:</b> write surveys booked, deposits paid, quotes delivered, and interviews logged before listing page or document work.</li>
+      </ul>
+    </div>
+  </div>
 
-<script src="assets/site.js"></script>
-<script src="assets/projects.js"></script>
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function(){
+    "use strict";
+    var API="/api/projects";
+    var storageKey="solar-city-project-board-v1";
+    var usingApi=false, editingId=null;
+    var lanes=[
+      {key:"Backlog",label:"Backlog"},
+      {key:"This week",label:"This week"},
+      {key:"Doing",label:"Doing"},
+      {key:"Blocked",label:"Blocked"},
+      {key:"Done",label:"Done"}
+    ];
+    var starter=[
+      {id:"task-1",title:"Create ops/status.md ledger",owner:"Founder",type:"Ops",due:"2026-07-17",status:"This week",notes:"Cash, deposits, hours split, gate status, decisions."},
+      {id:"task-2",title:"List 3 subdivision or barangay launch slices",owner:"Founder",type:"Traction",due:"2026-07-17",status:"This week",notes:"Exact Facebook groups before any ad spend."},
+      {id:"task-3",title:"Write 3 homeowner interview snapshots",owner:"Founder",type:"Traction",due:"2026-07-17",status:"Backlog",notes:"Past-specific stories, not would-you-buy answers."},
+      {id:"task-4",title:"Confirm lead delivery before boost spend",owner:"Founder",type:"Product",due:"2026-07-20",status:"Backlog",notes:"View to lead to reply to survey booking."}
+    ];
+
+    var state={tasks:[]};
+    var el=function(id){return document.getElementById(id);};
+    var form=el("pm-form"), board=el("pm-board"), filter=el("pm-filter");
+
+    var toastT;
+    function toast(msg,isErr){var t=el("toast");t.textContent=msg;t.classList.toggle("err",!!isErr);t.classList.add("show");
+      clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2600);}
+
+    function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+    function escAttr(s){return esc(s).replace(/`/g,"&#96;");}
+
+    function startOfToday(){var d=new Date();d.setHours(0,0,0,0);return d;}
+    function fmtDate(v){var p=(v||"").split("-");return p.length===3?p[1]+"/"+p[2]:v;}
+    function isOverdue(t){return Boolean(t.due)&&new Date(t.due+"T00:00:00")<startOfToday()&&t.status!=="Done";}
+    function dueLabel(v){
+      var due=new Date(v+"T00:00:00");
+      var days=Math.round((due-startOfToday())/86400000);
+      var hint=days===0?"today":days>0?"in "+days+"d":Math.abs(days)+"d late";
+      return fmtDate(v)+" · "+hint;
+    }
+
+    function normalize(t,i){
+      return {
+        id:String(t.id||"task-"+i+"-"+Date.now()),
+        title:String(t.title||""),
+        owner:String(t.owner||""),
+        type:["Traction","Product","Ops"].indexOf(t.type)>=0?t.type:"Ops",
+        due:/^\d{4}-\d{2}-\d{2}$/.test(String(t.due||""))?String(t.due):"",
+        status:lanes.some(function(l){return l.key===t.status;})?t.status:"Backlog",
+        notes:String(t.notes||"")
+      };
+    }
+    function findTask(id){return state.tasks.filter(function(t){return t.id===id;})[0];}
+
+    // ---- persistence ----
+    function loadLocal(){
+      try{var s=JSON.parse(localStorage.getItem(storageKey));if(s&&Array.isArray(s.tasks))return {tasks:s.tasks.map(normalize)};}catch(e){}
+      return {tasks:starter.map(normalize)};
+    }
+    function saveLocal(){localStorage.setItem(storageKey,JSON.stringify(state));}
+
+    function refreshFromApi(silent){
+      return fetch(API,{credentials:"same-origin",headers:{"Accept":"application/json"}})
+        .then(function(r){
+          if(r.status===401){window.location.href="/login.html?next="+encodeURIComponent(location.pathname);return null;}
+          if(!r.ok)throw new Error("API unavailable");
+          return r.json();
+        })
+        .then(function(d){
+          if(!d)return false;
+          if(!d.ok||!Array.isArray(d.tasks))throw new Error("Bad API response");
+          state={tasks:d.tasks.map(normalize)};
+          return true;
+        })
+        .catch(function(){if(!silent)toast("Could not reach the D1 project database.",true);return false;});
+    }
+    function api(method,body){
+      return fetch(API,{method:method,credentials:"same-origin",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(body||{})})
+        .then(function(r){
+          if(r.status===401){window.location.href="/login.html?next="+encodeURIComponent(location.pathname);return null;}
+          return r.json().then(function(d){if(!r.ok||!d.ok)throw new Error(d.error||"Request failed");return d;});
+        })
+        .catch(function(e){toast(e.message||"Project database request failed.",true);return null;});
+    }
+
+    // ---- render ----
+    function render(){
+      var sel=filter.value;
+      board.innerHTML=lanes.map(function(lane){
+        var tasks=state.tasks.filter(function(t){
+          if(t.status!==lane.key)return false;
+          if(sel==="all")return t.status!=="Done";
+          if(sel==="Done")return t.status==="Done";
+          return t.type===sel&&t.status!=="Done";
+        });
+        var cls="lane"+(lane.key==="Blocked"?" blocked":lane.key==="Done"?" done":"");
+        return '<section class="'+cls+'" data-lane="'+escAttr(lane.key)+'">'+
+          '<div class="lane-head"><span class="name">'+esc(lane.label)+'</span><span class="n">'+tasks.length+'</span></div>'+
+          '<div class="cards">'+(tasks.length?tasks.map(renderTask).join(""):'<div class="empty-lane">No tasks</div>')+'</div>'+
+        '</section>';
+      }).join("");
+      renderCounts();
+    }
+
+    function renderTask(t){
+      var overdue=isOverdue(t);
+      if(t.id===editingId)return renderEditor(t,overdue);
+      var moveOpts=lanes.map(function(l){return '<option value="'+escAttr(l.key)+'"'+(l.key===t.status?" selected":"")+'>'+esc(l.label)+'</option>';}).join("");
+      return '<article class="card read'+(overdue?" overdue":"")+'" draggable="true" data-id="'+escAttr(t.id)+'">'+
+        '<div class="card-head">'+
+          '<span class="pill '+esc(t.type.toLowerCase())+'">'+esc(t.type)+'</span>'+
+          (t.due?'<span class="due'+(overdue?" late":"")+'">'+esc(dueLabel(t.due))+'</span>':'<span class="due">No due date</span>')+
+        '</div>'+
+        '<h3 class="card-title">'+esc(t.title)+'</h3>'+
+        (t.owner?'<p class="card-owner">'+esc(t.owner)+'</p>':"")+
+        (t.notes?'<p class="card-notes">'+esc(t.notes)+'</p>':"")+
+        '<div class="card-foot">'+
+          '<select class="move-sel" data-action="move" data-id="'+escAttr(t.id)+'" aria-label="Move task to lane">'+moveOpts+'</select>'+
+          '<button type="button" class="edit-btn" data-action="edit" data-id="'+escAttr(t.id)+'">Edit</button>'+
+        '</div>'+
+      '</article>';
+    }
+
+    function renderEditor(t,overdue){
+      return '<article class="card editing'+(overdue?" overdue":"")+'" data-id="'+escAttr(t.id)+'">'+
+        '<div class="card-head">'+
+          '<span class="pill '+esc(t.type.toLowerCase())+'">'+esc(t.type)+'</span>'+
+          '<button type="button" class="edit-btn" data-action="close-edit" data-id="'+escAttr(t.id)+'">Done</button>'+
+        '</div>'+
+        '<label class="efield"><span class="lbl">Task</span><input data-field="title" data-id="'+escAttr(t.id)+'" value="'+escAttr(t.title)+'"></label>'+
+        '<div class="egrid">'+
+          '<label class="efield"><span class="lbl">Owner</span><input data-field="owner" data-id="'+escAttr(t.id)+'" value="'+escAttr(t.owner)+'"></label>'+
+          '<label class="efield"><span class="lbl">Due</span><input type="date" data-field="due" data-id="'+escAttr(t.id)+'" value="'+escAttr(t.due)+'"></label>'+
+        '</div>'+
+        '<label class="efield"><span class="lbl">Notes</span><textarea data-field="notes" data-id="'+escAttr(t.id)+'" rows="3">'+esc(t.notes)+'</textarea></label>'+
+        '<button type="button" class="del-btn" data-action="delete" data-id="'+escAttr(t.id)+'">Delete task</button>'+
+      '</article>';
+    }
+
+    function renderCounts(){
+      var active=state.tasks.filter(function(t){return t.status!=="Done";});
+      var weekEnd=new Date(startOfToday());weekEnd.setDate(weekEnd.getDate()+7);
+      setCount("open",active.length);
+      setCount("week",active.filter(function(t){if(!t.due)return false;var d=new Date(t.due+"T00:00:00");return d>=startOfToday()&&d<=weekEnd;}).length);
+      setCount("blocked",active.filter(function(t){return t.status==="Blocked";}).length);
+      var pct=active.length?Math.round(active.filter(function(t){return t.type==="Traction";}).length/active.length*100):0;
+      setCount("traction",pct+"%");
+      var gauge=el("gauge"), stat=el("traction-stat");
+      var low=active.length>0&&pct<50;
+      if(gauge){gauge.classList.toggle("low",low);gauge.querySelector("i").style.width=pct+"%";}
+      if(stat){stat.classList.toggle("low",low);stat.classList.toggle("green",!low);
+        stat.setAttribute("title",low?"Traction share is below the 50% floor — Monday/Tuesday go traction-only.":"Traction share is at or above the 50% floor.");}
+    }
+    function setCount(name,val){var n=document.querySelector('[data-count="'+name+'"]');if(n)n.textContent=val;}
+
+    function move(id,status){
+      var t=findTask(id);
+      if(!t||!status||t.status===status){render();return Promise.resolve();}
+      if(usingApi){
+        return api("PATCH",{id:t.id,status:status}).then(function(ok){if(ok){t.status=status;}render();});
+      }
+      t.status=status;saveLocal();render();return Promise.resolve();
+    }
+    function clearDrops(){Array.prototype.forEach.call(board.querySelectorAll(".lane.drop"),function(l){l.classList.remove("drop");});}
+
+    // ---- events ----
+    form.addEventListener("submit",function(ev){
+      ev.preventDefault();
+      var data=new FormData(form);
+      var task=normalize({
+        id:"task-"+Date.now(),
+        title:String(data.get("title")||"").trim(),
+        owner:String(data.get("owner")||"").trim(),
+        type:String(data.get("type")||"Traction"),
+        due:String(data.get("due")||""),
+        status:String(data.get("status")||"This week"),
+        notes:String(data.get("notes")||"").trim()
+      });
+      if(!task.title){toast("Give the task a title first.",true);el("pm-title").focus();return;}
+      var done=function(){form.reset();render();el("pm-title").focus();};
+      if(usingApi){
+        api("POST",task).then(function(created){if(!created)return;return refreshFromApi().then(done);});
+      }else{
+        state.tasks.unshift(task);saveLocal();done();
+      }
+    });
+
+    filter.addEventListener("change",render);
+    el("pm-export").addEventListener("click",function(){
+      var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+      var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="solar-city-project-board.json";a.click();URL.revokeObjectURL(a.href);
+    });
+    el("pm-import").addEventListener("change",function(ev){
+      var file=ev.target.files[0];if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(){
+        try{
+          var imp=JSON.parse(String(reader.result||""));
+          if(!imp||!Array.isArray(imp.tasks))throw new Error("Missing tasks");
+          var tasks=imp.tasks.map(normalize).filter(function(t){return t.title;});
+          if(usingApi){api("PUT",{tasks:tasks}).then(function(ok){if(ok)refreshFromApi().then(function(){render();toast("Board imported.");});});}
+          else{state={tasks:tasks};saveLocal();render();toast("Board imported.");}
+        }catch(e){toast("That file is not a Solar City project board export.",true);}
+        ev.target.value="";
+      };
+      reader.readAsText(file);
+    });
+
+    board.addEventListener("click",function(ev){
+      var btn=ev.target.closest("button[data-action]");if(!btn)return;
+      var action=btn.getAttribute("data-action"), t=findTask(btn.getAttribute("data-id"));if(!t)return;
+      if(action==="edit"){editingId=t.id;render();var f=board.querySelector('.card.editing input[data-field="title"]');if(f)f.focus();return;}
+      if(action==="close-edit"){editingId=null;render();return;}
+      if(action==="delete"){
+        var finish=function(){state.tasks=state.tasks.filter(function(x){return x.id!==t.id;});if(editingId===t.id)editingId=null;render();toast("Task deleted.");};
+        if(usingApi){api("DELETE",{id:t.id}).then(function(ok){if(ok)finish();});}
+        else{finish();saveLocal();}
+      }
+    });
+
+    board.addEventListener("change",function(ev){
+      var mover=ev.target.closest("select[data-action='move']");
+      if(mover){move(mover.getAttribute("data-id"),mover.value);return;}
+      var field=ev.target.closest("[data-field]");if(!field)return;
+      var t=findTask(field.getAttribute("data-id"));if(!t)return;
+      var key=field.getAttribute("data-field"), val=field.value;
+      if(usingApi){
+        var body={id:t.id};body[key]=val;
+        api("PATCH",body).then(function(ok){
+          if(!ok){field.value=t[key]||"";return;}
+          t[key]=val;renderCounts();
+        });
+      }else{t[key]=val;saveLocal();renderCounts();}
+    });
+
+    board.addEventListener("dragstart",function(ev){
+      var card=ev.target.closest('.card[draggable="true"]');if(!card)return;
+      ev.dataTransfer.setData("text/plain",card.getAttribute("data-id"));
+      ev.dataTransfer.effectAllowed="move";card.classList.add("dragging");
+    });
+    board.addEventListener("dragend",function(ev){var c=ev.target.closest(".card");if(c)c.classList.remove("dragging");clearDrops();});
+    board.addEventListener("dragover",function(ev){var lane=ev.target.closest(".lane");if(!lane)return;ev.preventDefault();ev.dataTransfer.dropEffect="move";lane.classList.add("drop");});
+    board.addEventListener("dragleave",function(ev){var lane=ev.target.closest(".lane");if(lane&&!lane.contains(ev.relatedTarget))lane.classList.remove("drop");});
+    board.addEventListener("drop",function(ev){var lane=ev.target.closest(".lane");if(!lane)return;ev.preventDefault();clearDrops();move(ev.dataTransfer.getData("text/plain"),lane.getAttribute("data-lane"));});
+
+    function setStorageBadge(){
+      var b=el("store-badge");if(!b)return;
+      b.classList.toggle("live",usingApi);
+      b.innerHTML='<span class="dot" aria-hidden="true"></span> '+(usingApi?"Storage: Cloudflare D1":"Storage: local browser");
+    }
+
+    // ---- init ----
+    (function init(){
+      if(location.protocol!=="file:"){
+        refreshFromApi(true).then(function(loaded){usingApi=loaded;if(!usingApi)state=loadLocal();render();setStorageBadge();});
+      }else{state=loadLocal();render();setStorageBadge();}
+    })();
+  })();
+  </script>
+</body>
 </html>
