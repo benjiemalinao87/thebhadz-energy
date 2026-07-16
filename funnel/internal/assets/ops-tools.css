@@ -1,0 +1,110 @@
+.ops-content { max-width: 1360px; }
+.ops-content [hidden] { display: none !important; }
+.ops-content h2 { margin: 0; padding: 0; border: 0; }
+.ops-topbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 24px 0 18px; }
+.ops-status { margin-right: auto; font: 12px var(--mono); color: var(--faint); }
+.ops-button, .ops-content button, .ops-file {
+  appearance: none; border: 1px solid var(--ink); background: var(--ink); color: #fff;
+  padding: 9px 13px; font: 600 12px var(--mono); cursor: pointer; text-decoration: none;
+}
+.ops-button:hover, .ops-content button:hover { background: var(--copper); border-color: var(--copper); color: #fff; }
+.ops-button.secondary, .ops-content button.secondary, .ops-file { background: var(--sheet); color: var(--ink); }
+.ops-button.danger, .ops-content button.danger { background: #fff; border-color: #b42318; color: #b42318; }
+.ops-file { position: relative; display: inline-block; }
+.ops-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.ops-alert { padding: 15px 18px; border-left: 5px solid var(--sun); background: #fff8e6; margin: 18px 0; font-size: 14px; }
+.ops-alert strong { display: block; margin-bottom: 3px; }
+.ops-alert.good { border-color: var(--ok); background: #edf8f1; }
+.ops-alert.danger { border-color: #b42318; background: #fff2f0; }
+
+.ops-metrics { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); margin: 22px 0; }
+.ops-metric { background: var(--sheet); padding: 14px; min-width: 0; }
+.ops-metric span { display: block; color: var(--faint); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+.ops-metric strong { display: block; margin-top: 5px; font: 700 clamp(17px, 2vw, 23px) var(--mono); overflow-wrap: anywhere; }
+.ops-metric small { display: block; color: var(--faint); margin-top: 4px; font-size: 11px; }
+.ops-metric.good strong { color: var(--ok); }
+.ops-metric.warn strong { color: var(--warn); }
+
+.ops-tabs { display: flex; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); margin-top: 26px; }
+.ops-tabs button { flex: 1; border: 0; padding: 13px; background: var(--sheet); color: var(--faint); }
+.ops-tabs button[aria-selected="true"] { background: var(--silicon); color: #fff; }
+.ops-panel { background: var(--sheet); border: 1px solid var(--hairline); border-top: 0; padding: 24px; }
+.ops-section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.ops-section-head p { margin: 4px 0 0; color: var(--faint); font-size: 13px; }
+.ops-kicker { font: 600 11px var(--mono); letter-spacing: .1em; color: var(--copper); text-transform: uppercase; }
+
+.ops-form { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 14px; padding: 18px; border: 1px solid var(--hairline); background: var(--paper); margin-bottom: 22px; }
+.ops-form.two { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+.ops-form label, .ops-filter label, .ops-inline-setting label {
+  display: flex; flex-direction: column; gap: 6px; color: var(--faint); font: 600 11px var(--mono); letter-spacing: .03em;
+}
+.ops-form label.wide { grid-column: 1 / -1; }
+.ops-form input, .ops-form select, .ops-form textarea, .ops-filter select, .ops-inline-setting input,
+.ops-table input, .ops-table select, .ops-card input, .ops-card select, .ops-card textarea {
+  width: 100%; border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+  padding: 9px 10px; font: 14px var(--sans); border-radius: 0;
+}
+.ops-form textarea, .ops-card textarea { resize: vertical; line-height: 1.45; }
+.ops-form input:focus, .ops-form select:focus, .ops-form textarea:focus,
+.ops-table input:focus, .ops-table select:focus, .ops-card input:focus, .ops-card select:focus, .ops-card textarea:focus { outline: 2px solid var(--sun); outline-offset: 1px; }
+.ops-form-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.ops-helper { color: var(--faint); font-size: 12px; line-height: 1.45; }
+.ops-inline-setting { display: flex; align-items: end; gap: 8px; padding: 12px; background: var(--paper); border: 1px solid var(--hairline); }
+.ops-inline-setting input { width: 150px; }
+
+.ops-toolbar { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.ops-filter { min-width: 160px; }
+.ops-table-wrap { overflow-x: auto; border: 1px solid var(--hairline); }
+.ops-table { min-width: 980px; margin: 0; border: 0; }
+.ops-table td { vertical-align: middle; }
+.ops-table .amount { text-align: right; font-family: var(--mono); white-space: nowrap; }
+.ops-table .muted { color: var(--faint); font-size: 12px; }
+.ops-table .row-actions { display: flex; gap: 6px; }
+.ops-table button { padding: 6px 8px; font-size: 10px; }
+.ops-empty { padding: 36px 18px; text-align: center; color: var(--faint); background: var(--sheet); border: 1px dashed var(--hairline); }
+.ops-pill { display: inline-flex; align-items: center; padding: 4px 7px; border: 1px solid var(--hairline); background: var(--paper); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.ops-pill.paid, .ops-pill.received, .ops-pill.passed { color: var(--ok); border-color: #a8d5b9; background: #edf8f1; }
+.ops-pill.committed, .ops-pill.scheduled, .ops-pill.pending { color: #8a5b00; border-color: #e5c77b; background: #fff8e6; }
+.ops-pill.rework, .ops-pill.cancelled { color: #b42318; border-color: #edb2aa; background: #fff2f0; }
+
+.ops-projects { display: grid; gap: 14px; }
+.ops-card { border: 1px solid var(--hairline); background: var(--sheet); padding: 18px; }
+.ops-card-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.ops-card h3 { margin: 0; font-size: 18px; }
+.ops-card .meta { color: var(--faint); font-size: 12px; margin: 4px 0 0; }
+.ops-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 15px; }
+.ops-card-grid > div { background: var(--paper); padding: 10px; }
+.ops-card-grid span { display: block; color: var(--faint); font: 10px var(--mono); text-transform: uppercase; }
+.ops-card-grid strong { display: block; margin-top: 3px; font: 650 15px var(--mono); }
+.ops-checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+.ops-checks label { display: flex; align-items: start; gap: 8px; padding: 10px; border: 1px solid var(--hairline); font-size: 12px; }
+.ops-checks input { width: auto; margin-top: 2px; }
+.ops-card-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-top: 14px; }
+.ops-card-actions label { min-width: 180px; color: var(--faint); font: 600 11px var(--mono); }
+.ops-card-actions select { margin-top: 5px; }
+.ops-progress { height: 7px; background: var(--hairline); margin-top: 14px; overflow: hidden; }
+.ops-progress span { display: block; height: 100%; background: var(--ok); }
+.ops-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.ops-subpanel { border: 1px solid var(--hairline); padding: 18px; }
+.ops-subpanel h3 { margin: 0 0 14px; }
+.ops-list { display: grid; gap: 8px; }
+.ops-list-item { padding: 12px; border: 1px solid var(--hairline); background: var(--paper); }
+.ops-list-item strong { display: block; }
+.ops-list-item small { color: var(--faint); }
+.ops-list-item .line { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font: 12px var(--mono); }
+
+@media (max-width: 1100px) {
+  .ops-metrics { grid-template-columns: repeat(3, 1fr); }
+  .ops-form { grid-template-columns: repeat(2, 1fr); }
+  .ops-card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  .ops-content { padding: 28px 18px 72px; }
+  .ops-metrics { grid-template-columns: repeat(2, 1fr); }
+  .ops-tabs { flex-direction: column; }
+  .ops-panel { padding: 16px; }
+  .ops-form, .ops-form.two, .ops-split { grid-template-columns: 1fr; }
+  .ops-section-head { align-items: stretch; flex-direction: column; }
+  .ops-card-grid, .ops-checks { grid-template-columns: 1fr; }
+  .ops-card-head { flex-direction: column; }
+}

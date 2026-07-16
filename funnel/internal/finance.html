@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-09 Finance &amp; Runway — MACC Systems &amp; Engineering Inc.</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/ops-tools.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="wordmark">MACC</span><span class="sub">SOLAR CITY · FOUNDER COMMAND CENTER</span></a></div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="leads.html"><span class="code">CRM</span>Contacts</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="founder-lab.html"><span class="code">SC-08</span>Strategy lab</a>
+      <a href="finance.html"><span class="code">SC-09</span>Finance &amp; runway</a>
+      <a href="install-ops.html"><span class="code">SC-10</span>Install operations</a>
+      <a href="strategy-deck-en.html"><span class="code">DECK</span>Founder strategy</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>MANAGEMENT LEDGER<br>EXPORT FOR ACCOUNTANT</div>
+  </aside>
+
+  <main class="content ops-content">
+    <p class="doc-eyebrow">SC-09 · FINANCE &amp; RUNWAY <span class="rev">· REV A · 2026-07-16</span></p>
+    <h1>Know where every peso went.</h1>
+    <p class="lede">Shared founder ledger for self-funding, customer cash, company expenses, commitments, receipts, burn, and runway. This is a management tool—not a replacement for registered accounting books.</p>
+
+    <div class="ops-topbar">
+      <span class="ops-status" id="fin-status">Loading shared ledger…</span>
+      <button type="button" class="secondary" id="fin-export">Export CSV for accountant</button>
+      <a class="ops-button secondary" href="install-ops.html">Open Install Operations →</a>
+    </div>
+
+    <div class="ops-alert" id="fin-onboarding">
+      <strong>Start with the real opening position.</strong>
+      Record each founder transfer separately. Choose whether the signed agreement treats it as capital, a founder loan, or a reimbursable expense. Do not guess the classification.
+    </div>
+
+    <section class="ops-metrics" aria-label="Finance summary">
+      <div class="ops-metric good"><span>Cash on hand</span><strong id="fin-cash">₱0</strong><small>Paid inflows − paid outflows</small></div>
+      <div class="ops-metric warn"><span>Committed cash</span><strong id="fin-committed">₱0</strong><small>Approved but not paid</small></div>
+      <div class="ops-metric"><span>Available cash</span><strong id="fin-available">₱0</strong><small>Cash after commitments</small></div>
+      <div class="ops-metric"><span>30-day burn</span><strong id="fin-burn">₱0</strong><small>Paid outflows in 30 days</small></div>
+      <div class="ops-metric"><span>Runway</span><strong id="fin-runway">—</strong><small>Based on current 30-day burn</small></div>
+      <div class="ops-metric"><span>Install capacity</span><strong id="fin-installs">Set cost</strong><small>Available cash ÷ cash needed/install</small></div>
+    </section>
+
+    <div class="ops-inline-setting">
+      <label>Cash required to start one install (₱)
+        <input id="fin-install-cash" type="number" min="0" step="500" placeholder="Use current job estimate">
+      </label>
+      <button type="button" id="fin-save-settings">Save planning input</button>
+      <span class="ops-helper">This is a planning input, not an accounting entry. Update it when actual job data changes.</span>
+    </div>
+
+    <nav class="ops-tabs" aria-label="Finance sections">
+      <button type="button" aria-selected="true" data-tab="ledger">Ledger</button>
+      <button type="button" aria-selected="false" data-tab="funding">Founder funding</button>
+    </nav>
+
+    <section class="ops-panel" data-panel="ledger">
+      <div class="ops-section-head"><div><span class="ops-kicker">MONEY IN · MONEY OUT</span><h2>Add a transaction</h2><p>Use “committed” for an approved bill that has not left the account yet.</p></div></div>
+      <form class="ops-form" id="fin-form">
+        <input type="hidden" name="id">
+        <label>Date<input name="txn_date" type="date" required></label>
+        <label>Money direction<select name="direction"><option value="outflow">Money out</option><option value="inflow">Money in</option></select></label>
+        <label>Type<select name="kind">
+          <option value="expense">Company expense</option><option value="founder_contribution">Founder contribution</option>
+          <option value="opening_balance">Opening balance</option><option value="customer_payment">Customer payment</option>
+          <option value="installer_payment">Installer payment</option><option value="refund">Refund</option><option value="other">Other</option>
+        </select></label>
+        <label>Status<select name="status"><option value="paid">Paid / received</option><option value="committed">Committed, not paid</option></select></label>
+        <label>Amount (₱)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+        <label>Category<input name="category" maxlength="80" placeholder="Materials, marketing, permit…" required></label>
+        <label>Account<input name="account" maxlength="80" placeholder="Bank, GCash, petty cash"></label>
+        <label>Vendor / source<input name="counterparty" maxlength="120" placeholder="Who received or sent it?"></label>
+        <label data-founder-field hidden>Founder<select name="founder"><option value="">Choose founder</option><option>Benjie</option><option>Jundhel</option><option>Jethro</option><option>Denver</option></select></label>
+        <label data-founder-field hidden>Funding classification<select name="contribution_type"><option value="">Choose signed classification</option><option value="capital">Capital / equity contribution</option><option value="founder_loan">Founder loan</option><option value="reimbursable">Reimbursable founder expense</option></select></label>
+        <label>Installation project<select name="project_id" id="fin-project"><option value="">Not linked to a project</option></select></label>
+        <label>Reference<input name="reference" maxlength="160" placeholder="Invoice, transfer or OR number"></label>
+        <label>Receipt / proof<input name="receipt" type="file" accept="image/png,image/jpeg,image/webp,image/heic,application/pdf"><small id="fin-receipt-note">Optional · max 10 MB</small></label>
+        <label class="wide">Notes<textarea name="notes" rows="2" maxlength="1200"></textarea></label>
+        <div class="ops-form-actions">
+          <button type="submit" id="fin-submit">Save transaction</button>
+          <button type="button" class="secondary" id="fin-cancel" hidden>Cancel edit</button>
+          <span class="ops-helper">Install Operations automatically adds received customer payments and paid job costs here.</span>
+        </div>
+      </form>
+
+      <div class="ops-toolbar">
+        <div class="ops-filter"><label>Show<select id="fin-filter"><option value="all">All transactions</option><option value="paid">Paid / received</option><option value="committed">Committed</option><option value="inflow">Money in</option><option value="outflow">Money out</option></select></label></div>
+      </div>
+      <div id="fin-ledger"></div>
+    </section>
+
+    <section class="ops-panel" data-panel="funding" hidden>
+      <div class="ops-section-head"><div><span class="ops-kicker">FOUNDER CONTRIBUTIONS</span><h2>Who funded what?</h2><p>Amounts are grouped by the classification recorded in the ledger.</p></div></div>
+      <div id="fin-funding"></div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/finance.js"></script>
+</html>
