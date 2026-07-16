@@ -1,0 +1,158 @@
+:root {
+  --bg: #03070d;
+  --panel: rgba(7, 15, 25, 0.94);
+  --line: rgba(148, 163, 184, 0.22);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --blue: #46b7e9;
+  --amber: #f59e0b;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--bg); }
+body {
+  margin: 0;
+  background:
+    radial-gradient(900px 460px at 50% 0, rgba(70, 183, 233, 0.09), transparent 62%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.deck-toolbar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px clamp(14px, 3vw, 34px);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+}
+
+.deck-brand { min-width: 0; margin-right: auto; }
+.deck-brand strong {
+  display: block;
+  color: var(--blue);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.deck-brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+
+.deck-actions { display: flex; align-items: center; gap: 8px; }
+.deck-actions a,
+.deck-actions button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.deck-actions a:hover,
+.deck-actions button:hover { border-color: rgba(70, 183, 233, 0.62); background: rgba(70, 183, 233, 0.09); }
+.deck-actions .active { color: #06111f; background: var(--blue); border-color: var(--blue); font-weight: 750; }
+.deck-actions .download { border-color: rgba(245, 158, 11, 0.46); color: #fbbf24; }
+
+.deck {
+  height: 100svh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+.deck-slide {
+  min-height: 100svh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: grid;
+  place-items: center;
+  padding: 84px clamp(12px, 3vw, 42px) 54px;
+}
+.deck-slide figure { margin: 0; width: min(100%, 1600px); }
+.deck-slide img {
+  display: block;
+  width: 100%;
+  max-height: calc(100svh - 138px);
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.deck-controls {
+  position: fixed;
+  z-index: 21;
+  right: clamp(14px, 3vw, 34px);
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+}
+.deck-controls button {
+  width: 36px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+}
+.deck-controls button:hover { background: rgba(70, 183, 233, 0.14); }
+.deck-counter { min-width: 54px; text-align: center; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.deck-progress {
+  position: fixed;
+  z-index: 22;
+  left: 0;
+  top: 63px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--amber));
+  transition: width 0.2s ease;
+}
+
+@media (max-width: 1280px) {
+  .deck-toolbar { align-items: flex-start; flex-wrap: wrap; gap: 8px; }
+  .deck-brand { flex: 1 1 100%; }
+  .deck-actions { width: 100%; overflow-x: auto; padding-bottom: 2px; }
+  .deck-actions a, .deck-actions button { white-space: nowrap; }
+  .deck-slide { padding-top: 126px; padding-bottom: 60px; }
+  .deck-slide img { max-height: calc(100svh - 196px); }
+  .deck-progress { top: 112px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .deck { scroll-snap-type: none; }
+}
+
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
