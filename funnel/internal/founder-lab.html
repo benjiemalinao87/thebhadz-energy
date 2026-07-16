@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-08 Founder strategy lab — Solar City</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/founder-lab.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">FOUNDER COMMAND CENTER</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="leads.html"><span class="code">CRM</span>Contacts</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="founder-lab.html"><span class="code">SC-08</span>Strategy lab</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>ALL VALUES ARE HYPOTHESES<br>UNTIL EVIDENCE IS LOGGED</div>
+  </aside>
+
+  <main class="content lab-content">
+    <p class="doc-eyebrow">SC-08 · FOUNDER STRATEGY LAB <span class="rev">· REV A · 2026-07-16</span></p>
+    <h1>Turn assumptions into decisions.</h1>
+    <p class="lede">Price the first offer, shape its Blue Ocean value curve, and see exactly what evidence is still missing before launch or spend.</p>
+
+    <div class="lab-savebar">
+      <span class="status-badge" id="lab-storage">Storage: checking</span>
+      <span id="lab-updated">Not saved yet</span>
+      <button type="button" id="lab-save">Save shared strategy</button>
+      <button type="button" id="lab-export">Export JSON</button>
+      <label class="lab-import">Import JSON<input type="file" id="lab-import" accept="application/json"></label>
+    </div>
+
+    <div class="callout warn" id="lab-gate-message">
+      <span class="label">Current decision</span>
+      Complete the evidence fields below. No price or package is launch-ready by default.
+    </div>
+
+    <nav class="lab-tabs" aria-label="Strategy tools">
+      <button type="button" aria-selected="true" data-tab="economics">1 · Unit economics</button>
+      <button type="button" aria-selected="false" data-tab="positioning">2 · Blue Ocean positioning</button>
+      <button type="button" aria-selected="false" data-tab="evidence">3 · Evidence gates</button>
+    </nav>
+
+    <section class="lab-panel" data-panel="economics">
+      <div class="lab-section-head">
+        <div><p class="lab-kicker">PRICE → TARGET COST → MARGIN</p><h2>First-product economics</h2></div>
+        <label>Offer
+          <select id="offer-name">
+            <option>LIWANAG</option><option>ILAW</option><option>SANDIGAN</option><option>Custom test offer</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="lab-metrics" aria-live="polite">
+        <div><span>Strategic price</span><strong id="metric-price">₱0</strong></div>
+        <div><span>Expected delivered cost</span><strong id="metric-cost">₱0</strong></div>
+        <div><span>Expected gross margin</span><strong id="metric-margin">0%</strong></div>
+        <div><span>Room vs target cost</span><strong id="metric-headroom">₱0</strong></div>
+      </div>
+
+      <div class="lab-input-grid">
+        <label>Strategic price (₱)<input id="sale-price" type="number" min="0" step="500"></label>
+        <label>Target gross margin (%)<input id="target-margin" type="number" min="0" max="80" step="1"></label>
+        <label>Expected installs / month<input id="monthly-volume" type="number" min="0" max="1000" step="1"></label>
+        <label>Quote validity date<input id="quote-date" type="date"></label>
+      </div>
+
+      <div class="lab-cost-table">
+        <table>
+          <thead><tr><th>Delivered-cost line</th><th>Low ₱</th><th>Expected ₱</th><th>High ₱</th><th>Quote / evidence</th><th></th></tr></thead>
+          <tbody id="cost-rows"></tbody>
+          <tfoot><tr><th>Total</th><td id="cost-low">₱0</td><td id="cost-expected">₱0</td><td id="cost-high">₱0</td><td colspan="2"></td></tr></tfoot>
+        </table>
+      </div>
+      <button type="button" id="add-cost">+ Add cost line</button>
+
+      <div class="lab-range" aria-label="Cost and price relationship">
+        <div class="lab-range-axis"><span>₱0</span><span id="range-max">₱0</span></div>
+        <div class="lab-range-track">
+          <span class="lab-range-band" id="range-cost-band"></span>
+          <span class="lab-range-marker target" id="range-target"><b>Target cost</b></span>
+          <span class="lab-range-marker price" id="range-price"><b>Price</b></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="lab-panel" data-panel="positioning" hidden>
+      <div class="lab-section-head"><div><p class="lab-kicker">ELIMINATE · REDUCE · RAISE · CREATE</p><h2>Blue Ocean value curve</h2></div></div>
+
+      <div class="lab-position-grid">
+        <label>Target customer<textarea id="pos-customer" rows="3" placeholder="Named area + observable bill, grid and ownership criteria"></textarea></label>
+        <label>Job they are hiring us for<textarea id="pos-job" rows="3" placeholder="The concrete progress they need"></textarea></label>
+        <label>Real alternatives<textarea id="pos-alternatives" rows="3" placeholder="Do nothing, genset/UPS, premium installer, DIY kit"></textarea></label>
+        <label>Reason why we can deliver it<textarea id="pos-reason" rows="3" placeholder="Standard package, standardized BOM, no showroom"></textarea></label>
+      </div>
+
+      <div class="errc-grid">
+        <label><span>Eliminate</span><textarea id="errc-eliminate" rows="6"></textarea></label>
+        <label><span>Reduce</span><textarea id="errc-reduce" rows="6"></textarea></label>
+        <label><span>Raise</span><textarea id="errc-raise" rows="6"></textarea></label>
+        <label><span>Create</span><textarea id="errc-create" rows="6"></textarea></label>
+      </div>
+
+      <h3>Positioning statement</h3>
+      <div class="lab-statement" id="positioning-statement">Complete the four positioning fields above.</div>
+      <label>Proof we can honestly show<textarea id="pos-proof" rows="4" placeholder="Permissioned customer evidence, founder-roof R&amp;D, dated quotes, engineering documents"></textarea></label>
+    </section>
+
+    <section class="lab-panel" data-panel="evidence" hidden>
+      <div class="lab-section-head"><div><p class="lab-kicker">FACTS AND COMMITMENTS ONLY</p><h2>Launch evidence gates</h2></div></div>
+
+      <div class="evidence-grid">
+        <label><span>Past-specific interviews</span><input id="ev-interviews" type="number" min="0"><small>Founder conversations written up within 24 hours</small></label>
+        <label><span>Current supplier quotes</span><input id="ev-supplier-quotes" type="number" min="0"><small>Dated quotes covering major cost lines</small></label>
+        <label><span>Real customer quotations issued</span><input id="ev-quotes-issued" type="number" min="0"><small>At the actual tested price</small></label>
+        <label><span>Site surveys booked</span><input id="ev-surveys" type="number" min="0"><small>Countable commitment</small></label>
+        <label><span>Paid deposits</span><input id="ev-deposits" type="number" min="0"><small>Banked, not promised</small></label>
+        <label><span>Permissioned proof items</span><input id="ev-proof" type="number" min="0"><small>Real photos, quotes or founder R&amp;D evidence</small></label>
+      </div>
+
+      <div class="gate-checklist">
+        <label><input id="gate-permits" type="checkbox"> Permit, licensed-practitioner and net-metering checklist is attached to the quote process</label>
+        <label><input id="gate-delivery" type="checkbox"> Lead delivery and attribution have been tested end-to-end</label>
+        <label><input id="gate-slices" type="checkbox"> Three launch subdivisions/barangays and exact groups are recorded</label>
+        <label><input id="gate-claims" type="checkbox"> Public copy contains no placeholder proof or unverified performance claims</label>
+        <label><input id="gate-liwanag" type="checkbox"> LIWANAG clearly says it provides no power during a brownout</label>
+      </div>
+
+      <div class="lab-decision" id="evidence-decision" aria-live="polite"></div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/founder-lab.js"></script>
+</html>

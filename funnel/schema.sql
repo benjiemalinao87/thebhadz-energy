@@ -55,3 +55,10 @@ CREATE TABLE IF NOT EXISTS project_tasks (
 
 CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_due ON project_tasks(due);
+
+-- Shared founder pricing, positioning and evidence workspace
+CREATE TABLE IF NOT EXISTS founder_strategy (
+  id          TEXT PRIMARY KEY,
+  state_json  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
