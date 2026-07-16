@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Team notes — BADJJ Energy Systems</title>
+<title>Team notes — MACC Systems &amp; Engineering Inc.</title>
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
 <style>
   /* ============================================================
-     BADJJ Team Notes — shared founder notebook
+     MACC Team Notes — shared founder notebook
      Command-center "monitor" theme (matches /internal dashboard).
      Backed by /api/notes (D1) + /api/note-image (R2 attachments).
      ============================================================ */
@@ -87,6 +87,11 @@
   .previews:empty{display:none;}
   .pv{position:relative;width:78px;height:78px;border-radius:10px;overflow:hidden;border:1px solid var(--z-700);}
   .pv img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pv.file{width:min(250px,100%);display:flex;align-items:center;gap:10px;padding:10px 34px 10px 10px;background:rgba(9,9,11,0.72);}
+  .pv.file .file-icon{width:34px;height:42px;flex:0 0 34px;display:grid;place-items:center;border:1px solid var(--z-700);border-radius:7px;color:var(--purple);background:rgba(192,132,252,0.08);}
+  .pv.file .file-meta{min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .pv.file .file-name{font-size:10.5px;color:var(--z-200);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pv.file .file-size{font-size:9.5px;color:var(--z-600);text-transform:uppercase;letter-spacing:.08em;}
   .pv .rm{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:0;cursor:pointer;
     background:rgba(0,0,0,0.72);color:var(--z-100);font-size:13px;line-height:1;display:grid;place-items:center;}
   .pv .rm:hover{background:rgba(251,113,133,0.85);}
@@ -115,6 +120,14 @@
   .note .imgs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--z-800);aspect-ratio:4/3;background:rgba(9,9,11,0.7);}
   .note .imgs img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .18s;}
   .note .imgs a:hover img{transform:scale(1.04);}
+  .note .files{display:grid;gap:8px;margin-top:14px;}
+  .note .file-link{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--z-800);border-radius:10px;background:rgba(9,9,11,0.7);transition:border-color .15s,background .15s;}
+  .note .file-link:hover{border-color:rgba(192,132,252,0.45);background:rgba(192,132,252,0.06);}
+  .note .file-link .doc-icon{width:34px;height:40px;flex:0 0 34px;display:grid;place-items:center;border:1px solid var(--z-700);border-radius:7px;color:var(--purple);}
+  .note .file-link .doc-copy{min-width:0;flex:1;}
+  .note .file-link strong{display:block;color:var(--z-200);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .note .file-link small{display:block;margin-top:2px;color:var(--z-600);font-size:10px;text-transform:uppercase;letter-spacing:.08em;}
+  .note .file-link .download{font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.12em;}
   .note .editing textarea{margin-top:8px;}
   .note .edit-actions{display:flex;gap:8px;margin-top:10px;}
   .note .edit-actions .save-btn{padding:8px 16px;}
@@ -153,7 +166,7 @@
       Founder home
     </a>
     <div class="titles">
-      <span class="eyebrow">BADJJ · Founders · Confidential</span>
+      <span class="eyebrow">MACC · Founders · Confidential</span>
       <h1>Team notes</h1>
     </div>
     <div class="sp"></div>
@@ -171,12 +184,12 @@
     <textarea id="f-body" placeholder="Site survey findings, supplier call notes, install photos, ideas for the next meeting…" maxlength="8000"></textarea>
     <div class="previews" id="previews"></div>
     <div class="attach-row">
-      <input type="file" id="f-files" accept="image/png,image/jpeg,image/webp,image/gif,image/heic" multiple hidden>
+      <input type="file" id="f-files" accept="image/png,image/jpeg,image/webp,image/gif,image/heic,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt" multiple hidden>
       <button type="button" class="attach-btn" id="attach">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
-        Add images
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+        Add files
       </button>
-      <span class="attach-hint">PNG / JPG / WebP · max 8 MB each · up to 12</span>
+      <span class="attach-hint">Images, PDF, Office, CSV, TXT · max 8 MB each · 12 total</span>
       <span class="sp"></span>
       <button type="button" class="save-btn" id="save">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
@@ -207,7 +220,27 @@
 (function(){
   function el(id){return document.getElementById(id);}
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-  function imgUrl(key){return "/api/note-image?key="+encodeURIComponent(key);}
+  function attachmentUrl(key){return "/api/note-image?key="+encodeURIComponent(key);}
+  function extension(name){var m=String(name||"").toLowerCase().match(/\.([a-z0-9]+)$/);return m?m[1]:"file";}
+  function isImageName(name){return ["png","jpg","jpeg","webp","gif","heic"].indexOf(extension(name))>-1;}
+  function normalizeAttachment(value){
+    if(typeof value==="string"){
+      var fallbackName=value.split("/").pop()||"attachment";
+      return {key:value,name:fallbackName,type:"",size:0,kind:isImageName(fallbackName)?"image":"document"};
+    }
+    if(!value||typeof value!=="object"||!value.key)return null;
+    return {key:String(value.key),name:String(value.name||value.key.split("/").pop()||"attachment"),type:String(value.type||""),size:Number(value.size)||0,kind:value.kind==="image"?"image":"document"};
+  }
+  function noteAttachments(note){
+    var raw=[];try{raw=JSON.parse(note.images||"[]");}catch(e){}
+    return Array.isArray(raw)?raw.map(normalizeAttachment).filter(Boolean):[];
+  }
+  function formatSize(bytes){
+    var n=Number(bytes)||0;if(!n)return "File";
+    if(n<1024)return n+" B";if(n<1024*1024)return (n/1024).toFixed(1)+" KB";
+    return (n/(1024*1024)).toFixed(1)+" MB";
+  }
+  function docIcon(){return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>';}
   function fmtDate(iso){
     if(!iso)return "—";
     var d=new Date(iso); if(isNaN(d))return "—";
@@ -238,14 +271,14 @@
   }
 
   // ---------- composer ----------
-  var pending=[]; // {file, key|null, uploading}
+  var pending=[]; // {file, attachment|null, uploading}
   el("f-author").value=localStorage.getItem("badjj_note_author")||"";
   el("attach").onclick=function(){el("f-files").click();};
   el("f-files").addEventListener("change",function(){
     Array.prototype.forEach.call(this.files,function(f){
-      if(pending.length>=12){toast("Max 12 images per note");return;}
+      if(pending.length>=12){toast("Max 12 attachments per note");return;}
       if(f.size>8*1024*1024){toast(esc(f.name)+" is over 8 MB — skipped");return;}
-      var item={file:f,key:null,uploading:true};
+      var item={file:f,attachment:null,uploading:true,kind:f.type.indexOf("image/")===0?"image":"document"};
       pending.push(item);
       renderPreviews();
       upload(item);
@@ -259,7 +292,7 @@
       .then(function(r){return r.json();})
       .then(function(d){
         item.uploading=false;
-        if(d.ok){item.key=d.key;}
+        if(d.ok){item.attachment=d.attachment||{key:d.key,name:item.file.name,type:item.file.type,size:item.file.size,kind:item.kind};}
         else{pending=pending.filter(function(p){return p!==item;});toast(d.error||"Upload failed");}
         renderPreviews();
       })
@@ -273,15 +306,19 @@
   function renderPreviews(){
     var c=el("previews"); c.innerHTML="";
     pending.forEach(function(item,i){
-      var d=document.createElement("div"); d.className="pv";
-      var img=document.createElement("img"); img.alt="";
-      img.src=URL.createObjectURL(item.file);
-      img.onload=function(){URL.revokeObjectURL(img.src);};
-      d.appendChild(img);
+      var d=document.createElement("div"); d.className="pv"+(item.kind==="image"?"":" file");
+      if(item.kind==="image"){
+        var img=document.createElement("img"); img.alt="";
+        img.src=URL.createObjectURL(item.file);
+        img.onload=function(){URL.revokeObjectURL(img.src);};
+        d.appendChild(img);
+      }else{
+        d.innerHTML='<span class="file-icon">'+docIcon()+'</span><span class="file-meta"><span class="file-name">'+esc(item.file.name)+'</span><span class="file-size">'+esc(extension(item.file.name).toUpperCase()+" · "+formatSize(item.file.size))+'</span></span>';
+      }
       if(item.uploading){
         var up=document.createElement("span"); up.className="up"; up.textContent="…"; d.appendChild(up);
       }
-      var rm=document.createElement("button"); rm.className="rm"; rm.type="button"; rm.setAttribute("aria-label","Remove image"); rm.textContent="×";
+      var rm=document.createElement("button"); rm.className="rm"; rm.type="button"; rm.setAttribute("aria-label","Remove attachment"); rm.textContent="×";
       rm.onclick=function(){pending.splice(i,1);renderPreviews();};
       d.appendChild(rm);
       c.appendChild(d);
@@ -292,8 +329,8 @@
     var author=el("f-author").value.trim();
     var title=el("f-title").value.trim();
     var body=el("f-body").value;
-    if(pending.some(function(p){return p.uploading;})){toast("Images still uploading — one sec");return;}
-    var images=pending.map(function(p){return p.key;}).filter(Boolean);
+    if(pending.some(function(p){return p.uploading;})){toast("Files still uploading — one sec");return;}
+    var images=pending.map(function(p){return p.attachment;}).filter(Boolean);
     if(!title&&!body.trim()&&!images.length){toast("Note is empty");return;}
     if(author)localStorage.setItem("badjj_note_author",author);
 
@@ -315,7 +352,8 @@
   function visible(){
     if(!filter)return notes;
     return notes.filter(function(n){
-      return ((n.author||"")+" "+(n.title||"")+" "+(n.body||"")).toLowerCase().indexOf(filter)>-1;
+      var names=noteAttachments(n).map(function(a){return a.name;}).join(" ");
+      return ((n.author||"")+" "+(n.title||"")+" "+(n.body||"")+" "+names).toLowerCase().indexOf(filter)>-1;
     });
   }
 
@@ -335,10 +373,17 @@
       var card=document.createElement("article");
       card.className="panel note"; card.dataset.id=n.id;
 
-      var imgs=[]; try{imgs=JSON.parse(n.images||"[]");}catch(e){}
+      var attachments=noteAttachments(n);
+      var imgs=attachments.filter(function(a){return a.kind==="image";});
+      var files=attachments.filter(function(a){return a.kind!=="image";});
       var imgsHtml=imgs.length
-        ? '<div class="imgs">'+imgs.map(function(k){
-            return '<a href="'+esc(imgUrl(k))+'" data-full="'+esc(imgUrl(k))+'"><img loading="lazy" src="'+esc(imgUrl(k))+'" alt="Note attachment"></a>';
+        ? '<div class="imgs">'+imgs.map(function(a){
+            return '<a href="'+esc(attachmentUrl(a.key))+'" data-full="'+esc(attachmentUrl(a.key))+'"><img loading="lazy" src="'+esc(attachmentUrl(a.key))+'" alt="'+esc(a.name||"Note image")+'"></a>';
+          }).join("")+'</div>'
+        : "";
+      var filesHtml=files.length
+        ? '<div class="files">'+files.map(function(a){
+            return '<a class="file-link" href="'+esc(attachmentUrl(a.key))+'" download><span class="doc-icon">'+docIcon()+'</span><span class="doc-copy"><strong>'+esc(a.name)+'</strong><small>'+esc(extension(a.name).toUpperCase()+" · "+formatSize(a.size))+'</small></span><span class="download">Download</span></a>';
           }).join("")+'</div>'
         : "";
       var edited=(n.updated_at&&n.updated_at!==n.created_at)?' · edited':'';
@@ -353,10 +398,10 @@
         '</div>'+
         (n.title?'<h3>'+esc(n.title)+'</h3>':'')+
         (n.body?'<div class="body">'+esc(n.body)+'</div>':'')+
-        imgsHtml;
+        imgsHtml+filesHtml;
 
       card.querySelector(".del").onclick=function(){
-        if(!confirm("Delete this note"+(imgs.length?" and its "+imgs.length+" image(s)":"")+" permanently?"))return;
+        if(!confirm("Delete this note"+(attachments.length?" and its "+attachments.length+" attachment(s)":"")+" permanently?"))return;
         fetch("/api/notes",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:n.id})})
           .then(function(r){return r.json();})
           .then(function(d){
@@ -391,8 +436,8 @@
       '<button class="cancel e-cancel" type="button">Cancel</button></div>';
     var title=card.querySelector("h3"), body=card.querySelector(".body");
     if(title)title.remove(); if(body)body.remove();
-    var imgsEl=card.querySelector(".imgs");
-    card.insertBefore(box,imgsEl||null);
+    var attachmentsEl=card.querySelector(".imgs,.files");
+    card.insertBefore(box,attachmentsEl||null);
 
     box.querySelector(".e-cancel").onclick=function(){editingId=null;render();};
     box.querySelector(".e-save").onclick=function(){

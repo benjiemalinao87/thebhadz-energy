@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS notes (
   author      TEXT,
   title       TEXT,
   body        TEXT NOT NULL DEFAULT '',
-  images      TEXT NOT NULL DEFAULT '[]',   -- JSON array of R2 object keys ("notes/…")
+  images      TEXT NOT NULL DEFAULT '[]',   -- legacy name: JSON array of R2 attachment keys/metadata
   created_at  TEXT NOT NULL,                -- ISO timestamp
   updated_at  TEXT NOT NULL
 );

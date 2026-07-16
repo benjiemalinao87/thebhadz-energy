@@ -1,12 +1,13 @@
 /**
- * /api/notes — founder-gated team notes (backed by D1 env.DB; images in R2 env.NOTES_R2).
+ * /api/notes — founder-gated team notes (backed by D1 env.DB; attachments in R2 env.NOTES_R2).
  *
  *   GET                                  → { ok, notes: [...] }  (newest first)
  *   POST   { author?, title?, body?, images? } → create a note
  *   PATCH  { id, title?, body?, images? }      → update a note
- *   DELETE { id }                        → remove a note + its R2 images
+ *   DELETE { id }                              → remove a note + its R2 attachments
  *
- * `images` is an array of R2 object keys returned by /api/note-image (all "notes/…").
+ * The legacy `images` column now stores an attachment JSON array. Existing string
+ * keys remain valid; new entries may be { key, name, type, size, kind } objects.
  * Every method requires a valid founder session cookie (same auth as /internal).
  */
 import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
@@ -14,7 +15,7 @@ import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
 const MAX_BODY = 8000;
 const MAX_TITLE = 200;
 const MAX_AUTHOR = 80;
-const MAX_IMAGES = 12;
+const MAX_ATTACHMENTS = 12;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -28,14 +29,31 @@ async function requireFounder(request, env) {
   return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
 }
 
-/** Validate the images field: an array of ≤ MAX_IMAGES keys, all under notes/. */
-function cleanImages(images) {
-  if (images === undefined) return undefined;
-  if (!Array.isArray(images) || images.length > MAX_IMAGES) return null;
-  for (const k of images) {
-    if (typeof k !== "string" || !k.startsWith("notes/") || k.includes("..") || k.length > 300) return null;
+function validKey(value) {
+  return typeof value === "string" && value.startsWith("notes/") && !value.includes("..") && value.length <= 300;
+}
+
+/** Validate legacy image keys and new attachment metadata without trusting client paths. */
+function cleanAttachments(attachments) {
+  if (attachments === undefined) return undefined;
+  if (!Array.isArray(attachments) || attachments.length > MAX_ATTACHMENTS) return null;
+  const cleaned = [];
+  for (const item of attachments) {
+    if (typeof item === "string") {
+      if (!validKey(item)) return null;
+      cleaned.push(item);
+      continue;
+    }
+    if (!item || typeof item !== "object" || !validKey(item.key)) return null;
+    cleaned.push({
+      key: item.key,
+      name: String(item.name || "attachment").replace(/[\r\n]/g, "").slice(0, 200),
+      type: String(item.type || "application/octet-stream").slice(0, 160),
+      size: Math.max(0, Math.min(Number(item.size) || 0, 8 * 1024 * 1024)),
+      kind: item.kind === "image" ? "image" : "document",
+    });
   }
-  return JSON.stringify(images);
+  return JSON.stringify(cleaned);
 }
 
 export async function onRequest(context) {
@@ -66,10 +84,10 @@ export async function onRequest(context) {
     const author = String(b.author || "").slice(0, MAX_AUTHOR).trim();
     const title = String(b.title || "").slice(0, MAX_TITLE).trim();
     const body = String(b.body || "").slice(0, MAX_BODY);
-    const images = cleanImages(b.images === undefined ? [] : b.images);
-    if (images === null) return json({ ok: false, error: "Invalid images list." }, 422);
+    const images = cleanAttachments(b.images === undefined ? [] : b.images);
+    if (images === null) return json({ ok: false, error: "Invalid attachments list." }, 422);
     if (!title && !body.trim() && images === "[]") {
-      return json({ ok: false, error: "Note is empty — add a title, text, or an image." }, 422);
+      return json({ ok: false, error: "Note is empty — add a title, text, image, or document." }, 422);
     }
     const now = new Date().toISOString();
     const r = await env.DB.prepare(
@@ -94,11 +112,11 @@ export async function onRequest(context) {
     if (typeof b.title === "string") { sets.push("title = ?"); binds.push(b.title.slice(0, MAX_TITLE).trim()); }
     if (typeof b.body === "string") { sets.push("body = ?"); binds.push(b.body.slice(0, MAX_BODY)); }
     if (b.images !== undefined) {
-      const images = cleanImages(b.images);
-      if (images === null) return json({ ok: false, error: "Invalid images list." }, 422);
+      const images = cleanAttachments(b.images);
+      if (images === null) return json({ ok: false, error: "Invalid attachments list." }, 422);
       sets.push("images = ?"); binds.push(images);
     }
-    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title, body, or images)." }, 422);
+    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title, body, or attachments)." }, 422);
 
     sets.push("updated_at = ?"); binds.push(new Date().toISOString());
     binds.push(id);
@@ -107,7 +125,7 @@ export async function onRequest(context) {
     return json({ ok: true });
   }
 
-  // ---- Delete (note + its R2 images) ----
+  // ---- Delete (note + its R2 attachments) ----
   if (method === "DELETE") {
     let b;
     try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
@@ -123,7 +141,8 @@ export async function onRequest(context) {
       let keys = [];
       try { keys = JSON.parse(row.images || "[]"); } catch { /* orphaned keys are harmless */ }
       if (Array.isArray(keys) && keys.length) {
-        try { await env.NOTES_R2.delete(keys.filter((k) => typeof k === "string" && k.startsWith("notes/"))); }
+        const attachmentKeys = keys.map((item) => typeof item === "string" ? item : item?.key).filter(validKey);
+        try { if (attachmentKeys.length) await env.NOTES_R2.delete(attachmentKeys); }
         catch { /* best effort — the note itself is already gone */ }
       }
     }
