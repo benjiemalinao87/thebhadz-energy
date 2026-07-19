@@ -57,9 +57,7 @@ Until the ≥2-deposit bar is met, 50% traction is a **floor, not a ceiling** (�
 | Date | Decision / override | Rule | Logged by |
 |---|---|---|---|
 | 2026-07-19 | Bootstrapped `ops/` ledger; parked in-house panel manufacturing behind §1.2 gate (pre-revenue, 0 installs). Chose in-house **system** fabrication as the un-gated margin lever. | §1.2, §5, §7 | AI + founder |
-
-_No Prime-Directive overrides on record. An override requires an explicit
-"I understand rule N and am overriding it" logged here (CLAUDE.md precedence)._
+| 2026-07-19 | AI flagged a new "Founder Lessons" docs-site section (SC-12, `founders.html`) under §7's "Add/polish X on the docs site" row — no `ops/tree.md` hypothesis, no booked survey/deposit, and this week's traction split unlogged. Founder directed the AI to build it anyway ("I want you to build it but you can suggest on the presentation"), asked only for presentation input. Built as internal team-culture reading, explicitly labeled non-Mission and not customer-facing in the page copy itself, kept to a single page + assets with no new nav weight elsewhere. Traction work this week is unaffected — flag it if it starts consuming founder time earmarked for interviews/channel tests. | §7 ("Add/polish X"), §1.3 | AI + founder |
 
 ## 5. This week's Triple-A (CLAUDE.md §6)
 
