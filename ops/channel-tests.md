@@ -18,10 +18,16 @@ events, Facebook community presence, referrals from visible rooftops.** _[to com
 ## Middle ring — the 3 candidate tests (design before spend)
 
 ### Slice list — REQUIRED before first ad peso (§0 bootstrap)
-List 3 candidate subdivisions/barangays + their **exact** Facebook groups:
-1. _[subdivision/barangay] — FB group: __________ (members: ___, ₱8k+ bill area? Y/N)_
-2. _[subdivision/barangay] — FB group: ___________
-3. _[subdivision/barangay] — FB group: ___________
+Market = **Biliran province** (Naval + municipalities, BILECO). See
+`docs/biliran-competitor-strategy.md`. List 3 candidate barangays/subdivisions + **exact**
+Facebook groups (e.g. Naval community/buy-sell groups):
+1. _[Naval-area barangay/subdivision] — FB group: __________ (members: ___, ₱8k+ BILECO bill? Y/N)_
+2. _[barangay/subdivision] — FB group: ___________
+3. _[barangay/subdivision] — FB group: ___________
+
+**Local recon feeding this list (do first — `biliran-competitor-strategy.md` §6):** confirm
+BILECO net-metering process; get RK Energy + SolarStream quotes for a Naval address (reveals
+their freight surcharge = our corridor evidence); check for any on-island installer.
 
 ### Test 1 — (proposed) FB/Messenger lead ad
 - **Hypothesis:** of homeowners in [slice] who see the savings-calculator ad, ≥__% submit
