@@ -1,0 +1,251 @@
+    <p class="doc-eyebrow">SC-02 · BUILD GUIDE <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>Hand-building a module</h1>
+    <p class="lede">
+      The full bench process: from loose cells to a framed, tested module. Written for the 108-half-cell
+      400&nbsp;W target from <a href="designer.html">SC-01</a>, with notes where the 36-cell trainer differs.
+      Read the whole document once before touching a cell.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Build the trainer first</span>
+      Your first module should be the 100&nbsp;W 36-cell trainer (SC-01 preset). Same process, same
+      failure modes, one-tenth the cost per mistake. Broken cells and bad solder joints are tuition —
+      pay it on ₱3,000 of cells, not ₱15,000 of TOPCon.
+    </div>
+
+    <div class="callout danger">
+      <span class="label">Safety — read before step 1</span>
+      A 108HC module in sunlight produces ~38&nbsp;V at up to 14&nbsp;A — it cannot be "switched off."
+      Cover the module with opaque sheet whenever leads are exposed. Soldering: fume extraction or
+      strong cross-draft; flux fumes are respiratory irritants. Lamination: 150&nbsp;°C surfaces and
+      hot EVA; heat gloves, no loose sleeves. Hi-pot testing (step 12) applies up to 3&nbsp;kV DC —
+      one person on the test, hands off the module, test area barricaded.
+    </div>
+
+    <h2><span class="sec">§ 0</span>Workspace and tooling</h2>
+    <p>
+      Minimum bench for prototypes: a flat, clean, dry room you can keep dust-low (cells and EVA hate
+      dust and moisture); a 2 × 1.5&nbsp;m work table with soft ESD-safe covering; nitrile gloves —
+      skin oils degrade cell surfaces and EVA adhesion.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Bench tooling — see SC-03 for purchasing</caption>
+        <tr><th>Tool</th><th>Spec</th><th>Purpose</th></tr>
+        <tr><td>Soldering iron</td><td>60–80 W, temperature-controlled, 3–5 mm chisel tip</td><td>Tabbing and bussing</td></tr>
+        <tr><td>Multimeter</td><td>DC 60 V / 20 A ranges, fused</td><td>String checks</td></tr>
+        <tr><td>IV load or MPPT analyzer</td><td>≥ 60 V / 20 A</td><td>Module IV curve (a programmable DC load works)</td></tr>
+        <tr><td>Laminator or vacuum rig</td><td>See step 8</td><td>Encapsulation</td></tr>
+        <tr><td>Infrared thermometer</td><td>0–300 °C</td><td>Verify platen/rig temperature</td></tr>
+        <tr><td>Glass suction cups ×2</td><td>50 kg rated</td><td>Handling 15+ kg of glass safely</td></tr>
+        <tr><td>Cell flipper / spatula</td><td>Thin PTFE or stainless</td><td>Lifting cells without flexing them</td></tr>
+      </table>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">01</span><h3>Receive and grade cells</h3><span class="time">~2 h / batch</span></div>
+      <p>Cells arrive in vacuum-sealed bricks of 100–200. They are 130–170&nbsp;µm thick — they flex
+         once, then crack. Handle by edges, gloves on, one at a time.</p>
+      <ul>
+        <li>Inspect every cell on a light table or against a bright window: chips, micro-cracks (fine dark lines), finger interruptions.</li>
+        <li>Sort by color and by binned current class if the supplier mixed bins — mismatched cells drag the whole string to the worst cell's current.</li>
+        <li>Store rejects: chipped cells are fine for practice soldering.</li>
+      </ul>
+      <div class="callout qc"><span class="label">QC gate</span>
+        Reject rate over 3% on arrival → photograph and claim against the supplier immediately.
+        Log every cell batch: supplier, bin, date, reject count.
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">02</span><h3>Cut cells (half-cut builds only)</h3><span class="time">~3 h / 60 cells</span></div>
+      <p>Best option: <strong>buy cells already half-cut</strong> — most distributors sell them, and factory
+         laser scribing beats anything you can do by hand. If you must cut:</p>
+      <ul>
+        <li>Score with a fiber laser (20–30 W, single pass along the designated scribe lane on the rear) to ~⅓ depth, then cleave over a straight edge. This is "scribe and break."</li>
+        <li>Do <em>not</em> use a hand diamond scribe on modern PERC/TOPCon cells except for practice — edge micro-cracks will show up as dark regions in EL later.</li>
+      </ul>
+      <div class="step params">
+        <b>CUT LANE:</b> across busbars, exactly between the two half-cell busbar patterns —
+        M10 cells are printed for halving; the lane is visible.<br>
+        <b>EDGE QC:</b> cleaved edge must be straight and shiny; jagged = reject for module use.
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">03</span><h3>Tab the cells</h3><span class="time">~10 min/cell hand · the skill step</span></div>
+      <p>Tabbing = soldering ribbon along each busbar on the cell front, with a tail hanging off to
+         reach the back of the next cell. This is 80% of hand-build quality. Practice on rejects until
+         a ribbon peels glass-side silicon rather than lifting off (peel strength &gt; 1 N/mm means the
+         joint is stronger than the print).</p>
+      <ol>
+        <li>Cut ribbon lengths = 2 × cell height + 5 mm (covers this cell's front + next cell's back).</li>
+        <li>Run the flux pen along each busbar. Thin, even, no pooling.</li>
+        <li>Lay ribbon on the busbar, hold with a weighted guide, draw the iron once from center outward each way at a steady ~10 mm/s. The ribbon's solder coating does the joining — no added solder.</li>
+        <li>No cold joints (dull, blobby) and no scorched cells (browned print).</li>
+      </ol>
+      <div class="step params">
+        <b>IRON:</b> 340–360 °C chisel tip · <b>RIBBON:</b> SnPb-coated (Sn60Pb40 coat, melts ~183 °C)
+        — start with leaded coating; lead-free (SnAgCu, ~220 °C) is harder to hand-solder ·
+        <b>FLUX:</b> no-clean rosin, Kester 951-class · <b>PASSES:</b> one. Re-working a joint twice = scrap the cell.
+      </div>
+      <div class="callout qc"><span class="label">QC gate</span>
+        Random 1-in-10 peel test on tabbed rejects. Visual: ribbon centered ±0.5 mm, no solder balls,
+        no crack sounds during handling (yes, you can hear them).
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">04</span><h3>String the cells</h3><span class="time">~1 h / string of 18</span></div>
+      <p>Connect tabbed cells front-to-back in series: this cell's front ribbons solder to the next
+         cell's rear pads. Build on a stringing jig — a board with stops that set the
+         <strong>2&nbsp;mm cell gap</strong> repeatably.</p>
+      <ul>
+        <li>Polarity discipline: front = negative, rear = positive on most mono cells. Every string flows the same way; label string ends with tape flags (+/−).</li>
+        <li>After each string: multimeter Voc in daylight ≈ N × 0.6–0.72 V. An 18-half-cell string should read ~12–13 V in good sun.</li>
+        <li>Lift finished strings with a thin board underneath, never by the end cells.</li>
+      </ul>
+      <div class="step params">
+        <b>TARGET (108HC):</b> 6 strings × 18 half-cells · <b>GAP:</b> 2.0 ± 0.5 mm ·
+        <b>TRAINER:</b> 4 strings × 9 full cells.
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">05</span><h3>Prepare glass and cut sheets</h3><span class="time">~1 h</span></div>
+      <ul>
+        <li>Glass: 3.2 mm low-iron tempered, cut-to-size with edges seamed (they arrive that way — you cannot cut tempered glass). Wash with IPA/water 50:50, lint-free wipes, dry fully. The tin side (test with UV lamp) faces out; AR coating faces the sun.</li>
+        <li>Cut two EVA sheets and one backsheet 10–20 mm oversize on all edges. Blades, not scissors — clean edges.</li>
+        <li>Keep EVA sealed until use; it absorbs moisture and has a shelf life (~6 months at &lt;30 °C). Note the lot number in the build log.</li>
+      </ul>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">06</span><h3>Layup</h3><span class="time">~2 h</span></div>
+      <p>Assemble the sandwich face-down (sun side down): <strong>glass → EVA → cell matrix (face down)
+         → EVA → backsheet</strong>. This is the exploded diagram on <a href="index.html">SC-00</a> made real.</p>
+      <ol>
+        <li>Glass on padded table, washed side up (inner surface).</li>
+        <li>First EVA sheet, embossed side per manufacturer's spec.</li>
+        <li>Place strings face-down using a placement template. String spacing 2 mm; laminate edge margin ≥ 15 mm on every side (we use 20/25 — see SC-01 dimensions).</li>
+        <li>Solder bus ribbons across string ends to wire the series/parallel topology and the diode taps from your SC-01 map. Insulate any bus crossing a cell edge with a patch of backsheet or PET tape.</li>
+        <li>For half-cut twin: center bus taps exit through slits cut in the rear EVA + backsheet at the module centerline; for the trainer: two end taps exit at the top edge.</li>
+        <li>Second EVA, then backsheet. Final visual sweep for debris — a hair laminated into the stack is a permanent void.</li>
+      </ol>
+      <div class="callout qc"><span class="label">QC gate</span>
+        Pre-lamination EL or at minimum a dark-room forward-bias IR check (power the layup at low
+        current, look for cold cells with an IR camera). This is the last cheap moment to fix anything.
+      </div>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">07</span><h3>Pre-lamination electrical check</h3><span class="time">15 min</span></div>
+      <div class="step params">
+        <b>Voc CHECK:</b> full layup in daylight should read the SC-01 predicted Voc ±5%
+        (~38 V for 108HC). <b>POLARITY:</b> confirm + and − leads against the diode orientation
+        plan. A reversed diode survives lamination and then shorts your module forever.
+      </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">08</span><h3>Laminate</h3><span class="time">~25 min cycle + cooldown</span></div>
+      <p>Lamination melts and cross-links the EVA into a permanent, optically clear, waterproof bond.
+         The three paths, in order of preference:</p>
+      <ul>
+        <li><strong>Benchtop/workshop laminator</strong> — vacuum membrane press with heated platen. The correct tool; small used/new units exist sized for one module (see SC-03/SC-04).</li>
+        <li><strong>DIY vacuum-bag rig</strong> — silicone membrane or nylon bag + venturi/rotary vane pump + a flat heated platen (or insulated box with the layup on an aluminum plate over heating elements). Works for trainer-size; hard to keep ±5 °C uniformity at full 1.7 m module size.</li>
+        <li><strong>No lamination (trainer only, temporary)</strong> — frame + silicone edge seal without encapsulant is a science-fair panel: it will fail in months outdoors. Acceptable only for indoor electrical learning.</li>
+      </ul>
+      <div class="step params">
+        <b>FAST-CURE EVA RECIPE (typical — follow your EVA datasheet over this):</b><br>
+        1. PUMP-DOWN: chamber to &lt;1 mbar, platen 145–150 °C, 4–6 min vacuum, membrane up (no press).<br>
+        2. PRESS: membrane down at ~50–80 kPa, hold 8–12 min at 145–155 °C.<br>
+        3. VENT + COOL: release, move to cooling rack, flat, no handling until &lt;50 °C.<br>
+        <b>CURE QC:</b> gel content &gt;75% (lab test) — bench proxy: a sacrificial EVA coupon from the same
+        run should not dissolve/swell apart in toluene overnight.
+      </div>
+      <div class="callout danger"><span class="label">Failure modes</span>
+        Bubbles = pump-down too short or moist EVA. Cell cracks = pressed too early/too hard.
+        Milky EVA = under-cured. Yellowing later = over-cured or bad EVA. Log every cycle:
+        temps, times, vacuum level, EVA lot.
+      </div>
+    </div>
+
+    <!-- STEP 9 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">09</span><h3>Trim and frame</h3><span class="time">~1 h</span></div>
+      <ul>
+        <li>Trim overhanging EVA/backsheet flush with a blade.</li>
+        <li>Fill the frame channel with neutral-cure silicone (or fit butyl tape), press frame profiles on, join corners with corner keys. Clamp square; check diagonals equal within 2 mm.</li>
+        <li>Neutral-cure only — acetoxy silicone (vinegar smell) corrodes cell metallization and the frame.</li>
+      </ul>
+    </div>
+
+    <!-- STEP 10 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">10</span><h3>Junction box and leads</h3><span class="time">~45 min + cure</span></div>
+      <ul>
+        <li>Solder the exit taps to the J-box terminals — diode orientation per the SC-01 map (cathode band toward positive). For half-cut: three split boxes along the centerline. Trainer: one box, top rear.</li>
+        <li>Seat the box on silicone, then pot the cavity with the two-part potting silicone supplied for the box. Potting is the module's main moisture seal around live parts — no voids.</li>
+        <li>Dress MC4 pigtails; genuine-brand or first-tier connectors only. Counterfeit MC4s are a fire origin, not a savings.</li>
+      </ul>
+    </div>
+
+    <!-- STEP 11 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">11</span><h3>Test: performance</h3><span class="time">~30 min</span></div>
+      <ul>
+        <li><strong>Outdoor IV curve:</strong> clear noon sun, module at normal incidence, log irradiance
+          (a calibrated reference cell or even a known-good commercial module beside it) and cell temperature.
+          Translate to STC and compare against SC-01: Pmax within −8%/+3% of prediction is a good hand build.</li>
+        <li><strong>EL image:</strong> forward-bias the module at ~Isc in a dark room; a modified
+          (IR-filter-removed) mirrorless camera sees cell electroluminescence at ~1150 nm. Dark cells,
+          lightning-bolt cracks, dead fingers — all visible. This is the single most informative image
+          of your build quality.</li>
+      </ul>
+    </div>
+
+    <!-- STEP 12 -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">12</span><h3>Test: safety, then log and label</h3><span class="time">~30 min</span></div>
+      <ul>
+        <li><strong>Insulation (hi-pot):</strong> leads shorted together vs frame, 500 V DC insulation test
+          first (&gt;40 MΩ·m² per IEC 61215 scaling), then if equipped, 3 kV DC dielectric withstand
+          — 1 min, no breakdown. Wet leakage (module in a shallow conductive water bath, frame vs leads)
+          is the certification-grade version.</li>
+        <li><strong>Ground continuity:</strong> frame-to-frame-bolt path &lt; 0.1 Ω.</li>
+        <li>Serialize the module (engraved tag or laminated label): SN, date, cell lot, EVA lot,
+          lamination cycle ID, measured Pmax/Voc/Isc/Vmp/Imp. This log is the seed of your factory MES —
+          start the habit at module #1.</li>
+      </ul>
+      <div class="callout qc"><span class="label">Exit criteria — stage 1 complete</span>
+        A module that: passes EL with no new cracks vs pre-lam, holds hi-pot, measures within −8% of
+        SC-01 prediction, and survives 4 weeks outdoors with &lt;1% power change re-measured.
+        Build 3–5 to this standard, then open <a href="strategy.html">SC-04</a>.
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 13</span>Process log template</h2>
+    <p>Copy per module. The discipline of filling it is what separates a manufacturer from a hobbyist.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Field</th><th>Entry</th></tr>
+        <tr><td class="mono">SN / date / builder</td><td></td></tr>
+        <tr><td class="mono">Cell lot · bin · reject count</td><td></td></tr>
+        <tr><td class="mono">Ribbon · flux · EVA lot · backsheet lot</td><td></td></tr>
+        <tr><td class="mono">Iron temp · lamination recipe (T, t, vac)</td><td></td></tr>
+        <tr><td class="mono">Pre-lam EL result</td><td></td></tr>
+        <tr><td class="mono">IV @ STC: Pmax Voc Isc Vmp Imp FF</td><td></td></tr>
+        <tr><td class="mono">Hi-pot / wet leakage / ground</td><td></td></tr>
+        <tr><td class="mono">Post-lam EL · defects map</td><td></td></tr>
+        <tr><td class="mono">Disposition (ship / test-only / scrap) + why</td><td></td></tr>
+      </table>
+    </div>

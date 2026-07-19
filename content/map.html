@@ -1,0 +1,55 @@
+    <p class="doc-eyebrow">SC-09 · BILIRAN PLANNING MAP <span class="rev">· REV A · 2026-07-19</span></p>
+    <h1>Biliran territory map</h1>
+    <p class="lede">
+      An offline planning map of Biliran's 8 municipalities. Color by priority, population, or your
+      own sales status; drop pins for leads, surveys, installs, competitors, demo days, and solar you
+      spot on the ground. Everything saves in this browser — export the JSON to share with co-founders.
+    </p>
+
+    <div class="callout info">
+      <span class="label">How to use</span>
+      Click a municipality to select and annotate it. <strong>Click empty map to drop a pin</strong>
+      (choose the type first, below the map). Data persists locally; use <em>Export</em> to hand a
+      snapshot to the team. Boundaries: PSGC 2023. Population figures are <span class="unverified">APPROX</span> — verify with PSA.
+    </div>
+
+    <div class="ctrls">
+      <span class="hint" style="align-self:center">Color by:</span>
+      <button class="btn on" data-mode="priority">Priority</button>
+      <button class="btn" data-mode="pop">Population</button>
+      <button class="btn" data-mode="status">Sales status</button>
+      <span style="flex:1"></span>
+      <button class="btn" id="exportBtn">Export</button>
+      <button class="btn" id="importBtn">Import</button>
+      <button class="btn" id="resetBtn">Reset data</button>
+    </div>
+
+    <div class="map-wrap">
+      <div class="map-stage" id="stage">
+        <div class="toast" id="toast"></div>
+      </div>
+
+      <div>
+        <div class="side-card">
+          <h3>Drop-pin type</h3>
+          <div id="pinLegend"></div>
+          <p class="hint" style="margin:8px 0 0">Selected type is added when you click empty map. Click a legend row to hide/show that layer.</p>
+        </div>
+        <div class="side-card" id="detail">
+          <h3>Select a municipality</h3>
+          <p class="hint">Click any area on the map to see and edit its plan.</p>
+        </div>
+        <div class="side-card">
+          <h3>Context</h3>
+          <div class="stat">BILECO residential: <b>₱12.95/kWh</b> (2026, approx)</div>
+          <div class="stat">Grid: frequent island brownouts</div>
+          <div class="stat">Nearest competitors: <b>off-island</b> (Tacloban, Cebu)</div>
+          <div class="stat" id="pinCount">Pins: 0</div>
+        </div>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px">
+      Companion: <span class="mono">docs/biliran-gtm-strategy.md</span>,
+      <span class="mono">competitors.html</span> (SC-08), and the recon toolkit. Off-island competitor
+      arrows are schematic (RK Energy → Tacloban SW; SolarStream → Cebu W).
+    </p>

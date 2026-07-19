@@ -1,0 +1,32 @@
+<style>
+  .map-wrap{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+  @media(max-width:900px){.map-wrap{grid-template-columns:1fr}}
+  .map-stage{position:relative;background:#0d1b2a;border-radius:12px;overflow:hidden;border:1px solid #1b3a5b}
+  .map-stage svg{display:block;width:100%;height:auto}
+  .muni{stroke:#0d1b2a;stroke-width:1;cursor:pointer;transition:opacity .15s}
+  .muni:hover{opacity:.82}
+  .muni.sel{stroke:#F2B705;stroke-width:2.5}
+  .muni-label{fill:#eaf1f8;font:600 10px/1.2 system-ui,sans-serif;pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:#0d1b2a;stroke-width:2px}
+  .pin{cursor:pointer}
+  .pin-hit{cursor:pointer}
+  .side-card{background:#fff;border:1px solid #dbe3ea;border-radius:10px;padding:14px;margin-bottom:14px}
+  .side-card h3{margin:0 0 8px;font-size:15px}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:13px;margin:5px 0;cursor:pointer;user-select:none}
+  .legend-row .sw{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
+  .legend-row.off{opacity:.4}
+  .ctrls{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .btn{font:600 12px system-ui;padding:6px 10px;border-radius:7px;border:1px solid #cdd8e2;background:#f5f8fb;color:#1a2230;cursor:pointer}
+  .btn:hover{background:#e9f0f6}
+  .btn.on{background:#12233A;color:#F2B705;border-color:#12233A}
+  .field{width:100%;box-sizing:border-box;font:13px system-ui;padding:6px 8px;border:1px solid #cdd8e2;border-radius:6px;margin:4px 0}
+  .stat{font-size:13px;color:#5c6b7a;margin:3px 0}
+  .stat b{color:#1a2230}
+  .toast{position:absolute;left:12px;bottom:12px;background:#12233A;color:#fff;font:12px system-ui;padding:6px 10px;border-radius:6px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:.95}
+  .pinlist{max-height:200px;overflow:auto}
+  .pinlist .row{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 0;border-bottom:1px solid #eef3f7}
+  .pinlist .row .sw{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .pinlist .row .x{margin-left:auto;color:#b0392b;cursor:pointer;font-weight:700}
+  .hint{font-size:12px;color:#5c6b7a}
+  .off-arrow{fill:#8fa3b8;font:600 11px system-ui}
+</style>

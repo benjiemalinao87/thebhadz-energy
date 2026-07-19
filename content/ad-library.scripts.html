@@ -1,0 +1,12 @@
+<script>
+  document.querySelectorAll('.copybtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var el = document.getElementById(b.getAttribute('data-t'));
+      var txt = el ? el.textContent : '';
+      var done = function(){ b.classList.add('ok'); b.textContent='Copied ✓'; setTimeout(function(){ b.classList.remove('ok'); b.textContent='Copy caption'; },1500); };
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallback(txt); done(); }); }
+      else { fallback(txt); done(); }
+    });
+  });
+  function fallback(txt){ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+</script>

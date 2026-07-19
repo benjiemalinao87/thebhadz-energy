@@ -1,0 +1,135 @@
+/* ============================================================
+   Solar City / MACC — unified design tokens (single source of truth)
+   Every internal stylesheet consumes these custom properties; no
+   page defines its own palette. Light is the default; dark follows
+   the OS preference and can be forced with data-theme on <html>.
+   Palette: warm paper ground, deep petrol ink, solar-amber accent.
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --ground: #F7F6F2;        /* page background */
+  --surface: #FFFFFF;       /* cards, panels, table bodies */
+  --surface-2: #F1EFE7;     /* inset areas, table heads, lanes */
+  --line: #E4E1D6;          /* hairline borders */
+  --line-strong: #CDC9BA;   /* input borders, emphasized rules */
+
+  /* Ink */
+  --ink: #14303A;           /* primary text */
+  --ink-2: #47636E;         /* secondary text */
+  --ink-3: #7E929B;         /* captions, placeholders */
+
+  /* Brand accent (solar amber) — one accent, used sparingly */
+  --accent: #E8A020;
+  --accent-deep: #B87A0A;   /* accent on light ground (AA text) */
+  --accent-ink: #8A5B08;    /* accent-tinted text */
+  --accent-soft: #FBF1DC;   /* accent wash background */
+
+  /* Semantic (separate from the accent) */
+  --good: #1E8E5A;
+  --good-soft: #E3F2EA;
+  --warn: #C0442B;
+  --warn-soft: #F9E9E4;
+  --info: #2E6E8E;
+  --info-soft: #E6F0F5;
+  --violet: #6D5BA8;
+  --violet-soft: #EDEAF6;
+
+  /* Elevation */
+  --shadow: 0 1px 2px rgba(20,48,58,.05), 0 8px 24px -14px rgba(20,48,58,.14);
+  --shadow-lift: 0 2px 4px rgba(20,48,58,.06), 0 18px 36px -18px rgba(20,48,58,.24);
+
+  /* Shape + type */
+  --radius: 14px;
+  --radius-sm: 9px;
+  --font-ui: "Avenir Next", "Seravek", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  color-scheme: light;
+}
+
+/* ---- Dark theme (petrol night — a considered variant, not an inversion) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0C181E;
+    --surface: #132229;
+    --surface-2: #1A2D35;
+    --line: #24383F;
+    --line-strong: #375059;
+    --ink: #EAF0F1;
+    --ink-2: #A9BDC4;
+    --ink-3: #6F8791;
+    --accent: #F0B23F;
+    --accent-deep: #F0B23F;
+    --accent-ink: #F4C566;
+    --accent-soft: #2E2818;
+    --good: #4EC48D;
+    --good-soft: #143526;
+    --warn: #E88266;
+    --warn-soft: #3B2019;
+    --info: #74B2CE;
+    --info-soft: #15303C;
+    --violet: #A99BD8;
+    --violet-soft: #241F38;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.5);
+    --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 20px 40px -18px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+
+/* Explicit override wins in both directions (future theme toggle). */
+:root[data-theme="dark"] {
+  --ground: #0C181E;
+  --surface: #132229;
+  --surface-2: #1A2D35;
+  --line: #24383F;
+  --line-strong: #375059;
+  --ink: #EAF0F1;
+  --ink-2: #A9BDC4;
+  --ink-3: #6F8791;
+  --accent: #F0B23F;
+  --accent-deep: #F0B23F;
+  --accent-ink: #F4C566;
+  --accent-soft: #2E2818;
+  --good: #4EC48D;
+  --good-soft: #143526;
+  --warn: #E88266;
+  --warn-soft: #3B2019;
+  --info: #74B2CE;
+  --info-soft: #15303C;
+  --violet: #A99BD8;
+  --violet-soft: #241F38;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.5);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 20px 40px -18px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --ground: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface-2: #F1EFE7;
+  --line: #E4E1D6;
+  --line-strong: #CDC9BA;
+  --ink: #14303A;
+  --ink-2: #47636E;
+  --ink-3: #7E929B;
+  --accent: #E8A020;
+  --accent-deep: #B87A0A;
+  --accent-ink: #8A5B08;
+  --accent-soft: #FBF1DC;
+  --good: #1E8E5A;
+  --good-soft: #E3F2EA;
+  --warn: #C0442B;
+  --warn-soft: #F9E9E4;
+  --info: #2E6E8E;
+  --info-soft: #E6F0F5;
+  --violet: #6D5BA8;
+  --violet-soft: #EDEAF6;
+  --shadow: 0 1px 2px rgba(20,48,58,.05), 0 8px 24px -14px rgba(20,48,58,.14);
+  --shadow-lift: 0 2px 4px rgba(20,48,58,.06), 0 18px 36px -18px rgba(20,48,58,.24);
+  color-scheme: light;
+}
+
+/* ---- Shared base (kept minimal on purpose; layout lives per-page) */
+:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+::selection { background: var(--accent-soft); color: var(--ink); }

@@ -1,0 +1,181 @@
+<script src="vendor/d3.min.js"></script>
+<script src="assets/biliran-geo.js"></script>
+<script>
+(function(){
+  var GEO = window.BILIRAN_GEO;
+  var KEY = 'sc_biliran_map_v1';
+  var PIN_TYPES = [
+    {k:'lead',   label:'Lead',          c:'#2f80ed'},
+    {k:'survey', label:'Survey booked', c:'#8e44ad'},
+    {k:'install',label:'Install',       c:'#27ae60'},
+    {k:'demo',   label:'Demo day',      c:'#e67e22'},
+    {k:'comp',   label:'Competitor',    c:'#c0392b'},
+    {k:'solar',  label:'Solar spotted', c:'#F2B705'}
+  ];
+  var STATUS = [
+    {k:'none', label:'None',        c:'#c7d2dc'},
+    {k:'prospect', label:'Prospecting', c:'#7fb2e5'},
+    {k:'active', label:'Active',    c:'#f0b429'},
+    {k:'won', label:'Won',          c:'#2f9e5b'}
+  ];
+  // ---- state ----
+  var db = load();
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){} }
+  db.pins = db.pins || [];
+  db.status = db.status || {};     // psgc -> status key
+  db.notes = db.notes || {};       // psgc -> note text
+  var mode = 'priority';
+  var activePin = 'lead';
+  var hidden = {};                 // pin type -> true if hidden
+  var selected = null;
+
+  // ---- geometry / projection ----
+  var stage = document.getElementById('stage');
+  var W = stage.clientWidth || 640, H = Math.round(W*0.72);
+  var svg = d3.select(stage).append('svg').attr('viewBox','0 0 '+W+' '+H);
+  var gMuni = svg.append('g'), gLabel = svg.append('g'), gExtras = svg.append('g'), gPins = svg.append('g');
+  var proj = d3.geoMercator().fitExtent([[14,14],[W-14,H-30]], GEO);
+  var path = d3.geoPath(proj);
+
+  function fillFor(f){
+    var p = f.properties;
+    if(mode==='priority'){ return ['#F2B705','#3f7cae','#274b63'][ (p.priority||3)-1 ] || '#274b63'; }
+    if(mode==='pop'){
+      var t = Math.min(1,(p.pop||0)/57000);
+      return d3.interpolateRgb('#22405c','#7ad0c0')(0.15+0.85*t);
+    }
+    if(mode==='status'){ var s=STATUS.find(x=>x.k===(db.status[p.psgc]||'none')); return s?s.c:'#c7d2dc'; }
+  }
+
+  var toastT;
+  function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1600); }
+
+  function drawMuni(){
+    var sel = gMuni.selectAll('path').data(GEO.features, d=>d.properties.psgc);
+    sel.enter().append('path').attr('class','muni').attr('d',path)
+      .on('click', function(ev,d){ ev.stopPropagation(); selectMuni(d); })
+      .merge(sel).attr('fill', fillFor).classed('sel', d=>selected&&d.properties.psgc===selected.properties.psgc);
+    // labels
+    var labs = gLabel.selectAll('text').data(GEO.features, d=>d.properties.psgc);
+    labs.enter().append('text').attr('class','muni-label')
+      .attr('x',d=>path.centroid(d)[0]).attr('y',d=>path.centroid(d)[1])
+      .text(d=>d.properties.name).merge(labs);
+  }
+
+  function drawExtras(){
+    gExtras.selectAll('*').remove();
+    // off-island competitor arrows (schematic, at map edges)
+    var arr = [
+      {t:'RK Energy → Tacloban', x:18, y:H-46, ax:-6, ay:14},
+      {t:'SolarStream → Cebu', x:18, y:H-26, ax:-10, ay:2}
+    ];
+    arr.forEach(function(a){
+      gExtras.append('text').attr('class','off-arrow').attr('x',a.x).attr('y',a.y).text('◄ '+a.t);
+    });
+  }
+
+  function drawPins(){
+    var data = db.pins.filter(p=>!hidden[p.type]);
+    var sel = gPins.selectAll('g.pin').data(data, (d,i)=>d.id);
+    sel.exit().remove();
+    var g = sel.enter().append('g').attr('class','pin');
+    g.append('circle').attr('class','pin-hit').attr('r',6).attr('stroke','#fff').attr('stroke-width',1.5);
+    g.append('title');
+    var all = g.merge(sel);
+    all.attr('transform',function(d){ var xy=proj([d.lng,d.lat]); return 'translate('+xy[0]+','+xy[1]+')'; });
+    all.select('circle').attr('fill',function(d){ var t=PIN_TYPES.find(x=>x.k===d.type); return t?t.c:'#333'; })
+      .on('click',function(ev,d){ ev.stopPropagation(); if(confirm('Delete pin: "'+(d.label||d.type)+'"?')){ db.pins=db.pins.filter(x=>x.id!==d.id); save(); drawPins(); refreshCounts(); if(selected) selectMuni(selected);} });
+    all.select('title').text(function(d){ var t=PIN_TYPES.find(x=>x.k===d.type); return (t?t.label:d.type)+': '+(d.label||''); });
+    refreshCounts();
+  }
+
+  function refreshCounts(){
+    document.getElementById('pinCount').innerHTML = 'Pins: <b>'+db.pins.length+'</b>';
+  }
+
+  // add pin on empty-map click
+  svg.on('click', function(ev){
+    var pt = d3.pointer(ev, svg.node());
+    var ll = proj.invert(pt);
+    if(!ll) return;
+    var label = prompt('Label for this '+ (PIN_TYPES.find(x=>x.k===activePin).label) +' pin (barangay, name, note):','');
+    if(label===null) return;
+    db.pins.push({id:'p'+Date.now()+Math.floor(Math.random()*999), type:activePin, lng:ll[0], lat:ll[1], label:label});
+    save(); drawPins();
+    toast('Pin added: '+PIN_TYPES.find(x=>x.k===activePin).label);
+    if(selected) selectMuni(selected);
+  });
+
+  // which municipality contains a point (simple bbox+centroid fallback via d3.geoContains)
+  function muniAt(lng,lat){
+    for(var i=0;i<GEO.features.length;i++){ if(d3.geoContains(GEO.features[i],[lng,lat])) return GEO.features[i]; }
+    return null;
+  }
+
+  function selectMuni(d){
+    selected = d; drawMuni();
+    var p = d.properties;
+    var inside = db.pins.filter(function(pin){ return d3.geoContains(d,[pin.lng,pin.lat]); });
+    var cnt = {}; inside.forEach(function(x){ cnt[x.type]=(cnt[x.type]||0)+1; });
+    var cntHtml = PIN_TYPES.filter(t=>cnt[t.k]).map(t=>'<span style="color:'+t.c+'">●</span> '+cnt[t.k]+' '+t.label).join(' · ') || '<span class="hint">no pins yet</span>';
+    var statusOpts = STATUS.map(s=>'<option value="'+s.k+'"'+((db.status[p.psgc]||'none')===s.k?' selected':'')+'>'+s.label+'</option>').join('');
+    document.getElementById('detail').innerHTML =
+      '<h3>'+p.name+'</h3>'+
+      '<div class="stat">Priority: <b>'+p.priority+'</b> · Area: <b>'+p.area_km2+' km²</b></div>'+
+      '<div class="stat">Population: <b>'+(p.pop?p.pop.toLocaleString():'—')+'</b> <span class="unverified">APPROX</span></div>'+
+      '<div class="stat" style="margin:6px 0">'+ (p.note||'') +'</div>'+
+      '<label class="stat">Sales status</label>'+
+      '<select class="field" id="statusSel">'+statusOpts+'</select>'+
+      '<label class="stat">Your notes</label>'+
+      '<textarea class="field" id="noteBox" rows="3" placeholder="Target barangays, contacts, next action…">'+(db.notes[p.psgc]||'')+'</textarea>'+
+      '<div class="stat" style="margin-top:6px">Pins here: '+cntHtml+'</div>';
+    document.getElementById('statusSel').onchange=function(){ db.status[p.psgc]=this.value; save(); if(mode==='status') drawMuni(); };
+    document.getElementById('noteBox').oninput=function(){ db.notes[p.psgc]=this.value; save(); };
+  }
+
+  // ---- pin type legend ----
+  function buildPinLegend(){
+    var host = document.getElementById('pinLegend'); host.innerHTML='';
+    PIN_TYPES.forEach(function(t){
+      var row = document.createElement('div'); row.className='legend-row'+(hidden[t.k]?' off':'');
+      row.innerHTML = '<span class="sw" style="background:'+t.c+'"></span>'+t.label+(activePin===t.k?' <b style="margin-left:auto;color:#12233A">◀ active</b>':'');
+      row.onclick=function(ev){
+        if(ev.shiftKey){ hidden[t.k]=!hidden[t.k]; drawPins(); }
+        else { activePin=t.k; }
+        buildPinLegend();
+      };
+      row.ondblclick=function(){ hidden[t.k]=!hidden[t.k]; drawPins(); buildPinLegend(); };
+      host.appendChild(row);
+    });
+    var h=document.createElement('p'); h.className='hint'; h.style.margin='6px 0 0';
+    h.innerHTML='Click = set active type · double-click = hide/show layer';
+    host.appendChild(h);
+  }
+
+  // ---- mode buttons ----
+  d3.selectAll('.btn[data-mode]').on('click', function(){
+    d3.selectAll('.btn[data-mode]').classed('on',false); d3.select(this).classed('on',true);
+    mode = this.getAttribute('data-mode'); drawMuni();
+  });
+
+  // ---- export / import / reset ----
+  document.getElementById('exportBtn').onclick=function(){
+    var blob = new Blob([JSON.stringify({pins:db.pins,status:db.status,notes:db.notes,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='biliran-plan.json'; a.click(); toast('Exported biliran-plan.json');
+  };
+  document.getElementById('importBtn').onclick=function(){
+    var inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+    inp.onchange=function(){ var fr=new FileReader(); fr.onload=function(){ try{ var o=JSON.parse(fr.result);
+      db.pins=o.pins||[]; db.status=o.status||{}; db.notes=o.notes||{}; save(); drawPins(); drawMuni(); toast('Imported plan'); if(selected) selectMuni(selected);
+    }catch(e){ alert('Could not read that file.'); } }; fr.readAsText(inp.files[0]); };
+    inp.click();
+  };
+  document.getElementById('resetBtn').onclick=function(){
+    if(confirm('Clear all pins, statuses, and notes in this browser?')){ db={pins:[],status:{},notes:{}}; save(); drawPins(); drawMuni(); document.getElementById('detail').innerHTML='<h3>Select a municipality</h3><p class="hint">Cleared.</p>'; toast('Data cleared'); }
+  };
+
+  // ---- init ----
+  drawMuni(); drawExtras(); drawPins(); buildPinLegend(); refreshCounts();
+})();
+</script>

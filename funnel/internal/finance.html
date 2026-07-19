@@ -3,8 +3,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SC-09 Finance &amp; Runway — MACC Systems &amp; Engineering Inc.</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/ops-tools.css">
+<link rel="stylesheet" href="assets/operations-redesign.css">
 
 <div class="frame">
   <aside class="sidebar">
@@ -21,7 +23,7 @@
     <div class="foot">PRIVATE · FOUNDERS ONLY<br>MANAGEMENT LEDGER<br>EXPORT FOR ACCOUNTANT</div>
   </aside>
 
-  <main class="content ops-content">
+  <main class="content ops-content ops-page ops-finance">
     <p class="doc-eyebrow">SC-09 · FINANCE &amp; RUNWAY <span class="rev">· REV A · 2026-07-16</span></p>
     <h1>Know where every peso went.</h1>
     <p class="lede">Shared founder ledger for self-funding, customer cash, company expenses, commitments, receipts, burn, and runway. This is a management tool—not a replacement for registered accounting books.</p>
@@ -54,12 +56,12 @@
       <span class="ops-helper">This is a planning input, not an accounting entry. Update it when actual job data changes.</span>
     </div>
 
-    <nav class="ops-tabs" aria-label="Finance sections">
-      <button type="button" aria-selected="true" data-tab="ledger">Ledger</button>
-      <button type="button" aria-selected="false" data-tab="funding">Founder funding</button>
+    <nav class="ops-tabs" aria-label="Finance sections" role="tablist">
+      <button type="button" role="tab" aria-selected="true" aria-controls="finance-ledger" data-tab="ledger">Ledger</button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="finance-funding" data-tab="funding">Founder funding</button>
     </nav>
 
-    <section class="ops-panel" data-panel="ledger">
+    <section class="ops-panel" id="finance-ledger" role="tabpanel" data-panel="ledger">
       <div class="ops-section-head"><div><span class="ops-kicker">MONEY IN · MONEY OUT</span><h2>Add a transaction</h2><p>Use “committed” for an approved bill that has not left the account yet.</p></div></div>
       <form class="ops-form" id="fin-form">
         <input type="hidden" name="id">
@@ -94,7 +96,7 @@
       <div id="fin-ledger"></div>
     </section>
 
-    <section class="ops-panel" data-panel="funding" hidden>
+    <section class="ops-panel" id="finance-funding" role="tabpanel" data-panel="funding" hidden>
       <div class="ops-section-head"><div><span class="ops-kicker">FOUNDER CONTRIBUTIONS</span><h2>Who funded what?</h2><p>Amounts are grouped by the classification recorded in the ledger.</p></div></div>
       <div id="fin-funding"></div>
     </section>

@@ -1,0 +1,195 @@
+    <p class="doc-eyebrow">SC-03 · BOM &amp; SUPPLIERS <span class="rev">· REV A · 2026-07-06</span></p>
+    <h1>Bill of materials &amp; sourcing</h1>
+    <p class="lede">
+      Everything that goes into one 400&nbsp;W module, what to specify, and where to buy it from the
+      Philippines. Quantities follow the 108HC configuration frozen in <a href="designer.html">SC-01</a>.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Price basis</span>
+      Brand names below are established industry suppliers (verified to exist); <strong>prices and MOQs are
+      2026-07 engineering estimates</strong> marked <span class="unverified">EST</span> — our live supplier-quote
+      research was interrupted by a session limit and figures must be re-quoted before ordering.
+      Component prices move monthly; treat this as a negotiation baseline, not a catalog.
+    </div>
+
+    <h2><span class="sec">§ 1</span>Per-module quantities — 108HC 400 W</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Cut list per module (order +15% overage for prototypes)</caption>
+        <tr><th>Item</th><th>Spec</th><th class="num">Qty / module</th></tr>
+        <tr><td>Solar cells</td><td>M10 (182 mm) mono, half-cut, single bin</td><td class="num">108 halves (54 full)</td></tr>
+        <tr><td>Tabbing ribbon</td><td>Per cell busbar layout (e.g. 0.26 × 1.0 mm, Sn60Pb40-coated)</td><td class="num">~35 m</td></tr>
+        <tr><td>Bus ribbon</td><td>0.3 × 5 mm coated copper</td><td class="num">~4 m</td></tr>
+        <tr><td>Flux</td><td>No-clean rosin pens</td><td class="num">~1 pen</td></tr>
+        <tr><td>EVA film</td><td>0.45 mm, fast-cure, cut 1150 × 1760 mm</td><td class="num">2 sheets (~4.1 m²)</td></tr>
+        <tr><td>Backsheet</td><td>TPT/KPK 0.30 mm white, 1150 × 1760 mm</td><td class="num">1 sheet (~2.1 m²)</td></tr>
+        <tr><td>Front glass</td><td>3.2 mm low-iron tempered, AR coated, 1134 × 1724 mm</td><td class="num">1 pc</td></tr>
+        <tr><td>Frame</td><td>Anodized Al profile 30–35 mm + 4 corner keys</td><td class="num">~5.8 m</td></tr>
+        <tr><td>Junction box</td><td>Split 3-piece, 3 bypass diodes ≥ 20 A, IP68, MC4 pigtails</td><td class="num">1 set</td></tr>
+        <tr><td>Potting + sealant</td><td>2-part potting silicone; neutral-cure frame silicone</td><td class="num">~0.4 kg</td></tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 2</span>Component guide with suppliers</h2>
+
+    <h3>2.1 Solar cells — the cost driver</h3>
+    <p>
+      Spec to order: <strong>M10 mono TOPCon (or PERC), half-cut, one current bin, one color class</strong>,
+      with datasheet Voc/Isc/Vmp/Imp per cell — those numbers feed SC-01 directly. TOPCon is now the
+      mainstream cell; PERC is cheaper and slightly easier to hand-solder (more forgiving metallization).
+    </p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Channel</th><th>Who</th><th>Price</th><th>MOQ</th><th>Notes</th></tr>
+        <tr>
+          <td>Bulk (factory)</td>
+          <td>Tongwei, LONGi, JA Solar, Aiko, DAS Solar (CN)</td>
+          <td class="num">$0.025–0.04/W <span class="unverified">EST</span></td>
+          <td class="num">≥1 container</td>
+          <td>Stage-2/3 channel. Bin + color guaranteed per contract.</td>
+        </tr>
+        <tr>
+          <td>Small-lot trading</td>
+          <td>Alibaba/Made-in-China cell traders; module-material kit sellers (e.g. Ooitech sells materials alongside equipment)</td>
+          <td class="num">$0.40–1.00/cell <span class="unverified">EST</span></td>
+          <td class="num">100–500 cells</td>
+          <td>Prototype channel. Insist on photos of actual stock + bin labels; expect mixed reality.</td>
+        </tr>
+        <tr>
+          <td>Hobby/retail</td>
+          <td>eBay/AliExpress/Shopee "DIY solar cell" listings</td>
+          <td class="num">$1–2/cell <span class="unverified">EST</span></td>
+          <td class="num">10+</td>
+          <td>Trainer-panel channel (125 mm cells still circulate here). Quality lottery — buy 20% extra.</td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout info">
+      <span class="label">Cell buying rules</span>
+      Never mix bins in one module. Ask for the cell datasheet + EL sample images of the lot.
+      Cells ship in foam-and-vacuum bricks; refuse visibly re-packed bricks. Air freight for prototype
+      lots is fine (cells are light); glass is what forces sea freight.
+    </div>
+
+    <h3>2.2 Encapsulant (EVA / POE)</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Item</th><th>Established makers</th><th>Price</th><th>Notes</th></tr>
+        <tr>
+          <td>EVA 0.45 mm fast-cure</td>
+          <td>First (Hangzhou First Applied Material), HIUV, Sveck (all CN)</td>
+          <td class="num">$0.8–1.5/m² <span class="unverified">EST</span></td>
+          <td>Sold in ~1 m-wide × 50–100 m rolls; traders resell cut lengths. Keep sealed, cool, &lt;6 months.</td>
+        </tr>
+        <tr>
+          <td>POE (glass-glass / high humidity)</td>
+          <td>Same makers</td>
+          <td class="num">+30–50% vs EVA <span class="unverified">EST</span></td>
+          <td>Better PID/moisture performance; slightly different lamination recipe. Not needed for stage 1.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>2.3 Backsheet and glass</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Item</th><th>Established makers</th><th>Price</th><th>Notes</th></tr>
+        <tr>
+          <td>Backsheet TPT/KPK 0.30 mm</td>
+          <td>Cybrid, Jolywood (CN)</td>
+          <td class="num">$1.5–3/m² <span class="unverified">EST</span></td>
+          <td>White standard. Traders sell cut sheets; rolls are ~1 m wide.</td>
+        </tr>
+        <tr>
+          <td>Front glass 3.2 mm low-iron AR, tempered</td>
+          <td>Xinyi Solar, Flat (FGG), CSG (CN)</td>
+          <td class="num">$4–7/m² bulk <span class="unverified">EST</span></td>
+          <td><strong>Must be ordered cut-to-size before tempering.</strong> For prototypes, a PH architectural
+          glass shop can supply 4 mm low-iron tempered cut-to-size (no AR coat, ~1% optical penalty) —
+          often the fastest local route. Sea freight only; crate, corner-protect.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>2.4 Ribbon, flux, frame, junction box</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Item</th><th>Established makers</th><th>Price</th><th>Notes</th></tr>
+        <tr>
+          <td>Tabbing/bus ribbon</td>
+          <td>Ulbrich (US/global), Taicang-area CN mills via traders</td>
+          <td class="num">$8–15/kg <span class="unverified">EST</span></td>
+          <td>~0.5 kg tabbing ribbon per module. SnPb coat for hand work; lead-free for production later.</td>
+        </tr>
+        <tr>
+          <td>Flux pens</td>
+          <td>Kester 951, Amtech NC-559 class</td>
+          <td class="num">$5–10/pen <span class="unverified">EST</span></td>
+          <td>Available via PH electronics suppliers (Raon/online) or RS/element14 PH.</td>
+        </tr>
+        <tr>
+          <td>Al frame + corner keys</td>
+          <td>CN module-frame extruders via traders; PH aluminum extruders can match a drawing</td>
+          <td class="num">$4–8/module set <span class="unverified">EST</span></td>
+          <td>For prototypes, local anodized extrusion + hand-cut 45° corners is acceptable.</td>
+        </tr>
+        <tr>
+          <td>Junction box, 3-diode split, IP68</td>
+          <td>QC Solar, Renhe, Zhonghuan (CN); connectors: Stäubli MC4 (genuine)</td>
+          <td class="num">$2–5/set <span class="unverified">EST</span></td>
+          <td>Buy the potting silicone the box maker specifies. Diodes rated ≥ 1.4 × module Isc.</td>
+        </tr>
+        <tr>
+          <td>Sealants</td>
+          <td>Dow (Dowsil), Wacker neutral-cure lines</td>
+          <td class="num">$8–15/module <span class="unverified">EST</span></td>
+          <td>Neutral cure only (see SC-02 step 9). Available from PH industrial distributors.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 3</span>The Philippines sourcing reality</h2>
+    <ul>
+      <li><strong>There is no local module-materials supply chain.</strong> Cells, EVA, backsheet, solar
+        glass, and J-boxes are all imports, effectively all from China. PH-local wins are: tempered
+        low-iron glass (architectural shops), aluminum extrusion, sealants, packaging/crating, and
+        general electronics consumables (flux, wire, connectors — Raon district, RS Components PH,
+        online industrial suppliers).</li>
+      <li><strong>Prototype lots:</strong> order consolidated via one Alibaba trader or a materials-kit
+        vendor so everything but glass arrives in one air/sea shipment. Glass: source locally first
+        (see 2.3) to avoid crating a single pane across the sea.</li>
+      <li><strong>Import mechanics:</strong> small lots clear as ordinary imports (duty + 12% VAT on CIF).
+        At production scale, DOE accreditation + BOI registration can make manufacturing inputs
+        duty- and VAT-exempt under RA 9513 §21 — the numbers and process are in
+        <a href="strategy.html">SC-04 §3</a>.</li>
+      <li><strong>Freight rule of thumb:</strong> cells and sheet goods air-freight economically for
+        prototypes; glass, frames, and anything at batch scale go LCL/FCL sea to Manila.</li>
+    </ul>
+
+    <h2><span class="sec">§ 4</span>Cost roll-up</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Materials cost per 400 W module — 2026-07 estimates <span class="unverified">EST</span></caption>
+        <tr><th>Component</th><th class="num">Prototype qty (3–5 modules)</th><th class="num">Batch qty (container inputs)</th></tr>
+        <tr><td>Cells (54 full-cell equiv.)</td><td class="num">$35–55</td><td class="num">$11–17</td></tr>
+        <tr><td>Glass</td><td class="num">$25–45 (local cut-to-size)</td><td class="num">$9–14</td></tr>
+        <tr><td>EVA + backsheet</td><td class="num">$15–25</td><td class="num">$7–11</td></tr>
+        <tr><td>Ribbon + flux</td><td class="num">$8–12</td><td class="num">$4–6</td></tr>
+        <tr><td>Frame + J-box + sealants</td><td class="num">$25–40</td><td class="num">$10–16</td></tr>
+        <tr><td>Freight + duties allocation</td><td class="num">$20–40</td><td class="num">$5–9</td></tr>
+        <tr><td><strong>Total materials</strong></td><td class="num"><strong>$128–217 (~₱7.5–13k)</strong></td><td class="num"><strong>$46–73 (~$0.12–0.18/W)</strong></td></tr>
+      </table>
+    </div>
+    <p>
+      The batch column is the number that matters strategically: compare it against imported finished
+      modules at <a href="strategy.html">SC-04 §5</a> before committing to stage 3. The prototype column
+      is tuition — spend it without guilt.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Action before ordering</span>
+      Re-run supplier quotes (3 quotes per line item minimum), confirm current cell spot prices
+      (PVInsights / InfoLink weekly indices), and check the trader's export packing method for cells
+      and glass. Update this page with actual quoted figures and dates as they land.
+    </div>

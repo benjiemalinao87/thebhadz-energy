@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+{{THEME_SCRIPT}}
+<link rel="stylesheet" href="{{ASSET_PREFIX}}assets/style.css">
+{{FAVICON}}{{EXTRA_LINKS}}{{HEAD_EXTRA}}{{WORKSPACE_LINK}}
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="{{HOME_HREF}}">
+        {{BRAND_MARK}}
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+{{NAV_ITEMS}}
+    </nav>
+    <div class="foot">
+{{FOOTER_BODY}}
+    </div>
+  </aside>
+
+  <main class="content{{MAIN_CLASS}}">
+{{MAIN}}
+  </main>
+</div>
+
+{{TRAILING_SCRIPTS}}
+</html>

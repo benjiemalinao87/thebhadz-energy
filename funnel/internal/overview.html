@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BADJJ Energy Systems — Module Engineering File</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="/internal/assets/style.css">
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <style>
@@ -13,6 +14,7 @@
     to   { transform: translateY(0);     opacity: 1; }
   }
 </style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
 
 <div class="frame">
   <aside class="sidebar">
@@ -31,6 +33,11 @@
       <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
       <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
       <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
     </nav>
     <div class="foot">
       REV A · 2026-07<br>
@@ -43,7 +50,7 @@
     </div>
   </aside>
 
-  <main class="content">
+  <main class="content workspace-page workspace-overview">
     <header class="hero">
       <p class="doc-eyebrow">SC-00 · OVERVIEW <span class="rev">· REV A · 2026-07-06</span></p>
       <h1>Bare cells in. 400&nbsp;W modules out.</h1>
@@ -181,41 +188,77 @@
 
     <h2><span class="sec">§ 2</span>The file</h2>
     <div class="toc-cards">
-      <a class="toc-card" href="/internal/designer.html">
+      <a class="toc-card" href="designer.html">
         <span class="code">SC-01</span>
         <h3>Panel designer</h3>
         <p>Interactive. Pick cell format and string layout; get the live cell map, wiring topology,
            Voc/Isc/Vmp/Imp, wattage, dimensions, and IV curve.</p>
       </a>
-      <a class="toc-card" href="/internal/build-guide.html">
+      <a class="toc-card" href="build-guide.html">
         <span class="code">SC-02</span>
         <h3>Build guide</h3>
         <p>The full hand-build process with parameters: tabbing, stringing, layup, lamination,
            framing, junction box, and the test sequence.</p>
       </a>
-      <a class="toc-card" href="/internal/bom.html">
+      <a class="toc-card" href="bom.html">
         <span class="code">SC-03</span>
         <h3>BOM &amp; suppliers</h3>
         <p>Every component with spec, named suppliers, prices, MOQs, and the Philippines
            sourcing picture. Research-backed and dated.</p>
       </a>
-      <a class="toc-card" href="/internal/strategy.html">
+      <a class="toc-card" href="strategy.html">
         <span class="code">SC-04</span>
         <h3>Manufacturing &amp; logistics strategy</h3>
         <p>Equipment and capex per stage, certification path, PH regulatory and incentives,
            freight, and distribution channels.</p>
       </a>
-      <a class="toc-card" href="/internal/sourcing.html">
+      <a class="toc-card" href="sourcing.html">
         <span class="code">SC-05</span>
         <h3>Source &amp; install</h3>
         <p>Model B: buy the parts we can't reproduce (panels, inverters, batteries), fabricate
            racking and boxes, and earn as the installer. Stage-0 revenue and the sales channel.</p>
       </a>
-      <a class="toc-card" href="/internal/market.html">
+      <a class="toc-card" href="market.html">
         <span class="code">SC-06</span>
         <h3>Market, packaging &amp; pricing</h3>
         <p>Segments, named packages, and the ₱99,500 homeowner flagship — on-grid, off-grid, and
            hybrid — with the pricing ladder and marketing plan.</p>
+      </a>
+      <a class="toc-card" href="projects.html">
+        <span class="code">SC-07</span>
+        <h3>Project board</h3>
+        <p>Internal execution board for tasks, owners, deadlines, traction/product split, and
+           Friday operating cadence. Local-first and offline.</p>
+      </a>
+      <a class="toc-card" href="competitors.html">
+        <span class="code">SC-08</span>
+        <h3>Biliran competitors</h3>
+        <p>The target market's competitive map: BILECO island economics, the off-island installers,
+           and the on-island wedge that wins Biliran. Feeds the go-to-market plan.</p>
+      </a>
+      <a class="toc-card" href="map.html">
+        <span class="code">SC-09</span>
+        <h3>Biliran map</h3>
+        <p>Interactive offline planning map of Biliran's 8 municipalities. Color by priority or sales
+           status; drop pins for leads, surveys, installs, competitors, and solar spotted on the ground.</p>
+      </a>
+      <a class="toc-card" href="roof-check.html">
+        <span class="code">SC-10</span>
+        <h3>Roof check <span style="opacity:.6;font-weight:normal">(online)</span></h3>
+        <p>Satellite roof pre-check: trace a lead's roof for approximate area, panel count, system size,
+           and a ballpark BILECO saving before you drive out. Needs internet (satellite tiles).</p>
+      </a>
+      <a class="toc-card" href="ad-library.html">
+        <span class="code">SC-11</span>
+        <h3>Ad library</h3>
+        <p>Shared, ready-to-fire ad creative for the team — three pre-registered Naval lead-ad variants
+           with copy, hand-built graphics, targeting, and the boost-gate checklist. Honesty gates baked in.</p>
+      </a>
+      <a class="toc-card" href="founders.html">
+        <span class="code">SC-12</span>
+        <h3>Founder lessons</h3>
+        <p>Swipeable, Tinder-style deck of short lessons from 20 founders' worst weeks. Internal
+           team culture reading — not a Mission deliverable, not customer-facing.</p>
       </a>
     </div>
 
@@ -258,7 +301,7 @@
     </ul>
 
     <hr>
-    <p class="asof">FILE STATUS: SC-01/SC-02 complete · SC-03/SC-04 populated from research dated 2026-07-06 · Open <a href="/internal/designer.html">SC-01</a> to start.</p>
+    <p class="asof">FILE STATUS: SC-01/SC-02 complete · SC-03/SC-04 populated from research dated 2026-07-06 · Open <a href="designer.html">SC-01</a> to start.</p>
   </main>
 </div>
 

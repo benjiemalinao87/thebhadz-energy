@@ -1,0 +1,114 @@
+<script src="vendor/leaflet.js"></script>
+<script>
+(function(){
+  var NAVAL=[11.7583,124.3969];
+  var KEY='sc_biliran_map_v1'; // shares pins with SC-09
+  var PIN_TYPES=[
+    {k:'lead',label:'Lead',c:'#2f80ed'},{k:'survey',label:'Survey booked',c:'#8e44ad'},
+    {k:'install',label:'Install',c:'#27ae60'},{k:'demo',label:'Demo day',c:'#e67e22'},
+    {k:'comp',label:'Competitor',c:'#c0392b'},{k:'solar',label:'Solar spotted',c:'#F2B705'}];
+  var db=load(); db.pins=db.pins||[]; db.status=db.status||{}; db.notes=db.notes||{};
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}}
+  var activePin='lead', drawing=false;
+
+  var map=L.map('rcmap',{center:NAVAL,zoom:15});
+  var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'});
+  var street=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19,attribution:'© OpenStreetMap contributors'});
+  sat.addTo(map);
+  document.getElementById('layerSat').onclick=function(){map.removeLayer(street);sat.addTo(map);this.classList.add('on');document.getElementById('layerStreet').classList.remove('on');};
+  document.getElementById('layerStreet').onclick=function(){map.removeLayer(sat);street.addTo(map);this.classList.add('on');document.getElementById('layerSat').classList.remove('on');};
+
+  // ---- go to coords ----
+  document.getElementById('gotoBtn').onclick=function(){
+    var v=document.getElementById('goto').value.split(',');
+    var la=parseFloat(v[0]), ln=parseFloat(v[1]);
+    if(isFinite(la)&&isFinite(ln)) map.setView([la,ln],18); else alert('Enter as: lat, lng');
+  };
+
+  // ---- roof tracing + area ----
+  var pts=[], markers=[], poly=null;
+  var drawBtn=document.getElementById('drawBtn');
+  function setDraw(on){drawing=on;drawBtn.classList.toggle('on',on);drawBtn.textContent=on?'▸ Tracing… click roof corners':'▸ Start tracing roof';map.getContainer().style.cursor=on?'crosshair':'';}
+  drawBtn.onclick=function(){ if(drawing){setDraw(false);} else {clearRoof();setDraw(true);} };
+  document.getElementById('finishBtn').onclick=finishRoof;
+  document.getElementById('clearRoofBtn').onclick=function(){clearRoof();setDraw(false);};
+
+  map.on('click',function(e){
+    if(drawing){
+      pts.push([e.latlng.lat,e.latlng.lng]);
+      var m=L.circleMarker(e.latlng,{radius:4,color:'#F2B705',fillColor:'#F2B705',fillOpacity:1}).addTo(map);
+      markers.push(m); redraw();
+      if(pts.length>=3) estimate();
+    } else {
+      addPin(e.latlng.lat,e.latlng.lng);
+    }
+  });
+  function redraw(){ if(poly) map.removeLayer(poly);
+    if(pts.length>=2){ poly=L.polygon(pts,{color:'#F2B705',weight:2,fillColor:'#F2B705',fillOpacity:.18}).addTo(map);} }
+  function finishRoof(){ setDraw(false); if(pts.length>=3) estimate(); }
+  function clearRoof(){ pts=[]; markers.forEach(function(m){map.removeLayer(m);}); markers=[]; if(poly){map.removeLayer(poly);poly=null;} document.getElementById('est').innerHTML='<span class="hint">No roof traced yet.</span>'; }
+
+  // geodesic-ish polygon area (equirectangular around centroid) in m²
+  function areaM2(ring){
+    if(ring.length<3) return 0;
+    var R=6378137, lat0=ring.reduce(function(a,p){return a+p[0];},0)/ring.length;
+    var k=Math.cos(lat0*Math.PI/180);
+    var xy=ring.map(function(p){return [R*(p[1]*Math.PI/180)*k, R*(p[0]*Math.PI/180)];});
+    var s=0; for(var i=0;i<xy.length;i++){var j=(i+1)%xy.length; s+=xy[i][0]*xy[j][1]-xy[j][0]*xy[i][1];}
+    return Math.abs(s/2);
+  }
+  function estimate(){
+    var A=areaM2(pts);
+    var usable=A*0.65, panels=Math.max(0,Math.floor(usable/2.2)), kwp=panels*0.55;
+    var mkwh=kwp*4.0*0.78*30, save=mkwh*12.95;
+    var pkg = kwp<1.2?'a small ILAW-class system':(kwp<3?'an ILAW / SANDIGAN package':'SANDIGAN+ (multiple strings)');
+    document.getElementById('est').innerHTML=
+      '<div class="stat">Roof traced <span class="unverified">ROUGH</span></div>'+
+      '<div class="big">'+Math.round(A).toLocaleString()+' m²</div>'+
+      '<div class="stat">Usable ~<b>'+Math.round(usable)+' m²</b> → ~<b>'+panels+' panels</b> (~<b>'+kwp.toFixed(1)+' kWp</b>)</div>'+
+      '<div class="stat">Est. output ~<b>'+Math.round(mkwh)+' kWh/mo</b></div>'+
+      '<div class="stat">Ballpark saving ~<b>₱'+Math.round(save).toLocaleString()+'/mo</b> at ₱12.95/kWh</div>'+
+      '<div class="stat">Fits '+pkg+'.</div>'+
+      '<div class="hint" style="margin-top:6px">Self-consumption ceiling; confirm on site.</div>';
+  }
+
+  // ---- pins (shared with SC-09) ----
+  var pinLayer=L.layerGroup().addTo(map);
+  function pinColor(t){var x=PIN_TYPES.find(function(p){return p.k===t;});return x?x.c:'#333';}
+  function drawPins(){ pinLayer.clearLayers();
+    db.pins.forEach(function(p){
+      var m=L.circleMarker([p.lat,p.lng],{radius:6,color:'#fff',weight:1.5,fillColor:pinColor(p.type),fillOpacity:1}).addTo(pinLayer);
+      m.bindTooltip((PIN_TYPES.find(function(t){return t.k===p.type;})||{}).label+': '+(p.label||''));
+      m.on('click',function(ev){ L.DomEvent.stop(ev); if(confirm('Delete pin: "'+(p.label||p.type)+'"?')){db.pins=db.pins.filter(function(x){return x.id!==p.id;});save();drawPins();} });
+    });
+  }
+  function addPin(lat,lng){
+    var label=prompt('Label for this '+(PIN_TYPES.find(function(t){return t.k===activePin;}).label)+' pin:','');
+    if(label===null) return;
+    db.pins.push({id:'p'+Date.now()+Math.floor(Math.random()*999),type:activePin,lat:lat,lng:lng,label:label});
+    save(); drawPins();
+  }
+  function buildLegend(){ var host=document.getElementById('pinLegend'); host.innerHTML='';
+    PIN_TYPES.forEach(function(t){ var row=document.createElement('div'); row.className='legend-row';
+      row.innerHTML='<span class="sw" style="background:'+t.c+'"></span>'+t.label+(activePin===t.k?' <b style="margin-left:auto;color:#12233A">◀ active</b>':'');
+      row.onclick=function(){activePin=t.k;buildLegend();}; host.appendChild(row); });
+    var h=document.createElement('p');h.className='hint';h.style.margin='6px 0 0';
+    h.innerHTML='Click a type to arm it, then click the map (when not tracing) to drop it.'; host.appendChild(h);
+  }
+  document.getElementById('exportBtn').onclick=function(){
+    var blob=new Blob([JSON.stringify({pins:db.pins,status:db.status,notes:db.notes,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='biliran-plan.json';a.click();
+  };
+  document.getElementById('importBtn').onclick=function(){
+    var inp=document.createElement('input');inp.type='file';inp.accept='application/json';
+    inp.onchange=function(){var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);db.pins=o.pins||[];db.status=o.status||{};db.notes=o.notes||{};save();drawPins();}catch(e){alert('Could not read that file.');}};fr.readAsText(inp.files[0]);};
+    inp.click();
+  };
+  document.getElementById('clearPinsBtn').onclick=function(){ if(confirm('Clear all pins in this browser?')){db.pins=[];save();drawPins();} };
+
+  buildLegend(); drawPins(); setDraw(true);
+})();
+</script>

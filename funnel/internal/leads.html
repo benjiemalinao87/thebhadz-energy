@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contacts — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
 <style>
@@ -187,8 +188,9 @@
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
   :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px;}
 </style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
-<body>
+<body class="ops-standalone ops-contacts">
   <div class="wrap">
 
     <!-- TOP BAR -->
@@ -205,6 +207,15 @@
       <span class="badge"><span class="pulse" aria-hidden="true"></span> LIVE FEED</span>
       <a class="logout" href="/api/founder-logout">Log out</a>
     </div>
+
+    <header class="ops-page-head">
+      <div>
+        <p class="ops-eyebrow">CRM / CONTACTS</p>
+        <h1>Every lead, one clear next step.</h1>
+        <p class="ops-lede">Triage new leads, track conversations, and move countable commitments forward.</p>
+      </div>
+      <span class="ops-live"><span aria-hidden="true"></span>Live D1 contacts</span>
+    </header>
 
     <!-- STAT STRIP -->
     <div class="strip">
@@ -229,13 +240,13 @@
         <table>
           <thead>
             <tr>
-              <th class="sortable" data-sort="name">Name<span class="arr">▼</span></th>
-              <th class="sortable" data-sort="phone">Phone<span class="arr">▼</span></th>
-              <th class="sortable hide-sm" data-sort="goal">Goal<span class="arr">▼</span></th>
-              <th class="sortable hide-sm" data-sort="package">Package<span class="arr">▼</span></th>
-              <th class="sortable" data-sort="stage">Stage<span class="arr">▼</span></th>
-              <th class="sortable hide-sm" data-sort="source">Source<span class="arr">▼</span></th>
-              <th class="sortable" data-sort="created_at">Received<span class="arr">▼</span></th>
+              <th class="sortable" data-sort="name" tabindex="0" role="button">Name<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable" data-sort="phone" tabindex="0" role="button">Phone<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable hide-sm" data-sort="goal" tabindex="0" role="button">Goal<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable hide-sm" data-sort="package" tabindex="0" role="button">Package<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable" data-sort="stage" tabindex="0" role="button">Stage<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable hide-sm" data-sort="source" tabindex="0" role="button">Source<span class="arr" aria-hidden="true">▼</span></th>
+              <th class="sortable" data-sort="created_at" tabindex="0" role="button">Received<span class="arr" aria-hidden="true">▼</span></th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
@@ -250,7 +261,7 @@
   <aside class="drawer" id="drawer" aria-hidden="true"></aside>
 
   <div class="loading" id="loading">Loading contacts…</div>
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
   (function(){
@@ -319,9 +330,9 @@
     function renderChips(){
       var counts={all:leads.length};
       STAGES.forEach(function(s){counts[s.id]=leads.filter(function(l){return l.stage===s.id;}).length;});
-      var html='<button class="chip'+(stageFilter==="all"?" active":"")+'" data-stage="all">All<span class="n">'+counts.all+'</span></button>';
+      var html='<button type="button" class="chip'+(stageFilter==="all"?" active":"")+'" aria-pressed="'+(stageFilter==="all")+'" data-stage="all">All<span class="n">'+counts.all+'</span></button>';
       STAGES.forEach(function(s){
-        html+='<button class="chip'+(stageFilter===s.id?" active":"")+'" data-stage="'+s.id+'">'+s.label+'<span class="n">'+counts[s.id]+'</span></button>';
+        html+='<button type="button" class="chip'+(stageFilter===s.id?" active":"")+'" aria-pressed="'+(stageFilter===s.id)+'" data-stage="'+s.id+'">'+s.label+'<span class="n">'+counts[s.id]+'</span></button>';
       });
       var c=el("chips"); c.innerHTML=html;
       Array.prototype.forEach.call(c.querySelectorAll(".chip"),function(btn){
@@ -347,6 +358,7 @@
       Array.prototype.forEach.call(document.querySelectorAll("thead th.sortable"),function(th){
         var on=th.dataset.sort===sortKey;
         th.classList.toggle("sorted",on);
+        th.setAttribute("aria-sort",on?(sortDir===1?"ascending":"descending"):"none");
         var arr=th.querySelector(".arr"); if(arr)arr.textContent=sortDir===1?"▲":"▼";
       });
 
@@ -361,6 +373,7 @@
       rows.forEach(function(l){
         var tr=document.createElement("tr");
         tr.dataset.id=l.id;
+        tr.tabIndex=0;
         var note=(l.notes&&l.notes.trim())?'<span class="notedot" title="Has notes">✎</span>':'';
         var fin=isFin(l)?'<span class="fin">Financing</span>':'';
         var src=l.utm_source||l.source||"—";
@@ -377,6 +390,9 @@
         tr.addEventListener("click",function(e){
           if(e.target.closest(".stage-sel"))return;
           openDrawer(l.id);
+        });
+        tr.addEventListener("keydown",function(e){
+          if(e.key==="Enter"){e.preventDefault();openDrawer(l.id);}
         });
         tb.appendChild(tr);
       });
@@ -410,9 +426,10 @@
     }
 
     // ---- drawer ----
-    var openId=null;
+    var openId=null,drawerReturnFocus=null;
     function openDrawer(id){
       var l=leads.filter(function(x){return x.id==id;})[0]; if(!l)return;
+      if(!openId)drawerReturnFocus=document.activeElement;
       openId=id;
       var dw=el("drawer");
       var options=STAGES.map(function(s){return '<option value="'+s.id+'"'+(s.id===l.stage?" selected":"")+'>'+s.label+'</option>';}).join("");
@@ -444,12 +461,18 @@
       el("scrim").classList.add("open");
       dw.classList.add("open"); dw.setAttribute("aria-hidden","false");
       el("dwx").onclick=closeDrawer;
+      el("dwx").focus();
       el("dwstage").onchange=function(){moveLead(id,this.value);openDrawer(id);};
       el("dwsave").onclick=function(){saveNotes(id,el("dwnotes").value);};
       el("dwdel").onclick=function(){if(confirm("Delete this contact permanently?"))delLead(id);};
     }
     function kv(k,v){return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';}
-    function closeDrawer(){openId=null;el("scrim").classList.remove("open");var dw=el("drawer");dw.classList.remove("open");dw.setAttribute("aria-hidden","true");}
+    function closeDrawer(){
+      if(!openId)return;
+      openId=null;el("scrim").classList.remove("open");var dw=el("drawer");dw.classList.remove("open");dw.setAttribute("aria-hidden","true");
+      if(drawerReturnFocus&&document.contains(drawerReturnFocus))drawerReturnFocus.focus();
+      drawerReturnFocus=null;
+    }
     el("scrim").addEventListener("click",closeDrawer);
     document.addEventListener("keydown",function(e){if(e.key==="Escape")closeDrawer();});
 
@@ -469,12 +492,14 @@
 
     // ---- sort headers ----
     Array.prototype.forEach.call(document.querySelectorAll("thead th.sortable"),function(th){
-      th.addEventListener("click",function(){
+      function sort(){
         var k=th.dataset.sort;
         if(sortKey===k){sortDir=-sortDir;}
         else{sortKey=k;sortDir=(k==="created_at")?-1:1;}
         renderRows();
-      });
+      }
+      th.addEventListener("click",sort);
+      th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();sort();}});
     });
 
     el("search").addEventListener("input",function(){filter=this.value.trim().toLowerCase();renderRows();});

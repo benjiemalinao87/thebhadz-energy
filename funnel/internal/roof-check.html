@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-10 Roof check (online) — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<link rel="stylesheet" href="/internal/vendor/leaflet.css">
+<style>
+  .rc-wrap{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+  @media(max-width:900px){.rc-wrap{grid-template-columns:1fr}}
+  #rcmap{height:70vh;min-height:460px;border-radius:12px;border:1px solid #1b3a5b;background:#0d1b2a}
+  .side-card{background:#fff;border:1px solid #dbe3ea;border-radius:10px;padding:14px;margin-bottom:14px}
+  .side-card h3{margin:0 0 8px;font-size:15px}
+  .btn{font:600 12px system-ui;padding:6px 10px;border-radius:7px;border:1px solid #cdd8e2;background:#f5f8fb;color:#1a2230;cursor:pointer}
+  .btn:hover{background:#e9f0f6}.btn.on{background:#12233A;color:#F2B705;border-color:#12233A}
+  .ctrls{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+  .field{width:100%;box-sizing:border-box;font:13px system-ui;padding:6px 8px;border:1px solid #cdd8e2;border-radius:6px;margin:4px 0}
+  .stat{font-size:13px;color:#5c6b7a;margin:4px 0}.stat b{color:#1a2230}
+  .big{font:700 30px/1 'Cambria',serif;color:#12233A;margin:2px 0}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:13px;margin:5px 0;cursor:pointer;user-select:none}
+  .legend-row .sw{width:14px;height:14px;border-radius:50%;flex:0 0 auto}.legend-row.off{opacity:.4}
+  .hint{font-size:12px;color:#5c6b7a}
+  .est-box{background:#f3f8f4;border:1px solid #cfe6d5;border-radius:8px;padding:10px;margin-top:8px}
+  .leaflet-container{font:13px system-ui}
+</style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      MARKET: BILIRAN · BILECO<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content workspace-page workspace-roof-check">
+    <p class="doc-eyebrow">SC-10 · SATELLITE ROOF CHECK <span class="rev">· REV A · 2026-07-19</span></p>
+    <h1>Roof pre-check &amp; rough sizing</h1>
+    <p class="lede">
+      Before you drive out to a lead, eyeball the roof from above: trace it to get an approximate area,
+      a rough panel count, system size, and a ballpark monthly BILECO saving. Drop pins for leads,
+      surveys, installs, competitors, and solar you spot. A desk pre-screen — never a substitute for the
+      on-site survey.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Online tool + rough estimate</span>
+      This page needs internet (satellite tiles from Esri). Rural Biliran imagery is <strong>low-res and
+      may be years old</strong> — measurements are approximate and recent installs may not appear. The
+      sizing is a <span class="unverified">ROUGH</span> pre-screen only; confirm everything on the actual
+      site survey (roof condition, structure, shading, the electrical panel).
+    </div>
+
+    <div class="ctrls">
+      <button class="btn on" id="layerSat">Satellite</button>
+      <button class="btn" id="layerStreet">Streets</button>
+      <span style="flex:1"></span>
+      <input class="field" id="goto" style="width:220px;margin:0" placeholder="Go to lat, lng (e.g. 11.7583, 124.397)">
+      <button class="btn" id="gotoBtn">Go</button>
+    </div>
+
+    <div class="rc-wrap">
+      <div id="rcmap"></div>
+      <div>
+        <div class="side-card">
+          <h3>Measure a roof</h3>
+          <button class="btn on" id="drawBtn" style="width:100%;margin-bottom:6px">▸ Start tracing roof</button>
+          <p class="hint">Click each corner of the roof; click the first point again (or press Finish) to close. Then read the estimate.</p>
+          <button class="btn" id="finishBtn" style="width:49%">Finish</button>
+          <button class="btn" id="clearRoofBtn" style="width:49%">Clear</button>
+          <div class="est-box" id="est"><span class="hint">No roof traced yet.</span></div>
+          <p class="hint" style="margin-top:8px">Assumptions: 65% usable roof, ~2.2 m²/panel (~550 W), 4.0 peak-sun-hrs, 78% derate, BILECO ₱12.95/kWh. Editable in source.</p>
+        </div>
+        <div class="side-card">
+          <h3>Drop-pin type</h3>
+          <div id="pinLegend"></div>
+          <div class="ctrls" style="margin:8px 0 0">
+            <button class="btn" id="exportBtn">Export</button>
+            <button class="btn" id="importBtn">Import</button>
+            <button class="btn" id="clearPinsBtn">Clear pins</button>
+          </div>
+          <p class="hint" style="margin-top:6px">Pins save in this browser. Shares the same plan file as SC-09 (pins only).</p>
+        </div>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px">
+      Companion to <span class="mono">map.html</span> (SC-09, offline territory map) and
+      <span class="mono">docs/biliran-gtm-strategy.md</span>. Imagery © Esri, Maxar, Earthstar Geographics;
+      streets © OpenStreetMap contributors.
+    </p>
+  </main>
+</div>
+
+<script src="/internal/vendor/leaflet.js"></script>
+<script>
+(function(){
+  var NAVAL=[11.7583,124.3969];
+  var KEY='sc_biliran_map_v1'; // shares pins with SC-09
+  var PIN_TYPES=[
+    {k:'lead',label:'Lead',c:'#2f80ed'},{k:'survey',label:'Survey booked',c:'#8e44ad'},
+    {k:'install',label:'Install',c:'#27ae60'},{k:'demo',label:'Demo day',c:'#e67e22'},
+    {k:'comp',label:'Competitor',c:'#c0392b'},{k:'solar',label:'Solar spotted',c:'#F2B705'}];
+  var db=load(); db.pins=db.pins||[]; db.status=db.status||{}; db.notes=db.notes||{};
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}}
+  var activePin='lead', drawing=false;
+
+  var map=L.map('rcmap',{center:NAVAL,zoom:15});
+  var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'});
+  var street=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19,attribution:'© OpenStreetMap contributors'});
+  sat.addTo(map);
+  document.getElementById('layerSat').onclick=function(){map.removeLayer(street);sat.addTo(map);this.classList.add('on');document.getElementById('layerStreet').classList.remove('on');};
+  document.getElementById('layerStreet').onclick=function(){map.removeLayer(sat);street.addTo(map);this.classList.add('on');document.getElementById('layerSat').classList.remove('on');};
+
+  // ---- go to coords ----
+  document.getElementById('gotoBtn').onclick=function(){
+    var v=document.getElementById('goto').value.split(',');
+    var la=parseFloat(v[0]), ln=parseFloat(v[1]);
+    if(isFinite(la)&&isFinite(ln)) map.setView([la,ln],18); else alert('Enter as: lat, lng');
+  };
+
+  // ---- roof tracing + area ----
+  var pts=[], markers=[], poly=null;
+  var drawBtn=document.getElementById('drawBtn');
+  function setDraw(on){drawing=on;drawBtn.classList.toggle('on',on);drawBtn.textContent=on?'▸ Tracing… click roof corners':'▸ Start tracing roof';map.getContainer().style.cursor=on?'crosshair':'';}
+  drawBtn.onclick=function(){ if(drawing){setDraw(false);} else {clearRoof();setDraw(true);} };
+  document.getElementById('finishBtn').onclick=finishRoof;
+  document.getElementById('clearRoofBtn').onclick=function(){clearRoof();setDraw(false);};
+
+  map.on('click',function(e){
+    if(drawing){
+      pts.push([e.latlng.lat,e.latlng.lng]);
+      var m=L.circleMarker(e.latlng,{radius:4,color:'#F2B705',fillColor:'#F2B705',fillOpacity:1}).addTo(map);
+      markers.push(m); redraw();
+      if(pts.length>=3) estimate();
+    } else {
+      addPin(e.latlng.lat,e.latlng.lng);
+    }
+  });
+  function redraw(){ if(poly) map.removeLayer(poly);
+    if(pts.length>=2){ poly=L.polygon(pts,{color:'#F2B705',weight:2,fillColor:'#F2B705',fillOpacity:.18}).addTo(map);} }
+  function finishRoof(){ setDraw(false); if(pts.length>=3) estimate(); }
+  function clearRoof(){ pts=[]; markers.forEach(function(m){map.removeLayer(m);}); markers=[]; if(poly){map.removeLayer(poly);poly=null;} document.getElementById('est').innerHTML='<span class="hint">No roof traced yet.</span>'; }
+
+  // geodesic-ish polygon area (equirectangular around centroid) in m²
+  function areaM2(ring){
+    if(ring.length<3) return 0;
+    var R=6378137, lat0=ring.reduce(function(a,p){return a+p[0];},0)/ring.length;
+    var k=Math.cos(lat0*Math.PI/180);
+    var xy=ring.map(function(p){return [R*(p[1]*Math.PI/180)*k, R*(p[0]*Math.PI/180)];});
+    var s=0; for(var i=0;i<xy.length;i++){var j=(i+1)%xy.length; s+=xy[i][0]*xy[j][1]-xy[j][0]*xy[i][1];}
+    return Math.abs(s/2);
+  }
+  function estimate(){
+    var A=areaM2(pts);
+    var usable=A*0.65, panels=Math.max(0,Math.floor(usable/2.2)), kwp=panels*0.55;
+    var mkwh=kwp*4.0*0.78*30, save=mkwh*12.95;
+    var pkg = kwp<1.2?'a small ILAW-class system':(kwp<3?'an ILAW / SANDIGAN package':'SANDIGAN+ (multiple strings)');
+    document.getElementById('est').innerHTML=
+      '<div class="stat">Roof traced <span class="unverified">ROUGH</span></div>'+
+      '<div class="big">'+Math.round(A).toLocaleString()+' m²</div>'+
+      '<div class="stat">Usable ~<b>'+Math.round(usable)+' m²</b> → ~<b>'+panels+' panels</b> (~<b>'+kwp.toFixed(1)+' kWp</b>)</div>'+
+      '<div class="stat">Est. output ~<b>'+Math.round(mkwh)+' kWh/mo</b></div>'+
+      '<div class="stat">Ballpark saving ~<b>₱'+Math.round(save).toLocaleString()+'/mo</b> at ₱12.95/kWh</div>'+
+      '<div class="stat">Fits '+pkg+'.</div>'+
+      '<div class="hint" style="margin-top:6px">Self-consumption ceiling; confirm on site.</div>';
+  }
+
+  // ---- pins (shared with SC-09) ----
+  var pinLayer=L.layerGroup().addTo(map);
+  function pinColor(t){var x=PIN_TYPES.find(function(p){return p.k===t;});return x?x.c:'#333';}
+  function drawPins(){ pinLayer.clearLayers();
+    db.pins.forEach(function(p){
+      var m=L.circleMarker([p.lat,p.lng],{radius:6,color:'#fff',weight:1.5,fillColor:pinColor(p.type),fillOpacity:1}).addTo(pinLayer);
+      m.bindTooltip((PIN_TYPES.find(function(t){return t.k===p.type;})||{}).label+': '+(p.label||''));
+      m.on('click',function(ev){ L.DomEvent.stop(ev); if(confirm('Delete pin: "'+(p.label||p.type)+'"?')){db.pins=db.pins.filter(function(x){return x.id!==p.id;});save();drawPins();} });
+    });
+  }
+  function addPin(lat,lng){
+    var label=prompt('Label for this '+(PIN_TYPES.find(function(t){return t.k===activePin;}).label)+' pin:','');
+    if(label===null) return;
+    db.pins.push({id:'p'+Date.now()+Math.floor(Math.random()*999),type:activePin,lat:lat,lng:lng,label:label});
+    save(); drawPins();
+  }
+  function buildLegend(){ var host=document.getElementById('pinLegend'); host.innerHTML='';
+    PIN_TYPES.forEach(function(t){ var row=document.createElement('div'); row.className='legend-row';
+      row.innerHTML='<span class="sw" style="background:'+t.c+'"></span>'+t.label+(activePin===t.k?' <b style="margin-left:auto;color:#12233A">◀ active</b>':'');
+      row.onclick=function(){activePin=t.k;buildLegend();}; host.appendChild(row); });
+    var h=document.createElement('p');h.className='hint';h.style.margin='6px 0 0';
+    h.innerHTML='Click a type to arm it, then click the map (when not tracing) to drop it.'; host.appendChild(h);
+  }
+  document.getElementById('exportBtn').onclick=function(){
+    var blob=new Blob([JSON.stringify({pins:db.pins,status:db.status,notes:db.notes,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='biliran-plan.json';a.click();
+  };
+  document.getElementById('importBtn').onclick=function(){
+    var inp=document.createElement('input');inp.type='file';inp.accept='application/json';
+    inp.onchange=function(){var fr=new FileReader();fr.onload=function(){try{var o=JSON.parse(fr.result);db.pins=o.pins||[];db.status=o.status||{};db.notes=o.notes||{};save();drawPins();}catch(e){alert('Could not read that file.');}};fr.readAsText(inp.files[0]);};
+    inp.click();
+  };
+  document.getElementById('clearPinsBtn').onclick=function(){ if(confirm('Clear all pins in this browser?')){db.pins=[];save();drawPins();} };
+
+  buildLegend(); drawPins(); setDraw(true);
+})();
+</script>
+</html>

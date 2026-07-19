@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SC-06 Market &amp; pricing — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="/internal/assets/style.css">
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <style>
@@ -32,6 +33,7 @@
   .pkg .pk-for { font-size: 13px; color: var(--faint); margin: 0 0 10px; }
   @media (max-width: 960px) { .pkgs { grid-template-columns: 1fr; } }
 </style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
 
 <div class="frame">
   <aside class="sidebar">
@@ -50,6 +52,11 @@
       <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
       <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
       <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
     </nav>
     <div class="foot">
       REV A · 2026-07<br>
@@ -62,7 +69,7 @@
     </div>
   </aside>
 
-  <main class="content">
+  <main class="content workspace-page workspace-market">
     <p class="doc-eyebrow">SC-06 · MARKET, PACKAGING &amp; PRICING <span class="rev">· REV A · 2026-07-06</span></p>
     <h1>Selling it: the ₱80–100k homeowner package</h1>
     <p class="lede">
@@ -80,10 +87,11 @@
     </div>
 
     <div class="callout qc">
-      <span class="label">Live funnel</span>
-      The conversion-optimized customer funnel implementing this strategy is live at
-      <a href="https://solar-city-funnel.pages.dev/">solar-city-funnel.pages.dev</a> —
-      persuasive copy, illustrated package images, and a lead-capture form.
+      <span class="label">Live funnel built</span>
+      A conversion-optimized customer funnel implementing this strategy lives in
+      <code>funnel/</code> — a self-contained landing page (persuasive copy, illustrated package
+      images, lead-capture form) ready to deploy to Cloudflare Pages. Open
+      <code>funnel/index.html</code> to preview; see <code>funnel/README.md</code> for deploy steps.
       This page (SC-06) is the internal strategy; the funnel is its public-facing execution.
     </div>
 
@@ -254,7 +262,7 @@
       <li><strong>The core message:</strong> "Cut your Meralco bill — or keep the lights on when the grid
         goes down — for around ₱99,500, installed, by a Philippine company that stands behind it."</li>
       <li><strong>Lead the pitch with the customer's number,</strong> not ours: upload a bill photo →
-        get a same-day estimate of monthly savings and payback (this is <a href="/internal/designer.html">SC-01</a>
+        get a same-day estimate of monthly savings and payback (this is <a href="designer.html">SC-01</a>
         sizing turned into a sales tool).</li>
       <li><strong>Season the calendar:</strong> push backup/hybrid before and during typhoon season;
         push bill-cut/on-grid during summer rate spikes.</li>
@@ -279,7 +287,7 @@
 
     <hr>
     <p class="asof">
-      DEPENDS ON: <a href="/internal/sourcing.html">SC-05</a> cost stack · post-reset equipment quotes ·
+      DEPENDS ON: <a href="sourcing.html">SC-05</a> cost stack · post-reset equipment quotes ·
       financing-partner terms · per-DU net-metering timelines. Update prices here once quotes land.
     </p>
   </main>

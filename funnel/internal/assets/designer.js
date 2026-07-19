@@ -390,6 +390,7 @@
   function init() {
     // preset buttons
     var pr = document.querySelector(".presets");
+    if (!pr) return; // designer view isn't the current page — nothing to wire up.
     PRESETS.forEach(function (p) {
       var b = document.createElement("button");
       b.textContent = p.label; b.dataset.preset = p.id;
@@ -426,5 +427,8 @@
     applyPreset(PRESETS[1]); // 435 W TOPCon default
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  // Run immediately rather than waiting for DOMContentLoaded: under the SPA router this
+  // script is injected well after that event has already fired once for the shell's
+  // initial load, so a DOMContentLoaded listener registered here would never fire again.
+  init();
 })();

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Team notes — MACC Systems &amp; Engineering Inc.</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
 <style>
@@ -156,8 +157,9 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
   :focus-visible{outline:2px solid var(--purple);outline-offset:3px;border-radius:6px;}
 </style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
-<body>
+<body class="ops-standalone ops-notes">
 <div class="wrap">
 
   <div class="bar">
@@ -174,13 +176,24 @@
     <a class="logout" href="/api/founder-logout">Log out</a>
   </div>
 
+  <header class="ops-page-head">
+    <div>
+      <p class="ops-eyebrow">FOUNDERS / TEAM NOTES</p>
+      <h1>Shared field notes, without the noise.</h1>
+      <p class="ops-lede">Capture site surveys, supplier calls, install evidence, and meeting decisions in one searchable place.</p>
+    </div>
+  </header>
+
   <!-- ---- composer ---- -->
   <section class="panel composer" aria-label="New note">
     <div class="kicker">New note</div>
     <div class="frow">
+      <label class="ops-sr-only" for="f-author">Author name</label>
       <input type="text" id="f-author" placeholder="Your name" autocomplete="name" maxlength="80">
+      <label class="ops-sr-only" for="f-title">Note title</label>
       <input type="text" id="f-title" placeholder="Title (optional)" maxlength="200">
     </div>
+    <label class="ops-sr-only" for="f-body">Note</label>
     <textarea id="f-body" placeholder="Site survey findings, supplier call notes, install photos, ideas for the next meeting…" maxlength="8000"></textarea>
     <div class="previews" id="previews"></div>
     <div class="attach-row">
@@ -206,7 +219,7 @@
   </div>
   <div class="search">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <input type="text" id="search" placeholder="Search notes…">
+    <input type="text" id="search" placeholder="Search notes…" aria-label="Search notes">
   </div>
   <div id="feed"></div>
 

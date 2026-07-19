@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project Board — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
 <style>
@@ -190,8 +191,9 @@
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
   :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px;}
 </style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
-<body>
+<body class="ops-standalone ops-projects">
   <div class="wrap">
 
     <!-- TOP BAR -->
@@ -208,6 +210,14 @@
       <span class="store-badge" id="store-badge"><span class="dot" aria-hidden="true"></span> Storage: checking</span>
       <a class="logout" href="/api/founder-logout">Log out</a>
     </div>
+
+    <header class="ops-page-head">
+      <div>
+        <p class="ops-eyebrow">OPERATIONS / PROJECT BOARD</p>
+        <h1>Move the work that moves the mission.</h1>
+        <p class="ops-lede">Countable commitments, clear owners, and visible blockers for the week that matters now.</p>
+      </div>
+    </header>
 
     <!-- STAT STRIP -->
     <div class="strip">
@@ -288,7 +298,7 @@
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
   (function(){

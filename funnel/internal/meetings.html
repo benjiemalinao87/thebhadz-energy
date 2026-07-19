@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meeting log — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <style>
@@ -104,8 +105,9 @@
     .content{padding:24px 18px 80px;}
   }
 </style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
-<body>
+<body class="ops-standalone ops-meetings">
   <div class="bar">
     <a class="brand" href="/internal/"><img src="/assets/img/badjj-logo.png" alt="BADJJ"> BADJJ</a>
     <h1>Meeting log</h1>
@@ -114,7 +116,7 @@
     <a class="link" href="/api/founder-logout">Log out</a>
   </div>
 
-  <div class="layout">
+  <main class="layout ops-page ops-meetings">
     <!-- INDEX RAIL: add one <a> per meeting, newest at top -->
     <nav class="rail" aria-label="Meetings">
       <p class="ey">Meetings</p>
@@ -131,12 +133,11 @@
       <span class="newbtn">+ Add next week's meeting<br>at the top of this list</span>
     </nav>
 
-    <main class="content">
+    <div class="content">
       <div class="page-head">
-        <p class="ey">BADJJ · Founders · Confidential</p>
-        <h2>Meeting log &amp; action items</h2>
-        <p>A running record of every founders' meeting — what we discussed, what we decided, and who owes
-           what by when. Newest meeting is at the top. Update it after each weekly sync.</p>
+        <p class="ops-eyebrow">FOUNDERS / MEETING LOG</p>
+        <h2>Decisions remembered. Owners accountable.</h2>
+        <p>Weekly founder decisions and action items with a clear owner and due date.</p>
       </div>
 
       <!-- OPEN ACTION ITEMS DIGEST — pulled from all meetings, most urgent first -->
@@ -346,7 +347,7 @@
         to <code>class="chk done"</code> (and the row to <code>class="ai done"</code>) so they show as
         struck-through. Just send me the transcript each week and I'll do it for you.
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </body>
 </html>

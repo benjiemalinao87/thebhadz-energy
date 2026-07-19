@@ -1,0 +1,124 @@
+[
+  {
+    "id": "overview",
+    "titleBase": "Solar City — Module Engineering File",
+    "rootFile": "index.html",
+    "internalFile": "overview.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-00",
+    "navLabel": "Overview"
+  },
+  {
+    "id": "designer",
+    "titleBase": "SC-01 Panel designer",
+    "rootFile": "designer.html",
+    "internalFile": "designer.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-01",
+    "navLabel": "Panel designer"
+  },
+  {
+    "id": "build-guide",
+    "titleBase": "SC-02 Build guide",
+    "rootFile": "build-guide.html",
+    "internalFile": "build-guide.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-02",
+    "navLabel": "Build guide"
+  },
+  {
+    "id": "bom",
+    "titleBase": "SC-03 BOM &amp; suppliers",
+    "rootFile": "bom.html",
+    "internalFile": "bom.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-03",
+    "navLabel": "BOM &amp; suppliers"
+  },
+  {
+    "id": "strategy",
+    "titleBase": "SC-04 Strategy",
+    "rootFile": "strategy.html",
+    "internalFile": "strategy.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-04",
+    "navLabel": "Strategy"
+  },
+  {
+    "id": "sourcing",
+    "titleBase": "SC-05 Source &amp; install",
+    "rootFile": "sourcing.html",
+    "internalFile": "sourcing.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-05",
+    "navLabel": "Source &amp; install"
+  },
+  {
+    "id": "market",
+    "titleBase": "SC-06 Market &amp; pricing",
+    "rootFile": "market.html",
+    "internalFile": "market.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-06",
+    "navLabel": "Market &amp; pricing"
+  },
+  {
+    "id": "competitors",
+    "titleBase": "SC-08 Biliran competitors",
+    "rootFile": "competitors.html",
+    "internalFile": "competitors.html",
+    "extraLinks": [],
+    "footer": "biliran",
+    "navCode": "SC-08",
+    "navLabel": "Biliran competitors"
+  },
+  {
+    "id": "map",
+    "titleBase": "SC-09 Biliran map",
+    "rootFile": "map.html",
+    "internalFile": "map.html",
+    "extraLinks": [],
+    "footer": "biliran",
+    "navCode": "SC-09",
+    "navLabel": "Biliran map"
+  },
+  {
+    "id": "roof-check",
+    "titleBase": "SC-10 Roof check (online)",
+    "rootFile": "roof-check.html",
+    "internalFile": "roof-check.html",
+    "extraLinks": [
+      "vendor/leaflet.css"
+    ],
+    "footer": "biliran",
+    "navCode": "SC-10",
+    "navLabel": "Roof check <span style=\"opacity:.6\">(online)</span>"
+  },
+  {
+    "id": "ad-library",
+    "titleBase": "SC-11 Ad library",
+    "rootFile": "ad-library.html",
+    "internalFile": "ad-library.html",
+    "extraLinks": [],
+    "footer": "biliran",
+    "navCode": "SC-11",
+    "navLabel": "Ad library"
+  },
+  {
+    "id": "founders",
+    "titleBase": "SC-12 Founder lessons",
+    "rootFile": "founders.html",
+    "internalFile": "founders.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-12",
+    "navLabel": "Founder lessons"
+  }
+]
