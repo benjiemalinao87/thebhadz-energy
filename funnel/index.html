@@ -20,6 +20,7 @@
       <span class="wm"><b>BADJJ</b><span>Energy Systems</span></span>
     </a>
     <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#calc">Savings</a>
       <a href="#packages">Packages</a>
       <a href="#how">How it works</a>
       <a href="#why">Why solar</a>
@@ -63,7 +64,7 @@
           </div>
         </div>
         <div class="hero-form-cta">
-          <a class="btn btn-primary btn-lg" href="#quote">See what my home would save</a>
+          <a class="btn btn-primary btn-lg" href="#calc">See what my home would save</a>
           <a class="btn btn-secondary btn-lg" href="tel:+639000000000">
             <span class="mini-phone" aria-hidden="true"></span>
             Call us: 0900 000 0000
@@ -85,6 +86,43 @@
         <div class="spec-card spec-payback">
           <span>Payback</span>
           <b>3-4 years</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="calc" id="calc" aria-label="Solar savings calculator">
+    <div class="wrap calc-grid">
+      <div class="calc-intro">
+        <h2>How much would you save?</h2>
+        <p class="lede">Enter your average monthly electric bill. In seconds you'll see an estimate of
+          your monthly savings, payback, and which package fits — no details needed yet.</p>
+        <p class="calc-note">Estimate based on a ₱99,500 system at a ₱12.95/kWh rate. We confirm the
+          exact numbers on your free site survey.</p>
+      </div>
+      <div class="calc-card">
+        <label for="calc-bill">Your average monthly electric bill (₱)</label>
+        <input id="calc-bill" type="number" inputmode="numeric" min="0" step="500" placeholder="e.g. 8000">
+        <div class="calc-priority">
+          <span>What matters most to you?</span>
+          <div class="calc-pills" id="calc-pills" role="group" aria-label="Priority">
+            <button type="button" class="calc-pill sel" data-prio="save">Lower my bill</button>
+            <button type="button" class="calc-pill" data-prio="backup">Backup power</button>
+            <button type="button" class="calc-pill" data-prio="both">Both</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-block" id="calc-go">See my estimate</button>
+        <div class="calc-result" id="calc-result" hidden>
+          <div class="calc-figure" id="calc-save">—</div>
+          <div class="calc-sub">estimated savings per month</div>
+          <div class="calc-rows">
+            <div class="r"><b id="calc-payback">—</b><span>estimated payback</span></div>
+            <div class="r"><b id="calc-5yr">—</b><span>saved over 5 years</span></div>
+          </div>
+          <div class="calc-pkg" id="calc-pkg"></div>
+          <a class="btn btn-primary btn-block" id="calc-cta" href="#quote">Get this estimate confirmed — free</a>
+          <p class="calc-fine">Rough estimate at ₱12.95/kWh — a bigger system saves more. Your real
+            numbers are confirmed free on the site survey. No obligation.</p>
         </div>
       </div>
     </div>

@@ -1160,3 +1160,29 @@ footer a:hover { color: #fff; }
   .mobile-cta { display: block; }
   .founder-lock { bottom: calc(82px + env(safe-area-inset-bottom)); }
 }
+
+/* ---- Savings calculator (SC / Test 1) ---- */
+.calc { background: var(--wash); padding: 64px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+@media (max-width: 860px) { .calc-grid { grid-template-columns: 1fr; gap: 24px; } }
+.calc-intro h2 { font-size: 34px; margin: 0 0 12px; }
+.calc-intro .lede { color: var(--muted); font-size: 17px; line-height: 1.5; }
+.calc-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.calc-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 24px; }
+.calc-card label { display: block; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+#calc-bill { width: 100%; box-sizing: border-box; font: 600 20px var(--sans); padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 16px; }
+#calc-bill:focus { outline: none; border-color: var(--sun); }
+.calc-priority > span { display: block; font-weight: 600; margin-bottom: 8px; }
+.calc-pills { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.calc-pill { flex: 1; min-width: 92px; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink); font: 600 14px var(--sans); cursor: pointer; }
+.calc-pill.sel { background: var(--sun); border-color: var(--sun); color: #fff; }
+.calc-result { margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--line); }
+.calc-figure { font-size: 34px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.calc-sub { color: var(--muted); font-size: 14px; margin: 2px 0 14px; }
+.calc-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.calc-rows .r { background: var(--wash); border-radius: var(--radius); padding: 10px 12px; }
+.calc-rows .r b { display: block; font-size: 18px; color: var(--ink); }
+.calc-rows .r span { font-size: 12px; color: var(--muted); }
+.calc-pkg { background: #fff6ec; border: 1px solid #ffd8a8; border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; font-size: 14px; color: var(--ink); }
+.calc-pkg b { color: var(--sun-deep); }
+.calc-fine { font-size: 12px; color: var(--muted); margin-top: 10px; }
