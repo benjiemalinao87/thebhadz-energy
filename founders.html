@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-12 Founder lessons — Solar City</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .fdeck { margin: 24px 0 8px; max-width: 520px; }
+  .fdeck-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .fdeck-progress { flex: 1; height: 4px; background: var(--hairline); position: relative; }
+  .fdeck-progress i { display: block; height: 100%; width: 0; background: var(--copper); transition: width .25s ease; }
+  .fdeck-count { white-space: nowrap; }
+  .fdeck-starred { white-space: nowrap; color: var(--sun); }
+
+  .fdeck-stage { position: relative; height: 460px; outline: none; touch-action: none; }
+  .fdeck-stage.is-empty { height: 0; }
+  .fdeck-stage:focus-visible { outline: 2px solid var(--copper); outline-offset: 4px; }
+
+  .fcard {
+    position: absolute; inset: 0; border-radius: 10px;
+    transform: translateY(calc(var(--depth) * 10px)) scale(calc(1 - var(--depth) * 0.035));
+    transition: transform .22s ease, opacity .22s ease;
+    z-index: 10;
+    --like-opacity: 0; --pass-opacity: 0;
+    user-select: none; -webkit-user-select: none;
+  }
+  .fcard[data-depth="1"] { z-index: 9; }
+  .fcard[data-depth="2"] { z-index: 8; }
+  .fcard.is-dragged { transition: none; cursor: grabbing; }
+  .fcard.is-flying { transition: transform .22s ease-in, opacity .22s ease-in; }
+  .fcard[data-depth="0"] { cursor: grab; }
+
+  .fcard-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    border-radius: 10px; box-shadow: 0 10px 28px rgba(12,19,34,.18);
+  }
+  .fcard.is-flipped .fcard-inner { transform: rotateY(180deg); }
+
+  .fcard-face {
+    position: absolute; inset: 0; backface-visibility: hidden;
+    border-radius: 10px; border: 1px solid var(--hairline); background: var(--sheet);
+    padding: 26px 26px 20px; display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .fcard-front { border-top: 5px solid var(--busbar); }
+  .fcard.cat-c-soft .fcard-front { border-top-color: var(--copper); }
+  .fcard.cat-c-hard .fcard-front { border-top-color: var(--sun); }
+  .fcard.cat-c-media .fcard-front { border-top-color: var(--busbar); }
+  .fcard.cat-c-invest .fcard-front { border-top-color: var(--ok); }
+
+  .fcard-back { transform: rotateY(180deg); background: var(--silicon); color: #dbe4ef; border-color: #26324a; justify-content: center; }
+
+  .fcard-top { display: flex; align-items: center; justify-content: space-between; }
+  .fcard-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .fcard-star { color: var(--sun); font-size: 15px; }
+
+  .fcard-avatar {
+    width: 64px; height: 64px; border-radius: 50%; margin: 18px 0 14px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--silicon); color: #fff; font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: .02em;
+  }
+  .fcard.cat-c-soft .fcard-avatar { background: var(--copper); }
+  .fcard.cat-c-hard .fcard-avatar { background: var(--sun); color: var(--silicon); }
+  .fcard.cat-c-media .fcard-avatar { background: var(--busbar); color: var(--silicon); }
+  .fcard.cat-c-invest .fcard-avatar { background: var(--ok); }
+
+  .fcard-name { margin: 0; font-size: 21px; }
+  .fcard-co { margin: 4px 0 0; font-size: 13.5px; color: var(--faint); }
+  .fcard-year { font-family: var(--mono); font-size: 11.5px; }
+  .fcard-hook { margin: 16px 0 0; font-size: 16px; line-height: 1.45; font-weight: 600; }
+  .fcard-flip-hint { margin-top: auto; padding-top: 14px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); text-align: center; }
+  .fcard-back .fcard-flip-hint { color: var(--busbar); }
+
+  .fcard-section { font-size: 13.5px; line-height: 1.55; margin: 0 0 14px; color: #c9d4e2; }
+  .fcard-section b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--sun); margin-bottom: 4px; }
+  .fcard-lesson { margin-bottom: 0; font-weight: 650; color: #fff; }
+  .fcard-lesson b { color: var(--copper-bright); }
+
+  .fcard::before, .fcard::after {
+    content: ""; position: absolute; top: 22px; bottom: 22px; width: 64px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 800; font-size: 15px; letter-spacing: .12em;
+    border-radius: 8px; pointer-events: none; z-index: 2;
+  }
+  .fcard[data-depth="0"]::after {
+    content: "★ STAR"; right: 20px; color: var(--ok); border: 2px solid var(--ok);
+    opacity: var(--like-opacity); transform: rotate(-8deg); padding: 0 8px; height: 34px; top: 22px; bottom: auto;
+  }
+  .fcard[data-depth="0"]::before {
+    content: "✕ PASS"; left: 20px; color: #c0392b; border: 2px solid #c0392b;
+    opacity: var(--pass-opacity); transform: rotate(8deg); padding: 0 8px; height: 34px; top: 22px; bottom: auto;
+  }
+
+  .fdeck-controls { display: flex; gap: 10px; margin-top: 18px; }
+  .fdeck-controls button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .03em;
+    border: 1px solid var(--busbar); background: var(--sheet); color: var(--ink);
+    padding: 10px 14px; cursor: pointer; border-radius: 6px;
+  }
+  .fdeck-controls button:hover { border-color: var(--copper); color: var(--copper); }
+  #fdeck-next { border-color: var(--ok); color: var(--ok); }
+  #fdeck-next:hover { background: var(--ok); color: #fff; }
+  #fdeck-prev { border-color: #c0392b; color: #c0392b; }
+  #fdeck-prev:hover { background: #c0392b; color: #fff; }
+
+  .fdeck-hint { margin: 12px 0 0; font-size: 12.5px; color: var(--faint); }
+
+  #fdeck-end button { margin-top: 8px; }
+
+  @media (max-width: 640px) {
+    .fdeck { max-width: 100%; }
+    .fdeck-stage { height: 500px; }
+    .fdeck-controls { flex-wrap: wrap; }
+    .fdeck-controls button { flex: 1 1 40%; }
+  }
+</style>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="founders.html"><span class="code">SC-12</span>Founder lessons</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-12 · FOUNDER LESSONS <span class="rev">· REV A · 2026-07-19</span></p>
+    <h1>Twenty founders. One bad week each.</h1>
+    <p class="lede">
+      Short, swipeable lessons from builders who nearly failed before they didn't. Internal reading
+      for the team — culture, not a Mission deliverable, and not customer-facing. Tap a card to flip
+      it, drag (or use the buttons / arrow keys) to move to the next one.
+    </p>
+
+    <div class="callout info">
+      <span class="label">Source note</span>
+      Condensed and paraphrased from public reporting, interviews, and memoirs (e.g. <em>Shoe Dog</em>,
+      <em>The Nvidia Way</em>, company histories) — for a fast internal read, not verbatim quotes.
+      Treat specifics as <span class="unverified">UNVERIFIED</span> if you plan to cite them externally.
+    </div>
+
+    <section class="fdeck" aria-label="Founder lesson cards">
+      <div class="fdeck-bar">
+        <span class="fdeck-count"><span id="fdeck-index">1</span>&nbsp;/&nbsp;<span id="fdeck-total">20</span></span>
+        <div class="fdeck-progress"><i id="fdeck-progress-fill"></i></div>
+        <span class="fdeck-starred">★ <span id="fdeck-starred-count">0</span></span>
+      </div>
+
+      <div class="fdeck-stage" id="fdeck-stage" tabindex="0" aria-live="polite" aria-label="Current founder card, use arrow keys to navigate"></div>
+
+      <div class="fdeck-controls">
+        <button type="button" id="fdeck-prev">✕ Pass</button>
+        <button type="button" id="fdeck-flip">⟲ Flip</button>
+        <button type="button" id="fdeck-shuffle">⤨ Shuffle</button>
+        <button type="button" id="fdeck-next">★ Star &amp; next</button>
+      </div>
+
+      <p class="fdeck-hint">Drag the card left/right, or use ← → to advance and Space/Enter to flip. Starred cards are remembered on this device.</p>
+
+      <div id="fdeck-end" class="callout qc" hidden>
+        <span class="label">Deck complete</span>
+        <span id="fdeck-end-starred"></span><br>
+        <button type="button" id="fdeck-restart">Reshuffle &amp; restart</button>
+      </div>
+    </section>
+
+    <h2><span class="sec">§ 1</span>Why this page exists</h2>
+    <p>
+      Building takes longer than it looks from outside, and it rarely looks like a straight line.
+      Every founder on this deck hit a point where the company could plausibly have ended — and
+      the lesson survived even where the specific company almost didn't. Read one before a hard
+      week, not instead of doing the work in front of you.
+    </p>
+    <p class="fdeck-hint">
+      Know a founder story that belongs here? Add it to <code>assets/founders.js</code> — same
+      shape: start, breaking point, one-line lesson.
+    </p>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/founders.js"></script>
+</html>
