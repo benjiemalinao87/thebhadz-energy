@@ -54,6 +54,19 @@ fully editable, and requiring no external assets (Cloudflare Pages serves them a
 
 Every CTA points to the single conversion action: **the free savings estimate.**
 
+## Savings calculator (instant time-to-value)
+
+The `#calc` section (hero CTA lands here) turns a visitor's monthly bill into an instant estimate
+— savings/month, payback, and the recommended package — then **pre-fills the lead form** (bill
+range + package + goal) and jumps to it. This is the engineer-founder channel: it collapses the
+quote cycle from a week to seconds, and it is the precondition for any ad spend (SC-11 boost gate).
+
+- Assumptions live at the top of `assets/funnel.js` (rate **₱12.95/kWh** = BILECO, 4.0 peak-sun-hrs,
+  0.78 derate, ~2.3 kWp for a ₱99,500 system). Change the rate there for a different utility.
+- Outputs are shown as **ranges** and labelled estimates on purpose — confirmed on the free survey,
+  never presented as guarantees (value-gap honesty rule).
+- Calculator use fires `fbq('track','Lead')` / `gtag('calculator_estimate')` for attribution.
+
 ## Deploy to Cloudflare Pages
 
 **Option A — dashboard (Git):**

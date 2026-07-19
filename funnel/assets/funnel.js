@@ -141,3 +141,97 @@
       });
   });
 })();
+
+/* Solar City — BILECO savings calculator (Test 1 instant time-to-value).
+   Bill in → estimated savings / payback / recommended package out, then
+   pre-fills the lead form (bill range + package + goal) and jumps to it.
+   Assumptions are deliberately conservative and clearly labelled as estimates. */
+(function () {
+  "use strict";
+  var billEl = document.getElementById("calc-bill");
+  var goBtn = document.getElementById("calc-go");
+  if (!billEl || !goBtn) return;
+
+  var RATE = 12.95, PSH = 4.0, DERATE = 0.78; // BILECO ₱/kWh, peak-sun-hrs, system derate
+  var KWP = { save: 2.3, both: 2.2, backup: 1.6 };      // ~₱99,500 system by priority
+  var PKG = {
+    save:   { code: "LIWANAG", opt: "LIWANAG (on-grid)",  goal: "Lower my bill (on-grid)",  tag: "On-grid — lowers your bill" },
+    both:   { code: "SANDIGAN", opt: "SANDIGAN (hybrid)", goal: "Both (hybrid)",            tag: "Hybrid — savings + brownout backup" },
+    backup: { code: "ILAW", opt: "ILAW (off-grid)",       goal: "Backup power (off-grid)",  tag: "Off-grid — backup through brownouts" }
+  };
+  var prio = "save";
+
+  var pills = document.getElementById("calc-pills");
+  if (pills) {
+    pills.querySelectorAll(".calc-pill").forEach(function (b) {
+      b.addEventListener("click", function () {
+        prio = b.getAttribute("data-prio");
+        pills.querySelectorAll(".calc-pill").forEach(function (x) { x.classList.toggle("sel", x === b); });
+      });
+    });
+  }
+
+  function peso(n) { return "₱" + Math.round(n).toLocaleString(); }
+  function round100(n) { return Math.max(0, Math.round(n / 100) * 100); }
+
+  function compute() {
+    var bill = parseFloat(billEl.value);
+    if (!isFinite(bill) || bill <= 0) { billEl.focus(); return null; }
+    var kwp = KWP[prio];
+    var prodKwh = kwp * PSH * 30 * DERATE;          // monthly production
+    var usedKwh = bill / RATE;                        // monthly consumption
+    var offsetKwh = Math.min(prodKwh, usedKwh);
+    var save = offsetKwh * RATE * 0.9;               // 0.9 = conservative self-consumption haircut
+    save = Math.min(save, bill * 0.9);               // never imply we zero the bill
+    var lo = round100(save * 0.85), hi = round100(save * 1.15);
+    var payLo = 99500 / (hi * 12), payHi = 99500 / (lo * 12);
+    return { bill: bill, lo: lo, hi: hi, payLo: payLo, payHi: payHi, five: save * 60, pkg: PKG[prio] };
+  }
+
+  function billRange(n) {
+    if (n < 3000) return "Under ₱3,000";
+    if (n < 6000) return "₱3,000 - ₱6,000";
+    if (n < 10000) return "₱6,000 - ₱10,000";
+    if (n < 15000) return "₱10,000 - ₱15,000";
+    return "Over ₱15,000";
+  }
+  function setSelect(id, text) {
+    var s = document.getElementById(id);
+    if (!s) return;
+    for (var i = 0; i < s.options.length; i++) {
+      if (s.options[i].value === text || s.options[i].text === text) { s.selectedIndex = i; break; }
+    }
+  }
+
+  goBtn.addEventListener("click", function () {
+    var r = compute();
+    if (!r) return;
+    document.getElementById("calc-save").textContent =
+      r.lo === r.hi ? peso(r.lo) + " / mo" : peso(r.lo) + " – " + peso(r.hi) + " / mo";
+    var py = Math.max(1, Math.round(r.payLo)), pyH = Math.max(py, Math.round(r.payHi));
+    document.getElementById("calc-payback").textContent = (py === pyH ? py : py + "–" + pyH) + " yrs";
+    document.getElementById("calc-5yr").textContent = "~" + peso(r.five);
+    var backupLine = (prio !== "save") ? " Plus lights, fans and WiFi through a brownout." : "";
+    document.getElementById("calc-pkg").innerHTML =
+      "Best fit: <b>" + r.pkg.code + "</b> — " + r.pkg.tag + ". Fixed ₱99,500, installed." + backupLine;
+
+    // pre-fill the lead form so the quote request carries the estimate context
+    setSelect("f-bill", billRange(r.bill));
+    setSelect("f-package", r.pkg.opt);
+    var radio = document.querySelector('input[name="goal"][value="' + r.pkg.goal + '"]');
+    if (radio) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event("change", { bubbles: true }));
+      var pill = radio.closest(".pill");
+      if (pill) pill.classList.add("sel");
+    }
+
+    var box = document.getElementById("calc-result");
+    box.hidden = false;
+    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (window.fbq) window.fbq("track", "Lead", { content_name: "savings_calculator" });
+    if (window.gtag) window.gtag("event", "calculator_estimate");
+  });
+
+  billEl.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); goBtn.click(); } });
+})();
