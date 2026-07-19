@@ -102,6 +102,21 @@ last is data). "Ang mahal ng kuryente!" without a number or prior spend = fluff.
 
 ---
 
+## 4b. Desk recon — spot existing solar from satellite imagery (free, supplement only)
+
+Before/alongside the drive, scan **Google Earth Pro** (free desktop) or Google Maps
+satellite view over Naval + town centers. Rooftop arrays show as **dark blue-black
+rectangular blocks** on roofs.
+
+- Use the **historical-imagery time-slider** (Google Earth Pro) to see roughly *when* an
+  array appeared.
+- **Limits (do not over-rely):** rural Biliran imagery is **low-res and often years old**,
+  small residential arrays are easy to miss or confuse with tanks/skylights, and it **never
+  reveals the installer, brand, or whether it's grid-tied.**
+- **Authoritative sources beat it:** BILECO's net-metering list (§1) is the real register of
+  grid-connected solar homes; the on-ground sweep (§4) catches off-grid systems imagery
+  misses. Treat satellite scanning as a free head-start, not the answer.
+
 ## 5. Where to log the results
 
 | Finding | File |
