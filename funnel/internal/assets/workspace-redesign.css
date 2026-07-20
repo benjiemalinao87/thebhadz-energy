@@ -418,6 +418,20 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
   border-radius: 8px;
 }
 
+/* Two-up form cards: the .ops-form is the card — drop the redundant
+   subpanel border and the stray form margin so the box doesn't overflow,
+   and let both columns stretch to equal height. */
+.workspace-page .ops-split { align-items: stretch; }
+.workspace-page .ops-subpanel {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.workspace-page .ops-subpanel > .ops-form { flex: 1; margin-bottom: 0; }
+.workspace-page .ops-subpanel > .ops-form .ops-form-actions { margin-top: auto; }
+
 .workspace-page .ops-alert { color: var(--ws-copy); border-radius: 0 8px 8px 0; }
 .workspace-page .ops-alert strong { color: var(--ws-ink); }
 .workspace-page .lab-savebar,
