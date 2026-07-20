@@ -237,13 +237,56 @@
   (function () {
     var boxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type="checkbox"]'));
     var STORE_KEY = 'sc13-checklist-v1';
-    var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { saved = {}; }
+    var API_KEY = 'sec-registration';
+    // On the internal Command Center the checklist is shared across the team via
+    // /api/checklist (D1). The root site has no Functions, so it stays local-only.
+    var useApi = location.pathname.indexOf('/internal/') === 0;
+    var saveTimer = null;
+    var saving = false;
 
-    function save() {
+    function readState() {
       var state = {};
-      boxes.forEach(function (b) { state[b.id] = b.checked; });
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+      boxes.forEach(function (b) { if (b.checked) state[b.id] = true; });
+      return state;
+    }
+
+    function applyState(state) {
+      boxes.forEach(function (b) {
+        b.checked = !!state[b.id];
+        b.closest('.cl-item').classList.toggle('done', b.checked);
+      });
+      updateProgress();
+    }
+
+    function saveLocal() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(readState())); } catch (e) {}
+    }
+
+    function pushRemote() {
+      if (!useApi) return;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function () {
+        saveTimer = null;
+        saving = true;
+        fetch('/api/checklist', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: API_KEY, state: readState() })
+        }).catch(function () {}).then(function () { saving = false; });
+      }, 500);
+    }
+
+    function pullRemote() {
+      if (!useApi) return;
+      fetch('/api/checklist?key=' + API_KEY)
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.ok && d.state) {
+            applyState(d.state);
+            saveLocal();
+          }
+        })
+        .catch(function () {});
     }
 
     function updateProgress() {
@@ -252,26 +295,32 @@
       document.getElementById('cl-bar-fill').style.width = (boxes.length ? (checked / boxes.length * 100) : 0) + '%';
     }
 
+    // Paint from localStorage first so the page never flashes empty, then let
+    // the shared server state (if reachable) win.
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { saved = {}; }
+    applyState(saved);
+    pullRemote();
+
     boxes.forEach(function (b) {
-      if (saved[b.id]) b.checked = true;
-      b.closest('.cl-item').classList.toggle('done', b.checked);
       b.addEventListener('change', function () {
         b.closest('.cl-item').classList.toggle('done', b.checked);
-        save();
+        saveLocal();
+        pushRemote();
         updateProgress();
       });
     });
 
     document.getElementById('cl-reset').addEventListener('click', function () {
-      boxes.forEach(function (b) {
-        b.checked = false;
-        b.closest('.cl-item').classList.remove('done');
-      });
+      applyState({});
       try { localStorage.removeItem(STORE_KEY); } catch (e) {}
-      updateProgress();
+      pushRemote();
     });
 
-    updateProgress();
+    // Pick up teammates' changes when returning to the tab.
+    window.addEventListener('focus', function () {
+      if (!saving && !saveTimer) pullRemote();
+    });
   })();
 </script>
 </html>

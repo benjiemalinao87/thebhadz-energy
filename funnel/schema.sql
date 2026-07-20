@@ -56,6 +56,14 @@ CREATE TABLE IF NOT EXISTS project_tasks (
 CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_due ON project_tasks(due);
 
+-- Shared team checklists (e.g. the SC-13 SEC registration checklist).
+-- One row per checklist; state_json maps checkbox id → true.
+CREATE TABLE IF NOT EXISTS checklists (
+  key         TEXT PRIMARY KEY,
+  state_json  TEXT NOT NULL DEFAULT '{}',
+  updated_at  TEXT NOT NULL
+);
+
 -- Shared founder pricing, positioning and evidence workspace
 CREATE TABLE IF NOT EXISTS founder_strategy (
   id          TEXT PRIMARY KEY,
