@@ -3,9 +3,15 @@
 
   var ACCEPT =
     ".mp4,.mov,.webm,.m4a,.mp3,.wav,.ogg,video/mp4,video/quicktime,video/webm,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/ogg";
+  var DONE_KEY = "macc-meetings-done";
+  var FOUNDER_KEY = "macc-meetings-founder";
   var sections = new Map();
   var dockSelect = null;
   var dockStatus = null;
+  var recordingTotal = 0;
+  var showCompleted = false;
+  var actionFilter = "all";
+  var actionRows = [];
 
   function meetingLabel(article) {
     var date = article.querySelector(".mh .date");
@@ -13,6 +19,319 @@
     var d = date ? date.textContent.split("·")[0].trim() : article.id;
     var t = title ? title.textContent.trim() : article.id;
     return d + " — " + t;
+  }
+
+  function taskKey(taskEl) {
+    return String(taskEl ? taskEl.textContent : "")
+      .trim()
+      .slice(0, 120);
+  }
+
+  function loadDoneSet() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]"));
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function saveDoneSet(set) {
+    localStorage.setItem(DONE_KEY, JSON.stringify(Array.from(set)));
+  }
+
+  function setDockStatus(text, isErr) {
+    document.querySelectorAll("#rec-dock-status, #rec-dock-status-top").forEach(function (el) {
+      el.textContent = text || "";
+      el.classList.toggle("err", !!isErr);
+    });
+  }
+
+  function selectMeeting(id, opts) {
+    if (!document.getElementById(id)) return;
+    document.querySelectorAll("article.meeting").forEach(function (m) {
+      m.classList.toggle("is-active", m.id === id);
+    });
+    document.querySelectorAll(".rail a.m[href^='#']").forEach(function (link) {
+      link.classList.toggle("act", link.getAttribute("href") === "#" + id);
+    });
+    if (dockSelect && sections.has(id)) dockSelect.value = id;
+    if (!opts || !opts.skipHash) {
+      try {
+        history.replaceState(null, "", "#" + id);
+      } catch (e) {}
+    }
+  }
+
+  function countOpenActionsInMeeting(article) {
+    var n = 0;
+    article.querySelectorAll(".m-actions .aitem").forEach(function (item) {
+      if (!item.classList.contains("done")) n++;
+    });
+    return n;
+  }
+
+  function updateRailActionDots() {
+    document.querySelectorAll(".rail a.m[href^='#']").forEach(function (link) {
+      var id = link.getAttribute("href").slice(1);
+      var article = document.getElementById(id);
+      var dot = link.querySelector(".act-dot");
+      var open = article ? countOpenActionsInMeeting(article) : 0;
+      if (!open) {
+        if (dot) dot.remove();
+        return;
+      }
+      if (!dot) {
+        dot = document.createElement("span");
+        dot.className = "act-dot";
+        dot.title = open + " open action" + (open === 1 ? "" : "s");
+        link.querySelector(".t").appendChild(dot);
+      } else {
+        dot.title = open + " open action" + (open === 1 ? "" : "s");
+      }
+    });
+  }
+
+  function updateStats() {
+    var open = 0;
+    var overdue = 0;
+    document.querySelectorAll(".actions-panel .ai").forEach(function (row) {
+      if (row.classList.contains("done")) return;
+      open++;
+      if (row.querySelector(".due.over")) overdue++;
+    });
+    var meetings = document.querySelectorAll("article.meeting").length;
+    var elOpen = document.getElementById("stat-open");
+    var elOver = document.getElementById("stat-overdue");
+    var elRec = document.getElementById("stat-recordings");
+    var elMeet = document.getElementById("stat-meetings");
+    if (elOpen) elOpen.textContent = String(open);
+    if (elOver) elOver.textContent = String(overdue);
+    if (elRec) elRec.textContent = String(recordingTotal);
+    if (elMeet) elMeet.textContent = String(meetings);
+  }
+
+  function ownerLabel(key) {
+    var map = {
+      all: "All founders",
+      ace: "Ace",
+      benjie: "Benjie",
+      jundhel: "Jundhel",
+      jethro: "Jethro",
+      other: "Unassigned",
+    };
+    return map[key] || key;
+  }
+
+  function ownerInitials(key) {
+    var map = { all: "ALL", ace: "AC", benjie: "BM", jundhel: "JC", jethro: "JA", other: "?" };
+    return map[key] || key.slice(0, 2).toUpperCase();
+  }
+
+  function primaryOwner(row) {
+    var owners = (row.getAttribute("data-owners") || "other").split(",");
+    if (owners.indexOf("all") >= 0) return "all";
+    return owners[0] || "other";
+  }
+
+  function matchesActionFilter(row) {
+    var isDone = row.classList.contains("done");
+    if (isDone && !showCompleted) return false;
+    if (!isDone && showCompleted) return false;
+    if (actionFilter === "overdue") return !isDone && !!row.querySelector(".due.over");
+    if (actionFilter === "mine") {
+      var founder = document.getElementById("actions-founder");
+      var pick = founder ? founder.value : "benjie";
+      var owners = (row.getAttribute("data-owners") || "").split(",");
+      return owners.indexOf(pick) >= 0;
+    }
+    return true;
+  }
+
+  function renderActionGroups() {
+    var host = document.getElementById("actions-groups");
+    if (!host || !actionRows.length) return;
+
+    var visible = actionRows.filter(matchesActionFilter);
+    host.innerHTML = "";
+
+    if (!visible.length) {
+      var empty = document.createElement("p");
+      empty.className = "rec-empty";
+      empty.textContent = showCompleted ? "No completed items yet." : "No open items match this filter.";
+      host.appendChild(empty);
+      return;
+    }
+
+    if (actionFilter === "overdue") {
+      visible.forEach(function (row) {
+        host.appendChild(row);
+      });
+      return;
+    }
+
+    var groups = {};
+    visible.forEach(function (row) {
+      var key = primaryOwner(row);
+      (groups[key] = groups[key] || []).push(row);
+    });
+
+    Object.keys(groups)
+      .sort(function (a, b) {
+        var order = ["all", "ace", "benjie", "jundhel", "jethro", "other"];
+        return order.indexOf(a) - order.indexOf(b);
+      })
+      .forEach(function (key) {
+        var wrap = document.createElement("div");
+        wrap.className = "owner-group";
+        var h = document.createElement("h4");
+        h.innerHTML =
+          '<span class="av">' +
+          ownerInitials(key) +
+          "</span> " +
+          ownerLabel(key) +
+          " (" +
+          groups[key].length +
+          ")";
+        wrap.appendChild(h);
+        groups[key].forEach(function (row) {
+          wrap.appendChild(row);
+        });
+        host.appendChild(wrap);
+      });
+  }
+
+  function setActionDone(row, done, doneSet) {
+    row.classList.toggle("done", done);
+    var chk = row.querySelector(".chk");
+    if (chk) {
+      chk.classList.toggle("done", done);
+      chk.setAttribute("aria-checked", done ? "true" : "false");
+    }
+    var key = taskKey(row.querySelector(".task"));
+    if (done) doneSet.add(key);
+    else doneSet.delete(key);
+  }
+
+  function syncMeetingItems(taskText, done) {
+    document.querySelectorAll(".m-actions .aitem").forEach(function (item) {
+      var txt = item.querySelector(".txt");
+      if (!txt) return;
+      if (taskKey(txt).slice(0, 80) === taskText.slice(0, 80)) {
+        item.classList.toggle("done", done);
+        var chk = item.querySelector(".chk");
+        if (chk) chk.classList.toggle("done", done);
+      }
+    });
+    updateRailActionDots();
+  }
+
+  function initActionItems() {
+    var host = document.getElementById("actions-groups");
+    if (host) {
+      actionRows = Array.prototype.slice.call(host.querySelectorAll(":scope > .ai"));
+    }
+    var doneSet = loadDoneSet();
+    document.querySelectorAll(".actions-panel .ai").forEach(function (row) {
+      var key = taskKey(row.querySelector(".task"));
+      if (doneSet.has(key)) {
+        setActionDone(row, true, doneSet);
+        syncMeetingItems(key, true);
+      }
+      var chk = row.querySelector(".chk");
+      if (!chk) return;
+      function toggle() {
+        var next = !row.classList.contains("done");
+        setActionDone(row, next, doneSet);
+        saveDoneSet(doneSet);
+        syncMeetingItems(key, next);
+        updateStats();
+        renderActionGroups();
+      }
+      chk.addEventListener("click", toggle);
+      chk.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
+    saveDoneSet(doneSet);
+  }
+
+  function initActionFilters() {
+    var founderSelect = document.getElementById("actions-founder");
+    var saved = localStorage.getItem(FOUNDER_KEY);
+    if (founderSelect && saved) founderSelect.value = saved;
+
+    document.querySelectorAll(".actions-tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        actionFilter = tab.getAttribute("data-filter") || "all";
+        document.querySelectorAll(".actions-tab").forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle("act", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        if (founderSelect) founderSelect.hidden = actionFilter !== "mine";
+        renderActionGroups();
+      });
+    });
+
+    if (founderSelect) {
+      founderSelect.addEventListener("change", function () {
+        localStorage.setItem(FOUNDER_KEY, founderSelect.value);
+        renderActionGroups();
+      });
+    }
+
+    var doneToggle = document.getElementById("actions-done-toggle");
+    if (doneToggle) {
+      doneToggle.addEventListener("click", function () {
+        showCompleted = !showCompleted;
+        doneToggle.textContent = showCompleted ? "Hide completed" : "View completed";
+        renderActionGroups();
+        updateStats();
+      });
+    }
+  }
+
+  function initRailFilters() {
+    document.querySelectorAll(".rail-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var filter = chip.getAttribute("data-filter") || "all";
+        document.querySelectorAll(".rail-chip").forEach(function (c) {
+          c.classList.toggle("act", c === chip);
+        });
+        document.querySelectorAll(".rail a.m[href^='#']").forEach(function (link) {
+          if (filter === "rec") {
+            link.classList.toggle("is-hidden", !link.querySelector(".rec-badge"));
+          } else {
+            link.classList.remove("is-hidden");
+          }
+        });
+      });
+    });
+  }
+
+  function initMeetingNav() {
+    document.querySelectorAll(".rail a.m[href^='#']").forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        selectMeeting(link.getAttribute("href").slice(1));
+      });
+    });
+    if (dockSelect) {
+      dockSelect.addEventListener("change", function () {
+        if (dockSelect.value) selectMeeting(dockSelect.value, { skipHash: true });
+      });
+    }
+    var hash = (location.hash || "").replace(/^#/, "");
+    var first = document.querySelector("article.meeting[id]");
+    selectMeeting(hash && document.getElementById(hash) ? hash : first ? first.id : "", { skipHash: true });
+    if (hash && document.getElementById(hash)) {
+      try {
+        history.replaceState(null, "", "#" + hash);
+      } catch (e) {}
+    }
   }
 
   function buildDock() {
@@ -85,12 +404,6 @@
     });
   }
 
-  function setDockStatus(text, isErr) {
-    if (!dockStatus) return;
-    dockStatus.textContent = text || "";
-    dockStatus.classList.toggle("err", !!isErr);
-  }
-
   function mountMeetingSections() {
     document.querySelectorAll("article.meeting[id]").forEach(function (article) {
       var panel = document.createElement("div");
@@ -99,11 +412,11 @@
       var head = document.createElement("div");
       head.className = "rec-panel-head";
       head.innerHTML =
-        "<div><h4>Recordings</h4><p class=\"rec-hint\">Zoom / phone / screen capture — MP4, MOV, M4A up to 2&nbsp;GB</p></div>";
+        '<div><h4>Recordings</h4><p class="rec-hint">Zoom / phone / screen capture — MP4, MOV, M4A up to 2&nbsp;GB</p></div>';
 
       var add = document.createElement("label");
       add.className = "rec-add";
-      add.innerHTML = "<span class=\"rec-add-ico\" aria-hidden=\"true\">⬆</span> Upload recording";
+      add.innerHTML = '<span class="rec-add-ico" aria-hidden="true">⬆</span> Upload recording';
       var input = document.createElement("input");
       input.type = "file";
       input.accept = ACCEPT;
@@ -221,8 +534,13 @@
           render(sec.list, byMeeting[meetingId] || []);
         });
         updateRailBadges(byMeeting);
-        var total = data.recordings.length;
-        setDockStatus(total ? total + " recording" + (total === 1 ? "" : "s") + " stored." : "No recordings yet.");
+        recordingTotal = data.recordings.length;
+        setDockStatus(
+          recordingTotal
+            ? recordingTotal + " recording" + (recordingTotal === 1 ? "" : "s") + " stored."
+            : "No recordings yet."
+        );
+        updateStats();
       })
       .catch(function () {
         setDockStatus("Could not load recordings.", true);
@@ -277,6 +595,7 @@
 
   async function upload(meetingId, file, wrap) {
     if (dockSelect) dockSelect.value = meetingId;
+    selectMeeting(meetingId, { skipHash: true });
     var defTitle = file.name.replace(/\.[^.]+$/, "");
     var title = prompt("Recording title:", defTitle);
     if (title === null) return;
@@ -335,8 +654,6 @@
       prog.remove();
       setDockStatus("Upload complete.");
       loadAll();
-      var article = document.getElementById(meetingId);
-      if (article) article.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
       if (created) {
         try {
@@ -355,15 +672,14 @@
     }
   }
 
-  // Keep dock meeting in sync when using the left rail.
-  document.querySelectorAll(".rail a.m[href^='#']").forEach(function (link) {
-    link.addEventListener("click", function () {
-      var id = link.getAttribute("href").slice(1);
-      if (dockSelect && sections.has(id)) dockSelect.value = id;
-    });
-  });
-
   mountMeetingSections();
   buildDock();
+  initMeetingNav();
+  initRailFilters();
+  initActionItems();
+  initActionFilters();
+  updateRailActionDots();
+  updateStats();
+  renderActionGroups();
   loadAll();
 })();

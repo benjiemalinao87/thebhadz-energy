@@ -50,3 +50,17 @@ AUTH_SECRET=<any-random-string-for-local>
 **Do not:** Use `python3 -m http.server` from repo root for funnel work — wrong web root and no Functions.
 
 **Do not:** Run `wrangler pages dev funnel` from repo root — Functions won't compile (look for `✨ Compiled Worker successfully`, not `No Functions. Shimming...`).
+
+## Meeting log 3-column redesign
+
+**Fixed:** 2026-07-21
+
+**Problem:** Upload bar, open-action digest, and all meeting notes stacked vertically — action items buried below upload; hard to scan overdue items or switch meetings.
+
+**Fix:**
+1. Layout: meetings rail | center (stats + compact upload + one active meeting) | sticky open-actions panel.
+2. Rail: filter chips (All / Has recording) + recording badges + red dot when meeting has open per-meeting actions.
+3. Right panel: All / Mine / Overdue tabs, owner groups, clickable checkboxes persisted in `localStorage` (`macc-meetings-done`).
+4. `meetings.js`: cache action rows before grouping (re-render destroys DOM if you re-query `:scope > .ai` after first group pass).
+
+**Do not:** Regroup action items by querying only direct children after moving nodes into `.owner-group` — keep a cached `actionRows[]` array and rebuild the panel from it.

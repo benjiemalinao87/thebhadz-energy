@@ -426,10 +426,79 @@ body.ops-standalone {
   width: 100%;
   max-width: none;
   display: grid;
-  grid-template-columns: 290px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr) 320px;
   gap: 16px;
   align-items: start;
 }
+.ops-meetings .center-col {
+  max-width: none;
+  padding: 0;
+  border-right: 0;
+}
+.ops-meetings .stats-row { margin-bottom: 16px; }
+.ops-meetings .stat-card {
+  border-color: var(--ops-line);
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
+}
+.ops-meetings .stat-n { color: var(--ops-petrol); }
+.ops-meetings .stat-l { color: var(--ops-muted); }
+.ops-meetings .actions-panel {
+  position: sticky;
+  top: 20px;
+  height: calc(100vh - 40px);
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
+}
+.ops-meetings .actions-panel h3 { color: var(--ops-ink); font-size: 16px; }
+.ops-meetings .actions-panel .sub { color: var(--ops-muted); }
+.ops-meetings .actions-tab {
+  border-color: var(--ops-line);
+  color: var(--ops-muted);
+  background: var(--ops-surface-2);
+}
+.ops-meetings .actions-tab.act {
+  background: #fff4e5;
+  border-color: #e0b35c;
+  color: #8a6100;
+}
+.ops-meetings .actions-founder {
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  border-color: var(--ops-line);
+}
+.ops-meetings .owner-group h4 { color: var(--ops-muted); }
+.ops-meetings .owner-group h4 .av {
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line);
+  color: #8a6100;
+}
+.ops-meetings .actions-done-toggle {
+  border-color: var(--ops-line);
+  color: var(--ops-muted);
+}
+.ops-meetings .actions-done-toggle:hover {
+  border-color: var(--ops-line-strong);
+  color: var(--ops-ink);
+}
+.ops-meetings .rail-filters { margin-bottom: 12px; }
+.ops-meetings .rail-chip {
+  border-color: var(--ops-line);
+  color: var(--ops-muted);
+  background: var(--ops-surface-2);
+}
+.ops-meetings .rail-chip.act {
+  background: #edf7f5;
+  border-color: #b8d7d3;
+  color: var(--ops-petrol);
+}
+.ops-meetings .rail a.m.is-hidden { display: none; }
+.ops-meetings .ai .chk { cursor: pointer; }
+.ops-meetings .ai .chk:focus { outline: 2px solid var(--ops-amber); outline-offset: 2px; }
 .ops-meetings .rail {
   position: sticky;
   top: 20px;
@@ -454,6 +523,7 @@ body.ops-standalone {
 .ops-meetings .rail a.m .t { color: var(--ops-ink); }
 .ops-meetings .rail a.m .n { color: var(--ops-muted); }
 .ops-meetings .content { max-width: none; padding: 0; }
+.ops-meetings .center-col { max-width: none; padding: 0; }
 .ops-meetings .page-head { margin: 0 0 20px; padding: 0; border: 0; }
 .ops-meetings .digest,
 .ops-meetings .meeting {
@@ -467,8 +537,10 @@ body.ops-standalone {
 }
 .ops-meetings .digest h3 { color: var(--ops-ink); }
 .ops-meetings .digest .sub { color: var(--ops-muted); }
-.ops-meetings .digest .ai { border-top-color: var(--ops-line); }
+.ops-meetings .digest .ai,
+.ops-meetings .actions-panel .ai { border-top-color: var(--ops-line); }
 .ops-meetings .digest .ai .task,
+.ops-meetings .actions-panel .ai .task,
 .ops-meetings .meeting :is(p, li) { color: #294950; }
 .ops-meetings .meeting .mh { border-bottom-color: var(--ops-line); }
 .ops-meetings .meeting .mh .date,
@@ -690,6 +762,12 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   .ops-finance .ops-metrics { grid-template-columns: repeat(3, 1fr); }
   .ops-notes .wrap { grid-template-columns: minmax(0, 1fr) 340px; }
   .ops-projects .board { grid-template-columns: repeat(5, 250px); }
+  .ops-meetings.layout { grid-template-columns: 260px minmax(0, 1fr); }
+  .ops-meetings .actions-panel {
+    position: static;
+    height: auto;
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 900px) {
@@ -700,7 +778,8 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   .ops-meetings.layout { grid-template-columns: 1fr; }
   .ops-meetings .rail { position: static; height: auto; display: flex; overflow-x: auto; }
   .ops-meetings .rail .ey,
-  .ops-meetings .rail .newbtn { display: none; }
+  .ops-meetings .rail .newbtn,
+  .ops-meetings .rail-filters { display: none; }
   .ops-meetings .rail a.m { flex: 0 0 230px; }
   .ops-notes .wrap {
     grid-template-columns: minmax(0, 1fr);
@@ -843,6 +922,30 @@ html[data-theme="dark"] .ops-meetings .rec .rt { color: var(--ops-ink); }
 html[data-theme="dark"] .ops-meetings .rec .rm { color: var(--ops-muted); }
 html[data-theme="dark"] .ops-meetings .rec-empty { color: var(--ops-subtle); }
 html[data-theme="dark"] .ops-meetings .rec-prog .plbl { color: var(--ops-muted); }
+html[data-theme="dark"] .ops-meetings .stat-card {
+  background: var(--ops-surface);
+  border-color: var(--ops-line);
+}
+html[data-theme="dark"] .ops-meetings .stat-n { color: var(--ops-amber); }
+html[data-theme="dark"] .ops-meetings .actions-panel {
+  background: var(--ops-surface);
+  border-color: var(--ops-line);
+}
+html[data-theme="dark"] .ops-meetings .actions-tab.act {
+  background: #2a2418;
+  border-color: #6a5420;
+  color: var(--ops-amber);
+}
+html[data-theme="dark"] .ops-meetings .rail-chip.act {
+  background: #123326;
+  border-color: #2a6b4a;
+  color: var(--ops-green);
+}
+html[data-theme="dark"] .ops-meetings .owner-group h4 .av {
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line);
+  color: var(--ops-amber);
+}
 html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
   background: rgba(245, 189, 54, 0.18);
   color: var(--ops-amber);
