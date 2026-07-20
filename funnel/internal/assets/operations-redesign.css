@@ -477,6 +477,56 @@ body.ops-standalone {
 .ops-meetings .decisions { background: var(--ops-green-soft); border-color: #a7d6bb; color: var(--ops-ink); }
 .ops-meetings .howto { border-color: var(--ops-line); background: var(--ops-surface-2); color: var(--ops-muted); }
 
+/* Meeting recordings — keep upload impossible to miss on the light ops theme */
+.ops-meetings .rec-dock {
+  top: 16px;
+  background: linear-gradient(135deg, #fff8ef, #edf7f5 60%, #fff);
+  border: 2px solid var(--ops-amber);
+  box-shadow: var(--ops-shadow);
+}
+.ops-meetings .rec-dock h3 { color: var(--ops-ink); }
+.ops-meetings .rec-dock .sub { color: var(--ops-muted); }
+.ops-meetings .rec-dock-status { color: #8a6100; }
+.ops-meetings .rec-dock-status.err { color: var(--ops-red); }
+.ops-meetings .rec-dock label.field { color: var(--ops-muted); }
+.ops-meetings .rec-dock select {
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  border-color: var(--ops-line);
+}
+.ops-meetings .rec-dock-drop {
+  background: #fff4e5;
+  border-color: #e0b35c;
+  color: var(--ops-muted);
+}
+.ops-meetings .rec-dock-drop:hover,
+.ops-meetings .rec-dock-drop.drag {
+  background: #ffe8c2;
+  border-color: var(--ops-amber);
+  color: var(--ops-ink);
+}
+.ops-meetings .rec-dock-btn,
+.ops-meetings .rec-add {
+  background: var(--ops-amber);
+  color: #172b30;
+  box-shadow: none;
+}
+.ops-meetings .rec-panel {
+  background: #fff8ef;
+  border-color: #e0b35c;
+}
+.ops-meetings .rec-panel h4 { color: #8a6100; }
+.ops-meetings .rec-hint { color: var(--ops-muted); }
+.ops-meetings .rec { background: var(--ops-surface-2); border-color: var(--ops-line); }
+.ops-meetings .rec .rt { color: var(--ops-ink); }
+.ops-meetings .rec .rm { color: var(--ops-muted); }
+.ops-meetings .rec-empty { color: var(--ops-muted); }
+.ops-meetings .rail a.m .rec-badge {
+  background: #fff4e5;
+  color: #8a6100;
+  border-color: #e0b35c;
+}
+
 /* ---------- Team notes ---------- */
 
 .ops-notes .wrap {

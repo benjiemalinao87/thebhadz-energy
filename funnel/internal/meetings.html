@@ -41,6 +41,7 @@
   .rail a.m .d{font-family:var(--mono);font-size:12px;color:var(--orange-soft);}
   .rail a.m .t{font-size:14px;font-weight:600;margin-top:2px;}
   .rail a.m .n{font-size:12px;color:var(--faint);margin-top:2px;}
+  .rail a.m .rec-badge{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:999px;background:rgba(240,125,26,0.18);color:var(--orange-soft);border:1px solid rgba(240,125,26,0.35);}
   .rail .newbtn{display:block;margin:16px 8px 0;font-family:var(--mono);font-size:12px;color:var(--faint);text-align:center;border:1px dashed var(--line);border-radius:8px;padding:10px;text-decoration:none;}
   .rail .newbtn:hover{color:var(--soft);border-color:var(--faint);}
 
@@ -91,8 +92,27 @@
   .m-actions .aitem .txt{font-size:14.5px;}
   .m-actions .aitem .meta{font-family:var(--mono);font-size:11.5px;color:var(--orange-soft);}
 
-  /* meeting recordings (Zoom uploads, R2-backed) */
-  .recs{margin:8px 0 4px;}
+  /* sticky upload dock — primary recording entry point */
+  .rec-dock{position:sticky;top:72px;z-index:15;background:linear-gradient(135deg,#1a3a5c,#14314f 55%,#1f2a20);border:2px solid var(--orange);border-radius:16px;padding:18px 20px;margin:0 0 22px;box-shadow:0 10px 28px rgba(0,0,0,0.28);}
+  .rec-dock-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .rec-dock h3{margin:0;font-size:18px;letter-spacing:-0.01em;}
+  .rec-dock .sub{margin:4px 0 0;color:var(--soft);font-size:13.5px;max-width:52ch;}
+  .rec-dock-status{font-family:var(--mono);font-size:12px;color:var(--orange-soft);white-space:nowrap;}
+  .rec-dock-status.err{color:var(--red);}
+  .rec-dock-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,1.4fr) auto;gap:12px;align-items:end;}
+  .rec-dock label.field{display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);}
+  .rec-dock select{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:0 12px;font:600 14px var(--sans);}
+  .rec-dock-drop{display:flex;align-items:center;justify-content:center;min-height:46px;border:1.5px dashed rgba(240,125,26,0.55);border-radius:10px;background:rgba(240,125,26,0.08);color:var(--soft);font-size:13.5px;cursor:pointer;padding:0 14px;text-align:center;}
+  .rec-dock-drop:hover,.rec-dock-drop.drag{border-color:var(--orange);color:var(--ink);background:rgba(240,125,26,0.16);}
+  .rec-dock-btn{min-height:46px;padding:0 18px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--orange-soft),var(--orange));color:#1a1208;font:800 14px var(--sans);cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(240,125,26,0.35);}
+  .rec-dock-btn:hover{filter:brightness(1.05);}
+
+  /* per-meeting recordings panel (right under header) */
+  .rec-panel{background:rgba(240,125,26,0.08);border:1px solid rgba(240,125,26,0.35);border-radius:12px;padding:14px 16px;margin:0 0 18px;}
+  .rec-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .rec-panel h4{margin:0;font-size:12.5px;font-family:var(--mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);}
+  .rec-hint{margin:4px 0 0;font-size:12.5px;color:var(--soft);}
+  .recs{margin:0;}
   .rec{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 10px;}
   .rec .rh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
   .rec .rt{font-weight:600;font-size:14.5px;flex:1;min-width:180px;}
@@ -101,8 +121,9 @@
   .rec .rx:hover{text-decoration:underline;}
   .rec video{width:100%;margin-top:10px;border-radius:8px;background:#000;max-height:420px;}
   .rec audio{width:100%;margin-top:10px;}
-  .rec-add{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--soft);border:1px dashed var(--line);border-radius:8px;padding:9px 14px;cursor:pointer;}
-  .rec-add:hover{color:var(--ink);border-color:var(--faint);}
+  .rec-add{display:inline-flex;align-items:center;gap:8px;min-height:40px;font:700 13px var(--sans);color:#1a1208;background:linear-gradient(180deg,var(--orange-soft),var(--orange));border:0;border-radius:9px;padding:0 14px;cursor:pointer;box-shadow:0 3px 10px rgba(240,125,26,0.28);}
+  .rec-add:hover{filter:brightness(1.05);}
+  .rec-add-ico{font-size:14px;line-height:1;}
   .rec-prog{margin:0 0 10px;}
   .rec-prog .ptrack{height:8px;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden;}
   .rec-prog .pfill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-soft));width:0%;transition:width 0.2s;}
@@ -122,6 +143,9 @@
     .rail a.m{flex:0 0 auto;border-left:0;border-bottom:3px solid transparent;}
     .rail a.m.act{border-left:0;border-bottom-color:var(--orange);}
     .content{padding:24px 18px 80px;}
+    .rec-dock{top:8px;}
+    .rec-dock-row{grid-template-columns:1fr;}
+    .rec-dock-btn{width:100%;}
   }
 </style>
 <link rel="stylesheet" href="/internal/assets/operations-redesign.css">
@@ -158,6 +182,27 @@
         <h2>Decisions remembered. Owners accountable.</h2>
         <p>Weekly founder decisions and action items with a clear owner and due date.</p>
       </div>
+
+      <!-- PRIMARY ACTION: upload recording without scrolling past notes -->
+      <section class="rec-dock" id="rec-dock" aria-label="Upload meeting recording">
+        <div class="rec-dock-top">
+          <div>
+            <h3>Upload meeting recording</h3>
+            <p class="sub">Drop a Zoom export or pick a file. It attaches to the selected meeting and plays back here for the team.</p>
+          </div>
+          <span class="rec-dock-status" id="rec-dock-status">Ready</span>
+        </div>
+        <div class="rec-dock-row">
+          <label class="field">Meeting
+            <select id="rec-dock-meeting" aria-label="Choose meeting for upload"></select>
+          </label>
+          <div class="rec-dock-drop" id="rec-dock-drop" role="button" tabindex="0" aria-label="Drop recording file here">
+            Drop file here, or click to browse
+            <input id="rec-dock-file" type="file" accept=".mp4,.mov,.webm,.m4a,.mp3,.wav,.ogg,video/mp4,video/quicktime,video/webm,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/ogg" hidden>
+          </div>
+          <button type="button" class="rec-dock-btn" id="rec-dock-btn">⬆ Upload recording</button>
+        </div>
+      </section>
 
       <!-- OPEN ACTION ITEMS DIGEST — pulled from all meetings, most urgent first -->
       <section class="digest" aria-label="Open action items">
@@ -366,194 +411,13 @@
         to <code>class="chk done"</code> (and the row to <code>class="ai done"</code>) so they show as
         struck-through. Just send me the transcript each week and I'll do it for you.
         <br><br>
-        <b>Zoom recordings:</b> every meeting has a <b>Recordings</b> section at the bottom — hit
-        <code>⬆ Upload Zoom recording</code> and pick the exported file (MP4/M4A up to 2&nbsp;GB).
-        It uploads in chunks to private R2 storage and plays back right here for the whole team.
+        <b>Recordings:</b> use the orange <b>Upload meeting recording</b> bar at the top (or the Upload
+        button under each meeting header). MP4/MOV/M4A up to 2&nbsp;GB — uploads in chunks to private R2
+        and plays back here for the whole team.
       </div>
     </div>
   </main>
 
-  <script>
-  (function () {
-    "use strict";
-    var ACCEPT = ".mp4,.mov,.webm,.m4a,.mp3,.wav,.ogg,video/mp4,video/quicktime,video/webm,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/ogg";
-    var sections = new Map(); // meeting id → recordings list element
-
-    // Mount a Recordings section at the bottom of every meeting entry.
-    document.querySelectorAll("article.meeting[id]").forEach(function (article) {
-      var h4 = document.createElement("h4");
-      h4.textContent = "Recordings";
-      var wrap = document.createElement("div");
-      wrap.className = "recs";
-      var list = document.createElement("div");
-      var add = document.createElement("label");
-      add.className = "rec-add";
-      add.textContent = "⬆ Upload Zoom recording";
-      var input = document.createElement("input");
-      input.type = "file";
-      input.accept = ACCEPT;
-      input.hidden = true;
-      add.appendChild(input);
-      wrap.appendChild(list);
-      wrap.appendChild(add);
-      input.addEventListener("change", function () {
-        if (input.files && input.files[0]) upload(article.id, input.files[0], wrap);
-        input.value = "";
-      });
-      article.appendChild(h4);
-      article.appendChild(wrap);
-      sections.set(article.id, list);
-    });
-
-    function fmtSize(bytes) {
-      if (!bytes) return "0 MB";
-      if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-      return Math.max(1, Math.round(bytes / (1024 * 1024))) + " MB";
-    }
-
-    function render(list, recs) {
-      list.innerHTML = "";
-      if (!recs.length) {
-        var empty = document.createElement("p");
-        empty.className = "rec-empty";
-        empty.textContent = "No recording uploaded yet.";
-        list.appendChild(empty);
-        return;
-      }
-      recs.forEach(function (r) {
-        var el = document.createElement("div");
-        el.className = "rec";
-        var rh = document.createElement("div");
-        rh.className = "rh";
-        var rt = document.createElement("div");
-        rt.className = "rt";
-        rt.textContent = r.title;
-        var rm = document.createElement("span");
-        rm.className = "rm";
-        rm.textContent = String(r.createdAt || "").slice(0, 10) + " · " + fmtSize(r.size);
-        var rx = document.createElement("button");
-        rx.className = "rx";
-        rx.textContent = "delete";
-        rx.addEventListener("click", function () {
-          if (!confirm('Delete recording "' + r.title + '"? The file is removed permanently.')) return;
-          fetch("/api/recordings?id=" + encodeURIComponent(r.id), { method: "DELETE" })
-            .then(function (res) { return res.json(); })
-            .then(function (data) { if (data.ok) loadAll(); });
-        });
-        rh.appendChild(rt);
-        rh.appendChild(rm);
-        rh.appendChild(rx);
-        var isVideo = String(r.type || "").indexOf("video/") === 0;
-        var media = document.createElement(isVideo ? "video" : "audio");
-        media.controls = true;
-        media.preload = "none";
-        media.src = "/api/recordings?id=" + encodeURIComponent(r.id) + "&stream=1";
-        el.appendChild(rh);
-        el.appendChild(media);
-        list.appendChild(el);
-      });
-    }
-
-    function loadAll() {
-      fetch("/api/recordings")
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (!data.ok) return;
-          var byMeeting = {};
-          data.recordings.forEach(function (r) {
-            (byMeeting[r.meetingId] = byMeeting[r.meetingId] || []).push(r);
-          });
-          sections.forEach(function (list, meetingId) {
-            render(list, byMeeting[meetingId] || []);
-          });
-        })
-        .catch(function () {});
-    }
-
-    function postJSON(body) {
-      return fetch("/api/recordings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }).then(function (res) { return res.json(); }).then(function (data) {
-        if (!data.ok) throw new Error(data.error || "Request failed.");
-        return data;
-      });
-    }
-
-    function putPart(id, uploadId, partNumber, blob, onProgress) {
-      return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("PUT", "/api/recordings?id=" + encodeURIComponent(id) +
-          "&uploadId=" + encodeURIComponent(uploadId) + "&part=" + partNumber);
-        xhr.upload.onprogress = function (e) {
-          if (e.lengthComputable) onProgress(e.loaded / e.total);
-        };
-        xhr.onload = function () {
-          try {
-            var body = JSON.parse(xhr.responseText);
-            if (body.ok) resolve(body); else reject(new Error(body.error || "Chunk upload failed."));
-          } catch (e) { reject(new Error("Chunk upload failed.")); }
-        };
-        xhr.onerror = function () { reject(new Error("Network error during upload.")); };
-        xhr.send(blob);
-      });
-    }
-
-    async function upload(meetingId, file, wrap) {
-      var defTitle = file.name.replace(/\.[^.]+$/, "");
-      var title = prompt("Recording title:", defTitle);
-      if (title === null) return; // cancelled
-      title = title || defTitle;
-
-      var prog = document.createElement("div");
-      prog.className = "rec-prog";
-      prog.innerHTML = '<div class="ptrack"><div class="pfill"></div></div><div class="plbl"></div>';
-      wrap.insertBefore(prog, wrap.lastElementChild);
-      var fill = prog.querySelector(".pfill");
-      var lbl = prog.querySelector(".plbl");
-      var setP = function (f) {
-        var pct = Math.min(100, Math.round(f * 100));
-        fill.style.width = pct + "%";
-        lbl.textContent = "Uploading " + file.name + " — " + pct + "%";
-      };
-      setP(0);
-
-      var created = null;
-      try {
-        created = await postJSON({
-          action: "create", meetingId: meetingId,
-          name: file.name, type: file.type, size: file.size, title: title,
-        });
-        var partSize = created.partSize;
-        var total = Math.ceil(file.size / partSize);
-        var parts = [];
-        for (var i = 0; i < total; i++) {
-          var blob = file.slice(i * partSize, Math.min(file.size, (i + 1) * partSize));
-          var r = await putPart(created.id, created.uploadId, i + 1, blob, (function (idx) {
-            return function (p) { setP((idx + p) / total); };
-          })(i));
-          parts.push({ partNumber: r.partNumber, etag: r.etag });
-        }
-        lbl.textContent = "Finalizing…";
-        await postJSON({ action: "complete", id: created.id, uploadId: created.uploadId, parts: parts });
-        prog.remove();
-        loadAll();
-      } catch (err) {
-        if (created) {
-          try { await postJSON({ action: "abort", id: created.id, uploadId: created.uploadId }); } catch (e) {}
-        }
-        prog.remove();
-        var msg = document.createElement("p");
-        msg.className = "rec-err";
-        msg.textContent = "Upload failed: " + (err && err.message ? err.message : err);
-        wrap.insertBefore(msg, wrap.lastElementChild);
-        setTimeout(function () { msg.remove(); }, 10000);
-      }
-    }
-
-    loadAll();
-  })();
-  </script>
+  <script src="/internal/assets/meetings.js"></script>
 </body>
 </html>

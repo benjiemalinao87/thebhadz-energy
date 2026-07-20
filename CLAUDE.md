@@ -54,6 +54,58 @@ Funnel conventions: keep it fully self-contained (no CDN/external requests — C
 static). Placeholders to replace before launch are listed in funnel/README.md (phone number,
 Messenger link, real testimonials, analytics pixel, confirmed prices).
 
+## Two sites, one content source — DO NOT hand-edit generated pages
+
+The engineering-file content exists in **two site trees** that must render identically apart
+from branding and link paths:
+
+- **Root site** (this directory) — public-facing brand "Solar City", relative paths
+  (`assets/…`), deployed as its own static site.
+- **`funnel/internal/`** — the founder/team Command Center, brand "BADJJ Energy Systems"
+  (BADJJ logo, absolute `/internal/…` paths, founder-auth-gated), deployed as part of the
+  `funnel` Cloudflare Pages project. Your team works from here day to day.
+
+These two trees **used to be hand-copied** and drifted badly (8–93 line diffs per page,
+including a missing Founder-OS-mandated strategy.html row and five pages entirely absent
+from the internal Command Center). That's fixed structurally now:
+
+- **`content/*.html`** — the single source of truth. One `<main>` body partial per shared
+  page (no `<main>` wrapper, no sidebar, no `<head>` — just the doc content). Body copy
+  uses the `{{BRAND}}` token wherever the product name should switch between "Solar City"
+  (root) and "BADJJ" (internal) — e.g. "branded {{BRAND}} power boxes."
+  - `content/<id>.head.html` — optional per-page inline `<style>` block for that page's `<head>`.
+  - `content/<id>.scripts.html` — everything that goes after `</main>` (trailing `<script>` tags).
+  - `content/pages.json` — the registry: which pages exist, their SC-code + nav label, output
+    filename per site, extra `<link>` tags, and footer variant (`standard` or `biliran`).
+- **`templates/shell.html`** — the one page shell (head / sidebar / nav / footer / main slot /
+  trailing scripts), parametrized per brand.
+- **`scripts/build-pages.mjs`** — the generator. No dependencies (Node built-ins only,
+  matches the repo's no-build-step philosophy — this is a pre-commit generation pass, not a
+  runtime build). Reads `content/` + `templates/shell.html`, writes both the root `.html` file
+  and its `funnel/internal/` twin.
+
+**Workflow: edit `content/<id>.html` (or `.head.html` / `.scripts.html`), then run
+`node scripts/build-pages.mjs`, then commit both the content change and the regenerated
+HTML.** Never hand-edit the `<main>` body of a page in `content/pages.json` directly at its
+root or `funnel/internal/` location — that edit will be silently overwritten (and drift right
+back) the next time someone runs the generator. Run `node scripts/build-pages.mjs --check`
+in CI / pre-commit to fail the build if generated output is stale.
+
+**Adding a new shared page:** write `content/<id>.html`, add an entry to
+`content/pages.json` (id, titleBase, rootFile, internalFile, footer, navCode, navLabel,
+extraLinks), run the generator — both sites' nav and content update from one edit.
+
+**Pages intentionally excluded from this system** (kept hand-maintained separately per
+site — do not try to unify them):
+- `projects.html` — root's is a static doc-styled page; `funnel/internal/projects.html` is
+  a different, live D1-backed CRUD board with its own layout (no shared shell).
+- `index.html` — root's is the SC-00 overview hero page (its content partner is
+  `content/overview.html`, output to root as `index.html`); `funnel/internal/index.html` is
+  the bespoke Command Center dashboard, structurally unrelated.
+- Founder-tools-only pages (`finance.html`, `install-ops.html`, `founder-lab.html`, `leads.html`,
+  `meetings.html`, `notes.html`, `principles.html`, `strategy-deck-*.html`) exist only inside
+  `funnel/internal/` — there is no root twin, nothing to unify.
+
 ## Audience & tone
 
 Written for engineers/technicians who will execute. Lead with specs, tolerances, and
