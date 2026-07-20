@@ -308,7 +308,19 @@
     navigate(pathname, false);
   });
 
+  // Deep link: /internal/?open=<page> reopens that page inside this shell. Pages whose
+  // only sanctioned UI is the Command Center (sec-registration) bounce here from a
+  // standalone-load guard in their own <head>. Read the query BEFORE the replaceState
+  // below rewrites the URL to the bare pathname (which drops the search string).
+  var openParam = new URLSearchParams(location.search).get("open");
+
   // The shell's own initial content (the dashboard) is already server-rendered — record
   // it as the current view so a click away and a click "back" doesn't re-fetch it needlessly.
+  // This also strips ?open=… from the address bar, so the back button after a deep-link
+  // navigation lands on the plain dashboard instead of re-bouncing.
   history.replaceState({ scPath: location.pathname }, "", location.pathname);
+
+  if (openParam && /^[a-z0-9-]+$/.test(openParam)) {
+    navigate("/internal/" + openParam + ".html", true);
+  }
 })();

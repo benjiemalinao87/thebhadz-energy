@@ -9,3 +9,13 @@
   .cl-reset { background: none; border: 1px solid var(--hairline); border-radius: 4px; font-family: var(--mono); font-size: 11px; padding: 4px 8px; cursor: pointer; color: var(--faint); }
   .cl-reset:hover { border-color: var(--copper); color: var(--copper); }
 </style>
+<script>
+  // On the internal site the Command Center dashboard is the ONLY UI for this page.
+  // A standalone load (direct link, refresh, bookmark) bounces to the dashboard shell,
+  // which reopens this page inside the SPA via the ?open= deep link (assets/spa-router.js).
+  // Inside the shell this script re-runs after a swap, where #cc-view exists — no-op.
+  // The root public site (no /internal/ prefix) keeps rendering standalone as before.
+  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
+    location.replace('/internal/?open=sec-registration');
+  }
+</script>

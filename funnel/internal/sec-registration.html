@@ -17,6 +17,16 @@
   .cl-reset { background: none; border: 1px solid var(--hairline); border-radius: 4px; font-family: var(--mono); font-size: 11px; padding: 4px 8px; cursor: pointer; color: var(--faint); }
   .cl-reset:hover { border-color: var(--copper); color: var(--copper); }
 </style>
+<script>
+  // On the internal site the Command Center dashboard is the ONLY UI for this page.
+  // A standalone load (direct link, refresh, bookmark) bounces to the dashboard shell,
+  // which reopens this page inside the SPA via the ?open= deep link (assets/spa-router.js).
+  // Inside the shell this script re-runs after a swap, where #cc-view exists — no-op.
+  // The root public site (no /internal/ prefix) keeps rendering standalone as before.
+  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
+    location.replace('/internal/?open=sec-registration');
+  }
+</script>
 <link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
 
 <div class="frame">
@@ -63,7 +73,8 @@
       §7 already enforces on quotes ("no deposit without permit / licensed-electrician
       sign-off / net-metering checklist"). Source of truth in the repo is
       <a href="/internal/ops/sec-registration-checklist.md"><code>ops/sec-registration-checklist.md</code></a> — this
-      page mirrors it for the team, with check-off state saved locally in your browser. A fillable, printable
+      page mirrors it for the team — check-off progress saves automatically and is shared live across
+      the whole founder team on the Command Center. A fillable, printable
       by-laws draft is at <a href="by-laws-template.html">By-laws template</a> (markdown source:
       <code>ops/templates/by-laws-template.md</code>).
     </p>
