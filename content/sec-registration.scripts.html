@@ -1,0 +1,42 @@
+<script src="assets/site.js"></script>
+<script>
+  (function () {
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type="checkbox"]'));
+    var STORE_KEY = 'sc13-checklist-v1';
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { saved = {}; }
+
+    function save() {
+      var state = {};
+      boxes.forEach(function (b) { state[b.id] = b.checked; });
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function updateProgress() {
+      var checked = boxes.filter(function (b) { return b.checked; }).length;
+      document.getElementById('cl-count').textContent = checked + ' / ' + boxes.length + ' checked';
+      document.getElementById('cl-bar-fill').style.width = (boxes.length ? (checked / boxes.length * 100) : 0) + '%';
+    }
+
+    boxes.forEach(function (b) {
+      if (saved[b.id]) b.checked = true;
+      b.closest('.cl-item').classList.toggle('done', b.checked);
+      b.addEventListener('change', function () {
+        b.closest('.cl-item').classList.toggle('done', b.checked);
+        save();
+        updateProgress();
+      });
+    });
+
+    document.getElementById('cl-reset').addEventListener('click', function () {
+      boxes.forEach(function (b) {
+        b.checked = false;
+        b.closest('.cl-item').classList.remove('done');
+      });
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      updateProgress();
+    });
+
+    updateProgress();
+  })();
+</script>

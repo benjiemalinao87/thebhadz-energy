@@ -1,0 +1,11 @@
+<style>
+  .cl-item { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 10px; }
+  .cl-item input[type="checkbox"] { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--copper); flex: none; }
+  .cl-item label { cursor: pointer; }
+  .cl-item.done label { color: var(--faint); text-decoration: line-through; }
+  .cl-progress { display: flex; align-items: center; gap: 12px; margin: 4px 0 26px; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .cl-bar { flex: 1; max-width: 320px; height: 4px; background: var(--hairline); position: relative; }
+  .cl-bar i { display: block; height: 100%; width: 0; background: var(--copper); transition: width .25s ease; }
+  .cl-reset { background: none; border: 1px solid var(--hairline); border-radius: 4px; font-family: var(--mono); font-size: 11px; padding: 4px 8px; cursor: pointer; color: var(--faint); }
+  .cl-reset:hover { border-color: var(--copper); color: var(--copper); }
+</style>

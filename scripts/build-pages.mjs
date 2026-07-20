@@ -21,7 +21,7 @@
  *                                                  from what's on disk — use in CI / pre-commit)
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -33,7 +33,7 @@ const CHECK = process.argv.includes('--check');
 const pages = JSON.parse(readFileSync(join(CONTENT_DIR, 'pages.json'), 'utf8'));
 const WORKSPACE_REDESIGN_PAGES = new Set([
   'overview', 'designer', 'build-guide', 'bom', 'strategy', 'sourcing', 'market',
-  'competitors', 'map', 'roof-check', 'ad-library', 'founders',
+  'competitors', 'map', 'roof-check', 'ad-library', 'founders', 'sec-registration',
 ]);
 
 // SC-07 Project board is NOT in content/pages.json (it's a different implementation per
@@ -90,8 +90,17 @@ function repath(html, assetPrefix) {
     .replace(/href="assets\//g, `href="${assetPrefix}assets/`)
     .replace(/src="assets\//g,  `src="${assetPrefix}assets/`)
     .replace(/href="vendor\//g, `href="${assetPrefix}vendor/`)
-    .replace(/src="vendor\//g,  `src="${assetPrefix}vendor/`);
+    .replace(/src="vendor\//g,  `src="${assetPrefix}vendor/`)
+    .replace(/href="ops\//g,    `href="${assetPrefix}ops/`);
 }
+
+// Repo-root ops/ docs that shared pages link to. The root site serves them in place;
+// the internal site gets a generator-managed copy under funnel/internal/ops/ (same
+// single-source rule as the pages: edit the root ops/ file, rerun this script).
+const OPS_DOCS = [
+  'ops/sec-registration-checklist.md',
+  'ops/templates/by-laws-template.md',
+];
 
 function render(entry, site) {
   const b = BRAND[site];
@@ -142,6 +151,22 @@ function render(entry, site) {
 
 let mismatches = 0;
 let written = 0;
+
+for (const doc of OPS_DOCS) {
+  const src = readFileSync(join(ROOT, doc), 'utf8');
+  const dest = join(ROOT, 'funnel/internal', doc);
+  const current = existsSync(dest) ? readFileSync(dest, 'utf8') : null;
+  if (current === src) continue;
+  if (CHECK) {
+    console.error(`OUT OF DATE: ${dest.replace(ROOT + '/', '')}`);
+    mismatches++;
+  } else {
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, src);
+    console.log(`wrote ${dest.replace(ROOT + '/', '')}`);
+    written++;
+  }
+}
 
 for (const entry of pages) {
   const rootOut = render(entry, 'root');

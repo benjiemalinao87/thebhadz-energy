@@ -120,5 +120,15 @@
     "footer": "standard",
     "navCode": "SC-12",
     "navLabel": "Founder lessons"
+  },
+  {
+    "id": "sec-registration",
+    "titleBase": "SC-13 SEC registration",
+    "rootFile": "sec-registration.html",
+    "internalFile": "sec-registration.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-13",
+    "navLabel": "SEC registration"
   }
 ]
