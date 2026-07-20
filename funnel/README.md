@@ -188,6 +188,22 @@ same feed. Use it for site-survey findings, supplier call notes, install photos,
 - Provisioning (already done once): `npx wrangler r2 bucket create solar-city-notes` and
   the `schema.sql` apply above. Local dev gets its own simulated bucket + DB automatically.
 
+### Meeting recordings (D1 + R2-backed)
+
+**`/internal/meetings.html`** — every meeting entry has a **Recordings** section. Upload the
+exported Zoom file (MP4/MOV/WebM video or M4A/MP3/WAV/OGG audio, ≤ 2 GB) and it plays back
+inline for the whole team.
+
+- **Metadata** lives in D1 (`meeting_recordings` table, `schema.sql`); the media file lives in
+  the same private R2 bucket as note images (`solar-city-notes`), under the `recordings/` prefix.
+- Uploads are **chunked** (25 MB parts via R2 multipart) through the founder-gated
+  `/api/recordings`, so large Zoom files clear the Workers per-request body limit. Playback
+  streams through the same endpoint with HTTP Range support, so seeking works in the player.
+- Deleting a recording removes both the D1 row and the R2 object. Nothing is ever public —
+  every method requires the founder session cookie.
+- Provisioning (one-time, already-created bucket is reused): apply `schema.sql` per above —
+  no new R2 bucket or binding needed.
+
 ### Deploy note
 
 Because Functions + the D1 binding must be detected, **always deploy from inside `funnel/`**:

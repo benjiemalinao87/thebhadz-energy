@@ -91,6 +91,25 @@
   .m-actions .aitem .txt{font-size:14.5px;}
   .m-actions .aitem .meta{font-family:var(--mono);font-size:11.5px;color:var(--orange-soft);}
 
+  /* meeting recordings (Zoom uploads, R2-backed) */
+  .recs{margin:8px 0 4px;}
+  .rec{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 10px;}
+  .rec .rh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .rec .rt{font-weight:600;font-size:14.5px;flex:1;min-width:180px;}
+  .rec .rm{font-family:var(--mono);font-size:11.5px;color:var(--faint);}
+  .rec .rx{font-family:var(--mono);font-size:11.5px;color:var(--red);background:none;border:0;cursor:pointer;padding:2px 4px;}
+  .rec .rx:hover{text-decoration:underline;}
+  .rec video{width:100%;margin-top:10px;border-radius:8px;background:#000;max-height:420px;}
+  .rec audio{width:100%;margin-top:10px;}
+  .rec-add{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--soft);border:1px dashed var(--line);border-radius:8px;padding:9px 14px;cursor:pointer;}
+  .rec-add:hover{color:var(--ink);border-color:var(--faint);}
+  .rec-prog{margin:0 0 10px;}
+  .rec-prog .ptrack{height:8px;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden;}
+  .rec-prog .pfill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-soft));width:0%;transition:width 0.2s;}
+  .rec-prog .plbl{font-family:var(--mono);font-size:11.5px;color:var(--soft);margin-top:5px;}
+  .rec-err{font-family:var(--mono);font-size:12px;color:var(--red);margin:0 0 10px;}
+  .rec-empty{font-family:var(--mono);font-size:12px;color:var(--faint);margin:0 0 10px;}
+
   /* how-to-add note */
   .howto{background:var(--panel2);border:1px dashed var(--line);border-radius:12px;padding:18px 22px;margin:30px 0 0;font-size:13.5px;color:var(--soft);}
   .howto code{font-family:var(--mono);background:var(--bg);padding:1px 6px;border-radius:4px;color:var(--orange-soft);}
@@ -346,8 +365,195 @@
         Add a matching link at the top of the left rail. Move any completed tasks' <code>&lt;span class="chk"&gt;</code>
         to <code>class="chk done"</code> (and the row to <code>class="ai done"</code>) so they show as
         struck-through. Just send me the transcript each week and I'll do it for you.
+        <br><br>
+        <b>Zoom recordings:</b> every meeting has a <b>Recordings</b> section at the bottom — hit
+        <code>⬆ Upload Zoom recording</code> and pick the exported file (MP4/M4A up to 2&nbsp;GB).
+        It uploads in chunks to private R2 storage and plays back right here for the whole team.
       </div>
     </div>
   </main>
+
+  <script>
+  (function () {
+    "use strict";
+    var ACCEPT = ".mp4,.mov,.webm,.m4a,.mp3,.wav,.ogg,video/mp4,video/quicktime,video/webm,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/ogg";
+    var sections = new Map(); // meeting id → recordings list element
+
+    // Mount a Recordings section at the bottom of every meeting entry.
+    document.querySelectorAll("article.meeting[id]").forEach(function (article) {
+      var h4 = document.createElement("h4");
+      h4.textContent = "Recordings";
+      var wrap = document.createElement("div");
+      wrap.className = "recs";
+      var list = document.createElement("div");
+      var add = document.createElement("label");
+      add.className = "rec-add";
+      add.textContent = "⬆ Upload Zoom recording";
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = ACCEPT;
+      input.hidden = true;
+      add.appendChild(input);
+      wrap.appendChild(list);
+      wrap.appendChild(add);
+      input.addEventListener("change", function () {
+        if (input.files && input.files[0]) upload(article.id, input.files[0], wrap);
+        input.value = "";
+      });
+      article.appendChild(h4);
+      article.appendChild(wrap);
+      sections.set(article.id, list);
+    });
+
+    function fmtSize(bytes) {
+      if (!bytes) return "0 MB";
+      if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+      return Math.max(1, Math.round(bytes / (1024 * 1024))) + " MB";
+    }
+
+    function render(list, recs) {
+      list.innerHTML = "";
+      if (!recs.length) {
+        var empty = document.createElement("p");
+        empty.className = "rec-empty";
+        empty.textContent = "No recording uploaded yet.";
+        list.appendChild(empty);
+        return;
+      }
+      recs.forEach(function (r) {
+        var el = document.createElement("div");
+        el.className = "rec";
+        var rh = document.createElement("div");
+        rh.className = "rh";
+        var rt = document.createElement("div");
+        rt.className = "rt";
+        rt.textContent = r.title;
+        var rm = document.createElement("span");
+        rm.className = "rm";
+        rm.textContent = String(r.createdAt || "").slice(0, 10) + " · " + fmtSize(r.size);
+        var rx = document.createElement("button");
+        rx.className = "rx";
+        rx.textContent = "delete";
+        rx.addEventListener("click", function () {
+          if (!confirm('Delete recording "' + r.title + '"? The file is removed permanently.')) return;
+          fetch("/api/recordings?id=" + encodeURIComponent(r.id), { method: "DELETE" })
+            .then(function (res) { return res.json(); })
+            .then(function (data) { if (data.ok) loadAll(); });
+        });
+        rh.appendChild(rt);
+        rh.appendChild(rm);
+        rh.appendChild(rx);
+        var isVideo = String(r.type || "").indexOf("video/") === 0;
+        var media = document.createElement(isVideo ? "video" : "audio");
+        media.controls = true;
+        media.preload = "none";
+        media.src = "/api/recordings?id=" + encodeURIComponent(r.id) + "&stream=1";
+        el.appendChild(rh);
+        el.appendChild(media);
+        list.appendChild(el);
+      });
+    }
+
+    function loadAll() {
+      fetch("/api/recordings")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (!data.ok) return;
+          var byMeeting = {};
+          data.recordings.forEach(function (r) {
+            (byMeeting[r.meetingId] = byMeeting[r.meetingId] || []).push(r);
+          });
+          sections.forEach(function (list, meetingId) {
+            render(list, byMeeting[meetingId] || []);
+          });
+        })
+        .catch(function () {});
+    }
+
+    function postJSON(body) {
+      return fetch("/api/recordings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }).then(function (res) { return res.json(); }).then(function (data) {
+        if (!data.ok) throw new Error(data.error || "Request failed.");
+        return data;
+      });
+    }
+
+    function putPart(id, uploadId, partNumber, blob, onProgress) {
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("PUT", "/api/recordings?id=" + encodeURIComponent(id) +
+          "&uploadId=" + encodeURIComponent(uploadId) + "&part=" + partNumber);
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable) onProgress(e.loaded / e.total);
+        };
+        xhr.onload = function () {
+          try {
+            var body = JSON.parse(xhr.responseText);
+            if (body.ok) resolve(body); else reject(new Error(body.error || "Chunk upload failed."));
+          } catch (e) { reject(new Error("Chunk upload failed.")); }
+        };
+        xhr.onerror = function () { reject(new Error("Network error during upload.")); };
+        xhr.send(blob);
+      });
+    }
+
+    async function upload(meetingId, file, wrap) {
+      var defTitle = file.name.replace(/\.[^.]+$/, "");
+      var title = prompt("Recording title:", defTitle);
+      if (title === null) return; // cancelled
+      title = title || defTitle;
+
+      var prog = document.createElement("div");
+      prog.className = "rec-prog";
+      prog.innerHTML = '<div class="ptrack"><div class="pfill"></div></div><div class="plbl"></div>';
+      wrap.insertBefore(prog, wrap.lastElementChild);
+      var fill = prog.querySelector(".pfill");
+      var lbl = prog.querySelector(".plbl");
+      var setP = function (f) {
+        var pct = Math.min(100, Math.round(f * 100));
+        fill.style.width = pct + "%";
+        lbl.textContent = "Uploading " + file.name + " — " + pct + "%";
+      };
+      setP(0);
+
+      var created = null;
+      try {
+        created = await postJSON({
+          action: "create", meetingId: meetingId,
+          name: file.name, type: file.type, size: file.size, title: title,
+        });
+        var partSize = created.partSize;
+        var total = Math.ceil(file.size / partSize);
+        var parts = [];
+        for (var i = 0; i < total; i++) {
+          var blob = file.slice(i * partSize, Math.min(file.size, (i + 1) * partSize));
+          var r = await putPart(created.id, created.uploadId, i + 1, blob, (function (idx) {
+            return function (p) { setP((idx + p) / total); };
+          })(i));
+          parts.push({ partNumber: r.partNumber, etag: r.etag });
+        }
+        lbl.textContent = "Finalizing…";
+        await postJSON({ action: "complete", id: created.id, uploadId: created.uploadId, parts: parts });
+        prog.remove();
+        loadAll();
+      } catch (err) {
+        if (created) {
+          try { await postJSON({ action: "abort", id: created.id, uploadId: created.uploadId }); } catch (e) {}
+        }
+        prog.remove();
+        var msg = document.createElement("p");
+        msg.className = "rec-err";
+        msg.textContent = "Upload failed: " + (err && err.message ? err.message : err);
+        wrap.insertBefore(msg, wrap.lastElementChild);
+        setTimeout(function () { msg.remove(); }, 10000);
+      }
+    }
+
+    loadAll();
+  })();
+  </script>
 </body>
 </html>

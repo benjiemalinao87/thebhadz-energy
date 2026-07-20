@@ -212,3 +212,20 @@ CREATE TABLE IF NOT EXISTS install_assignments (
 CREATE INDEX IF NOT EXISTS idx_install_assignments_project ON install_assignments(project_id);
 CREATE INDEX IF NOT EXISTS idx_install_assignments_installer ON install_assignments(installer_id);
 CREATE INDEX IF NOT EXISTS idx_install_assignments_date ON install_assignments(work_date);
+
+-- Meeting recordings (Zoom call recordings on /internal/meetings.html).
+-- Metadata only — the media file itself lives in the NOTES_R2 bucket under recordings/.
+CREATE TABLE IF NOT EXISTS meeting_recordings (
+  id            TEXT PRIMARY KEY,
+  meeting_id    TEXT NOT NULL,              -- matches the article id on meetings.html, e.g. m-2026-07-13
+  title         TEXT NOT NULL,
+  original_name TEXT,
+  content_type  TEXT,
+  size          INTEGER NOT NULL DEFAULT 0, -- bytes
+  r2_key        TEXT NOT NULL,
+  upload_id     TEXT,                       -- R2 multipart upload id while status = 'pending'
+  status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'ready')),
+  created_at    TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_meeting_recordings_meeting ON meeting_recordings(meeting_id);
