@@ -466,3 +466,16 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 | "One more week to polish before we launch/ship/post it" | RFA challenge (§1.8): what would firing THIS week look like, and which sales datum are we waiting on that polish can't answer? Reversible → fire the smallest sellable version now; a safety/legal/honesty concern → name the gate, not the polish. |
 | A front-end discount or freebie with no evidenced back-end path | Block per §3 front-end/back-end: name the EVIDENCED back-end line in `ops/canvas.md`, keep the price inside the corridor, run it as a pre-registered experiment (§2) — or hold the price. Free calculator/survey are the only sanctioned loss-leaders. |
 | A new offer or feature with no fire-test plan (campaigns route to the "new marketing idea" row) | Demand the smallest real-market test: what goes in front of which homeowners this week, at what pre-registered number (§2)? No fire plan → an unlaunched perfection project; park it. |
+
+## Learned User Preferences
+
+- Never mention `CLAUDE.md` (or other internal AI/instruction filenames) in any rendered frontend HTML; cite Founder OS rules by section number only.
+- On founder/Command Center tools, keep primary actions (especially recording upload) obvious and top-level — not buried under long meeting notes.
+
+## Learned Workspace Facts
+
+- Local funnel + Command Center must be run from inside `funnel/` (`cd funnel && npx wrangler pages dev . --port 8000`); starting Wrangler from the repo root can shim Functions and break `/api/*` with 405.
+- Cloudflare Pages serves `funnel/` as the site root; the repo-root engineering docs are a separate static site.
+- Internal Command Center brand is BADJJ Energy Systems (`funnel/internal/`); public brand remains Solar City.
+- Recent founder collaborators named in meeting notes include Ace Denver Corpin, Jundhel Cabradilla, and Jethro Abatias (alongside Benjie Malinao).
+- Corporate legal name is not finalized; "MEC" / "Systems and Engineering" is an interim placeholder only.
