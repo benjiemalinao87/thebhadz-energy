@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-13 SEC registration — Solar City</title>
+
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .cl-item { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 10px; }
+  .cl-item input[type="checkbox"] { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--copper); flex: none; }
+  .cl-item label { cursor: pointer; }
+  .cl-item.done label { color: var(--faint); text-decoration: line-through; }
+  .cl-progress { display: flex; align-items: center; gap: 12px; margin: 4px 0 26px; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+  .cl-bar { flex: 1; max-width: 320px; height: 4px; background: var(--hairline); position: relative; }
+  .cl-bar i { display: block; height: 100%; width: 0; background: var(--copper); transition: width .25s ease; }
+  .cl-reset { background: none; border: 1px solid var(--hairline); border-radius: 4px; font-family: var(--mono); font-size: 11px; padding: 4px 8px; cursor: pointer; color: var(--faint); }
+  .cl-reset:hover { border-color: var(--copper); color: var(--copper); }
+</style>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="founders.html"><span class="code">SC-12</span>Founder lessons</a>
+      <a href="sec-registration.html"><span class="code">SC-13</span>SEC registration</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-13 · SEC REGISTRATION <span class="rev">· REV A · 2026-07-20</span></p>
+    <h1>Company registration: SEC, BIR, LGU &amp; solar-specific licensing</h1>
+    <p class="lede">
+      Internal ops checklist, not customer-facing. This is the legal-entity and licensing work that has
+      to exist before we can legally sign an install contract and bank a deposit — the same gate
+      <code>CLAUDE.md</code> §7 already enforces on quotes ("no deposit without permit / licensed-electrician
+      sign-off / net-metering checklist"). Source of truth in the repo is
+      <code>ops/sec-registration-checklist.md</code> — this page mirrors it for the team, with check-off state
+      saved locally in your browser. A fillable by-laws draft is at
+      <code>ops/templates/by-laws-template.md</code>.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Unverified — confirm before quoting a customer</span>
+      Fees, timelines, and PCAB/DOE prerequisites below are 2026 market estimates from public sources, not
+      primary-source confirmations. Verify against sec.gov.ph, bir.gov.ph, pcab.gov.ph, doe.gov.ph, and your
+      LGU/DU before committing a date or price to a homeowner.
+      <span class="unverified">EST</span>
+    </div>
+
+    <div class="cl-progress">
+      <span id="cl-count">0 / 0 checked</span>
+      <div class="cl-bar"><i id="cl-bar-fill"></i></div>
+      <button class="cl-reset" id="cl-reset" type="button">Reset checklist</button>
+    </div>
+
+    <h2><span class="sec">§ 0</span>Decide the entity first</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Entity choice drives every step below</caption>
+        <tr><th>Question</th><th>Answer drives</th></tr>
+        <tr>
+          <td>How many founders hold equity?</td>
+          <td>1 → One Person Corporation (OPC) eligible. 2+ → regular domestic stock corporation
+              (min. 2 incorporators, no statutory minimum capital for most activities).</td>
+        </tr>
+        <tr>
+          <td>SEC corp vs. DTI sole-prop?</td>
+          <td>DTI is faster/cheaper (~1 day, &lt;₱5,000) but unlimited personal liability, no corporate
+              bank account, and reads as less credible to homeowners and distribution utilities. Default:
+              <strong>SEC corporation</strong> (or OPC if solo).</td>
+        </tr>
+        <tr>
+          <td>Any foreign equity?</td>
+          <td>Check the Foreign Investment Negative List before filing — flag for a lawyer if applicable.</td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout info">
+      <span class="label">Action</span>
+      Log the entity type + founder list as a decision in <code>ops/status.md</code> §4 before starting
+      eSPARC. Everything below assumes a regular domestic stock corporation unless you're solo (OPC).
+    </div>
+
+    <h2><span class="sec">§ 1</span>Pre-filing prep</h2>
+    <div class="step">
+      <div class="step-head"><span class="step-num">01</span><h3>Prep before eSPARC</h3></div>
+      <div class="checklist" data-group="prefiling">
+        <div class="cl-item"><input type="checkbox" id="c1"><label for="c1">Pick 3 candidate corporate names (SEC rejects duplicates/confusingly similar names)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c2"><label for="c2">Decide principal office address</label></div>
+        <div class="cl-item"><input type="checkbox" id="c3"><label for="c3">Decide authorized capital stock and paid-up capital (paid-up ≥25% of subscribed, subscribed ≥25% of authorized)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c4"><label for="c4">List incorporators (2–15, or 1 for OPC) with valid IDs, TINs, % ownership</label></div>
+        <div class="cl-item"><input type="checkbox" id="c5"><label for="c5">Draft primary purpose clause covering both manufacturing/assembly (Model A) and installation/EPC contracting (Model B)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c6"><label for="c6">Appoint corporate secretary (Filipino citizen), treasurer (PH resident), and (OPC only) nominee + alternate nominee</label></div>
+        <div class="cl-item"><input type="checkbox" id="c7"><label for="c7">Create/credential an SEC eSECURE account for every incorporator/officer</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 2</span>SEC eSPARC filing</h2>
+    <div class="step">
+      <div class="step-head"><span class="step-num">02</span><h3>File and get the Certificate of Incorporation</h3><span class="time">~5–10 business days <span class="unverified">EST</span></span></div>
+      <div class="checklist" data-group="esparc">
+        <div class="cl-item"><input type="checkbox" id="c8"><label for="c8">Reserve the company name via eSPARC</label></div>
+        <div class="cl-item"><input type="checkbox" id="c9"><label for="c9">Complete online Articles of Incorporation (or upload notarized PDF)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c10"><label for="c10">Complete By-laws — start from <code>ops/templates/by-laws-template.md</code> (regular corp only; OPCs are exempt)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c11"><label for="c11">Complete Treasurer's Affidavit</label></div>
+        <div class="cl-item"><input type="checkbox" id="c12"><label for="c12">Upload supporting docs: incorporator IDs, TINs, proof of office address, (OPC) nominee written consent</label></div>
+        <div class="cl-item"><input type="checkbox" id="c13"><label for="c13">Pay filing fees online</label></div>
+        <div class="cl-item"><input type="checkbox" id="c14"><label for="c14">Monitor eSPARC dashboard; respond to any clarificatory comments</label></div>
+        <div class="cl-item"><input type="checkbox" id="c15"><label for="c15">Courier 2 notarized hard-copy sets within 60 calendar days of approval</label></div>
+        <div class="cl-item"><input type="checkbox" id="c16"><label for="c16">Receive the Certificate of Incorporation — corporation legally exists as of this date</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 3</span>Immediately after incorporation</h2>
+    <div class="step">
+      <div class="step-head"><span class="step-num">03</span><h3>Bank, officers, seal</h3></div>
+      <div class="checklist" data-group="postinc">
+        <div class="cl-item"><input type="checkbox" id="c17"><label for="c17">Open a corporate bank account; deposit paid-up capital</label></div>
+        <div class="cl-item"><input type="checkbox" id="c18"><label for="c18">(OPC only) File Form of Appointment (FAO) with SEC within 20 days of the Certificate</label></div>
+        <div class="cl-item"><input type="checkbox" id="c19"><label for="c19">Order corporate seal/stamp (some banks/LGUs still ask for it)</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 4</span>BIR registration</h2>
+    <p>Required before issuing any official receipt/invoice — i.e. before a legally documented deposit.</p>
+    <div class="step">
+      <div class="step-head"><span class="step-num">04</span><h3>Register with the RDO</h3></div>
+      <div class="checklist" data-group="bir">
+        <div class="cl-item"><input type="checkbox" id="c20"><label for="c20">File BIR Form 1903 at the Revenue District Office covering the principal office address</label></div>
+        <div class="cl-item"><input type="checkbox" id="c21"><label for="c21">Pay Annual Registration Fee (₱500, Form 0605 — confirm current fee)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c22"><label for="c22">Register books of accounts</label></div>
+        <div class="cl-item"><input type="checkbox" id="c23"><label for="c23">Apply for Authority to Print (ATP) or register a BIR-accredited e-invoicing/CRM system</label></div>
+        <div class="cl-item"><input type="checkbox" id="c24"><label for="c24">Get the BIR Certificate of Registration (Form 2303) posted at the business address</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 5</span>Local government (LGU)</h2>
+    <div class="step">
+      <div class="step-head"><span class="step-num">05</span><h3>Permits at the address where you operate</h3></div>
+      <div class="checklist" data-group="lgu">
+        <div class="cl-item"><input type="checkbox" id="c25"><label for="c25">Barangay Clearance (business)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c26"><label for="c26">Mayor's/Business Permit (needs SEC cert, BIR COR, barangay clearance, address proof, fire safety inspection cert, sanitary permit)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c27"><label for="c27">Register as employer with SSS, PhilHealth, and Pag-IBIG</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 6</span>Solar/electrical-industry licensing — the real gate on accepting a deposit</h2>
+    <div class="callout danger">
+      <span class="label">This is what CLAUDE.md §7 already blocks on</span>
+      SEC/BIR/LGU registration makes the company legally exist — it does not by itself let you sign an
+      install contract. The permit/licensed-electrician/net-metering checklist is this section.
+    </div>
+    <div class="step">
+      <div class="step-head"><span class="step-num">06</span><h3>PCAB, DOE, electrician, net metering</h3></div>
+      <div class="checklist" data-group="solar">
+        <div class="cl-item"><input type="checkbox" id="c28"><label for="c28">Confirm required PCAB (Philippine Contractors Accreditation Board) classification for solar EPC work and file for the license</label></div>
+        <div class="cl-item"><input type="checkbox" id="c29"><label for="c29">Research DOE renewable-energy installer accreditation prerequisites for a first-time applicant with no track record yet</label></div>
+        <div class="cl-item"><input type="checkbox" id="c30"><label for="c30">Employ or contract a licensed electrician / Registered Master Electrician (RME) for install sign-off</label></div>
+        <div class="cl-item"><input type="checkbox" id="c31"><label for="c31">Confirm current distribution-utility net-metering application process and turnaround (target DU, e.g. Meralco)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c32"><label for="c32">Know the Electrical Permit + Certificate of Final Electrical Inspection process for each install's LGU</label></div>
+      </div>
+    </div>
+
+    <h2><span class="sec">§ 7</span>Rough costs &amp; timeline <span class="unverified">EST</span></h2>
+    <div class="table-wrap">
+      <table>
+        <caption>2026 market estimates — verify before budgeting</caption>
+        <tr><th>Item</th><th>Estimate</th></tr>
+        <tr><td>SEC + BIR + LGU registration, small domestic corp</td><td class="mono">₱25,000–₱130,000</td></tr>
+        <tr><td>Name reservation → Certificate of Incorporation via eSPARC</td><td class="mono">5–10 business days</td></tr>
+        <tr><td>PCAB / DOE accreditation timeline</td><td class="mono">not yet researched — confirm before any customer-facing start date</td></tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 8</span>Next actions</h2>
+    <div class="step">
+      <div class="step-head"><span class="step-num">08</span><h3>Owner + decisions</h3></div>
+      <div class="checklist" data-group="next">
+        <div class="cl-item"><input type="checkbox" id="c33"><label for="c33">Founders decide entity type + name candidates (§0–1) this week</label></div>
+        <div class="cl-item"><input type="checkbox" id="c34"><label for="c34">Log the decision in <code>ops/status.md</code> §4</label></div>
+        <div class="cl-item"><input type="checkbox" id="c35"><label for="c35">Assign a named owner for this checklist (CLAUDE.md §6 "pilot in command")</label></div>
+        <div class="cl-item"><input type="checkbox" id="c36"><label for="c36">Confirm PCAB/DOE prerequisites (§6) before any install is quoted</label></div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="label">Sources</span>
+      Full citation list is in <code>ops/sec-registration-checklist.md</code> §8 (SEC eSPARC, PCAB, DOE, and
+      law-firm summaries, fetched 2026-07-20).
+    </div>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script>
+  (function () {
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type="checkbox"]'));
+    var STORE_KEY = 'sc13-checklist-v1';
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { saved = {}; }
+
+    function save() {
+      var state = {};
+      boxes.forEach(function (b) { state[b.id] = b.checked; });
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function updateProgress() {
+      var checked = boxes.filter(function (b) { return b.checked; }).length;
+      document.getElementById('cl-count').textContent = checked + ' / ' + boxes.length + ' checked';
+      document.getElementById('cl-bar-fill').style.width = (boxes.length ? (checked / boxes.length * 100) : 0) + '%';
+    }
+
+    boxes.forEach(function (b) {
+      if (saved[b.id]) b.checked = true;
+      b.closest('.cl-item').classList.toggle('done', b.checked);
+      b.addEventListener('change', function () {
+        b.closest('.cl-item').classList.toggle('done', b.checked);
+        save();
+        updateProgress();
+      });
+    });
+
+    document.getElementById('cl-reset').addEventListener('click', function () {
+      boxes.forEach(function (b) {
+        b.checked = false;
+        b.closest('.cl-item').classList.remove('done');
+      });
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      updateProgress();
+    });
+
+    updateProgress();
+  })();
+</script>
