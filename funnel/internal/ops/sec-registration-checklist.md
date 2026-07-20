@@ -33,9 +33,12 @@ unless you're solo, in which case swap "incorporators (2+)" steps for "single st
 ## 2. SEC eSPARC filing
 
 - [ ] Reserve the company name via eSPARC.
-- [ ] Complete online Articles of Incorporation (or upload notarized PDF).
-- [ ] Complete By-laws (regular corp) — OPCs are exempt from filing by-laws.
-- [ ] Complete Treasurer's Affidavit.
+- [ ] Complete online Articles of Incorporation (or upload notarized PDF) — prep with
+  `ops/templates/articles-of-incorporation-template.md`.
+- [ ] Complete By-laws (regular corp) — OPCs are exempt from filing by-laws. Start from
+  `ops/templates/by-laws-template.md`.
+- [ ] Complete Treasurer's Affidavit — start from
+  `ops/templates/treasurers-affidavit-template.md`.
 - [ ] Upload supporting docs: incorporator IDs, TINs, proof of office address, (OPC) nominee written consent.
 - [ ] Pay filing fees online through eSPARC's payment channel.
 - [ ] Monitor the eSPARC dashboard for clarificatory comments; respond within the window given (SEC commits to a first response within ~7 working days).
@@ -48,7 +51,7 @@ estimate, not a guarantee).
 
 ## 3. Immediately after the Certificate of Incorporation
 
-- [ ] Open a corporate bank account; deposit paid-up capital (bank will ask for the Certificate of Incorporation, Articles, secretary's certificate, and board resolution naming signatories).
+- [ ] Open a corporate bank account; deposit paid-up capital (bank will ask for the Certificate of Incorporation, Articles, secretary's certificate, and board resolution naming signatories — start from `ops/templates/secretarys-certificate-template.md`).
 - [ ] (OPC only) File the Form of Appointment (FAO) naming treasurer/corporate secretary/officers with SEC within 20 days of the Certificate of Incorporation.
 - [ ] Order the SEC-registered corporate seal/stamp (some banks and LGUs still ask for it).
 

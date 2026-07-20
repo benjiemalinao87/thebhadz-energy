@@ -139,5 +139,32 @@
     "extraLinks": [],
     "footer": "standard",
     "nav": false
+  },
+  {
+    "id": "articles-of-incorporation-template",
+    "titleBase": "Articles of Incorporation template (PH stock corporation)",
+    "rootFile": "articles-of-incorporation-template.html",
+    "internalFile": "articles-of-incorporation-template.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
+  },
+  {
+    "id": "treasurers-affidavit-template",
+    "titleBase": "Treasurer's Affidavit template",
+    "rootFile": "treasurers-affidavit-template.html",
+    "internalFile": "treasurers-affidavit-template.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
+  },
+  {
+    "id": "secretarys-certificate-template",
+    "titleBase": "Secretary's Certificate template (bank account)",
+    "rootFile": "secretarys-certificate-template.html",
+    "internalFile": "secretarys-certificate-template.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
   }
 ]

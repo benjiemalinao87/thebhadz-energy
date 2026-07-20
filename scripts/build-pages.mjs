@@ -34,7 +34,8 @@ const pages = JSON.parse(readFileSync(join(CONTENT_DIR, 'pages.json'), 'utf8'));
 const WORKSPACE_REDESIGN_PAGES = new Set([
   'overview', 'designer', 'build-guide', 'bom', 'strategy', 'sourcing', 'market',
   'competitors', 'map', 'roof-check', 'ad-library', 'founders', 'sec-registration',
-  'by-laws-template',
+  'by-laws-template', 'articles-of-incorporation-template', 'treasurers-affidavit-template',
+  'secretarys-certificate-template',
 ]);
 
 // SC-07 Project board is NOT in content/pages.json (it's a different implementation per
@@ -103,6 +104,9 @@ function repath(html, assetPrefix) {
 const OPS_DOCS = [
   'ops/sec-registration-checklist.md',
   'ops/templates/by-laws-template.md',
+  'ops/templates/articles-of-incorporation-template.md',
+  'ops/templates/treasurers-affidavit-template.md',
+  'ops/templates/secretarys-certificate-template.md',
 ];
 
 // Minimal markdown → HTML for the ops/ docs embedded via {{MD:path}} — covers exactly
