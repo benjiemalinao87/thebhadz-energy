@@ -35,7 +35,7 @@ const WORKSPACE_REDESIGN_PAGES = new Set([
   'overview', 'designer', 'build-guide', 'bom', 'strategy', 'sourcing', 'market',
   'competitors', 'map', 'roof-check', 'ad-library', 'founders', 'sec-registration',
   'by-laws-template', 'articles-of-incorporation-template', 'treasurers-affidavit-template',
-  'secretarys-certificate-template',
+  'secretarys-certificate-template', 'founder-charter', 'founders-agreement-term-sheet',
 ]);
 
 // SC-07 Project board is NOT in content/pages.json (it's a different implementation per
@@ -107,6 +107,8 @@ const OPS_DOCS = [
   'ops/templates/articles-of-incorporation-template.md',
   'ops/templates/treasurers-affidavit-template.md',
   'ops/templates/secretarys-certificate-template.md',
+  'ops/founder-charter.md',
+  'ops/templates/founders-agreement-term-sheet.md',
 ];
 
 // Minimal markdown → HTML for the ops/ docs embedded via {{MD:path}} — covers exactly
@@ -129,6 +131,15 @@ function mdToHtml(md) {
     if (b === '---') return '<hr>';
     if (b.startsWith('## ')) return `<h2>${inline(b.slice(3))}</h2>`;
     if (b.startsWith('# '))  return `<h1>${inline(b.slice(2))}</h1>`;
+    if (/^[-*] /.test(b)) {
+      const items = b.split(/\n(?=[-*] )/).map(i => inline(i.replace(/^[-*] /, '').replace(/\n/g, ' ')));
+      return `<ul>\n${items.map(i => `  <li>${i}</li>`).join('\n')}\n</ul>`;
+    }
+    if (/^\d+\. /.test(b)) {
+      const start = b.match(/^(\d+)\. /)[1];
+      const items = b.split(/\n(?=\d+\. )/).map(i => inline(i.replace(/^\d+\. /, '').replace(/\n/g, ' ')));
+      return `<ol start="${start}">\n${items.map(i => `  <li>${i}</li>`).join('\n')}\n</ol>`;
+    }
     if (b.startsWith('|')) {
       const rows = b.split('\n').filter(r => !/^\s*\|[-\s|]+\|\s*$/.test(r));
       const cells = r => r.split('|').slice(1, -1).map(c => c.trim());

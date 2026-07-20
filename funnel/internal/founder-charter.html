@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Founder Charter — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  .bylaws-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 26px; }
+  .bylaws-btn {
+    display: inline-block; background: none; border: 1px solid var(--hairline); border-radius: 4px;
+    font-family: var(--mono); font-size: 11px; padding: 5px 10px; cursor: pointer;
+    color: var(--faint); text-decoration: none;
+  }
+  .bylaws-btn:hover { border-color: var(--copper); color: var(--copper); }
+
+  .bylaws-doc { max-width: 760px; }
+  .bylaws-doc hr { border: 0; border-top: 1px solid var(--hairline); margin: 30px 0; }
+  .bylaws-doc .fill {
+    font-family: var(--mono); font-size: 0.92em; padding: 0 3px;
+    background: color-mix(in srgb, var(--copper) 14%, transparent);
+    border-bottom: 1px dashed var(--copper);
+  }
+
+  /* Print as a plain filing-ready document: no sidebar, no controls, black on white,
+     fill-in fields become blank-underline style. */
+  @media print {
+    .sidebar, .bylaws-actions, .doc-eyebrow { display: none !important; }
+    .frame { display: block; }
+    .content { max-width: none; padding: 0; }
+    body { background: #fff; color: #000; }
+    .bylaws-doc, .bylaws-doc h1, .bylaws-doc h2, .bylaws-doc p, .bylaws-doc td, .bylaws-doc th { color: #000; }
+    .bylaws-doc .fill { background: none; border-bottom: 1px solid #000; }
+    .bylaws-doc h2 { break-after: avoid; }
+    .bylaws-doc table { break-inside: avoid; }
+  }
+</style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
+      <a href="/internal/sec-registration.html"><span class="code">SC-13</span>SEC registration</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content workspace-page workspace-founder-charter">
+    <p class="doc-eyebrow">FOUNDER CHARTER · LIVING DOC <span class="rev">· REV A · 2026-07-21</span></p>
+
+    <div class="bylaws-actions">
+      <button type="button" class="bylaws-btn" onclick="window.print()">Print / save as PDF</button>
+      <a class="bylaws-btn" href="/internal/ops/founder-charter.md">Raw markdown (edit source)</a>
+      <a class="bylaws-btn" href="founders-agreement-term-sheet.html">Founders' Agreement term sheet &rarr;</a>
+    </div>
+
+    <div class="bylaws-doc">
+<h1>Founder Charter — how we run this company</h1>
+
+<p><strong>Living document, owned by all founders.</strong> The one place we write down how we work together — culture, disagreement, decisions, hiring, growth, money, impact — so we consult a page instead of memory. Sections are <strong>PROPOSED (drafted 2026-07-21, ratify or edit at a Friday meeting)</strong> or <strong>AGREED (date)</strong>. Every change gets a row in the Decision Log. The operating rules already committed to (Mission, spend gates, weekly cadence) live in the Founder Operating System — this charter builds on it; where they conflict, the Founder OS wins. Numbers marked ▸ are proposals to ratify, not defaults in force.</p>
+
+<p>Legal counterpart: anything that must be <em>enforceable</em> (equity, vesting, founder exit, deadlock buyouts, IP) belongs in the Founders' Agreement — see the term sheet at <code>ops/templates/founders-agreement-term-sheet.md</code> — not here. This charter is culture and practice; the agreement is contract.</p>
+
+<hr>
+
+<h2>1. Mission &amp; north star — AGREED (2026-07-11)</h2>
+
+<p>▸ 5 paid ₱99,500-package installs — deposits banked, not promised — by 2026-10-09. Everything in this charter serves that number until it's met. This section exists so the charter never grows a second north star.</p>
+
+<h2>2. Culture &amp; values — PROPOSED</h2>
+
+<p>We are building a company that outlives its founders. Long-lasting means: the customer relationship (not the sale) is the asset, the process improves every week, and the brand is trusted in a market trained to expect scams. Five values, each with the cost it must be allowed to charge us:</p>
+
+<ol start="1">
+  <li><strong>Kaizen — better every install.</strong> Every install, every quote, every ad ends with a 15-minute postmortem: one thing that goes better next time, shipped before the next install. Root cause stated bluntly, whiteboard erased, nobody defends last week's way. <em>What it costs:</em> time when we're busiest, and pride when the improvement contradicts a founder's own design.</li>
+  <li><strong>The customer's bill is our scoreboard.</strong> We measure ourselves in pesos off the Meralco/BILECO bill, hours of light through a brownout, and referrals earned — never in panels installed or pages shipped. Service standard: every homeowner knows their next step (survey → design → permit → install date → energized → first lower bill) without having to chase us, and a Messenger message gets a human reply within ▸ 4 waking hours. <em>What it costs:</em> evenings, and saying "we were slow" out loud in the postmortem.</li>
+  <li><strong>Honest power.</strong> We never promise what the system doesn't deliver — no brownout implication on LIWANAG, no fabricated testimonials, no accredited-installer claims we don't hold yet. One betrayed customer in a scam-wary province taxes every future lead. <em>What it costs:</em> real sales, this quarter, every quarter. We pay it.</li>
+  <li><strong>Innovate below the fold.</strong> Incumbents race specs; we innovate where the customer actually hurts — fixed all-in price, the savings calculator, install speed, jigs and checklists, service turnaround, honest warranty. Innovation that doesn't unblock a buyer-experience stage is a hobby (do it on trainer-panel day). <em>What it costs:</em> the engineer's itch to build the impressive thing instead of the useful thing.</li>
+  <li><strong>Leave the barangay better.</strong> Every rooftop is public proof: clean power without genset fumes, local labor trained on our installs, batteries and e-waste disposed of responsibly (the disposal stage is part of our offer, not the customer's problem), and a build-log the community can read. Impact is compounding trust, not a CSR page. <em>What it costs:</em> doing disposal and training right even when nobody would notice.</li>
+</ol>
+
+<p>Norms already committed via the Founder OS and adopted here: bad news to the group channel, never one-on-one; public postmortems, no defending prior work; outcomes headline, outputs footnote; only countable commitments are evidence.</p>
+
+<h2>3. When we disagree — PROPOSED</h2>
+
+<ol start="1">
+  <li><strong>Facts are settled by tests, not seniority.</strong> If it's checkable — a price, a claim, a conversion guess — the cheapest 7-day real-market test or primary source decides.</li>
+  <li><strong>Domain owner decides.</strong> The named owner (§8) hears the disagreement as 2–3 written alternatives (no whether-or-not framing), decides against the Mission number, logs it.</li>
+  <li><strong>Disagree and commit.</strong> Once decided, everyone executes at full effort. The dissenter's objection is logged with a revisit-when condition — being right later is rewarded, relitigating weekly is not.</li>
+  <li><strong>Challenge path.</strong> A founder who thinks a decision is Mission-critical wrong writes a one-pager; the owners meet within ▸ 48 hours; if still stuck, default to whichever option produces a countable commitment soonest (Founder OS tie-break). Reversible + still tied → run the ▸ ≤₱5k test; genuinely untestable → the tie-break founder named in §8 calls it.</li>
+  <li><strong>Company-direction deadlock</strong> (pivot, shutdown, equity, firing a founder) → the Founders' Agreement mechanism. Invoking it is a named last resort, not a negotiating move.</li>
+  <li><strong>How we argue:</strong> hard on the idea in the group channel, never about the person, nothing held for a private sidebar — no ghost grudges.</li>
+</ol>
+
+<h2>4. Decision making — PROPOSED</h2>
+
+<p>Already in force from the Founder OS: no whether-or-not decisions; reversible-in-a-week → Ready-Fire-Aim; irreversible → the written gates; everything logged in <code>ops/status.md</code>.</p>
+
+<p>Proposed decision tiers (₱ figures to ratify):</p>
+
+<ul>
+  <li><strong>Solo (inform after):</strong> owner's domain, spend ≤ ▸ ₱5,000, fully reversible.</li>
+  <li><strong>One other founder:</strong> spend ▸ ₱5k–₱25k, any customer-facing price/claim change, any   new supplier commitment.</li>
+  <li><strong>All founders (reserved list):</strong> any hire or fire; single spend &gt; ▸ ₱25k; anything   touching the ⅓-of-cash rule; new SKU or package change; contracts &gt; ▸ ₱50k or longer   than 6 months; equity, debt, or founder pay; anything on the Founder OS hard-stop   list.</li>
+  <li><strong>Decision debt rule:</strong> not written in the log within 7 days → not a decision;   re-open it.</li>
+</ul>
+
+<h2>5. Hiring — PROPOSED</h2>
+
+<ul>
+  <li><strong>Stage One default: no specialist employees.</strong> Contractors and per-install labor   until the Mission is met — the first payroll hire needs the reserved list AND a   number (installs/month) it unlocks at.</li>
+  <li><strong>First critical role: licensed electrician / RME</strong> — per-install engagement first   (sign-off fee per install), employee only when volume sustains it. Without this role   no deposit is legal (SC-13 §6).</li>
+  <li><strong>The bar every hire clears:</strong> a paid trial day on a real install or real funnel   task; we hire for Kaizen fit — someone who improves the checklist beats someone who   merely follows it; references actually called.</li>
+  <li><strong>We train local.</strong> Biliran labor first, trained on our checklists — this is the §2   impact value operating as hiring policy, and it builds the install crew Model A will   need.</li>
+  <li><strong>Family and friends:</strong> allowed, same bar, and the decision is made by a founder NOT   related to them; pay and firing rules identical to anyone else.</li>
+  <li><strong>Wrong hire:</strong> acted on within ▸ 2 weeks of the postmortem naming it — slow firing   is culture debt.</li>
+</ul>
+
+<h2>6. Growth strategy — PROPOSED</h2>
+
+<p>In force from the Founder OS: two models, one company — Model B revenue funds and gates Model A; stage gates are numbers, never dates; one channel scaled at a time.</p>
+
+<p>The NOT-doing list (each with its unlock number):</p>
+
+<ul>
+  <li>No commercial/industrial installs until ▸ 25 residential installs are energized.</li>
+  <li>No expansion beyond Biliran until ▸ 10 installs/month sustained 3 months (then   adjacent municipalities by referral density, not by map ambition).</li>
+  <li>No in-house financing/installment plans — ever on our own balance sheet; a bank/coop   partner may be explored after ▸ 25 installs.</li>
+  <li>No franchising talk in Stage One.</li>
+  <li>No new SKU without its pre-registered threshold (Founder OS whole-cow rule).</li>
+</ul>
+
+<p><strong>Kaizen loop on strategy itself:</strong> after every ▸ 5 installs, re-interview the buyers (what almost stopped you, what closed you), update <code>ops/positioning.md</code> and <code>ops/canvas.md</code>, and re-run the §2 postmortem at company level. Long-lasting comes from the back end: maintenance contracts, monitoring, upgrades — the install buys the relationship; the relationship is the company.</p>
+
+<h2>7. Spending our money — PROPOSED</h2>
+
+<p>In force: ⅓-of-cash rule; Model A trainer cap; channel tests ≤₱12k, max 3 concurrent; death-clock runway in <code>ops/status.md</code>.</p>
+
+<ul>
+  <li>Spend approval follows the §4 tiers (▸ ₱5k / ₱25k).</li>
+  <li><strong>Founder pay: nothing until the Mission is met.</strong> Then an equal draw, amount set by   reserved-list decision, revisited each quarter against the death clock.</li>
+  <li><strong>Reimbursements:</strong> receipt in the ledger within ▸ 7 days or it's a personal expense.</li>
+  <li><strong>Money owner:</strong> one named founder keeps books, ledger, death clock — and cannot   solo-approve their own spend (the counter-signature is always someone else).</li>
+  <li><strong>US↔PH money:</strong> every peso the US-based founder puts in is documented same-week as   either capital contribution or founder loan (decide the default with the lawyer — it   changes equity and tax on both sides); one named founder holds in-country   bank/GCash authority.</li>
+  <li>Kaizen applies to cost too: after every install, one line item made cheaper or faster   without touching the honesty/table-stakes floor.</li>
+</ul>
+
+<h2>8. Founder roles &amp; working arrangement — PROPOSED (names to fill)</h2>
+
+<ul>
+  <li>Three owned roles (Founder OS §6): <strong>customer/interviews: <span class="fill">[NAME]</span></strong> ·   <strong>offer/pricing: <span class="fill">[NAME]</span></strong> · <strong>install/technical: <span class="fill">[NAME]</span></strong> (one person may hold two;   none may be unowned).</li>
+  <li>Tie-break founder for §3.4 untestable calls: <span class="fill">[NAME]</span>.</li>
+  <li>Officers must match the SEC filing (SC-13): President <span class="fill">[NAME]</span>, Corporate Secretary   <span class="fill">[NAME — Filipino citizen]</span>, Treasurer <span class="fill">[NAME — PH resident]</span>.</li>
+  <li><strong>US↔PH split:</strong> daily overlap window ▸ <span class="fill">[X–Y]</span> PH time; in-country founder(s) own   LGU/DU/site presence; the US-based founder owns <span class="fill">[e.g., funnel, instrumentation,   sourcing research]</span> — and §7's foreign-equity/PCAB question is resolved with the   lawyer before the SEC filing fixes the officer list.</li>
+  <li>Cadence in force: Friday T5T + canvas; Monday Critical Path deferral; weekly   Triple-A sprint. Proposed addition: ▸ one 15-minute mid-week sync inside the overlap   window.</li>
+</ul>
+
+<h2>9. When it's not working — PROPOSED</h2>
+
+<ul>
+  <li><strong>Pivot trigger:</strong> if by the Mission date (2026-10-09) we hold fewer than ▸ 2 banked   deposits despite ▸ ≥3 scored channel tests, the next Friday meeting is a full   positioning review and a written compare-and-contrast of pivot options — not "one   more month" by default.</li>
+  <li><strong>Shutdown floor:</strong> death clock at ▸ ≤2 installs of runway → all discretionary spend   stops that day; founders decide within a week: clean wind-down or a named smaller   shape of the company. We end honestly — customers with warranties come first in any   wind-down.</li>
+  <li><strong>Founder exit or fade:</strong> raised at a weekly meeting, resolved within ▸ 2 weeks of   being raised; mechanics (vesting, buyback, non-compete) come from the Founders'   Agreement. <strong>No ghost-founder state</strong> — reduced involvement is renegotiated   explicitly, never silently tolerated.</li>
+</ul>
+
+<h2>10. Impact — why this outlives us — PROPOSED</h2>
+
+<p>The impact thesis IS the business model, not a side program: affordable fixed-price solar in brownout-hit provinces, honestly sold, locally serviced. Stage One impact commitments (all zero-cash, all compounding):</p>
+
+<ul>
+  <li>Train local labor on every install (§5) — skills stay in Biliran.</li>
+  <li>Responsible battery/e-waste disposal on every job (§2, value 5).</li>
+  <li>Build in public: the monthly founder-roof kWh/typhoon post (already mandated by the   Founder OS) doubles as honest public education about what solar really does.</li>
+  <li>Transparent pricing — the corridor price with its published "reason why" — as a   market-level attack on the scam economy around solar.</li>
+</ul>
+
+<p>Post-Mission ideas (parked until gates unlock, per Founder OS spend rules): a donated community install per ▸ 25 paid installs (school/health center, chosen with the barangay); scholarship or apprenticeship for a local electrician trainee. Logged here as intent so we don't forget who we said we'd be.</p>
+
+<h2>11. Decision Log</h2>
+
+<p>Every ratification, amendment, and override gets a row. Newest first.</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Date</th><th>Decision</th><th>Why</th><th>Revisit when</th></tr>
+  <tr><td>2026-07-21</td><td>Charter drafted: §1 agreed; §2–10 PROPOSED pending founder ratification</td><td>One reference place instead of memory; drafted from the Founder OS + founder pillars (innovation, Kaizen, customer service, community impact)</td><td>First Friday meeting after creation</td></tr>
+</table></div>
+
+<hr>
+
+<p><em>Companion documents: Founder Operating System (Vision &amp; Values page / CLAUDE.md), <code>ops/templates/founders-agreement-term-sheet.md</code> (legal), <code>ops/status.md</code> (ledger), SC-13 SEC registration checklist.</em></p>
+    </div>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>

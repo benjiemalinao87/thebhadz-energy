@@ -166,5 +166,23 @@
     "extraLinks": [],
     "footer": "standard",
     "nav": false
+  },
+  {
+    "id": "founder-charter",
+    "titleBase": "Founder Charter",
+    "rootFile": "founder-charter.html",
+    "internalFile": "founder-charter.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
+  },
+  {
+    "id": "founders-agreement-term-sheet",
+    "titleBase": "Founders' Agreement term sheet",
+    "rootFile": "founders-agreement-term-sheet.html",
+    "internalFile": "founders-agreement-term-sheet.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
   }
 ]

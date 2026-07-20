@@ -1,0 +1,30 @@
+<style>
+  .bylaws-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 26px; }
+  .bylaws-btn {
+    display: inline-block; background: none; border: 1px solid var(--hairline); border-radius: 4px;
+    font-family: var(--mono); font-size: 11px; padding: 5px 10px; cursor: pointer;
+    color: var(--faint); text-decoration: none;
+  }
+  .bylaws-btn:hover { border-color: var(--copper); color: var(--copper); }
+
+  .bylaws-doc { max-width: 760px; }
+  .bylaws-doc hr { border: 0; border-top: 1px solid var(--hairline); margin: 30px 0; }
+  .bylaws-doc .fill {
+    font-family: var(--mono); font-size: 0.92em; padding: 0 3px;
+    background: color-mix(in srgb, var(--copper) 14%, transparent);
+    border-bottom: 1px dashed var(--copper);
+  }
+
+  /* Print as a plain filing-ready document: no sidebar, no controls, black on white,
+     fill-in fields become blank-underline style. */
+  @media print {
+    .sidebar, .bylaws-actions, .doc-eyebrow { display: none !important; }
+    .frame { display: block; }
+    .content { max-width: none; padding: 0; }
+    body { background: #fff; color: #000; }
+    .bylaws-doc, .bylaws-doc h1, .bylaws-doc h2, .bylaws-doc p, .bylaws-doc td, .bylaws-doc th { color: #000; }
+    .bylaws-doc .fill { background: none; border-bottom: 1px solid #000; }
+    .bylaws-doc h2 { break-after: avoid; }
+    .bylaws-doc table { break-inside: avoid; }
+  }
+</style>

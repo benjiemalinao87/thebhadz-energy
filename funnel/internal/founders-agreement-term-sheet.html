@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Founders' Agreement term sheet — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  .bylaws-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 26px; }
+  .bylaws-btn {
+    display: inline-block; background: none; border: 1px solid var(--hairline); border-radius: 4px;
+    font-family: var(--mono); font-size: 11px; padding: 5px 10px; cursor: pointer;
+    color: var(--faint); text-decoration: none;
+  }
+  .bylaws-btn:hover { border-color: var(--copper); color: var(--copper); }
+
+  .bylaws-doc { max-width: 760px; }
+  .bylaws-doc hr { border: 0; border-top: 1px solid var(--hairline); margin: 30px 0; }
+  .bylaws-doc .fill {
+    font-family: var(--mono); font-size: 0.92em; padding: 0 3px;
+    background: color-mix(in srgb, var(--copper) 14%, transparent);
+    border-bottom: 1px dashed var(--copper);
+  }
+
+  /* Print as a plain filing-ready document: no sidebar, no controls, black on white,
+     fill-in fields become blank-underline style. */
+  @media print {
+    .sidebar, .bylaws-actions, .doc-eyebrow { display: none !important; }
+    .frame { display: block; }
+    .content { max-width: none; padding: 0; }
+    body { background: #fff; color: #000; }
+    .bylaws-doc, .bylaws-doc h1, .bylaws-doc h2, .bylaws-doc p, .bylaws-doc td, .bylaws-doc th { color: #000; }
+    .bylaws-doc .fill { background: none; border-bottom: 1px solid #000; }
+    .bylaws-doc h2 { break-after: avoid; }
+    .bylaws-doc table { break-inside: avoid; }
+  }
+</style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
+      <a href="/internal/sec-registration.html"><span class="code">SC-13</span>SEC registration</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content workspace-page workspace-founders-agreement-term-sheet">
+    <p class="doc-eyebrow">FOUNDERS' AGREEMENT · TERM SHEET <span class="rev">· REV A · 2026-07-21</span></p>
+
+    <div class="bylaws-actions">
+      <button type="button" class="bylaws-btn" onclick="window.print()">Print / save as PDF</button>
+      <a class="bylaws-btn" href="/internal/ops/templates/founders-agreement-term-sheet.md">Raw markdown (fillable source)</a>
+      <a class="bylaws-btn" href="founder-charter.html">&larr; Founder Charter</a>
+    </div>
+
+    <div class="bylaws-doc">
+<h1>Founders' Agreement — term sheet checklist</h1>
+
+<p><strong>Template only — not legal advice.</strong> This is the clause-by-clause brief to bring to a Philippine lawyer who will draft the actual Founders'/Shareholders' Agreement — the <em>enforceable</em> counterpart to <code>ops/founder-charter.md</code>. Fill the <code><span class="fill">[BRACKETED]</span></code> decisions before the lawyer meeting; the lawyer turns them into contract language and flags what PH law won't enforce. Where the charter is culture, this is what happens when culture isn't enough.</p>
+
+<hr>
+
+<h2>1. Parties &amp; recitals</h2>
+
+<ul>
+  <li>Founders: <span class="fill">[NAME 1, nationality, address]</span>, <span class="fill">[NAME 2, …]</span>, <span class="fill">[NAME 3, …]</span>.</li>
+  <li>The corporation: <span class="fill">[COMPANY NAME]</span>, Inc. (execute a short-form version pre-incorporation,   then have the corporation adopt/accede after the SEC Certificate issues).</li>
+  <li><strong>Foreign-equity constraint stated up front:</strong> the equity table must keep the company   eligible for a PCAB regular contractor license (≥60% Filipino-owned) unless the   founders explicitly decide otherwise — this binds every clause below that can move   shares (vesting, buyback, transfers, dilution). A natural-born Filipino with RA 9225   reacquired citizenship counts as Filipino.</li>
+</ul>
+
+<h2>2. Equity &amp; vesting</h2>
+
+<ul>
+  <li>Initial split: <span class="fill">[NAME 1: X%]</span> / <span class="fill">[NAME 2: Y%]</span> / <span class="fill">[NAME 3: Z%]</span> — and the one-sentence   rationale, written down now, while everyone still likes each other.</li>
+  <li><strong>Vesting: <span class="fill">[4]</span> years, <span class="fill">[1]</span>-year cliff, monthly thereafter</strong> (the standard; PH practice   implements it via share transfer/buyback mechanics rather than US-style restricted   stock — let the lawyer choose the vehicle).</li>
+  <li>Acceleration: <span class="fill">[full/partial]</span> on death or permanent disability; <span class="fill">[none]</span> on voluntary   exit; <span class="fill">[single-trigger on sale of the company? decide]</span>.</li>
+  <li>Unvested shares on exit: bought back / forfeited at <span class="fill">[par value / nominal price]</span>.</li>
+</ul>
+
+<h2>3. Roles, time &amp; commitment</h2>
+
+<ul>
+  <li>Full-time / part-time status of each founder and what "full-time" means given the   US↔PH split (reference charter §8; the agreement enforces it, the charter operates it).</li>
+  <li>Officer seats per the SEC filing: President <span class="fill">[NAME]</span>, Corporate Secretary <span class="fill">[NAME —   Filipino citizen]</span>, Treasurer <span class="fill">[NAME — PH resident]</span>.</li>
+  <li>Consequence of sustained non-performance: ties into good-leaver/bad-leaver (§7), not   ad-hoc punishment.</li>
+</ul>
+
+<h2>4. Capital, loans &amp; dilution</h2>
+
+<ul>
+  <li>Paid-in capital per founder at incorporation: <span class="fill">[AMOUNTS]</span> (must match the AOI Eighth   article and the Treasurer's Affidavit).</li>
+  <li>Future money from a founder: default treatment is <span class="fill">[capital contribution at agreed   valuation / documented founder loan at [0–X]</span>% interest] — decided per §4 reserved   matters, documented same week (charter §7).</li>
+  <li>Pre-emptive rights: each founder may maintain their percentage in any new issuance.</li>
+  <li>No dividends in Stage One; distributions require unanimous consent.</li>
+</ul>
+
+<h2>5. Reserved matters (unanimous founder consent)</h2>
+
+<p>Mirror charter §4 and lock it contractually: new share issuance or transfer; debt above ₱<span class="fill">[X]</span>; any single spend above ₱<span class="fill">[Y]</span>; founder compensation; hiring/firing any employee; sale, merger, dissolution; amending Articles/By-laws; anything overriding a Founder OS hard stop.</p>
+
+<h2>6. Deadlock resolution (company-direction scale)</h2>
+
+<p>Escalation ladder, each step with a clock:</p>
+
+<ol start="1">
+  <li>Written one-pagers + facilitated founders' meeting within <span class="fill">[14]</span> days.</li>
+  <li>Mediation: <span class="fill">[30]</span> days, mediator from <span class="fill">[PDRCI / agreed neutral]</span>.</li>
+  <li>Buy-sell ("shotgun"): either side names a per-share price; the other must buy or    sell at it — with a Filipino-ownership check on the resulting cap table (§1).</li>
+  <li>Arbitration: <span class="fill">[PDRCI, Manila / alternative]</span>, governing law: Philippines, language:    English. (Cross-border founders: arbitration beats courts — a PH court judgment is    hard to enforce in the US and vice versa; an arbitral award travels under the New    York Convention.)</li>
+</ol>
+
+<h2>7. Exit: good leaver / bad leaver</h2>
+
+<ul>
+  <li><strong>Good leaver</strong> (death, disability, agreed departure): keeps vested shares or sells   them back at <span class="fill">[fair value — define the formula: multiple of trailing revenue /   independent valuation / book value]</span>.</li>
+  <li><strong>Bad leaver</strong> (walks out pre-cliff, fraud, material breach, sustained abandonment as   defined in §3): unvested forfeited; vested bought back at <span class="fill">[par / discounted formula]</span>.</li>
+  <li>Company/remaining founders get first right to buy; payment terms <span class="fill">[lump / N-month   installments]</span> so a buyback can't kill the death clock.</li>
+  <li><strong>No ghost founders</strong> (charter §9): sustained non-involvement beyond <span class="fill">[90]</span> days   without agreed leave = trigger for the §7 process.</li>
+</ul>
+
+<h2>8. Share transfer restrictions</h2>
+
+<ul>
+  <li>Lock-in: no transfers to third parties before <span class="fill">[the Mission is met + 12 months /   DATE]</span>.</li>
+  <li>Right of first refusal to the company, then to founders pro-rata.</li>
+  <li>Tag-along (minority may join a sale) and drag-along (majority above <span class="fill">[75]</span>% may compel   a sale) — thresholds to fit a <span class="fill">[2–3]</span>-founder table.</li>
+  <li>Any transferee must sign this agreement; spouses/heirs bound (PH conjugal property   rules make this clause matter — ask the lawyer about spousal consent at signing).</li>
+</ul>
+
+<h2>9. IP assignment &amp; confidentiality</h2>
+
+<ul>
+  <li>All work product to date and forward — this repo, the BADJJ/Solar City brands, the   designer, docs, funnel, install checklists, jigs, customer data — assigned to the   corporation on incorporation; prior personal IP listed and licensed or carved out:   <span class="fill">[LIST or "none"]</span>.</li>
+  <li>Confidentiality survives exit by <span class="fill">[3]</span> years; customer list and leads are corporate   assets (the Founder OS treats the lead list as an asset — the agreement makes that   enforceable).</li>
+</ul>
+
+<h2>10. Non-compete / non-solicit</h2>
+
+<ul>
+  <li>Scope proposal: no competing residential-solar install business in <span class="fill">[Biliran +   adjacent provinces]</span> for <span class="fill">[2]</span> years post-exit; no soliciting employees, contractors, or   customers for <span class="fill">[2]</span> years.</li>
+  <li><strong>PH reality check for the lawyer:</strong> post-employment/post-exit restraints are   enforceable only if reasonable in time, territory, and trade — get the narrowest   version that actually protects the company, not a broad one a court voids entirely.</li>
+</ul>
+
+<h2>11. Boilerplate the lawyer completes</h2>
+
+<p>Insurance on founders <span class="fill">[key-person? decide]</span>; notices (email + Viber/WhatsApp valid); amendment only in writing, unanimous; severability; entire agreement; relationship to By-laws (this agreement prevails between the founders to the extent law allows — by-laws stay the public/legal minimum); counterparts + electronic signature; apostille plan for any founder signing in the US.</p>
+
+<hr>
+
+<h2>Decision worksheet (fill before the lawyer meeting)</h2>
+
+<div class="table-wrap"><table>
+  <tr><th>#</th><th>Decision</th><th>Our answer</th></tr>
+  <tr><td>1</td><td>Equity split + rationale</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>2</td><td>Vesting years / cliff</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>3</td><td>Good-leaver valuation formula</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>4</td><td>Bad-leaver buyback price</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>5</td><td>Reserved-matter peso thresholds</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>6</td><td>Deadlock final step (shotgun? arbitration seat?)</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>7</td><td>Non-compete scope/duration</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>8</td><td>Founder-money default (equity vs loan)</td><td><span class="fill">[ ]</span></td></tr>
+  <tr><td>9</td><td>Filipino-ownership floor to preserve (PCAB)</td><td><span class="fill">[ ]</span></td></tr>
+</table></div>
+
+<hr>
+
+<p><em>Companion to <code>ops/founder-charter.md</code> (culture/practice) and the SC-13 registration checklist. Have the draft reviewed by a PH corporate lawyer; if any founder signs in the US, plan apostille time.</em></p>
+    </div>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>
