@@ -723,6 +723,16 @@ html[data-theme="dark"] .frame:has(> main.workspace-page) {
 
 html[data-theme="dark"] .workspace-page code { color: #a6d7d4; background: #152a2c; }
 html[data-theme="dark"] .workspace-page .callout.warn { background: #302816; }
+html[data-theme="dark"] .workspace-page .lab-decision {
+  color: var(--ws-copy);
+  background: #2a2312;
+  border-color: var(--ws-copper);
+}
+html[data-theme="dark"] .workspace-page .lab-decision.is-ready {
+  background: var(--ws-green-soft);
+  border-color: var(--ws-green);
+}
+html[data-theme="dark"] .workspace-page .lab-decision strong { color: var(--ws-ink); }
 html[data-theme="dark"] .workspace-page .unverified { color: #ffd476; background: #332a13; border-color: #7e642c; }
 html[data-theme="dark"] .workspace-install-ops .ops-alert.danger {
   color: #ffd9d3;
