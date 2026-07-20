@@ -130,5 +130,14 @@
     "footer": "standard",
     "navCode": "SC-13",
     "navLabel": "SEC registration"
+  },
+  {
+    "id": "by-laws-template",
+    "titleBase": "By-laws template (PH stock corporation)",
+    "rootFile": "by-laws-template.html",
+    "internalFile": "by-laws-template.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "nav": false
   }
 ]

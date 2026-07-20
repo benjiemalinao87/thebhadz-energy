@@ -34,6 +34,7 @@ const pages = JSON.parse(readFileSync(join(CONTENT_DIR, 'pages.json'), 'utf8'));
 const WORKSPACE_REDESIGN_PAGES = new Set([
   'overview', 'designer', 'build-guide', 'bom', 'strategy', 'sourcing', 'market',
   'competitors', 'map', 'roof-check', 'ad-library', 'founders', 'sec-registration',
+  'by-laws-template',
 ]);
 
 // SC-07 Project board is NOT in content/pages.json (it's a different implementation per
@@ -49,12 +50,14 @@ function navRows(entries, site) {
 }
 
 // Build the ordered nav list once: pages.json order, with Project board spliced back in
-// right after "market" (its historical SC-07 slot, between SC-06 and SC-08).
-const marketIdx = pages.findIndex(p => p.id === 'market');
+// right after "market" (its historical SC-07 slot, between SC-06 and SC-08). Pages with
+// "nav": false are generated but not listed (reachable from the pages that link them).
+const navPages = pages.filter(p => p.nav !== false);
+const marketIdx = navPages.findIndex(p => p.id === 'market');
 const navEntries = [
-  ...pages.slice(0, marketIdx + 1),
+  ...navPages.slice(0, marketIdx + 1),
   PROJECTS_NAV,
-  ...pages.slice(marketIdx + 1),
+  ...navPages.slice(marketIdx + 1),
 ];
 
 const FOOTERS = {
@@ -102,10 +105,44 @@ const OPS_DOCS = [
   'ops/templates/by-laws-template.md',
 ];
 
+// Minimal markdown → HTML for the ops/ docs embedded via {{MD:path}} — covers exactly
+// what those docs use (#/## headings, paragraphs, ---, **bold**, *italic*, `code`,
+// pipe tables) so the .md stays the single fillable source and the HTML view can't
+// drift from it. [BRACKETED] fill-in fields are wrapped in <span class="fill"> so the
+// page can highlight what still needs completing.
+function mdToHtml(md) {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const inline = s => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]/g, '<span class="fill">[$1]</span>');
+
+  // A --- rule is its own block even when the source only leaves one newline around it.
+  const blocks = md.trim().replace(/^---[ \t]*$/gm, '\n---\n').split(/\n{2,}/);
+  return blocks.map(block => {
+    const b = block.trim();
+    if (b === '---') return '<hr>';
+    if (b.startsWith('## ')) return `<h2>${inline(b.slice(3))}</h2>`;
+    if (b.startsWith('# '))  return `<h1>${inline(b.slice(2))}</h1>`;
+    if (b.startsWith('|')) {
+      const rows = b.split('\n').filter(r => !/^\s*\|[-\s|]+\|\s*$/.test(r));
+      const cells = r => r.split('|').slice(1, -1).map(c => c.trim());
+      const [head, ...body] = rows;
+      return '<div class="table-wrap"><table>\n'
+        + `  <tr>${cells(head).map(c => `<th>${inline(c)}</th>`).join('')}</tr>\n`
+        + body.map(r => `  <tr>${cells(r).map(c => `<td>${inline(c) || '&nbsp;'}</td>`).join('')}</tr>`).join('\n')
+        + '\n</table></div>';
+    }
+    return `<p>${inline(b.replace(/\n/g, ' '))}</p>`;
+  }).join('\n\n');
+}
+
 function render(entry, site) {
   const b = BRAND[site];
   const main = readFileSync(join(CONTENT_DIR, `${entry.id}.html`), 'utf8').trimEnd()
-    .replaceAll('{{BRAND}}', b.name);
+    .replaceAll('{{BRAND}}', b.name)
+    .replace(/\{\{MD:([^}]+)\}\}/g, (_, p) => mdToHtml(readFileSync(join(ROOT, p.trim()), 'utf8')));
   const headExtraPath = join(CONTENT_DIR, `${entry.id}.head.html`);
   const scriptsPath = join(CONTENT_DIR, `${entry.id}.scripts.html`);
   const headExtra = existsSync(headExtraPath) ? readFileSync(headExtraPath, 'utf8').trimEnd() : '';

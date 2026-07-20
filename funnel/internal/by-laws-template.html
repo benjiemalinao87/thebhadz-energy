@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>By-laws template (PH stock corporation) — BADJJ Energy Systems</title>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<style>
+  .bylaws-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 26px; }
+  .bylaws-btn {
+    display: inline-block; background: none; border: 1px solid var(--hairline); border-radius: 4px;
+    font-family: var(--mono); font-size: 11px; padding: 5px 10px; cursor: pointer;
+    color: var(--faint); text-decoration: none;
+  }
+  .bylaws-btn:hover { border-color: var(--copper); color: var(--copper); }
+
+  .bylaws-doc { max-width: 760px; }
+  .bylaws-doc hr { border: 0; border-top: 1px solid var(--hairline); margin: 30px 0; }
+  .bylaws-doc .fill {
+    font-family: var(--mono); font-size: 0.92em; padding: 0 3px;
+    background: color-mix(in srgb, var(--copper) 14%, transparent);
+    border-bottom: 1px dashed var(--copper);
+  }
+
+  /* Print as a plain filing-ready document: no sidebar, no controls, black on white,
+     fill-in fields become blank-underline style. */
+  @media print {
+    .sidebar, .bylaws-actions, .doc-eyebrow { display: none !important; }
+    .frame { display: block; }
+    .content { max-width: none; padding: 0; }
+    body { background: #fff; color: #000; }
+    .bylaws-doc, .bylaws-doc h1, .bylaws-doc h2, .bylaws-doc p, .bylaws-doc td, .bylaws-doc th { color: #000; }
+    .bylaws-doc .fill { background: none; border-bottom: 1px solid #000; }
+    .bylaws-doc h2 { break-after: avoid; }
+    .bylaws-doc table { break-inside: avoid; }
+  }
+</style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="/internal/overview.html">
+        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
+        <span class="sub">MODULE ENGINEERING FILE</span></span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="/internal/overview.html"><span class="code">SC-00</span>Overview</a>
+      <a href="/internal/designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="/internal/build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="/internal/bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="/internal/strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="/internal/sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="/internal/market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="/internal/projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="/internal/competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="/internal/map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="/internal/roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="/internal/ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="/internal/founders.html"><span class="code">SC-12</span>Founder lessons</a>
+      <a href="/internal/sec-registration.html"><span class="code">SC-13</span>SEC registration</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
+        <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
+        <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content workspace-page workspace-by-laws-template">
+    <p class="doc-eyebrow">SC-13 · BY-LAWS TEMPLATE <span class="rev">· REV A · 2026-07-20</span></p>
+
+    <div class="bylaws-actions">
+      <button type="button" class="bylaws-btn" onclick="window.print()">Print / save as PDF</button>
+      <a class="bylaws-btn" href="/internal/ops/templates/by-laws-template.md">Raw markdown (fillable source)</a>
+      <a class="bylaws-btn" href="sec-registration.html">&larr; Back to SC-13 checklist</a>
+    </div>
+
+    <div class="bylaws-doc">
+<h1>By-Laws of <span class="fill">[COMPANY NAME]</span>, Inc.</h1>
+
+<p><strong>Template only — not legal advice.</strong> Structured on the standard Philippine SEC by-laws format for a domestic stock corporation under the Revised Corporation Code (RA 11232). Fill every <code><span class="fill">[BRACKETED]</span></code> field, delete this notice, and have a lawyer or SEC-accredited filer review before notarizing/submitting via eSPARC. Not required for a One Person Corporation (OPCs are exempt from filing by-laws).</p>
+
+<hr>
+
+<h2>ARTICLE I — Offices</h2>
+
+<p><strong>Section 1. Principal Office.</strong> The principal office of the corporation shall be located at <span class="fill">[FULL REGISTERED ADDRESS, CITY/MUNICIPALITY, PROVINCE, PHILIPPINES]</span>, or at such other place as the Board of Directors may determine, subject to notice to the Securities and Exchange Commission (SEC) as required by law.</p>
+
+<h2>ARTICLE II — Meetings of Stockholders</h2>
+
+<p><strong>Section 1. Annual Meeting.</strong> The annual meeting of stockholders shall be held on <span class="fill">[DATE/MONTH, e.g., "the second Monday of March each year"]</span> at the principal office of the corporation or such other place within the Philippines as the Board may designate, for the election of directors and the transaction of such other business as may properly come before the meeting.</p>
+
+<p><strong>Section 2. Special Meetings.</strong> Special meetings of stockholders may be called at any time by the Board of Directors, the President, or upon written request of stockholders representing at least a majority of the outstanding capital stock.</p>
+
+<p><strong>Section 3. Notice of Meetings.</strong> Written notice stating the place, date, time, and purpose(s) of any stockholders' meeting shall be sent to each stockholder of record at least <span class="fill">[21]</span> days prior to the meeting, unless a shorter period is allowed by law and stockholders holding a majority of outstanding capital stock consent in writing.</p>
+
+<p><strong>Section 4. Quorum.</strong> Unless otherwise provided by law, a quorum for stockholders' meetings shall consist of stockholders representing a majority of the outstanding capital stock, present in person or by proxy.</p>
+
+<p><strong>Section 5. Voting.</strong> Each share of stock shall be entitled to one vote, except as otherwise provided in the Articles of Incorporation. Stockholders may vote in person, by proxy, or through remote communication/in absentia as may be authorized by the Board and permitted by the Revised Corporation Code.</p>
+
+<h2>ARTICLE III — Board of Directors</h2>
+
+<p><strong>Section 1. Number and Qualifications.</strong> The corporation shall be governed by a Board of Directors consisting of <span class="fill">[NUMBER, e.g., "3"]</span> members, each of whom must own at least one share of stock in their own name and possess the qualifications required by the Revised Corporation Code.</p>
+
+<p><strong>Section 2. Term.</strong> Directors shall be elected at each annual meeting and shall hold office for one year and until their successors are elected and qualified.</p>
+
+<p><strong>Section 3. Regular and Special Meetings.</strong> Regular meetings of the Board shall be held <span class="fill">[FREQUENCY, e.g., "quarterly"]</span>, on such dates as the Board may fix. Special meetings may be called by the President or by a majority of the directors, with at least <span class="fill">[5]</span> days' prior notice, unless waived.</p>
+
+<p><strong>Section 4. Quorum and Voting.</strong> A majority of the number of directors as fixed in these by-laws shall constitute a quorum for the transaction of business. Except where a greater vote is required by law or the Articles of Incorporation, the vote of a majority of directors present at a meeting with quorum shall be the act of the Board. Directors may participate in meetings via remote communication as permitted by law.</p>
+
+<p><strong>Section 5. Vacancies.</strong> Any vacancy in the Board other than by removal or expiration of term may be filled by a vote of at least a majority of the remaining directors, if still constituting a quorum, in accordance with the Revised Corporation Code.</p>
+
+<p><strong>Section 6. Powers.</strong> The Board shall exercise the corporate powers, conduct all business, and control all property of the corporation, subject to the Articles of Incorporation, these by-laws, and applicable law.</p>
+
+<h2>ARTICLE IV — Officers</h2>
+
+<p><strong>Section 1. Officers.</strong> The officers of the corporation shall be a President (who must be a director), a Corporate Secretary (who must be a Filipino citizen and a resident of the Philippines), a Treasurer (who must be a resident of the Philippines), and such other officers as the Board may appoint, including a Compliance Officer if required by applicable SEC rules. One person may hold two or more positions, except that no one shall act as both President and Treasurer, or President and Secretary, concurrently unless the corporation qualifies as and elects to operate as a One Person Corporation.</p>
+
+<p><strong>Section 2. Election and Term.</strong> Officers shall be elected by the Board immediately after the annual stockholders' meeting and shall serve for one year and until their successors are elected and qualified, unless removed earlier for cause.</p>
+
+<p><strong>Section 3. President.</strong> The President shall preside at all stockholders' and Board meetings, oversee the general management of the corporation's business, and sign contracts and other instruments on behalf of the corporation as authorized by the Board.</p>
+
+<p><strong>Section 4. Corporate Secretary.</strong> The Corporate Secretary shall keep the minutes of all stockholders' and Board meetings, maintain the stock and transfer book, issue notices of meetings, certify corporate records, and perform such other duties as the Board directs.</p>
+
+<p><strong>Section 5. Treasurer.</strong> The Treasurer shall have custody of corporate funds and securities, keep full accounts of receipts and disbursements, render financial statements as required, and perform such other duties as the Board directs.</p>
+
+<h2>ARTICLE V — Stock Certificates</h2>
+
+<p><strong>Section 1. Form.</strong> Certificates of stock shall be issued in such form as the Board approves, signed by the President and the Secretary, and bearing the corporate seal (if any), specifying the number of shares and stating that the shares are fully paid.</p>
+
+<p><strong>Section 2. Transfer.</strong> Shares of stock shall be transferable only on the books of the corporation upon surrender of the certificate properly endorsed, and no transfer shall be valid, except as between the parties, until recorded in the stock and transfer book.</p>
+
+<p><strong>Section 3. Lost or Destroyed Certificates.</strong> A new certificate may be issued in lieu of one lost, stolen, or destroyed, upon such terms and proof as the Board requires and in compliance with the Revised Corporation Code.</p>
+
+<h2>ARTICLE VI — Fiscal Year and Dividends</h2>
+
+<p><strong>Section 1. Fiscal Year.</strong> The fiscal year of the corporation shall begin on <span class="fill">[DATE, e.g., "January 1"]</span> and end on <span class="fill">[DATE, e.g., "December 31"]</span> of each year, unless changed by Board resolution and duly reported to the BIR and SEC.</p>
+
+<p><strong>Section 2. Dividends.</strong> Dividends shall be declared and paid out of unrestricted retained earnings, as and when the Board determines, subject to the Revised Corporation Code and applicable tax rules.</p>
+
+<h2>ARTICLE VII — Corporate Seal</h2>
+
+<p>The corporation may adopt a corporate seal, which shall bear the corporation's full name, the year of incorporation, and the words "Philippines." Use of a seal is optional under the Revised Corporation Code but may still be requested by banks or counterparties.</p>
+
+<h2>ARTICLE VIII — Amendments</h2>
+
+<p>These by-laws may be amended or repealed, or new by-laws adopted, by a majority vote of the Board of Directors and the vote or written assent of stockholders representing at least a majority of the outstanding capital stock, at a meeting called for that purpose, subject to filing the amendment with the SEC.</p>
+
+<h2>ARTICLE IX — Effectivity</h2>
+
+<p>These by-laws shall take effect upon approval by the SEC as part of the corporation's registration, or upon subsequent SEC approval if adopted or amended after incorporation.</p>
+
+<hr>
+
+<p><strong>Certification</strong> (required by SEC eSPARC): a Secretary's Certificate attesting that these by-laws were adopted by the required stockholder/board vote, signed by the Corporate Secretary and notarized, is typically filed alongside this document.</p>
+
+<p>Adopted this <span class="fill">[DAY]</span> day of <span class="fill">[MONTH]</span>, <span class="fill">[YEAR]</span>, at <span class="fill">[CITY]</span>, Philippines.</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Name</th><th>Signature</th><th>Position</th></tr>
+  <tr><td><span class="fill">[INCORPORATOR 1]</span></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  <tr><td><span class="fill">[INCORPORATOR 2]</span></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  <tr><td><span class="fill">[INCORPORATOR 3]</span></td><td>&nbsp;</td><td>&nbsp;</td></tr>
+</table></div>
+
+<hr>
+
+<p><em>Drafted as a starting template for <code>ops/sec-registration-checklist.md</code> — verify current required clauses against the SEC eSPARC by-laws form and RA 11232 before filing.</em></p>
+    </div>
+  </main>
+</div>
+
+<script src="/internal/assets/site.js"></script>
+</html>
