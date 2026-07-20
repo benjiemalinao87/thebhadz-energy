@@ -3,6 +3,21 @@
 <script>
 (function(){
   var GEO = window.BILIRAN_GEO;
+  // The source boundaries (faeldon/philippines-json-maps, PSGC 2023) are wound
+  // clockwise, which D3's spherical geometry reads as "the whole globe minus a
+  // sliver" — d3.geoBounds then returns [[-180,-90],[180,90]] and fitExtent
+  // collapses every municipality to a point (all labels stack in the centre).
+  // Rewind each ring so outer rings are CCW before we project.
+  (function rewind(){
+    if (GEO && GEO.__rewound) return;
+    function rev(r){ return r.slice().reverse(); }
+    (GEO.features || []).forEach(function(f){
+      var g = f.geometry; if(!g) return;
+      if(g.type==='Polygon'){ g.coordinates = g.coordinates.map(rev); }
+      else if(g.type==='MultiPolygon'){ g.coordinates = g.coordinates.map(function(p){ return p.map(rev); }); }
+    });
+    if(GEO) GEO.__rewound = true;
+  })();
   var KEY = 'sc_biliran_map_v1';
   var PIN_TYPES = [
     {k:'lead',   label:'Lead',          c:'#2f80ed'},
