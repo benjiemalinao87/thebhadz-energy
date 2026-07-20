@@ -541,6 +541,8 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
 .workspace-page .side-card p,
 .workspace-page .side-card li,
 .workspace-roof-check .est-box p { color: var(--ws-copy); }
+.workspace-page :is(.side-card, .est-box) .stat { color: var(--ws-copy); }
+.workspace-page :is(.side-card, .est-box) .stat b { color: var(--ws-ink); }
 .workspace-page .ctrls { gap: 8px; }
 
 /* Ad library */
