@@ -1,5 +1,17 @@
 # Lesson Learn
 
+## Meeting log upload dock: dark mode contrast
+
+**Fixed:** 2026-07-21
+
+**Problem:** In dark mode, the upload dock showed a light cream card but text used `--ops-ink` (light in dark theme) — title, description, and "MEETING" label were nearly invisible.
+
+**Root cause:** `operations-redesign.css` applied light-theme `.rec-dock` styles unconditionally; dark mode flipped text tokens to light without changing the card background.
+
+**Fix:** Scope light rec-dock/rec-panel rules to `html:not([data-theme="dark"])` and add explicit `html[data-theme="dark"] .ops-meetings .rec-dock` overrides with dark surfaces + light text.
+
+**Do not:** Set text colors from theme tokens on a container whose background is hardcoded to a fixed light color.
+
 ## Meeting log: recording upload was nearly invisible
 
 **Fixed:** 2026-07-21

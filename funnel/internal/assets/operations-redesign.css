@@ -478,50 +478,50 @@ body.ops-standalone {
 .ops-meetings .howto { border-color: var(--ops-line); background: var(--ops-surface-2); color: var(--ops-muted); }
 
 /* Meeting recordings — keep upload impossible to miss on the light ops theme */
-.ops-meetings .rec-dock {
+html:not([data-theme="dark"]) .ops-meetings .rec-dock {
   top: 16px;
   background: linear-gradient(135deg, #fff8ef, #edf7f5 60%, #fff);
   border: 2px solid var(--ops-amber);
   box-shadow: var(--ops-shadow);
 }
-.ops-meetings .rec-dock h3 { color: var(--ops-ink); }
-.ops-meetings .rec-dock .sub { color: var(--ops-muted); }
-.ops-meetings .rec-dock-status { color: #8a6100; }
-.ops-meetings .rec-dock-status.err { color: var(--ops-red); }
-.ops-meetings .rec-dock label.field { color: var(--ops-muted); }
-.ops-meetings .rec-dock select {
+html:not([data-theme="dark"]) .ops-meetings .rec-dock h3 { color: var(--ops-ink); }
+html:not([data-theme="dark"]) .ops-meetings .rec-dock .sub { color: var(--ops-muted); }
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-status { color: #8a6100; }
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-status.err { color: var(--ops-rust); }
+html:not([data-theme="dark"]) .ops-meetings .rec-dock label.field { color: var(--ops-muted); }
+html:not([data-theme="dark"]) .ops-meetings .rec-dock select {
   background: var(--ops-surface);
   color: var(--ops-ink);
   border-color: var(--ops-line);
 }
-.ops-meetings .rec-dock-drop {
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop {
   background: #fff4e5;
   border-color: #e0b35c;
   color: var(--ops-muted);
 }
-.ops-meetings .rec-dock-drop:hover,
-.ops-meetings .rec-dock-drop.drag {
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop:hover,
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop.drag {
   background: #ffe8c2;
   border-color: var(--ops-amber);
   color: var(--ops-ink);
 }
-.ops-meetings .rec-dock-btn,
-.ops-meetings .rec-add {
+html:not([data-theme="dark"]) .ops-meetings .rec-dock-btn,
+html:not([data-theme="dark"]) .ops-meetings .rec-add {
   background: var(--ops-amber);
   color: #172b30;
   box-shadow: none;
 }
-.ops-meetings .rec-panel {
+html:not([data-theme="dark"]) .ops-meetings .rec-panel {
   background: #fff8ef;
   border-color: #e0b35c;
 }
-.ops-meetings .rec-panel h4 { color: #8a6100; }
-.ops-meetings .rec-hint { color: var(--ops-muted); }
-.ops-meetings .rec { background: var(--ops-surface-2); border-color: var(--ops-line); }
-.ops-meetings .rec .rt { color: var(--ops-ink); }
-.ops-meetings .rec .rm { color: var(--ops-muted); }
-.ops-meetings .rec-empty { color: var(--ops-muted); }
-.ops-meetings .rail a.m .rec-badge {
+html:not([data-theme="dark"]) .ops-meetings .rec-panel h4 { color: #8a6100; }
+html:not([data-theme="dark"]) .ops-meetings .rec-hint { color: var(--ops-muted); }
+html:not([data-theme="dark"]) .ops-meetings .rec { background: var(--ops-surface-2); border-color: var(--ops-line); }
+html:not([data-theme="dark"]) .ops-meetings .rec .rt { color: var(--ops-ink); }
+html:not([data-theme="dark"]) .ops-meetings .rec .rm { color: var(--ops-muted); }
+html:not([data-theme="dark"]) .ops-meetings .rec-empty { color: var(--ops-muted); }
+html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   background: #fff4e5;
   color: #8a6100;
   border-color: #e0b35c;
@@ -794,3 +794,57 @@ html[data-theme="dark"] .ops-notes .attach-btn:hover {
   border-color: var(--ops-amber);
 }
 html[data-theme="dark"] .ops-notes .attach-btn:focus-visible { outline-color: var(--ops-amber); }
+
+/* Meeting log — upload dock + recordings in dark mode (light-theme rec-dock rules must not bleed in) */
+html[data-theme="dark"] .ops-meetings .rec-dock {
+  top: 16px;
+  background: linear-gradient(135deg, #1a3a5c, #14314f 55%, #0f2023);
+  border: 2px solid var(--ops-amber);
+  box-shadow: var(--ops-shadow);
+}
+html[data-theme="dark"] .ops-meetings .rec-dock h3 { color: var(--ops-ink); }
+html[data-theme="dark"] .ops-meetings .rec-dock .sub { color: var(--ops-muted); }
+html[data-theme="dark"] .ops-meetings .rec-dock-status { color: var(--ops-amber); }
+html[data-theme="dark"] .ops-meetings .rec-dock-status.err { color: var(--ops-rust); }
+html[data-theme="dark"] .ops-meetings .rec-dock label.field { color: var(--ops-subtle); }
+html[data-theme="dark"] .ops-meetings .rec-dock select {
+  background: #0a181b;
+  color: var(--ops-ink);
+  border-color: var(--ops-line-strong);
+}
+html[data-theme="dark"] .ops-meetings .rec-dock-drop {
+  background: rgba(245, 189, 54, 0.08);
+  border-color: rgba(245, 189, 54, 0.45);
+  color: var(--ops-muted);
+}
+html[data-theme="dark"] .ops-meetings .rec-dock-drop:hover,
+html[data-theme="dark"] .ops-meetings .rec-dock-drop.drag {
+  background: rgba(245, 189, 54, 0.16);
+  border-color: var(--ops-amber);
+  color: var(--ops-ink);
+}
+html[data-theme="dark"] .ops-meetings .rec-dock-btn,
+html[data-theme="dark"] .ops-meetings .rec-add {
+  background: var(--ops-amber);
+  color: #172b30;
+  box-shadow: none;
+}
+html[data-theme="dark"] .ops-meetings .rec-panel {
+  background: rgba(245, 189, 54, 0.08);
+  border-color: rgba(245, 189, 54, 0.35);
+}
+html[data-theme="dark"] .ops-meetings .rec-panel h4 { color: var(--ops-amber); }
+html[data-theme="dark"] .ops-meetings .rec-hint { color: var(--ops-muted); }
+html[data-theme="dark"] .ops-meetings .rec {
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line);
+}
+html[data-theme="dark"] .ops-meetings .rec .rt { color: var(--ops-ink); }
+html[data-theme="dark"] .ops-meetings .rec .rm { color: var(--ops-muted); }
+html[data-theme="dark"] .ops-meetings .rec-empty { color: var(--ops-subtle); }
+html[data-theme="dark"] .ops-meetings .rec-prog .plbl { color: var(--ops-muted); }
+html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
+  background: rgba(245, 189, 54, 0.18);
+  color: var(--ops-amber);
+  border-color: rgba(245, 189, 54, 0.35);
+}
