@@ -28,14 +28,20 @@
   var injected = []; // Per-view styles/scripts to remove before the next swap.
   var currentPath = location.pathname;
   var routeStatus = document.getElementById("cc-route-status");
-  var OPERATION_PATHS = [
-    "/internal/leads.html",
-    "/internal/mail.html",
-    "/internal/meetings.html",
-    "/internal/notes.html",
-    "/internal/projects.html",
-    "/internal/finance.html"
-  ];
+  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "projects", "finance"];
+
+  // Every internal page has two spellings: the file that actually exists
+  // (/internal/leads.html) and the canonical address we show (/internal/leads).
+  // Cloudflare Pages already redirects the first to the second, so links may keep
+  // the .html — they resolve without JS — while the router fetches the file and
+  // puts the clean URL in the address bar. Reducing both spellings to one slug
+  // keeps nav matching, history, and refresh from disagreeing about "where am I".
+  function slugOf(pathname) {
+    var match = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(pathname || "");
+    return match ? match[1].toLowerCase() : null;
+  }
+  function fileFor(slug) { return "/internal/" + slug + ".html"; }
+  function urlFor(slug) { return "/internal/" + slug; }
 
   function isInternalPageLink(a) {
     if (!a || !a.getAttribute) return false;
@@ -50,12 +56,20 @@
       return false;
     }
     if (url.origin !== location.origin) return false;
-    if (!/^\/internal\/[a-z0-9-]+\.html$/i.test(url.pathname)) return false;
+    // The dashboard is a route like any other: once another view has been swapped
+    // into #cc-view the dashboard markup is gone, so "back to Dashboard" has to
+    // re-fetch it rather than rely on an in-page anchor.
+    if (isDashboardPath(url.pathname)) return true;
+    var slug = slugOf(url.pathname);
+    // "index" is the shell itself, not a view it can swap into.
+    if (!slug || slug === "index") return false;
     return true;
   }
 
   function setActiveNav(pathname) {
     var items = document.querySelectorAll(".cc-sb-item[href]");
+    var current = slugOf(pathname);
+    var onDashboard = isDashboardPath(pathname);
     var matched = false;
     for (var i = 0; i < items.length; i++) {
       var href = items[i].getAttribute("href");
@@ -65,7 +79,12 @@
           items[i].classList.remove("active");
           continue;
         }
-        samePage = !matched && new URL(href, location.href).pathname === pathname;
+        var itemPath = new URL(href, location.href).pathname;
+        // Compare slugs, not raw paths: the sidebar links .html while the address
+        // bar carries the extensionless form, so a literal match never fires.
+        samePage = !matched && (onDashboard
+          ? isDashboardPath(itemPath)
+          : (!!current && slugOf(itemPath) === current));
       } catch (_) {}
       if (samePage) matched = true;
       items[i].classList.toggle("active", samePage);
@@ -167,7 +186,8 @@
     }
   }
 
-  var DASHBOARD_PATHS = ["/internal/", "/internal/index.html"];
+  var DASHBOARD_PATHS = ["/internal/", "/internal/index.html", "/internal/index"];
+  function isDashboardPath(pathname) { return DASHBOARD_PATHS.indexOf(pathname) !== -1; }
 
   function swap(html, pathname, baseUrl) {
     var doc = new DOMParser().parseFromString(html, "text/html");
@@ -247,15 +267,21 @@
       });
     });
     setActiveNav(pathname);
-    document.body.classList.toggle("cc-operation-view", OPERATION_PATHS.indexOf(pathname) !== -1);
+    document.body.classList.toggle("cc-operation-view", OPERATION_SLUGS.indexOf(slugOf(pathname)) !== -1);
     if (typeof window.ccCloseNavigation === "function") window.ccCloseNavigation();
     else document.body.classList.remove("nav-open");
     window.scrollTo(0, 0);
   }
 
-  function navigate(pathname, pushHistory) {
+  function navigate(rawPathname, pushHistory) {
+    // Accept either spelling in, work in one canonical form from here on: fetch the
+    // real .html file, but show and remember the extensionless URL. The dashboard
+    // collapses to "/internal/" so index.html / index / bare all land on one entry.
+    var slug = slugOf(rawPathname);
+    var dashboard = isDashboardPath(rawPathname) || slug === "index";
+    var pathname = dashboard ? "/internal/" : (slug ? urlFor(slug) : rawPathname);
+    var requestUrl = dashboard ? "/internal/" : (slug ? fileFor(slug) : rawPathname);
     if (pathname === currentPath && pushHistory) return; // already here, no-op on click
-    var requestUrl = pathname;
 
     view.setAttribute("aria-busy", "true");
     if (routeStatus) routeStatus.textContent = "Loading page";
@@ -322,6 +348,6 @@
   history.replaceState({ scPath: location.pathname }, "", location.pathname);
 
   if (openParam && /^[a-z0-9-]+$/.test(openParam)) {
-    navigate("/internal/" + openParam + ".html", true);
+    navigate(urlFor(openParam), true);
   }
 })();
