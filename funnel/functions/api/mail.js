@@ -4,6 +4,8 @@
  *   GET    ?id=N                      → { ok, email }        (single, marks it read)
  *   GET    ?box=in|out|all            → { ok, emails: [...] } (list, newest first, no bodies)
  *   POST   { to, subject, body, from?, reply_to_id?, sent_by? } → send an email
+ *   PATCH  { id, read }               → mark one message read/unread
+ *   DELETE { id } | { ids: [...] }    → remove from this mailbox view
  *
  * Inbound rows are written by the hello-fanout Email Worker. This endpoint reads
  * them and sends outbound mail via the Email Sending REST API.
@@ -196,6 +198,41 @@ export async function onRequest(context) {
 
     if (sendError) return json({ ok: false, error: sendError }, 502);
     return json({ ok: true, id: row.meta.last_row_id });
+  }
+
+  // ---- Mark read / unread ----
+  if (method === "PATCH") {
+    let b;
+    try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+    const id = parseInt(b.id, 10);
+    if (!Number.isInteger(id)) return json({ ok: false, error: "A valid id is required." }, 422);
+
+    const readAt = b.read === false ? null : new Date().toISOString();
+    const r = await env.DB.prepare(`UPDATE emails SET read_at = ? WHERE id = ?`).bind(readAt, id).run();
+    if (!r.meta || r.meta.changes === 0) return json({ ok: false, error: "Email not found." }, 404);
+    return json({ ok: true, read_at: readAt });
+  }
+
+  // ---- Delete ----
+  // Only removes our D1 copy. Inbound mail was also forwarded to the founders'
+  // Gmail inboxes, which stay the durable record — deleting here tidies this view,
+  // it does not destroy the message.
+  if (method === "DELETE") {
+    let b;
+    try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id])
+      .map((value) => parseInt(value, 10))
+      .filter(Number.isInteger);
+    if (!ids.length) return json({ ok: false, error: "A valid id is required." }, 422);
+    if (ids.length > 100) return json({ ok: false, error: "Too many ids in one request (max 100)." }, 422);
+
+    // Build the placeholder list from the validated integers, never from raw input.
+    const placeholders = ids.map(() => "?").join(", ");
+    const r = await env.DB.prepare(`DELETE FROM emails WHERE id IN (${placeholders})`).bind(...ids).run();
+    const removed = (r.meta && r.meta.changes) || 0;
+    if (!removed) return json({ ok: false, error: "Email not found." }, 404);
+    return json({ ok: true, deleted: removed });
   }
 
   return json({ ok: false, error: "Method not allowed." }, 405);

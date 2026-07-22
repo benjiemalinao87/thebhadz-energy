@@ -59,7 +59,7 @@
   .titles .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:var(--z-500);}
   .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--z-50);letter-spacing:0.01em;}
   .bar .sp{flex:1;}
-  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:10px;text-transform:uppercase;letter-spacing:0.24em;
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:11px;text-transform:uppercase;letter-spacing:0.24em;
     border:1px solid rgba(103,232,249,0.35);background:rgba(103,232,249,0.10);color:#cffafe;}
   .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
   .logout:hover{background:rgba(251,113,133,0.08);}
@@ -74,72 +74,82 @@
   /* ---- toolbar ---- */
   .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 16px;}
   .tabs{display:flex;gap:6px;border:1px solid var(--z-800);border-radius:999px;padding:4px;background:rgba(9,9,11,0.7);}
-  .tab{font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:var(--z-400);padding:7px 15px;border-radius:999px;cursor:pointer;
+  .tab{font-size:11.5px;text-transform:uppercase;letter-spacing:0.16em;color:var(--z-400);padding:8px 17px;border-radius:999px;cursor:pointer;
     border:none;background:transparent;font-family:var(--mono);transition:background .15s,color .15s;}
   .tab:hover{color:var(--z-100);}
   .tab.on{background:rgba(103,232,249,0.14);color:#cffafe;}
   .tools .sp{flex:1;}
   input[type=text],input[type=email],textarea,select{
-    font-family:var(--mono);font-size:13px;color:var(--z-100);background:rgba(9,9,11,0.85);
-    border:1px solid var(--z-800);border-radius:10px;padding:10px 13px;outline:none;transition:border-color .15s;width:100%;}
+    font-family:var(--mono);font-size:14.5px;color:var(--z-100);background:rgba(9,9,11,0.85);
+    border:1px solid var(--z-800);border-radius:10px;padding:11px 14px;outline:none;transition:border-color .15s;width:100%;}
   input:focus,textarea:focus,select:focus{border-color:var(--z-600);}
   input::placeholder,textarea::placeholder{color:var(--z-600);}
   #search{max-width:280px;}
-  .btn{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.2em;cursor:pointer;
+  .btn{font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:0.2em;cursor:pointer;
     border-radius:999px;padding:10px 18px;border:1px solid var(--z-700);background:rgba(24,24,27,0.9);color:var(--z-100);
     transition:border-color .15s,background .15s;}
   .btn:hover{border-color:var(--z-500);background:rgba(39,39,42,0.9);}
   .btn.primary{border-color:rgba(103,232,249,0.45);background:rgba(103,232,249,0.12);color:#cffafe;}
   .btn.primary:hover{background:rgba(103,232,249,0.2);}
   .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn.danger{color:var(--red);border-color:rgba(251,113,133,0.35);}
+  .btn.danger:hover{background:rgba(251,113,133,0.10);border-color:var(--red);}
+  /* Row-level delete: only revealed on hover/focus so the list stays calm. */
+  .row .del{opacity:0;flex:none;border:none;background:transparent;cursor:pointer;padding:4px 6px;
+    color:var(--z-500);border-radius:6px;font-family:var(--mono);font-size:14px;line-height:1;transition:opacity .12s,color .12s;}
+  .row:hover .del,.row .del:focus-visible{opacity:1;}
+  .row .del:hover{color:var(--red);}
 
   /* ---- list ---- */
   .list{display:flex;flex-direction:column;}
-  .row{display:flex;gap:14px;align-items:baseline;padding:15px 18px;border-bottom:1px solid rgba(39,39,42,0.7);cursor:pointer;transition:background .12s;}
+  .row{display:flex;gap:14px;align-items:baseline;padding:17px 20px;border-bottom:1px solid rgba(39,39,42,0.7);cursor:pointer;transition:background .12s;}
   .row:last-child{border-bottom:none;}
   .row:hover{background:rgba(103,232,249,0.045);}
   .row.unread .who{color:var(--z-50);}
   .row.unread .subj{color:var(--z-50);font-weight:600;}
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);flex:none;align-self:center;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);flex:none;align-self:center;}
   .dot.blank{background:transparent;}
-  .who{width:210px;flex:none;font-size:12px;color:var(--z-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .who{width:230px;flex:none;font-size:14px;color:var(--z-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .main-col{flex:1;min-width:0;}
-  .subj{font-size:13px;color:var(--z-300);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .prev{font-size:11.5px;color:var(--z-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
-  .when{font-size:10.5px;color:var(--z-600);flex:none;white-space:nowrap;}
-  .tag{font-size:9px;text-transform:uppercase;letter-spacing:0.18em;border-radius:4px;padding:2px 6px;flex:none;}
+  .subj{font-size:15.5px;color:var(--z-300);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prev{font-size:13.5px;color:var(--z-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;}
+  .when{font-size:12.5px;color:var(--z-600);flex:none;white-space:nowrap;}
+  .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.16em;border-radius:4px;padding:2px 7px;flex:none;}
   .tag.out{border:1px solid rgba(74,222,128,0.4);color:#bbf7d0;}
   .tag.clip{border:1px solid var(--z-700);color:var(--z-400);}
   .tag.err{border:1px solid rgba(251,113,133,0.5);color:#fecdd3;}
-  .empty{padding:48px 20px;text-align:center;color:var(--z-600);font-size:12.5px;}
+  .empty{padding:52px 20px;text-align:center;color:var(--z-600);font-size:14px;}
 
   /* ---- reader ---- */
   .reader{margin-top:18px;padding:22px;}
   .rhead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px dashed rgba(63,63,70,0.9);}
-  .rhead h2{font-family:var(--display);font-size:1.15rem;margin:0 0 6px;color:var(--z-50);font-weight:600;}
-  .meta{font-size:11.5px;color:var(--z-500);line-height:1.8;}
+  .rhead h2{font-family:var(--display);font-size:1.4rem;margin:0 0 8px;color:var(--z-50);font-weight:600;letter-spacing:-0.01em;}
+  .meta{font-size:13px;color:var(--z-500);line-height:1.9;}
   .meta b{color:var(--z-300);font-weight:500;}
-  .body{margin-top:18px;font-size:13px;color:var(--z-200);white-space:pre-wrap;word-wrap:break-word;line-height:1.65;}
-  .clips{margin-top:18px;padding-top:14px;border-top:1px dashed rgba(63,63,70,0.9);font-size:11.5px;color:var(--z-500);}
+  /* Message bodies are prose, not telemetry — wider leading, generous size, and a
+     measure capped near 80ch so long lines stay readable on a wide monitor. */
+  .body{margin-top:20px;font-size:15.5px;color:var(--z-200);white-space:pre-wrap;word-wrap:break-word;
+    line-height:1.75;max-width:78ch;}
+  .clips{margin-top:20px;padding-top:16px;border-top:1px dashed rgba(63,63,70,0.9);font-size:13px;color:var(--z-500);}
   .clips b{color:var(--z-300);font-weight:500;}
-  .clip-note{margin-top:6px;color:var(--z-600);font-size:11px;}
+  .clip-note{margin-top:6px;color:var(--z-600);font-size:12.5px;}
 
   /* ---- compose ---- */
   .compose{margin-top:18px;padding:22px;}
-  .compose h3{font-family:var(--display);font-size:1rem;margin:0 0 16px;color:var(--z-50);font-weight:600;}
+  .compose h3{font-family:var(--display);font-size:1.2rem;margin:0 0 16px;color:var(--z-50);font-weight:600;}
   .field{margin-bottom:12px;}
-  .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-500);margin-bottom:6px;}
-  .field textarea{min-height:180px;resize:vertical;line-height:1.6;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-500);margin-bottom:6px;}
+  .field textarea{min-height:220px;resize:vertical;line-height:1.6;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .actions{display:flex;gap:10px;align-items:center;margin-top:16px;}
   .actions .sp{flex:1;}
-  .hint{font-size:11px;color:var(--z-600);}
+  .hint{font-size:12.5px;color:var(--z-600);}
 
   .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:120;opacity:0;pointer-events:none;
-    background:rgba(9,9,11,0.97);border:1px solid var(--z-700);border-radius:10px;padding:11px 18px;font-size:12px;color:var(--z-100);
+    background:rgba(9,9,11,0.97);border:1px solid var(--z-700);border-radius:10px;padding:12px 20px;font-size:13.5px;color:var(--z-100);
     transition:opacity .2s,transform .2s;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translate(-50%,0);}
-  .loading{padding:48px 20px;text-align:center;color:var(--z-600);font-size:12.5px;}
+  .loading{padding:52px 20px;text-align:center;color:var(--z-600);font-size:14px;}
   .hide{display:none !important;}
 
   @media (max-width:720px){
@@ -174,6 +184,10 @@
   .ops-standalone .panel{background:var(--ops-surface);}
   .ops-standalone .panel::before{display:none;}
   .ops-standalone .err-state{color:var(--ops-rust);}
+  .ops-standalone .btn.danger{color:var(--ops-rust);border-color:var(--ops-rust);background:var(--ops-surface);}
+  .ops-standalone .btn.danger:hover{background:var(--ops-rust-soft);}
+  .ops-standalone .row .del{color:var(--ops-subtle);}
+  .ops-standalone .row .del:hover{color:var(--ops-rust);}
   /* The CRT scanline overlay is a dark-only flourish — it reads as dirt on paper. */
   body.ops-standalone::before{display:none;}
 
@@ -244,6 +258,8 @@
         <div class="meta" id="r-meta"></div>
       </div>
       <button class="btn" id="btn-reply" type="button">Reply</button>
+      <button class="btn" id="btn-unread" type="button">Mark unread</button>
+      <button class="btn danger" id="btn-delete" type="button">Delete</button>
       <button class="btn" id="btn-close" type="button">Close</button>
     </div>
     <div class="body" id="r-body"></div>
@@ -400,11 +416,17 @@
           '<div class="prev">'+esc(m.preview||"")+'</div>'+
         '</span>'+
         '<span class="when">'+fmtShort(m.created_at)+'</span>'+
+        '<button class="del" type="button" title="Delete" aria-label="Delete this message">✕</button>'+
       '</div>';
     }).join("");
 
     Array.prototype.forEach.call(list.querySelectorAll(".row"),function(row){
-      row.addEventListener("click",function(){open(parseInt(row.getAttribute("data-id"),10));});
+      var id=parseInt(row.getAttribute("data-id"),10);
+      row.addEventListener("click",function(){open(id);});
+      row.querySelector(".del").addEventListener("click",function(e){
+        e.stopPropagation(); // the row itself opens the message
+        remove(id);
+      });
     });
   }
 
@@ -447,6 +469,38 @@
   function stripHtml(html){
     if(!html)return "";
     var t=document.createElement("div"); t.innerHTML=html; return t.textContent||"";
+  }
+
+  // ---------- delete / read state ----------
+  // Deleting only drops our D1 copy; inbound mail still sits in the founders' Gmail.
+  // Say so in the prompt so nobody thinks this destroys the record.
+  function remove(id){
+    var m=null;
+    for(var i=0;i<emails.length;i++){if(emails[i].id===id)m=emails[i];}
+    var label=m?('"'+(m.subject||"(no subject)")+'"'):"this message";
+    if(!confirm("Delete "+label+" from the mailbox?\n\nThis removes it from this view only — the copy forwarded to Gmail is untouched."))return;
+
+    fetch("/api/mail",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+      .then(authed)
+      .then(function(d){
+        if(!d.ok){toast(d.error||"Could not delete.");return;}
+        if(current&&current.id===id)el("reader").classList.add("hide");
+        toast("Deleted.");
+        load();
+      })
+      .catch(function(e){if(e.message!=="auth")toast("Could not delete.");});
+  }
+
+  function markUnread(id){
+    fetch("/api/mail",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,read:false})})
+      .then(authed)
+      .then(function(d){
+        if(!d.ok){toast(d.error||"Could not update.");return;}
+        el("reader").classList.add("hide");
+        toast("Marked unread.");
+        load();
+      })
+      .catch(function(e){if(e.message!=="auth")toast("Could not update.");});
   }
 
   // ---------- compose ----------
@@ -514,6 +568,8 @@
   el("btn-refresh").addEventListener("click",load);
   el("btn-compose").addEventListener("click",function(){showCompose(false);});
   el("btn-reply").addEventListener("click",function(){showCompose(true);});
+  el("btn-delete").addEventListener("click",function(){if(current)remove(current.id);});
+  el("btn-unread").addEventListener("click",function(){if(current)markUnread(current.id);});
   el("btn-close").addEventListener("click",function(){el("reader").classList.add("hide");});
   el("btn-cancel").addEventListener("click",function(){el("compose").classList.add("hide");});
   el("btn-send").addEventListener("click",send);
