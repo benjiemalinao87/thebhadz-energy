@@ -229,3 +229,32 @@ CREATE TABLE IF NOT EXISTS meeting_recordings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_meeting_recordings_meeting ON meeting_recordings(meeting_id);
+
+-- Company mailbox (/internal/mail.html) for hello@ and main@maccsyseng.com.
+-- Inbound rows are written by the hello-fanout Email Worker (workers/hello-fanout),
+-- which ALSO still forwards every message to the founders' Gmail inboxes — Gmail stays
+-- the system of record for attachments, so nothing here is load-bearing for filings.
+-- Outbound rows are written by /api/mail when a founder sends or replies.
+CREATE TABLE IF NOT EXISTS emails (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  direction     TEXT NOT NULL CHECK (direction IN ('in', 'out')),
+  mailbox       TEXT NOT NULL,              -- which of our addresses: hello@… / main@…
+  sender        TEXT NOT NULL,              -- envelope from (inbound) or our address (outbound)
+  recipient     TEXT NOT NULL,              -- our address (inbound) or the destination (outbound)
+  subject       TEXT NOT NULL DEFAULT '',
+  body_text     TEXT NOT NULL DEFAULT '',
+  body_html     TEXT NOT NULL DEFAULT '',
+  -- JSON array of {name,type,size} — metadata only. The files themselves are NOT
+  -- stored; they live in the Gmail copy. Shown in the UI so you know to check Gmail.
+  attachments   TEXT NOT NULL DEFAULT '[]',
+  message_id    TEXT,                       -- RFC 2822 Message-ID, for threading
+  in_reply_to   TEXT,
+  sent_by       TEXT,                       -- founder who clicked send (outbound only)
+  error         TEXT,                       -- delivery error, if the send failed
+  read_at       TEXT,                       -- NULL until opened in the UI
+  created_at    TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_emails_created ON emails(created_at);
+CREATE INDEX IF NOT EXISTS idx_emails_direction ON emails(direction);
+CREATE INDEX IF NOT EXISTS idx_emails_mailbox ON emails(mailbox);

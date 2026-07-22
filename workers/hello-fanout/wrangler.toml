@@ -6,15 +6,23 @@ compatibility_date = "2025-07-01"
 # handler and is not meant to be invoked over the web — it runs only when an
 # email routing rule for maccsyseng.com sends a message to it.
 #
-# Wiring the rule (address -> this worker) is NOT done here. Wrangler cannot yet
-# create Email Routing rules; do it once in the Cloudflare dashboard after the
-# first deploy. See README.md for the exact steps.
+# Wiring the rule (address -> this worker) is NOT done here — routing rules live on
+# the zone, not in this config. Create them once with
+# `wrangler email routing rules create` (needs the email_routing:write OAuth scope).
+# See README.md for the exact commands. hello@ and main@ are both wired already.
 
 # The list of verified destination addresses lives in a var so it can be changed
 # without touching code. Keep these in sync with the account's verified
 # Destination Addresses (Email Routing -> Destination Addresses).
 [vars]
 FORWARD_TO = "androidjeth@gmail.com,aver.corpin@gmail.com,benjiemalinao87@gmail.com,engr.juncab@gmail.com"
+
+# Same D1 database the funnel Pages project uses, so /internal/mail.html can read
+# inbound mail. Writing here is best-effort: if D1 is down the forward still happens.
+[[d1_databases]]
+binding = "DB"
+database_name = "solar-city-leads"
+database_id = "ed3892aa-1dce-41ce-9727-2a831a4ec1f1"
 
 [observability]
 enabled = true

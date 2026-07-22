@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mailbox — MACC Systems &amp; Engineering Inc.</title>
+<script src="/internal/assets/theme.js"></script>
+<link rel="icon" href="/assets/img/badjj-favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* ============================================================
+     MACC Mailbox — shared company inbox for hello@ / main@maccsyseng.com
+     Command-center "monitor" theme (matches /internal dashboard).
+     Backed by /api/mail (D1 in; Email Sending REST API out).
+     ============================================================ */
+  :root{
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
+    --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --bg:#020202; --panel-a:rgba(12,12,12,0.96); --panel-b:rgba(5,5,5,0.98);
+    --z-900:#18181b; --z-800:#27272a; --z-700:#3f3f46; --z-600:#52525b;
+    --z-500:#71717a; --z-400:#a1a1aa; --z-300:#d4d4d8; --z-200:#e4e4e7; --z-100:#f4f4f5; --z-50:#fafafa;
+    --cyan:#67e8f9; --green:#4ade80; --yellow:#facc15; --red:#fb7185; --purple:#c084fc; --blue:#60a5fa; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; min-height:100vh; font-family:var(--mono); color:var(--z-100); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,0.05), transparent 55%),
+      radial-gradient(1000px 500px at 100% -5%, rgba(250,204,21,0.035), transparent 50%),
+      var(--bg);
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:rgba(103,232,249,0.25);color:#fff;}
+  body::before{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0.08;
+    background-image:linear-gradient(to bottom,rgba(255,255,255,0.10) 1px,transparent 1px);background-size:100% 4px;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+
+  /* ---- top bar ---- */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px dashed rgba(63,63,70,0.9);}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-400);
+    border:1px solid var(--z-800);border-radius:999px;padding:8px 14px;transition:border-color .15s,color .15s;}
+  .back:hover{border-color:var(--z-500);color:var(--z-50);}
+  .titles{display:flex;flex-direction:column;gap:3px;}
+  .titles .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:var(--z-500);}
+  .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--z-50);letter-spacing:0.01em;}
+  .bar .sp{flex:1;}
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:10px;text-transform:uppercase;letter-spacing:0.24em;
+    border:1px solid rgba(103,232,249,0.35);background:rgba(103,232,249,0.10);color:#cffafe;}
+  .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
+  .logout:hover{background:rgba(251,113,133,0.08);}
+
+  /* ---- panel base ---- */
+  .panel{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--z-800);
+    background:linear-gradient(180deg,var(--panel-a),var(--panel-b)),#000;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 18px 38px rgba(0,0,0,0.30);}
+  .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.16),transparent);opacity:.5;pointer-events:none;}
+  .panel>*{position:relative;z-index:1;}
+
+  /* ---- toolbar ---- */
+  .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 16px;}
+  .tabs{display:flex;gap:6px;border:1px solid var(--z-800);border-radius:999px;padding:4px;background:rgba(9,9,11,0.7);}
+  .tab{font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:var(--z-400);padding:7px 15px;border-radius:999px;cursor:pointer;
+    border:none;background:transparent;font-family:var(--mono);transition:background .15s,color .15s;}
+  .tab:hover{color:var(--z-100);}
+  .tab.on{background:rgba(103,232,249,0.14);color:#cffafe;}
+  .tools .sp{flex:1;}
+  input[type=text],input[type=email],textarea,select{
+    font-family:var(--mono);font-size:13px;color:var(--z-100);background:rgba(9,9,11,0.85);
+    border:1px solid var(--z-800);border-radius:10px;padding:10px 13px;outline:none;transition:border-color .15s;width:100%;}
+  input:focus,textarea:focus,select:focus{border-color:var(--z-600);}
+  input::placeholder,textarea::placeholder{color:var(--z-600);}
+  #search{max-width:280px;}
+  .btn{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.2em;cursor:pointer;
+    border-radius:999px;padding:10px 18px;border:1px solid var(--z-700);background:rgba(24,24,27,0.9);color:var(--z-100);
+    transition:border-color .15s,background .15s;}
+  .btn:hover{border-color:var(--z-500);background:rgba(39,39,42,0.9);}
+  .btn.primary{border-color:rgba(103,232,249,0.45);background:rgba(103,232,249,0.12);color:#cffafe;}
+  .btn.primary:hover{background:rgba(103,232,249,0.2);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---- list ---- */
+  .list{display:flex;flex-direction:column;}
+  .row{display:flex;gap:14px;align-items:baseline;padding:15px 18px;border-bottom:1px solid rgba(39,39,42,0.7);cursor:pointer;transition:background .12s;}
+  .row:last-child{border-bottom:none;}
+  .row:hover{background:rgba(103,232,249,0.045);}
+  .row.unread .who{color:var(--z-50);}
+  .row.unread .subj{color:var(--z-50);font-weight:600;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);flex:none;align-self:center;}
+  .dot.blank{background:transparent;}
+  .who{width:210px;flex:none;font-size:12px;color:var(--z-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .main-col{flex:1;min-width:0;}
+  .subj{font-size:13px;color:var(--z-300);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prev{font-size:11.5px;color:var(--z-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+  .when{font-size:10.5px;color:var(--z-600);flex:none;white-space:nowrap;}
+  .tag{font-size:9px;text-transform:uppercase;letter-spacing:0.18em;border-radius:4px;padding:2px 6px;flex:none;}
+  .tag.out{border:1px solid rgba(74,222,128,0.4);color:#bbf7d0;}
+  .tag.clip{border:1px solid var(--z-700);color:var(--z-400);}
+  .tag.err{border:1px solid rgba(251,113,133,0.5);color:#fecdd3;}
+  .empty{padding:48px 20px;text-align:center;color:var(--z-600);font-size:12.5px;}
+
+  /* ---- reader ---- */
+  .reader{margin-top:18px;padding:22px;}
+  .rhead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px dashed rgba(63,63,70,0.9);}
+  .rhead h2{font-family:var(--display);font-size:1.15rem;margin:0 0 6px;color:var(--z-50);font-weight:600;}
+  .meta{font-size:11.5px;color:var(--z-500);line-height:1.8;}
+  .meta b{color:var(--z-300);font-weight:500;}
+  .body{margin-top:18px;font-size:13px;color:var(--z-200);white-space:pre-wrap;word-wrap:break-word;line-height:1.65;}
+  .clips{margin-top:18px;padding-top:14px;border-top:1px dashed rgba(63,63,70,0.9);font-size:11.5px;color:var(--z-500);}
+  .clips b{color:var(--z-300);font-weight:500;}
+  .clip-note{margin-top:6px;color:var(--z-600);font-size:11px;}
+
+  /* ---- compose ---- */
+  .compose{margin-top:18px;padding:22px;}
+  .compose h3{font-family:var(--display);font-size:1rem;margin:0 0 16px;color:var(--z-50);font-weight:600;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.22em;color:var(--z-500);margin-bottom:6px;}
+  .field textarea{min-height:180px;resize:vertical;line-height:1.6;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .actions{display:flex;gap:10px;align-items:center;margin-top:16px;}
+  .actions .sp{flex:1;}
+  .hint{font-size:11px;color:var(--z-600);}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:120;opacity:0;pointer-events:none;
+    background:rgba(9,9,11,0.97);border:1px solid var(--z-700);border-radius:10px;padding:11px 18px;font-size:12px;color:var(--z-100);
+    transition:opacity .2s,transform .2s;max-width:90vw;text-align:center;}
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+  .loading{padding:48px 20px;text-align:center;color:var(--z-600);font-size:12.5px;}
+  .hide{display:none !important;}
+
+  @media (max-width:720px){
+    .who{width:auto;max-width:130px;}
+    .row2{grid-template-columns:1fr;}
+    .row{gap:10px;padding:13px 14px;}
+    .prev{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <a class="back" href="/internal/index.html">← Command Center</a>
+    <div class="titles">
+      <span class="eyebrow">MACC Systems &amp; Engineering</span>
+      <h1>Mailbox</h1>
+    </div>
+    <span class="sp"></span>
+    <span class="badge" id="unread-badge">—</span>
+    <a class="logout" href="/api/founder-logout">Log out</a>
+  </div>
+
+  <div class="tools">
+    <div class="tabs">
+      <button class="tab on" data-box="all" type="button">All</button>
+      <button class="tab" data-box="in" type="button">Inbox</button>
+      <button class="tab" data-box="out" type="button">Sent</button>
+    </div>
+    <input type="text" id="search" placeholder="Search sender or subject…" autocomplete="off">
+    <span class="sp"></span>
+    <button class="btn" id="btn-refresh" type="button">Refresh</button>
+    <button class="btn primary" id="btn-compose" type="button">Compose</button>
+  </div>
+
+  <div class="panel">
+    <div class="list" id="list"></div>
+    <div class="loading" id="loading">Loading mail…</div>
+  </div>
+
+  <!-- reader -->
+  <div class="panel reader hide" id="reader">
+    <div class="rhead">
+      <div style="flex:1;min-width:0;">
+        <h2 id="r-subject"></h2>
+        <div class="meta" id="r-meta"></div>
+      </div>
+      <button class="btn" id="btn-reply" type="button">Reply</button>
+      <button class="btn" id="btn-close" type="button">Close</button>
+    </div>
+    <div class="body" id="r-body"></div>
+    <div class="clips hide" id="r-clips"></div>
+  </div>
+
+  <!-- compose -->
+  <div class="panel compose hide" id="compose">
+    <h3 id="c-title">New message</h3>
+    <div class="row2">
+      <div class="field">
+        <label for="c-from">From</label>
+        <select id="c-from">
+          <option value="main@maccsyseng.com">main@maccsyseng.com</option>
+          <option value="hello@maccsyseng.com">hello@maccsyseng.com</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="c-to">To</label>
+        <input type="email" id="c-to" placeholder="recipient@example.com" autocomplete="off">
+      </div>
+    </div>
+    <div class="field">
+      <label for="c-subject">Subject</label>
+      <input type="text" id="c-subject" placeholder="Subject" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="c-body">Message</label>
+      <textarea id="c-body" placeholder="Write your message…"></textarea>
+    </div>
+    <div class="field" style="max-width:260px;">
+      <label for="c-by">Sent by (your name)</label>
+      <input type="text" id="c-by" placeholder="e.g. Benjie" autocomplete="off">
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btn-send" type="button">Send</button>
+      <button class="btn" id="btn-cancel" type="button">Cancel</button>
+      <span class="sp"></span>
+      <span class="hint">Text only — no attachments.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  function el(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function fmtDate(iso){
+    if(!iso)return "—";
+    var d=new Date(iso); if(isNaN(d))return "—";
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+
+           d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  }
+  function fmtShort(iso){
+    if(!iso)return "";
+    var d=new Date(iso); if(isNaN(d))return "";
+    var now=new Date();
+    if(d.toDateString()===now.toDateString())return d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  }
+  function parseClips(raw){
+    var a=[]; try{a=JSON.parse(raw||"[]");}catch(e){}
+    return Array.isArray(a)?a:[];
+  }
+  function fmtSize(bytes){
+    var n=Number(bytes)||0; if(!n)return "";
+    if(n<1024)return n+" B";
+    if(n<1024*1024)return (n/1024).toFixed(1)+" KB";
+    return (n/(1024*1024)).toFixed(1)+" MB";
+  }
+  var toastTimer=null;
+  function toast(msg){
+    var t=el("toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},3200);
+  }
+  function authed(r){
+    if(r.status===401){location.href="/login.html?next="+encodeURIComponent("/internal/mail.html");throw new Error("auth");}
+    return r.json();
+  }
+
+  var emails=[], box="all", filter="", current=null;
+
+  // ---------- load ----------
+  function load(){
+    el("loading").classList.remove("hide");
+    fetch("/api/mail?box="+encodeURIComponent(box))
+      .then(authed)
+      .then(function(d){
+        el("loading").classList.add("hide");
+        if(!d.ok){toast(d.error||"Could not load mail.");return;}
+        emails=d.emails||[];
+        el("unread-badge").textContent=(d.unread||0)+" unread";
+        render();
+      })
+      .catch(function(e){
+        if(e.message==="auth")return;
+        el("loading").classList.add("hide");
+        toast("Could not load mail.");
+      });
+  }
+
+  function render(){
+    var list=el("list"), q=filter;
+    var shown=emails.filter(function(m){
+      if(!q)return true;
+      return (String(m.sender)+" "+String(m.recipient)+" "+String(m.subject)).toLowerCase().indexOf(q)>-1;
+    });
+    if(!shown.length){
+      list.innerHTML='<div class="empty">'+(emails.length?"Nothing matches that search.":"No mail yet. Messages to hello@ or main@maccsyseng.com will land here.")+'</div>';
+      return;
+    }
+    list.innerHTML=shown.map(function(m){
+      var out=m.direction==="out";
+      var unread=!out&&!m.read_at;
+      var who=out?("To: "+m.recipient):m.sender;
+      var clips=parseClips(m.attachments);
+      return '<div class="row'+(unread?" unread":"")+'" data-id="'+m.id+'">'+
+        '<span class="dot'+(unread?"":" blank")+'"></span>'+
+        '<span class="who">'+esc(who)+'</span>'+
+        '<span class="main-col">'+
+          '<div class="subj">'+esc(m.subject||"(no subject)")+
+            (out?' <span class="tag out">sent</span>':'')+
+            (m.error?' <span class="tag err">failed</span>':'')+
+            (clips.length?' <span class="tag clip">'+clips.length+' file'+(clips.length>1?"s":"")+'</span>':'')+
+          '</div>'+
+          '<div class="prev">'+esc(m.preview||"")+'</div>'+
+        '</span>'+
+        '<span class="when">'+fmtShort(m.created_at)+'</span>'+
+      '</div>';
+    }).join("");
+
+    Array.prototype.forEach.call(list.querySelectorAll(".row"),function(row){
+      row.addEventListener("click",function(){open(parseInt(row.getAttribute("data-id"),10));});
+    });
+  }
+
+  // ---------- read ----------
+  function open(id){
+    fetch("/api/mail?id="+id)
+      .then(authed)
+      .then(function(d){
+        if(!d.ok){toast(d.error||"Could not open that message.");return;}
+        var m=d.email; current=m;
+        el("compose").classList.add("hide");
+        el("r-subject").textContent=m.subject||"(no subject)";
+        var meta='<div><b>From</b> '+esc(m.sender)+'</div>'+
+                 '<div><b>To</b> '+esc(m.recipient)+'</div>'+
+                 '<div><b>Date</b> '+fmtDate(m.created_at)+'</div>';
+        if(m.sent_by)meta+='<div><b>Sent by</b> '+esc(m.sent_by)+'</div>';
+        if(m.error)meta+='<div style="color:#fecdd3;"><b>Delivery error</b> '+esc(m.error)+'</div>';
+        el("r-meta").innerHTML=meta;
+        el("r-body").textContent=m.body_text||stripHtml(m.body_html)||"(empty message)";
+
+        var clips=parseClips(m.attachments);
+        var box=el("r-clips");
+        if(clips.length){
+          box.innerHTML='<b>'+clips.length+' attachment'+(clips.length>1?"s":"")+':</b> '+
+            clips.map(function(c){return esc(c.name)+(c.size?" ("+fmtSize(c.size)+")":"");}).join(", ")+
+            '<div class="clip-note">Files are not stored here — open the forwarded copy in Gmail to download them.</div>';
+          box.classList.remove("hide");
+        }else{
+          box.classList.add("hide");
+        }
+        el("reader").classList.remove("hide");
+        el("reader").scrollIntoView({behavior:"smooth",block:"start"});
+        // reflect the now-read state without a full reload
+        for(var i=0;i<emails.length;i++){if(emails[i].id===m.id)emails[i].read_at=m.read_at;}
+        render();
+      })
+      .catch(function(e){if(e.message!=="auth")toast("Could not open that message.");});
+  }
+
+  function stripHtml(html){
+    if(!html)return "";
+    var t=document.createElement("div"); t.innerHTML=html; return t.textContent||"";
+  }
+
+  // ---------- compose ----------
+  function showCompose(reply){
+    el("reader").classList.add("hide");
+    el("c-title").textContent=reply?"Reply":"New message";
+    if(reply&&current){
+      el("c-to").value=current.direction==="in"?current.sender:current.recipient;
+      var s=current.subject||"";
+      el("c-subject").value=/^re:/i.test(s)?s:("Re: "+s);
+      el("c-from").value=current.direction==="in"?current.recipient:current.sender;
+      el("c-body").value="\n\n---\nOn "+fmtDate(current.created_at)+", "+current.sender+" wrote:\n"+
+        String(current.body_text||"").split("\n").map(function(l){return "> "+l;}).join("\n");
+      el("compose").setAttribute("data-reply-to",current.id);
+    }else{
+      el("c-to").value=""; el("c-subject").value=""; el("c-body").value="";
+      el("compose").removeAttribute("data-reply-to");
+    }
+    el("compose").classList.remove("hide");
+    el("compose").scrollIntoView({behavior:"smooth",block:"start"});
+    el("c-to").focus();
+  }
+
+  function send(){
+    var to=el("c-to").value.trim();
+    var subject=el("c-subject").value.trim();
+    var body=el("c-body").value;
+    if(!to){toast("Add a recipient.");return;}
+    if(!subject){toast("Add a subject.");return;}
+    if(!body.trim()){toast("The message is empty.");return;}
+
+    var payload={to:to,subject:subject,body:body,from:el("c-from").value,sent_by:el("c-by").value.trim()};
+    var rt=el("compose").getAttribute("data-reply-to");
+    if(rt)payload.reply_to_id=parseInt(rt,10);
+
+    el("btn-send").disabled=true;
+    el("btn-send").textContent="Sending…";
+    fetch("/api/mail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+      .then(authed)
+      .then(function(d){
+        el("btn-send").disabled=false; el("btn-send").textContent="Send";
+        if(!d.ok){toast(d.error||"Send failed.");return;}
+        toast("Sent.");
+        el("compose").classList.add("hide");
+        el("c-to").value=""; el("c-subject").value=""; el("c-body").value="";
+        load();
+      })
+      .catch(function(e){
+        el("btn-send").disabled=false; el("btn-send").textContent="Send";
+        if(e.message!=="auth")toast("Send failed.");
+      });
+  }
+
+  // ---------- wiring ----------
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){
+    t.addEventListener("click",function(){
+      Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.classList.remove("on");});
+      t.classList.add("on");
+      box=t.getAttribute("data-box");
+      el("reader").classList.add("hide");
+      load();
+    });
+  });
+  el("search").addEventListener("input",function(){filter=this.value.trim().toLowerCase();render();});
+  el("btn-refresh").addEventListener("click",load);
+  el("btn-compose").addEventListener("click",function(){showCompose(false);});
+  el("btn-reply").addEventListener("click",function(){showCompose(true);});
+  el("btn-close").addEventListener("click",function(){el("reader").classList.add("hide");});
+  el("btn-cancel").addEventListener("click",function(){el("compose").classList.add("hide");});
+  el("btn-send").addEventListener("click",send);
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){el("reader").classList.add("hide");el("compose").classList.add("hide");}
+  });
+
+  // remember who's sending, so nobody retypes it every time
+  var savedBy=null;
+  try{savedBy=localStorage.getItem("macc_mail_sender");}catch(e){}
+  if(savedBy)el("c-by").value=savedBy;
+  el("c-by").addEventListener("change",function(){
+    try{localStorage.setItem("macc_mail_sender",this.value.trim());}catch(e){}
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

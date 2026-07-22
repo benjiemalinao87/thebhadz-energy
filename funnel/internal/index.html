@@ -306,6 +306,11 @@
           Meeting Log
           <span class="dot-badge" title="Open action items"></span>
         </a>
+        <a class="cc-sb-item" href="/internal/mail.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Mailbox
+          <span class="tail" id="cc-mail-nav">—</span>
+        </a>
         <a class="cc-sb-item" href="/internal/notes.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 21v-5h5"/></svg>
           Team Notes
@@ -758,6 +763,17 @@
   // relevant regardless of which view is showing, and the dashboard's own stat cards
   // (cc-open-leads etc.) only exist while the dashboard view itself is injected.
   window.ccRefreshDashboardMetrics = async function () {
+    // Unread mail is fetched on its own so a mailbox hiccup can't strand the
+    // other sidebar metrics behind the all-or-nothing guard below.
+    try {
+      var mailRes = await fetch('/api/mail?box=in');
+      if (mailRes.ok) {
+        var mail = await mailRes.json();
+        var mailNav = document.getElementById('cc-mail-nav');
+        if (mailNav) mailNav.textContent = mail.unread || 0;
+      }
+    } catch (_) { /* Leave the mail badge unclaimed. */ }
+
     try {
       var responses = await Promise.all([fetch('/api/leads'), fetch('/api/finance'), fetch('/api/install-ops')]);
       if (!responses.every(function (response) { return response.ok; })) return;

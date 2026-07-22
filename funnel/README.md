@@ -204,6 +204,31 @@ inline for the whole team.
 - Provisioning (one-time, already-created bucket is reused): apply `schema.sql` per above —
   no new R2 bucket or binding needed.
 
+### Company mailbox (D1 + Email Service)
+
+**`/internal/mail.html`** — a shared inbox for `hello@` and `main@maccsyseng.com`, so the whole
+team can read and reply from the company address instead of four personal Gmails.
+
+- **Receiving** is handled by the `hello-fanout` Email Worker (`workers/hello-fanout/`), which
+  forwards every message to the founders' Gmail inboxes **and** writes a copy to the `emails`
+  table in D1. Forwarding is the priority: a D1 failure is logged and never costs a delivery.
+- **Sending** goes through the Email Sending **REST API** (`/api/mail`), not a binding —
+  Pages Functions only support a subset of bindings and `send_email` is Workers-only.
+- **Attachments are metadata only.** Inbound file names/sizes are recorded so you know a file
+  exists, but the bytes are not stored — open the forwarded Gmail copy to download them.
+  Outbound mail is plain text, no attachments. **For SEC/government filings with PDFs, use a
+  real mail client**; this is a convenience layer, not a system of record.
+- Two extra secrets are required for sending (both scoped to Email Sending only):
+  ```bash
+  # API token with "Email Sending: Edit" on the account that owns maccsyseng.com
+  npx wrangler pages secret put CF_API_TOKEN  --project-name solar-city-funnel
+  npx wrangler pages secret put CF_ACCOUNT_ID --project-name solar-city-funnel
+  ```
+- Prerequisites: the domain must be onboarded for sending
+  (`npx wrangler email sending enable maccsyseng.com`, which adds SPF/DKIM/DMARC records on the
+  `cf-bounce` subdomain), and **Email Sending is Beta and requires a Workers Paid plan**.
+  Receiving works on the free plan; only outbound needs the upgrade.
+
 ### Deploy note
 
 Because Functions + the D1 binding must be detected, **always deploy from inside `funnel/`**:
