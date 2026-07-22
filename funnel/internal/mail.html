@@ -284,9 +284,17 @@
     var t=el("toast"); t.textContent=msg; t.classList.add("show");
     clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},3200);
   }
+  // Surface WHY a call failed. "request failed" alone can't tell a 404 (stale
+  // deploy) from a non-JSON body from a dropped connection, and those need
+  // different fixes.
   function authed(r){
     if(r.status===401){location.href="/login.html?next="+encodeURIComponent("/internal/mail.html");throw new Error("auth");}
-    return r.json();
+    return r.text().then(function(body){
+      try{ return JSON.parse(body); }
+      catch(e){
+        throw new Error("HTTP "+r.status+" — server sent "+(body?("non-JSON: "+body.slice(0,120)):"an empty body"));
+      }
+    });
   }
 
   var emails=[], box="all", filter="", current=null;
@@ -296,7 +304,9 @@
   // empty, which reads as "no mail" instead of "the request broke". Errors get
   // written into the list itself.
   function showError(msg){
-    el("list").innerHTML='<div class="empty err-state">'+esc(msg)+'</div>';
+    el("list").innerHTML='<div class="empty err-state">'+esc(msg)+
+      '<div style="margin-top:14px;"><button class="btn" type="button" id="btn-retry">Retry</button></div></div>';
+    var b=el("btn-retry"); if(b)b.addEventListener("click",load);
   }
 
   function load(){
@@ -313,7 +323,7 @@
       .catch(function(e){
         if(e.message==="auth")return;
         el("loading").classList.add("hide");
-        showError("Could not load mail — the /api/mail request failed. Check that the latest deploy is live.");
+        showError("Could not load mail. "+(e&&e.message?e.message:"The /api/mail request failed."));
       });
   }
 
