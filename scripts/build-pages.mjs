@@ -153,9 +153,23 @@ function mdToHtml(md) {
   }).join('\n\n');
 }
 
+// Content wrapped in {{INTERNAL_ONLY}}…{{/INTERNAL_ONLY}} ships to funnel/internal/ and is
+// dropped from the public root build. It exists for blocks that only make sense — or are
+// only safe — inside the founder-auth-gated Command Center: links to founder-only pages,
+// competitor intel, downloads that live under /internal/. Without it the only way to get
+// such a block onto one site was to hand-edit the generated file, which is exactly the
+// drift this generator was written to stop.
+function stripInternalOnly(html, site) {
+  const block = /[ \t]*\{\{INTERNAL_ONLY\}\}\n?([\s\S]*?)\{\{\/INTERNAL_ONLY\}\}[ \t]*\n?/g;
+  return site === 'internal'
+    ? html.replace(block, (_, inner) => inner)
+    : html.replace(block, '');
+}
+
 function render(entry, site) {
   const b = BRAND[site];
-  const main = readFileSync(join(CONTENT_DIR, `${entry.id}.html`), 'utf8').trimEnd()
+  const main = stripInternalOnly(
+    readFileSync(join(CONTENT_DIR, `${entry.id}.html`), 'utf8').trimEnd(), site)
     .replaceAll('{{BRAND}}', b.name)
     .replace(/\{\{MD:([^}]+)\}\}/g, (_, p) => mdToHtml(readFileSync(join(ROOT, p.trim()), 'utf8')));
   const headExtraPath = join(CONTENT_DIR, `${entry.id}.head.html`);
