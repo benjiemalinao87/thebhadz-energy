@@ -1,0 +1,20 @@
+name = "hello-fanout"
+main = "src/index.js"
+compatibility_date = "2025-07-01"
+
+# This Worker is an Email Routing "destination worker". It has no HTTP fetch
+# handler and is not meant to be invoked over the web — it runs only when an
+# email routing rule for maccsystemsandengineering.com sends a message to it.
+#
+# Wiring the rule (address -> this worker) is NOT done here. Wrangler cannot yet
+# create Email Routing rules; do it once in the Cloudflare dashboard after the
+# first deploy. See README.md for the exact steps.
+
+# The list of verified destination addresses lives in a var so it can be changed
+# without touching code. Keep these in sync with the account's verified
+# Destination Addresses (Email Routing -> Destination Addresses).
+[vars]
+FORWARD_TO = "androidjeth@gmail.com,aver.corpin@gmail.com,benjiemalinao87@gmail.com,engr.juncab@gmail.com"
+
+[observability]
+enabled = true
