@@ -1,5 +1,17 @@
 # Lesson Learn
 
+## Meeting log upload dock: status text overflow
+
+**Fixed:** 2026-07-22
+
+**Problem:** "4 recordings stored." spilled past the orange-bordered upload dock and overlapped the Open action items column.
+
+**Root cause:** `.rec-dock-row` was a 5-column grid (`… auto auto`) with `.rec-dock-status { white-space: nowrap }`. The status sized to its full text width and the grid could not shrink below content, so it overflowed the dock (no `min-width: 0` / `overflow` containment).
+
+**Fix:** Drop the status from the control row — use 4 columns (`auto minmax(0,…) minmax(0,…) auto`) and `grid-column: 1 / -1` so status wraps on a full-width line under the controls. Add `min-width: 0` + `overflow: hidden` on the dock.
+
+**Do not:** Put nowrap status text as a fifth `auto` grid column beside Upload when the center column shares space with a side panel.
+
 ## Meeting log upload dock: dark mode contrast
 
 **Fixed:** 2026-07-21

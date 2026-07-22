@@ -119,15 +119,15 @@
   .m-actions .aitem .meta{font-family:var(--mono);font-size:11.5px;color:var(--orange-soft);}
 
   /* compact upload dock — primary recording entry point */
-  .rec-dock{position:sticky;top:72px;z-index:15;background:linear-gradient(135deg,#1a3a5c,#14314f 55%,#1f2a20);border:2px solid var(--orange);border-radius:12px;padding:12px 14px;margin:0 0 18px;box-shadow:0 8px 22px rgba(0,0,0,0.24);}
+  .rec-dock{position:sticky;top:72px;z-index:15;min-width:0;overflow:hidden;background:linear-gradient(135deg,#1a3a5c,#14314f 55%,#1f2a20);border:2px solid var(--orange);border-radius:12px;padding:12px 14px;margin:0 0 18px;box-shadow:0 8px 22px rgba(0,0,0,0.24);}
   .rec-dock-top{display:none;}
   .rec-dock-label{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--orange-soft);white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:46px;}
-  .rec-dock-status{font-family:var(--mono);font-size:11px;color:var(--orange-soft);white-space:nowrap;align-self:center;}
+  .rec-dock-status{grid-column:1 / -1;font-family:var(--mono);font-size:11px;color:var(--orange-soft);white-space:normal;line-height:1.35;min-width:0;overflow-wrap:anywhere;}
   .rec-dock-status.err{color:var(--red);}
-  .rec-dock-row{display:grid;grid-template-columns:auto minmax(140px,0.9fr) minmax(180px,1.2fr) auto auto;gap:10px;align-items:end;}
-  .rec-dock label.field{display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);}
-  .rec-dock select{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:0 12px;font:600 14px var(--sans);}
-  .rec-dock-drop{display:flex;align-items:center;justify-content:center;min-height:46px;border:1.5px dashed rgba(240,125,26,0.55);border-radius:10px;background:rgba(240,125,26,0.08);color:var(--soft);font-size:13.5px;cursor:pointer;padding:0 14px;text-align:center;}
+  .rec-dock-row{display:grid;grid-template-columns:auto minmax(0,0.9fr) minmax(0,1.2fr) auto;gap:10px;align-items:end;min-width:0;}
+  .rec-dock label.field{display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);min-width:0;}
+  .rec-dock select{width:100%;min-width:0;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:0 12px;font:600 14px var(--sans);}
+  .rec-dock-drop{display:flex;align-items:center;justify-content:center;min-width:0;min-height:46px;border:1.5px dashed rgba(240,125,26,0.55);border-radius:10px;background:rgba(240,125,26,0.08);color:var(--soft);font-size:13.5px;cursor:pointer;padding:0 14px;text-align:center;}
   .rec-dock-drop:hover,.rec-dock-drop.drag{border-color:var(--orange);color:var(--ink);background:rgba(240,125,26,0.16);}
   .rec-dock-btn{min-height:46px;padding:0 18px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--orange-soft),var(--orange));color:#1a1208;font:800 14px var(--sans);cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(240,125,26,0.35);}
   .rec-dock-btn:hover{filter:brightness(1.05);}
@@ -178,7 +178,7 @@
     .rec-dock-row{grid-template-columns:1fr;}
     .rec-dock-label{display:none;}
     .rec-dock-btn{width:100%;}
-    .rec-dock-status{justify-self:start;}
+    .rec-dock-status{grid-column:1;}
   }
 </style>
 <link rel="stylesheet" href="/internal/assets/operations-redesign.css">
