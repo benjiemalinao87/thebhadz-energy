@@ -136,9 +136,38 @@
     .row{gap:10px;padding:13px 14px;}
     .prev{display:none;}
   }
+
+  /* ---- theme bridge ----------------------------------------------------
+     The palette above is the page's legacy dark-only set. operations-redesign.css
+     (loaded below, activated by body.ops-standalone) remaps --z-*/--cyan/--panel-*
+     to the shared --ops-* tokens, which follow html[data-theme]. Anything that
+     hardcodes a colour instead of using a variable would survive that remap and
+     break in light mode, so those few spots are re-pointed at tokens here. */
+  .ops-standalone .tab.on{background:var(--ops-amber, rgba(103,232,249,0.14));color:var(--ops-petrol-deep, #cffafe);}
+  .ops-standalone .badge{border-color:var(--ops-line-strong);background:var(--ops-surface-2);color:var(--ops-muted);}
+  .ops-standalone .tabs{background:var(--ops-surface-2);}
+  .ops-standalone input[type=text],
+  .ops-standalone input[type=email],
+  .ops-standalone textarea,
+  .ops-standalone select{background:var(--ops-surface);border-color:var(--ops-line);color:var(--ops-ink);}
+  .ops-standalone .btn{background:var(--ops-surface);border-color:var(--ops-line-strong);color:var(--ops-ink);}
+  .ops-standalone .btn:hover{background:var(--ops-surface-2);border-color:var(--ops-petrol);}
+  .ops-standalone .btn.primary{background:var(--ops-amber);border-color:var(--ops-amber);color:#3a2600;}
+  .ops-standalone .btn.primary:hover{background:var(--ops-amber-hover);}
+  .ops-standalone .row:hover{background:var(--ops-surface-2);}
+  .ops-standalone .tag.out{border-color:var(--ops-green);color:var(--ops-green);}
+  .ops-standalone .tag.err{border-color:var(--ops-rust);color:var(--ops-rust);}
+  .ops-standalone .tag.clip{border-color:var(--ops-line-strong);color:var(--ops-subtle);}
+  .ops-standalone .toast{background:var(--ops-ink);color:var(--ops-ground);border-color:var(--ops-ink);}
+  .ops-standalone .panel{background:var(--ops-surface);}
+  .ops-standalone .panel::before{display:none;}
+  .ops-standalone .err-state{color:var(--ops-rust);}
+  /* The CRT scanline overlay is a dark-only flourish — it reads as dirt on paper. */
+  body.ops-standalone::before{display:none;}
 </style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
-<body>
+<body class="ops-standalone ops-mail">
 <div class="wrap">
 
   <div class="bar">
@@ -263,13 +292,20 @@
   var emails=[], box="all", filter="", current=null;
 
   // ---------- load ----------
+  // A transient toast is not enough on failure: the panel would just sit there
+  // empty, which reads as "no mail" instead of "the request broke". Errors get
+  // written into the list itself.
+  function showError(msg){
+    el("list").innerHTML='<div class="empty err-state">'+esc(msg)+'</div>';
+  }
+
   function load(){
     el("loading").classList.remove("hide");
     fetch("/api/mail?box="+encodeURIComponent(box))
       .then(authed)
       .then(function(d){
         el("loading").classList.add("hide");
-        if(!d.ok){toast(d.error||"Could not load mail.");return;}
+        if(!d.ok){showError(d.error||"Could not load mail.");return;}
         emails=d.emails||[];
         el("unread-badge").textContent=(d.unread||0)+" unread";
         render();
@@ -277,7 +313,7 @@
       .catch(function(e){
         if(e.message==="auth")return;
         el("loading").classList.add("hide");
-        toast("Could not load mail.");
+        showError("Could not load mail — the /api/mail request failed. Check that the latest deploy is live.");
       });
   }
 
@@ -329,7 +365,7 @@
                  '<div><b>To</b> '+esc(m.recipient)+'</div>'+
                  '<div><b>Date</b> '+fmtDate(m.created_at)+'</div>';
         if(m.sent_by)meta+='<div><b>Sent by</b> '+esc(m.sent_by)+'</div>';
-        if(m.error)meta+='<div style="color:#fecdd3;"><b>Delivery error</b> '+esc(m.error)+'</div>';
+        if(m.error)meta+='<div class="err-state"><b>Delivery error</b> '+esc(m.error)+'</div>';
         el("r-meta").innerHTML=meta;
         el("r-body").textContent=m.body_text||stripHtml(m.body_html)||"(empty message)";
 
