@@ -47,7 +47,7 @@ actually chooses between:
 | Company | Base | Reach to Biliran | Channel | Notes |
 |---|---|---|---|---|
 | **RK Energy** | Tacloban City | Road (~2–3 hr + Biliran bridge) | Facebook (`RKEnergyPH`) | Closest real installer. Confirm if they cross to Biliran. |
-| **SolarStream** | Tuburan, Cebu | Serves Leyte & Samar; **barge/air freight** for islands | Viber/WhatsApp +63 947 678 1297 | Biliran **not** on their listed areas — freight cost is our advantage. |
+| **SolarStream** | Tuburan, Cebu | Serves Leyte & Samar; **barge/air freight** for islands | Viber/WhatsApp +63 947 678 1297 | Biliran **not** on their listed areas — freight cost is our advantage. Published hybrid pricing (solarstreamph.com city pages, 2026-07-22): 3kW ₱150k–200k, 6kW ₱330k–450k, 10kW ₱520k–700k — all above our ₱99,500 corridor even before their freight surcharge to Biliran. |
 | **pinas.solar (Tacloban page)** | Online aggregator | Lead-gen only | Web "get free quotes" | Not an installer — a lead broker. A channel, not a rival. |
 
 ### Tier 2 — Cebu/Visayas players that ship into the region
@@ -57,6 +57,25 @@ Visayan Solar Power (Cebu), ABC Solar Electronics (Cebu), Cebu Solar Power, JC S
 ### Tier 3 — national brands (mostly Luzon-anchored, weak local presence)
 UNISOLAR (~20 yr), SolarNRG, GoSolar Philippines, LakaSolar, SolarWise PH. Strong brands,
 but no Biliran footprint — they compete on the web, not on the island.
+
+**Pricing/positioning data on these and adjacent national brands, pulled 2026-07-22**
+(full detail in `outputs/ph-solar-competitor-research.xlsx`) — useful as corridor evidence
+for what an off-island quote actually costs before freight, not as direct Biliran rivals:
+
+| Brand | Residential pricing found | Status |
+|---|---|---|
+| **Solaric Corporation** | ₱140,000 (1.84kWp) – ₱530,000 (12kWp), tiered; ₱60k starter promo (older post, may be stale) | Found on site |
+| **PHILERGY German Solar** | ₱200,000–280,000 (3kWp) up to ₱660,000–870,000 (10kWp); savings-tier packages ₱310k–650k | Found on site, dated 2026-03-17 |
+| **Vivant (via Buskowitz Energy)** | 4 tiers (3.3–11kWp) sized to monthly bill; standard price quote-gated, one 40%-off promo cited at ₱119,397.79 | Mostly quote-gated |
+| **GoSolar Philippines** | No fixed pricing; bill-based calculator + free quote. Largest FB presence found in this research (~514k, secondary-source) | Quote-gated |
+| **SolarNRG Philippines** | No fixed pricing; from 1kWp, lease-to-own financing offered | Quote-gated |
+| **Helios (PH) Sustainable Energy Corp.** | Financing-led "solar mortgage" (0%-interest bank partnerships) — closest model analogue to our fixed-package approach, but no packages/prices published | Quote-gated |
+
+Every national brand above sells **above** our ₱99,500 corridor once sized to a comparable
+system (their cheapest confirmed *fixed* tier — Solaric's 1.84kWp at ₱140,000 — already
+exceeds it), and none publishes a Biliran-reachable price, which supports the freight-surcharge
+wedge in §4. **RK Energy and SolarStream — the two actually-relevant Tier 1 alternatives —
+were NOT covered in this pass** and still need direct quotes per the §6 recon checklist.
 
 ### Weak signal to verify
 A "Naval, Biliran — Solar Power" social post exists — **there may be a hyperlocal
