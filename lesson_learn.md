@@ -1,5 +1,15 @@
 # Lesson Learn
 
+## Meeting log: auto-collapse open actions column
+
+**Fixed:** 2026-07-22
+
+**Problem:** The right "Open action items" column ate ~320px on desktop and cramped the upload dock / meeting detail center column.
+
+**Fix:** Collapse the actions panel by default on wide viewports (`actions-collapsed` on `.layout`). Show an **Open action items (N)** button under the page head; panel expands with a **✕** close control. Preference persists in `localStorage` (`macc-meetings-actions-open`). Below 1180px the panel stays in the stacked layout (full width under content) with collapse controls hidden.
+
+**Do not:** Keep a permanent third column on desktop when the primary job is reading meetings and uploading recordings — gate secondary panels behind an explicit expand.
+
 ## Meeting log upload dock: status text overflow
 
 **Fixed:** 2026-07-22

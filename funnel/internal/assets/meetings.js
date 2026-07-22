@@ -5,6 +5,7 @@
     ".mp4,.mov,.webm,.m4a,.mp3,.wav,.ogg,video/mp4,video/quicktime,video/webm,audio/mp4,audio/x-m4a,audio/mpeg,audio/wav,audio/ogg";
   var DONE_KEY = "macc-meetings-done";
   var FOUNDER_KEY = "macc-meetings-founder";
+  var ACTIONS_PANEL_KEY = "macc-meetings-actions-open";
   var sections = new Map();
   var dockSelect = null;
   var dockStatus = null;
@@ -108,6 +109,43 @@
     if (elOver) elOver.textContent = String(overdue);
     if (elRec) elRec.textContent = String(recordingTotal);
     if (elMeet) elMeet.textContent = String(meetings);
+    var toggleCount = document.getElementById("actions-toggle-count");
+    if (toggleCount) toggleCount.textContent = "(" + open + ")";
+  }
+
+  function setActionsPanelOpen(open) {
+    var layout = document.querySelector(".layout.ops-meetings");
+    var toggle = document.getElementById("actions-toggle");
+    if (!layout) return;
+    layout.classList.toggle("actions-collapsed", !open);
+    if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    try {
+      localStorage.setItem(ACTIONS_PANEL_KEY, open ? "1" : "0");
+    } catch (e) {}
+  }
+
+  function initActionsPanelCollapse() {
+    var layout = document.querySelector(".layout.ops-meetings");
+    var toggle = document.getElementById("actions-toggle");
+    var closeBtn = document.getElementById("actions-close");
+    if (!layout) return;
+
+    var saved = null;
+    try {
+      saved = localStorage.getItem(ACTIONS_PANEL_KEY);
+    } catch (e) {}
+    setActionsPanelOpen(saved === "1");
+
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        setActionsPanelOpen(true);
+      });
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        setActionsPanelOpen(false);
+      });
+    }
   }
 
   function ownerLabel(key) {
@@ -678,6 +716,7 @@
   initRailFilters();
   initActionItems();
   initActionFilters();
+  initActionsPanelCollapse();
   updateRailActionDots();
   updateStats();
   renderActionGroups();

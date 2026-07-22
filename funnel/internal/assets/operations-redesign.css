@@ -430,6 +430,55 @@ body.ops-standalone {
   gap: 16px;
   align-items: start;
 }
+.ops-meetings.layout.actions-collapsed {
+  grid-template-columns: 280px minmax(0, 1fr);
+}
+.ops-meetings.layout.actions-collapsed .actions-panel { display: none; }
+.ops-meetings.layout:not(.actions-collapsed) .actions-toggle { display: none; }
+.ops-meetings .actions-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.ops-meetings .actions-panel-head h3 { margin: 0; flex: 1; }
+.ops-meetings .actions-close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ops-line);
+  border-radius: 8px;
+  background: var(--ops-surface-2);
+  color: var(--ops-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ops-meetings .actions-close:hover {
+  color: var(--ops-ink);
+  border-color: var(--ops-line-strong);
+}
+.ops-meetings .actions-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  font-family: var(--ops-mono, ui-monospace, monospace);
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0b35c;
+  background: #fff4e5;
+  color: #8a6100;
+  cursor: pointer;
+}
+.ops-meetings .actions-toggle:hover {
+  border-color: var(--ops-amber);
+  background: #ffefd6;
+  color: var(--ops-ink);
+}
+.ops-meetings .actions-toggle-count { font-weight: 800; }
 .ops-meetings .center-col {
   max-width: none;
   padding: 0;
@@ -763,6 +812,10 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   .ops-notes .wrap { grid-template-columns: minmax(0, 1fr) 340px; }
   .ops-projects .board { grid-template-columns: repeat(5, 250px); }
   .ops-meetings.layout { grid-template-columns: 260px minmax(0, 1fr); }
+  .ops-meetings.layout.actions-collapsed { grid-template-columns: 260px minmax(0, 1fr); }
+  .ops-meetings.layout.actions-collapsed .actions-panel { display: block; }
+  .ops-meetings .actions-toggle,
+  .ops-meetings .actions-close { display: none !important; }
   .ops-meetings .actions-panel {
     position: static;
     height: auto;
@@ -930,6 +983,25 @@ html[data-theme="dark"] .ops-meetings .stat-n { color: var(--ops-amber); }
 html[data-theme="dark"] .ops-meetings .actions-panel {
   background: var(--ops-surface);
   border-color: var(--ops-line);
+}
+html[data-theme="dark"] .ops-meetings .actions-toggle {
+  background: #2a2418;
+  border-color: #6a5420;
+  color: var(--ops-amber);
+}
+html[data-theme="dark"] .ops-meetings .actions-toggle:hover {
+  background: #352d1c;
+  border-color: var(--ops-amber);
+  color: var(--ops-ink);
+}
+html[data-theme="dark"] .ops-meetings .actions-close {
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line);
+  color: var(--ops-muted);
+}
+html[data-theme="dark"] .ops-meetings .actions-close:hover {
+  color: var(--ops-ink);
+  border-color: var(--ops-line-strong);
 }
 html[data-theme="dark"] .ops-meetings .actions-tab.act {
   background: #2a2418;
