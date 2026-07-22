@@ -3,6 +3,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SC-01 Panel designer — BADJJ Energy Systems</title>
+<script>
+  // Internal build only: the Command Center shell is the UI for these pages. A
+  // standalone load — refresh, bookmark, pasted link — hits the real file with no
+  // shell around it, so bounce to the dashboard, which reopens this page inside the
+  // SPA via ?open= (assets/spa-router.js). The slug is read from the path rather
+  // than templated in, so this one block serves every page. On the public root site
+  // the path is not under /internal/, so this is a no-op and pages render as before.
+  (function () {
+    if (document.getElementById('cc-view')) return; // already inside the shell
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== 'index') location.replace('/internal/?open=' + m[1].toLowerCase());
+  })();
+</script>
 <script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="/internal/assets/style.css">
 <link rel="icon" href="/assets/img/badjj-favicon.png">

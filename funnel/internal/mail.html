@@ -8,14 +8,16 @@
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
 <script>
-  // The Command Center shell is the only sanctioned UI for the mailbox. A standalone
-  // load — refresh, bookmark, pasted link — hits this real file with no shell around
-  // it, and Pages then drops the .html so the URL degrades to /internal/mail. Bounce
-  // to the dashboard, which reopens this page inside the SPA via ?open= (spa-router.js).
-  // Inside the shell this re-runs after a swap, where #cc-view exists — no-op.
-  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
-    location.replace('/internal/?open=mail');
-  }
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
 </script>
 <style>
   /* ============================================================

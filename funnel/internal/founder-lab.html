@@ -3,6 +3,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SC-08 Founder strategy lab — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
 <script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/founder-lab.css">

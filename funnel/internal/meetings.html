@@ -4,6 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meeting log — BADJJ Energy Systems</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
 <script src="/internal/assets/theme.js"></script>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/assets/img/badjj-favicon.png">
@@ -63,7 +75,18 @@
   .stat-l{display:block;font-size:12px;color:var(--faint);margin-top:4px;}
 
   /* action-items panel (right sidebar) */
-  .actions-panel{position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;padding:22px 18px 60px;background:rgba(12,28,48,0.35);}
+  .actions-panel{position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;padding:22px 18px 60px;background:rgba(12,28,48,0.35);transition:opacity 0.2s ease,visibility 0.2s ease;}
+  .actions-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 0 4px;}
+  .actions-panel-head h3{margin:0;flex:1;}
+  .actions-close{flex:0 0 auto;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--soft);font-size:16px;line-height:1;cursor:pointer;}
+  .actions-close:hover{color:var(--ink);border-color:var(--faint);}
+  .actions-toggle{display:inline-flex;align-items:center;gap:8px;margin:12px 0 0;font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid rgba(240,125,26,0.45);background:rgba(240,125,26,0.12);color:var(--orange-soft);cursor:pointer;}
+  .actions-toggle:hover{color:var(--ink);border-color:var(--orange);background:rgba(240,125,26,0.2);}
+  .actions-toggle-count{font-weight:800;}
+  .layout.actions-collapsed{grid-template-columns:280px minmax(0,1fr);}
+  .layout.actions-collapsed .actions-panel{display:none;}
+  .layout.actions-collapsed .center-col{border-right:0;}
+  .layout:not(.actions-collapsed) .actions-toggle{display:none;}
   .actions-panel h3{margin:0 0 4px;font-size:17px;display:flex;align-items:center;gap:8px;}
   .actions-panel .sub{color:var(--soft);font-size:13px;margin:0 0 12px;}
   .actions-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px;}
@@ -163,6 +186,9 @@
 
   @media (max-width:1180px){
     .layout{grid-template-columns:260px minmax(0,1fr);}
+    .layout.actions-collapsed{grid-template-columns:260px minmax(0,1fr);}
+    .layout.actions-collapsed .actions-panel{display:block;}
+    .actions-toggle,.actions-close{display:none !important;}
     .actions-panel{position:static;height:auto;border-top:1px solid var(--line);grid-column:1/-1;}
     .center-col{border-right:0;}
   }
@@ -192,7 +218,7 @@
     <a class="link" href="/api/founder-logout">Log out</a>
   </div>
 
-  <main class="layout ops-page ops-meetings">
+  <main class="layout ops-page ops-meetings actions-collapsed">
     <!-- INDEX RAIL: add one <a> per meeting, newest at top -->
     <nav class="rail" aria-label="Meetings">
       <p class="ey">Meetings</p>
@@ -228,6 +254,11 @@
         <p class="ops-eyebrow">FOUNDERS / MEETING LOG</p>
         <h2>Decisions remembered. Owners accountable.</h2>
         <p>Weekly founder decisions and action items with a clear owner and due date.</p>
+        <button type="button" class="actions-toggle" id="actions-toggle" aria-expanded="false" aria-controls="actions-panel">
+          <span aria-hidden="true">📌</span>
+          <span class="actions-toggle-label">Open action items</span>
+          <span class="actions-toggle-count" id="actions-toggle-count">—</span>
+        </button>
       </div>
 
       <div class="stats-row" aria-label="Meeting log summary">
@@ -590,8 +621,11 @@
       </div>
     </div>
 
-    <aside class="actions-panel" aria-label="Open action items">
-      <h3>📌 Open action items</h3>
+    <aside class="actions-panel" id="actions-panel" aria-label="Open action items">
+      <div class="actions-panel-head">
+        <h3>📌 Open action items</h3>
+        <button type="button" class="actions-close" id="actions-close" aria-label="Hide action items">✕</button>
+      </div>
       <p class="sub">Everything outstanding across all meetings. Click to mark done.</p>
       <div class="actions-toolbar">
         <div class="actions-tabs" role="tablist" aria-label="Filter action items">
