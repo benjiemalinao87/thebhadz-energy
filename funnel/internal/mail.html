@@ -130,6 +130,14 @@
      measure capped near 80ch so long lines stay readable on a wide monitor. */
   .body{margin-top:20px;font-size:15.5px;color:var(--z-200);white-space:pre-wrap;word-wrap:break-word;
     line-height:1.75;max-width:78ch;}
+  /* Quoted reply text ("> ..." from the other client) — collapsed by default and
+     shown as a rule-marked block rather than raw > markers, the way mail clients do. */
+  .quote-toggle{margin-top:16px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    border:1px solid var(--z-800);background:rgba(9,9,11,0.6);color:var(--z-500);border-radius:999px;
+    padding:5px 12px;font-family:var(--mono);font-size:12px;line-height:1.2;transition:color .15s,border-color .15s;}
+  .quote-toggle:hover{color:var(--z-300);border-color:var(--z-600);}
+  .quote{margin-top:14px;padding-left:16px;border-left:2px solid var(--z-700);color:var(--z-500);
+    white-space:pre-wrap;word-wrap:break-word;font-size:14.5px;line-height:1.7;max-width:78ch;}
   .clips{margin-top:20px;padding-top:16px;border-top:1px dashed rgba(63,63,70,0.9);font-size:13px;color:var(--z-500);}
   .clips b{color:var(--z-300);font-weight:500;}
   .clip-note{margin-top:6px;color:var(--z-600);font-size:12.5px;}
@@ -188,6 +196,9 @@
   .ops-standalone .btn.danger:hover{background:var(--ops-rust-soft);}
   .ops-standalone .row .del{color:var(--ops-subtle);}
   .ops-standalone .row .del:hover{color:var(--ops-rust);}
+  .ops-standalone .quote{border-left-color:var(--ops-line-strong);color:var(--ops-muted);}
+  .ops-standalone .quote-toggle{background:var(--ops-surface-2);border-color:var(--ops-line);color:var(--ops-muted);}
+  .ops-standalone .quote-toggle:hover{color:var(--ops-ink);border-color:var(--ops-line-strong);}
   /* The CRT scanline overlay is a dark-only flourish — it reads as dirt on paper. */
   body.ops-standalone::before{display:none;}
 
@@ -323,6 +334,15 @@
     if(d.toDateString()===now.toDateString())return d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
     return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
   }
+  // The server previews the first 180 chars of the raw body, which on a reply runs
+  // straight into the quoted history. Cut at the attribution or the first ">" so the
+  // list shows what the person wrote, not their client's boilerplate.
+  function cleanPreview(preview){
+    var s=String(preview||"").replace(/\s+/g," ");
+    var cut=s.search(/\s(?:On\s.{0,120}?wrote:|>)/);
+    return (cut > 0 ? s.slice(0,cut) : s).trim();
+  }
+
   function parseClips(raw){
     var a=[]; try{a=JSON.parse(raw||"[]");}catch(e){}
     return Array.isArray(a)?a:[];
@@ -413,7 +433,7 @@
             (m.error?' <span class="tag err">failed</span>':'')+
             (clips.length?' <span class="tag clip">'+clips.length+' file'+(clips.length>1?"s":"")+'</span>':'')+
           '</div>'+
-          '<div class="prev">'+esc(m.preview||"")+'</div>'+
+          '<div class="prev">'+esc(cleanPreview(m.preview))+'</div>'+
         '</span>'+
         '<span class="when">'+fmtShort(m.created_at)+'</span>'+
         '<button class="del" type="button" title="Delete" aria-label="Delete this message">✕</button>'+
@@ -445,7 +465,7 @@
         if(m.sent_by)meta+='<div><b>Sent by</b> '+esc(m.sent_by)+'</div>';
         if(m.error)meta+='<div class="err-state"><b>Delivery error</b> '+esc(m.error)+'</div>';
         el("r-meta").innerHTML=meta;
-        el("r-body").textContent=m.body_text||stripHtml(m.body_html)||"(empty message)";
+        renderBody(el("r-body"),m.body_text||stripHtml(m.body_html));
 
         var clips=parseClips(m.attachments);
         var box=el("r-clips");
@@ -469,6 +489,58 @@
   function stripHtml(html){
     if(!html)return "";
     var t=document.createElement("div"); t.innerHTML=html; return t.textContent||"";
+  }
+
+  // Split a reply into what the person actually wrote and the quoted history their
+  // client tacked on. Quoting is the plain-text convention every mail client uses:
+  // each carried-over line is prefixed with ">", usually under an "On <date>, <who>
+  // wrote:" attribution. Showing those markers raw is noise, so we fold them away.
+  function splitQuoted(text){
+    var lines=String(text||"").split("\n");
+    var i=lines.length;
+    // Walk back over the trailing run of quoted (and blank) lines.
+    while(i>0&&(lines[i-1].trim()===""||lines[i-1].charAt(0)===">"))i--;
+    var start=i;
+    // The attribution sits just above the quote and may wrap across lines, so find
+    // the "... wrote:" ending and climb to the "On ..." that opened it.
+    for(var j=i-1;j>=0&&j>=i-4;j--){
+      if(/wrote:\s*$/.test(lines[j])){
+        var k=j;
+        while(k>0&&!/^\s*On\s/.test(lines[k]))k--;
+        if(/^\s*On\s/.test(lines[k]))start=k;
+        break;
+      }
+    }
+    var quoted=lines.slice(start).join("\n").trim();
+    // Trailing blank lines alone are not a quote — only commit if markers are present.
+    if(!/^>/m.test(quoted))return {main:String(text||""),quoted:""};
+    return {
+      main:lines.slice(0,start).join("\n").replace(/\s+$/,""),
+      // Strip one level of "> " so the text reads normally inside the rule-marked block.
+      quoted:quoted.split("\n").map(function(l){return l.replace(/^>\s?/,"");}).join("\n").trim()
+    };
+  }
+
+  function renderBody(target,text){
+    target.textContent="";
+    var parts=splitQuoted(text);
+    var main=document.createElement("div");
+    main.textContent=parts.main||(parts.quoted?"":"(empty message)");
+    target.appendChild(main);
+    if(!parts.quoted)return;
+
+    var quote=document.createElement("div");
+    quote.className="quote"; quote.textContent=parts.quoted; quote.style.display="none";
+    var toggle=document.createElement("button");
+    toggle.type="button"; toggle.className="quote-toggle";
+    toggle.textContent="••• Show quoted text";
+    toggle.addEventListener("click",function(){
+      var shown=quote.style.display!=="none";
+      quote.style.display=shown?"none":"block";
+      toggle.textContent=shown?"••• Show quoted text":"••• Hide quoted text";
+    });
+    target.appendChild(toggle);
+    target.appendChild(quote);
   }
 
   // ---------- delete / read state ----------
