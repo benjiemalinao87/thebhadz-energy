@@ -226,7 +226,12 @@
         <button type="button" class="rail-chip act" data-filter="all">All</button>
         <button type="button" class="rail-chip" data-filter="rec">Has recording</button>
       </div>
-      <a class="m act" href="#m-2026-07-19" data-meeting="m-2026-07-19">
+      <a class="m act" href="#m-2026-07-22" data-meeting="m-2026-07-22">
+        <span class="d">2026-07-22</span>
+        <span class="t">Registration sprint &amp; go-to-market</span>
+        <span class="n">Permits, officer roadblock, China OEM, lower-ticket SKU</span>
+      </a>
+      <a class="m" href="#m-2026-07-19" data-meeting="m-2026-07-19">
         <span class="d">2026-07-19</span>
         <span class="t">Office, registration &amp; approvals</span>
         <span class="n">Lean HQ, Aug kickoff, spend thresholds</span>
@@ -295,7 +300,144 @@
 
       <!-- ===================== MEETING ENTRIES (newest first) ===================== -->
 
-      <article class="meeting is-active" id="m-2026-07-19">
+      <article class="meeting is-active" id="m-2026-07-22">
+        <div class="mh">
+          <div>
+            <div class="date">2026-07-22 · Meeting #5</div>
+            <h3>Registration sprint, corporate identity &amp; go-to-market direction</h3>
+          </div>
+          <div class="who">Benjie Malinao · Ace Denver Corpin<br>Jundhel Cabradilla · Jethro Abatias</div>
+        </div>
+
+        <p>Working session split in two halves: (1) walking the SEC registration checklist line by line
+           against the internal portal, and (2) an open go-to-market / product discussion. All four
+           founders on the call. <em>Reconstructed from a noisy Taglish-heavy auto-transcript — treat
+           peso figures, dates and thresholds as <strong>what was discussed</strong>, not finalized
+           policy.</em></p>
+
+        <h4>Discussion</h4>
+        <p><strong>Permits &amp; engineering track (Jundhel).</strong> Jundhel walked the construction-side
+           permits the HQ/office will need on top of the corporate registration:
+           <span class="tag">Building permit</span> <span class="tag">Mechanical permit</span>
+           <span class="tag">Electrical permit</span> <span class="tag">Occupancy</span>
+           — all signed off through the local <strong>building official</strong>. These are separate from,
+           and sequenced after, the SEC/LGU corporate track.</p>
+        <p><strong>Registration timeline.</strong> SEC incorporation itself estimated at roughly
+           <strong>10 days</strong>; the full chain (SEC → BIR → LGU/mayor's permit) pushes completion to
+           <strong>end of August, realistically the first week of September</strong>. Benjie asked the group
+           to work back from that and track progress daily against the checklist rather than by meeting.</p>
+        <p><strong>SEC online vs. LGU over-the-counter (Denver).</strong> SEC filing is done online, but the
+           <strong>LGU steps are mostly over-the-counter / manual</strong> — someone physically walks them.
+           Articles of Incorporation still need a <strong>lawyer</strong> to review before filing. Denver
+           priced a <strong>professional bookkeeper at roughly ₱5,000–₱10,000</strong> (rate to confirm),
+           plus a corporate lawyer engagement. Advice was to keep the LGU work as early in August as
+           possible because the counter queues, not the paperwork, set the pace.</p>
+        <p><strong>Checklist status walk-through.</strong> Went item by item on the internal SEC-registration
+           checklist. <strong>Already decided:</strong> entity type, corporate name, percentage ownership,
+           physical office. <strong>Still open / roadblock:</strong> the officer slate — specifically
+           <strong>Corporate Secretary and Treasurer</strong> (President discussed alongside). Also still
+           open: opening the <strong>corporate bank account</strong> and engaging the
+           <strong>consultant / accountant</strong>. Each checklist row should carry a named owner
+           accountable end-to-end rather than a shared "all."</p>
+        <p><strong>Company email &amp; mobile number.</strong> Denver pushed back on registering with a
+           personal Gmail — SEC and BIR filings should use a <strong>central official company email</strong>
+           on the company domain (pattern discussed:
+           <code>firstname.lastname@maccsyseng.com</code>, e.g. Denver's) served through the existing
+           <strong>Cloudflare</strong> account as routing aliases, so nothing new has to be self-hosted.
+           Jethro to supply his email address and mobile number. A single <strong>company mobile number /
+           SIM</strong> is also needed for the filings. Benjie's caution: don't over-engineer incoming vs.
+           outgoing mail — keep it simple, one verified official address.</p>
+        <p><strong>Templates &amp; the internal portal.</strong> Benjie published the working documents into
+           the Command Center so the team stops passing files around: SEC registration checklist (markdown),
+           <strong>Articles of Incorporation template</strong> ("Articles of Incorporation of MACC Systems …
+           Technology, Inc." — exact registered name still to be confirmed against the DTI/SEC name check),
+           and the other incorporation templates, all linked from the project board. Team to fill in their
+           information, then the group double-checks and confirms.</p>
+        <p><strong>Cadence.</strong> Next check-in set for <strong>Friday, 24 July</strong>. Standing rule
+           restated: as long as your assigned task moves, that's progress — updates go on the board, not
+           into a meeting.</p>
+        <p><strong>Marketing strategy — separate agenda.</strong> Benjie has done deep-research work on the
+           marketing/go-to-market strategy (his usual pre-pitch process). Denver's position, agreed:
+           <strong>keep it off the registration agenda</strong> and give it a dedicated meeting so
+           registration doesn't get diluted.</p>
+        <p><strong>Positioning direction (discussion, not decided).</strong> Play the
+           <strong>local-company card</strong>: a Philippine renewable-energy company creating local jobs,
+           with a give-back-to-community angle that could later support LGU/government endorsement and
+           renewable-energy contracts. Competitive claim framed as price + quality + safety together, not
+           price alone.</p>
+        <p><strong>Stage plan discussed.</strong> Stage 0 = registration. Stage 1 = <strong>first 1–5
+           customers, targeted around October</strong>, won mostly <strong>offline</strong> — face-to-face
+           plus informational content about renewable energy. Stage 2 = paid/online marketing, only after
+           stage 1 proves out.</p>
+        <p><strong>Lower-ticket product idea (idea only).</strong> Alongside the flagship (₱250k-class
+           commercial system discussed), floated a <strong>lower-ticket portable solar generator at roughly
+           ₱50,000–₱60,000</strong> — "runs your fridge for 12 hours through a brownout" — as an acquisition
+           product, with a battery + panel "package B" as the upgrade path for existing customers. Denver's
+           version: a household generator-type solar unit under ₱100k for the budget segment, assembled from
+           sourced inverter / charge controller / battery with our own frame, casing (3D-printed prototype
+           parts) and QA — i.e. <strong>MACC-branded OEM hardware</strong>, with the IP/branding question
+           flagged.</p>
+        <p><strong>China / direct supply pipeline.</strong> Benjie has a live contact ("William") and read
+           the thread on-screen: intro sent as a new Philippine company seeking a
+           <strong>direct manufacturer relationship</strong>, with an <strong>in-person visit by our
+           representatives</strong> and an order scale of ~200 units discussed. Two OEM options exist —
+           supplier applies <em>our</em> brand, or ships components we assemble locally. Benjie estimated a
+           <strong>~6-month horizon</strong> and a <strong>₱1–2M</strong> raise to make that real. Recorded
+           here as direction; nothing committed.</p>
+        <p><strong>Documentation over bottlenecks.</strong> Benjie's standing rule: every process gets
+           documented and support answers <em>point at the documentation</em>. If the only way to get an
+           answer is "ask Jundhel" or "ask Jethro," that person is a bottleneck — record the knowledge and
+           turn it into training material.</p>
+        <p><strong>AI-produced ad creative (Denver).</strong> Rather than hiring an ad agency, produce video
+           creative in-house with AI tooling plus phone-shot footage (iPhone Pro Max), treating prompting as
+           the production skill. Parked as a stage-2 item.</p>
+
+        <div class="decisions">
+          <strong>✓ Direction agreed (not all finalized)</strong>
+          <ul style="margin:6px 0 0">
+            <li>Registration completion target: <strong>end of August / first week of September</strong>
+                (SEC leg ~10 days; LGU legs are over-the-counter).</li>
+            <li><strong>Officer slate (Secretary / Treasurer / President) is the named roadblock</strong> —
+                close it before filing.</li>
+            <li>Register using a <strong>company-domain email</strong> (Cloudflare alias on
+                <code>maccsyseng.com</code>) and a <strong>company mobile number</strong>, not personal ones.</li>
+            <li>Engage a <strong>lawyer</strong> for AOI review and a <strong>bookkeeper</strong>
+                (₱5k–₱10k range discussed).</li>
+            <li>Templates + checklist live in the <strong>internal Command Center</strong>; everyone fills in
+                their own info, then the group confirms together.</li>
+            <li><strong>Marketing strategy gets its own dedicated meeting</strong> — off the registration agenda.</li>
+            <li>Next check-in: <strong>Friday, 24 July</strong>.</li>
+            <li>Idea-stage only (no spend authorized): lower-ticket ₱50–60k portable solar generator,
+                MACC-branded OEM assembly, China supplier visit / ~200-unit order, ₱1–2M raise.</li>
+          </ul>
+        </div>
+
+        <h4>Action items</h4>
+        <div class="m-actions">
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Close the <strong>officer slate</strong> — Corporate Secretary, Treasurer, President — the standing roadblock</div><span class="meta">All · by Fri 24 Jul</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Create <strong>official company email</strong> (Cloudflare alias, <code>maccsyseng.com</code>) + <strong>company mobile number/SIM</strong> for the filings</div><span class="meta">Benjie (Cloudflare) · Denver (SIM) · by Fri 24 Jul</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Send <strong>email address + mobile number</strong> for the incorporator details</div><span class="meta">Jethro · ASAP</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Fill in personal/incorporator info on the <strong>AOI + incorporation templates</strong> in the Command Center</div><span class="meta">All founders · before next meeting</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Engage <strong>corporate lawyer</strong> (AOI review) and <strong>bookkeeper</strong> (₱5k–₱10k) — confirm actual rates</div><span class="meta">Denver · before filing</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Map the <strong>LGU over-the-counter route</strong> and who physically walks it; confirm mayor's permit + BIR sequence</div><span class="meta">Denver / Jundhel · early August</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Confirm <strong>building / mechanical / electrical / occupancy permit</strong> requirements for the office with the building official</div><span class="meta">Jundhel · early August</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Confirm <strong>exact registered corporate name</strong> against DTI/SEC name verification before templates are finalized</div><span class="meta">Benjie · before filing</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Assign a <strong>named owner to every row</strong> of the SEC registration checklist (accountable end-to-end)</div><span class="meta">Benjie · this week</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Open the <strong>corporate bank account</strong> once SEC certificate is issued</div><span class="meta">Treasurer (TBD) · post-SEC</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Schedule a <strong>dedicated marketing-strategy meeting</strong> (deep-research deck) — separate from registration</div><span class="meta">Benjie · date TBD</span></div></div>
+          <div class="aitem"><span class="chk"></span><div><div class="txt">Upload &amp; circulate this meeting's <strong>recording</strong></div><span class="meta">Benjie · ASAP</span></div></div>
+        </div>
+
+        <h4>Next meeting — Friday, 24 July</h4>
+        <ul>
+          <li>Officer slate confirmed and recorded (Secretary / Treasurer / President).</li>
+          <li>Company email + mobile number live; incorporator details filled into the AOI template.</li>
+          <li>Lawyer/bookkeeper engagement status and the August LGU walking plan.</li>
+          <li>Separately: schedule the marketing-strategy session and the governance/policy session.</li>
+        </ul>
+      </article>
+
+      <article class="meeting" id="m-2026-07-19">
         <div class="mh">
           <div>
             <div class="date">2026-07-19 · Meeting #4</div>
