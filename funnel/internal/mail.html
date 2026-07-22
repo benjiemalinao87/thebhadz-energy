@@ -317,7 +317,12 @@
         el("loading").classList.add("hide");
         if(!d.ok){showError(d.error||"Could not load mail.");return;}
         emails=d.emails||[];
-        el("unread-badge").textContent=(d.unread||0)+" unread";
+        // The unread badge lives in this page's own .bar, which the SPA router
+        // strips when it injects the page into the Command Center shell (the
+        // shell supplies its own nav). So it is absent in the embedded view and
+        // present standalone — never assume it exists.
+        var badge=el("unread-badge");
+        if(badge)badge.textContent=(d.unread||0)+" unread";
         render();
       })
       .catch(function(e){
