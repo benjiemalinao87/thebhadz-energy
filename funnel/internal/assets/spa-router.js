@@ -30,6 +30,7 @@
   var routeStatus = document.getElementById("cc-route-status");
   var OPERATION_PATHS = [
     "/internal/leads.html",
+    "/internal/mail.html",
     "/internal/meetings.html",
     "/internal/notes.html",
     "/internal/projects.html",

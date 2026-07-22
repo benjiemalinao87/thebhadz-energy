@@ -7,6 +7,16 @@
 <script src="/internal/assets/theme.js"></script>
 <link rel="icon" href="/assets/img/badjj-favicon.png">
 <meta name="robots" content="noindex, nofollow">
+<script>
+  // The Command Center shell is the only sanctioned UI for the mailbox. A standalone
+  // load — refresh, bookmark, pasted link — hits this real file with no shell around
+  // it, and Pages then drops the .html so the URL degrades to /internal/mail. Bounce
+  // to the dashboard, which reopens this page inside the SPA via ?open= (spa-router.js).
+  // Inside the shell this re-runs after a swap, where #cc-view exists — no-op.
+  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
+    location.replace('/internal/?open=mail');
+  }
+</script>
 <style>
   /* ============================================================
      MACC Mailbox — shared company inbox for hello@ / main@maccsyseng.com
@@ -210,8 +220,7 @@
 
   <div class="tools">
     <div class="tabs">
-      <button class="tab on" data-box="all" type="button">All</button>
-      <button class="tab" data-box="in" type="button">Inbox</button>
+      <button class="tab on" data-box="in" type="button">Inbox</button>
       <button class="tab" data-box="out" type="button">Sent</button>
     </div>
     <input type="text" id="search" placeholder="Search sender or subject…" autocomplete="off">
@@ -324,7 +333,7 @@
     });
   }
 
-  var emails=[], box="all", filter="", current=null;
+  var emails=[], box="in", filter="", current=null;
 
   // ---------- load ----------
   // A transient toast is not enough on failure: the panel would just sit there
@@ -366,7 +375,10 @@
       return (String(m.sender)+" "+String(m.recipient)+" "+String(m.subject)).toLowerCase().indexOf(q)>-1;
     });
     if(!shown.length){
-      list.innerHTML='<div class="empty">'+(emails.length?"Nothing matches that search.":"No mail yet. Messages to hello@ or main@maccsyseng.com will land here.")+'</div>';
+      var msg=emails.length?"Nothing matches that search."
+             :box==="out"?"Nothing sent yet. Use Compose to send from hello@ or main@maccsyseng.com."
+             :"No mail yet. Messages to hello@ or main@maccsyseng.com will land here.";
+      list.innerHTML='<div class="empty">'+msg+'</div>';
       return;
     }
     list.innerHTML=shown.map(function(m){
