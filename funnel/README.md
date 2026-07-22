@@ -218,12 +218,20 @@ team can read and reply from the company address instead of four personal Gmails
   exists, but the bytes are not stored — open the forwarded Gmail copy to download them.
   Outbound mail is plain text, no attachments. **For SEC/government filings with PDFs, use a
   real mail client**; this is a convenience layer, not a system of record.
-- Two extra secrets are required for sending (both scoped to Email Sending only):
+- Two extra secrets are required before the Compose box can send. **Set them on
+  `thebhadz-energy`** — that is the project actually serving the live site
+  (`www.badjjengineeringenergy.com`); `solar-city-funnel` is a stale leftover and
+  secrets put there have no effect:
   ```bash
-  # API token with "Email Sending: Edit" on the account that owns maccsyseng.com
-  npx wrangler pages secret put CF_API_TOKEN  --project-name solar-city-funnel
-  npx wrangler pages secret put CF_ACCOUNT_ID --project-name solar-city-funnel
+  # Create the token first: Cloudflare dashboard -> My Profile -> API Tokens,
+  # custom token with permission "Email Sending: Edit" on this account.
+  npx wrangler pages secret put CF_API_TOKEN  --project-name thebhadz-energy
+  # Account id that owns maccsyseng.com:
+  echo -n "b386322deca777360835c0f78dae766f" | npx wrangler pages secret put CF_ACCOUNT_ID --project-name thebhadz-energy
   ```
+  Until both are set, Compose returns "Sending is not configured" — receiving is
+  unaffected. Note the wrangler CLI can send without a token (it uses your OAuth
+  login), so `wrangler email sending send` working does **not** mean the UI will.
 - Prerequisites: the domain must be onboarded for sending
   (`npx wrangler email sending enable maccsyseng.com`, which adds SPF/DKIM/DMARC records on the
   `cf-bounce` subdomain), and **Email Sending is Beta and requires a Workers Paid plan**.
