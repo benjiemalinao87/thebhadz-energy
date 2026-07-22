@@ -4,7 +4,7 @@ compatibility_date = "2025-07-01"
 
 # This Worker is an Email Routing "destination worker". It has no HTTP fetch
 # handler and is not meant to be invoked over the web — it runs only when an
-# email routing rule for maccsystemsandengineering.com sends a message to it.
+# email routing rule for maccsyseng.com sends a message to it.
 #
 # Wiring the rule (address -> this worker) is NOT done here. Wrangler cannot yet
 # create Email Routing rules; do it once in the Cloudflare dashboard after the

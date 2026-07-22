@@ -1,9 +1,18 @@
 # hello-fanout — email forwarding worker
 
-Forwards every email sent to **hello@maccsystemsandengineering.com** to a list
-of verified inboxes. This is an [Email Routing](https://developers.cloudflare.com/email-routing/email-workers/)
+Forwards email sent to **hello@maccsyseng.com** and **main@maccsyseng.com** to a
+list of verified inboxes. This is an [Email Routing](https://developers.cloudflare.com/email-routing/email-workers/)
 "destination worker": it has no HTTP endpoint and only runs when a routing rule
 for the domain hands it an incoming message.
+
+The worker code is domain/address-agnostic — it only reads the destination list
+and forwards. To point another address at it, just add another routing rule (see
+below); no code change needed. Current rules on `maccsyseng.com`:
+
+| Address                | Rule name              |
+|------------------------|------------------------|
+| hello@maccsyseng.com   | hello -> fanout worker |
+| main@maccsyseng.com    | main -> fanout worker  |
 
 ## Current destinations
 
@@ -29,18 +38,33 @@ npx wrangler deploy
 
 That uploads the script as a Worker named `hello-fanout`. Account is selected by
 your `wrangler login` (currently benjiemalinao87@gmail.com's account, which holds
-the maccsystemsandengineering.com zone).
+the maccsyseng.com zone).
 
-## One-time wiring (dashboard)
+## One-time wiring: the routing rule
 
-Wrangler cannot create the Email Routing *rule* that connects the address to
-this worker — do this once after the first deploy:
+The rule connecting `hello@maccsyseng.com` to this worker is separate from the
+deploy. Do it once (Email Routing must be Enabled on the domain first — it is).
 
-1. Cloudflare dashboard → **maccsystemsandengineering.com** → **Email** →
-   **Email Routing** → **Routing rules**.
-2. **Create address** (custom address): `hello@maccsystemsandengineering.com`.
+### Via CLI (needs the `email_routing:write` OAuth scope)
+
+If `npx wrangler email routing rules list maccsyseng.com` errors about missing
+scopes, refresh the token first with `npx wrangler login`, then:
+
+```sh
+# Repeat per address (hello@, main@, ...), changing --name and --match-value.
+npx wrangler email routing rules create maccsyseng.com \
+  --name "hello -> fanout worker" \
+  --match-type literal --match-field to --match-value hello@maccsyseng.com \
+  --action-type worker --action-value hello-fanout
+```
+
+### Via dashboard (equivalent)
+
+1. Cloudflare dashboard → **maccsyseng.com** → **Email** → **Email Routing** →
+   **Routing rules** → **Create routing rule**.
+2. Custom address: `hello@maccsyseng.com`.
 3. Action: **Send to a Worker** → select **hello-fanout**.
-4. Save. Send a test email to `hello@` and confirm all four inboxes receive it.
+4. Save. Send a test email to `hello@` and confirm the inboxes receive it.
 
 After that, redeploys via `npx wrangler deploy` take effect immediately with no
 further dashboard steps — the rule stays pointed at the worker by name.
