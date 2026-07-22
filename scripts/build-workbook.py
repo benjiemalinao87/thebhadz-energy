@@ -133,13 +133,18 @@ PAGE = """<!doctype html>
 <link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
 <style>
   .wb-tabs {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 4px; }}
-  .wb-tab {{ font: 600 11.5px/1 var(--mono, ui-monospace, "SF Mono", Menlo, monospace);
-    letter-spacing: 0.04em; padding: 8px 11px; border-radius: 999px; cursor: pointer;
+  /* Scoped with .workspace-page so these beat the house `.workspace-page button` rule
+     (petrol fill + white text), which would otherwise repaint every control on this page. */
+  .workspace-page .wb-tab {{ font: 600 11.5px/1 var(--mono, ui-monospace, "SF Mono", Menlo, monospace);
+    letter-spacing: 0.04em; padding: 9px 11px; min-height: 0; border-radius: 999px; cursor: pointer;
     border: 1px solid var(--ws-line); background: var(--ws-surface); color: var(--ws-muted); }}
-  .wb-tab:hover {{ color: var(--ws-ink); border-color: var(--ws-petrol); }}
-  .wb-tab[aria-selected="true"] {{ background: var(--ws-petrol); border-color: var(--ws-petrol); color: #fff; }}
-  .wb-tab[aria-selected="true"] .n {{ color: rgba(255,255,255,0.72); }}
-  .wb-tab .n {{ color: var(--ws-muted); margin-left: 6px; font-weight: 400; }}
+  .workspace-page .wb-tab:hover {{ color: var(--ws-ink); background: var(--ws-surface-2);
+    border-color: var(--ws-petrol); }}
+  /* Amber for the selected control is the house signal — same as .btn.on elsewhere. */
+  .workspace-page .wb-tab[aria-selected="true"] {{ background: var(--ws-amber);
+    border-color: var(--ws-amber); color: var(--ws-ink); }}
+  .workspace-page .wb-tab[aria-selected="true"] .n {{ color: rgba(16,47,52,0.62); }}
+  .workspace-page .wb-tab .n {{ color: var(--ws-muted); margin-left: 6px; font-weight: 400; }}
 
   .wb-controls {{ display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 10px; }}
   .wb-search {{ flex: 1 1 260px; min-width: 0; padding: 9px 12px; border-radius: 8px;
@@ -168,11 +173,27 @@ PAGE = """<!doctype html>
   table.wb .num {{ text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }}
   .wb-empty {{ padding: 22px; color: var(--ws-muted); font-size: 14px; }}
 
-  .wb-prose p {{ margin: 0 0 4px; color: var(--ws-copy); }}
-  .wb-prose .h {{ margin-top: 16px; font: 600 11px/1.4 var(--mono, ui-monospace, Menlo, monospace);
+  /* Notes sheet -> document: a hero, then one card per section. */
+  .wb-doc {{ display: grid; gap: 14px; }}
+  .wb-hero {{ border-left: 3px solid var(--ws-petrol); padding: 2px 0 2px 16px; }}
+  .wb-hero h3 {{ margin: 0 0 6px; font-size: 22px; line-height: 1.25; color: var(--ws-ink); }}
+  .wb-hero p {{ margin: 0; color: var(--ws-muted); font-size: 14px; max-width: 70ch; }}
+
+  .wb-card {{ border: 1px solid var(--ws-line); border-radius: var(--ws-radius, 10px);
+    background: var(--ws-surface); padding: 16px 20px 18px; }}
+  .wb-card h4 {{ margin: 0 0 10px; font: 600 11px/1.4 var(--mono, ui-monospace, Menlo, monospace);
     letter-spacing: 0.1em; text-transform: uppercase; color: var(--ws-muted); }}
-  .wb-prose .cols {{ display: flex; gap: 14px; flex-wrap: wrap; }}
-  .wb-prose .cols span:first-child {{ font-weight: 600; min-width: 220px; }}
+  .wb-card p {{ margin: 0 0 8px; color: var(--ws-copy); max-width: 78ch; }}
+  .wb-card p:last-child {{ margin-bottom: 0; }}
+  .wb-card.accent {{ border-left: 3px solid var(--ws-petrol); }}
+  .wb-card.accent h4 {{ color: var(--ws-petrol); }}
+  .wb-card.warn {{ border-left: 3px solid var(--ws-copper); background: var(--ws-amber-soft); }}
+  .wb-card.warn h4 {{ color: var(--ws-copper); }}
+  .wb-list {{ margin: 0 0 4px; padding-left: 20px; color: var(--ws-copy); max-width: 78ch; }}
+  .wb-list li {{ margin-bottom: 6px; }}
+  .wb-list li:last-child {{ margin-bottom: 0; }}
+  .cols {{ display: flex; gap: 14px; flex-wrap: wrap; }}
+  .cols span:first-child {{ font-weight: 600; min-width: 220px; color: var(--ws-ink); }}
 
   @media print {{ .wb-tabs, .wb-controls {{ display: none; }} }}
 </style>
@@ -274,24 +295,106 @@ PAGE = """<!doctype html>
     }}
   }}
 
-  function renderProse(sheet, needle) {{
-    var wrap = el("div", "wb-prose");
-    var shown = 0;
-    sheet.rows.forEach(function (row) {{
-      var joined = row.join(" ").trim();
-      if (needle && joined.toLowerCase().indexOf(needle) === -1) return;
-      shown++;
-      if (row.length > 1) {{
-        var line = el("p", "cols");
-        row.forEach(function (c) {{ line.appendChild(el("span", null, c)); }});
-        wrap.appendChild(line);
+  // "IMPORTANT CAVEATS (do not treat as EVIDENCED)" is a heading — test the stem, not the
+  // trailing parenthetical, which is usually sentence case.
+  function headingOf(line) {{
+    var stem = line.replace(/\\s*\\([^)]*\\)\\s*$/, "").trim();
+    var ok = stem.length > 0 && stem.length < 60 && stem === stem.toUpperCase() && /[A-Z]/.test(stem);
+    return ok ? stem : null;
+  }}
+
+  // The notes sheet is a document, not records — a title, then headed sections of prose and
+  // lists. Break it into sections so each can render as its own card instead of 35 identical
+  // paragraphs, and so the sheet index can be swapped for real navigation.
+  function sectionize(rows) {{
+    var doc = {{ title: "", meta: [], sections: [] }};
+    var cur = null;
+    rows.forEach(function (row, idx) {{
+      var line = row.join("  ").trim();
+      if (idx === 0) {{ doc.title = line; return; }}
+      var heading = row.length === 1 ? headingOf(line) : null;
+      if (heading) {{
+        cur = {{ heading: heading, label: line, lines: [] }};
+        doc.sections.push(cur);
         return;
       }}
-      // A short all-caps line is a section heading in these notes sheets.
-      var isHeading = joined === joined.toUpperCase() && joined.length < 60 && /[A-Z]/.test(joined);
-      wrap.appendChild(el("p", isHeading ? "h" : null, joined));
+      (cur ? cur.lines : doc.meta).push(row);
     }});
-    return {{ node: wrap, shown: shown, total: sheet.rows.length }};
+    return doc;
+  }}
+
+  // Prose + lists for one section, with wrapped-cell fragments rejoined.
+  function sectionBody(lines) {{
+    var frag = document.createDocumentFragment();
+    var list = null, listKind = "", last = null;
+    lines.forEach(function (row) {{
+      var line = row.join("  ").trim();
+      var bullet = /^[\\u2022\\u00b7*-]\\s+/.test(line);
+      var numbered = /^\\d+[.)]\\s+/.test(line);
+      if (row.length === 1 && (bullet || numbered)) {{
+        var kind = bullet ? "ul" : "ol";
+        if (!list || listKind !== kind) {{
+          list = el(kind, "wb-list");
+          listKind = kind;
+          frag.appendChild(list);
+        }}
+        last = el("li", null, line.replace(/^([\\u2022\\u00b7*-]|\\d+[.)])\\s+/, ""));
+        list.appendChild(last);
+        return;
+      }}
+      // A long cell wrapped onto the next spreadsheet row arrives as a fragment starting
+      // mid-sentence. Rejoin it rather than emitting an orphan paragraph.
+      if (row.length === 1 && last && /^[a-z]/.test(line)) {{
+        last.textContent += " " + line;
+        return;
+      }}
+      list = null; listKind = "";
+      if (row.length > 1) {{
+        var cols = el("p", "cols");
+        row.forEach(function (c) {{ cols.appendChild(el("span", null, c)); }});
+        frag.appendChild(cols);
+        last = null;
+        return;
+      }}
+      last = el("p", null, line);
+      frag.appendChild(last);
+    }});
+    return frag;
+  }}
+
+  function renderProse(sheet, needle) {{
+    var doc = sectionize(sheet.rows);
+    var wrap = el("div", "wb-doc");
+    var shown = 0;
+
+    function matches(text) {{ return !needle || text.toLowerCase().indexOf(needle) !== -1; }}
+
+    if (matches(doc.title)) {{
+      var hero = el("div", "wb-hero");
+      hero.appendChild(el("h3", null, doc.title));
+      doc.meta.forEach(function (row) {{ hero.appendChild(el("p", null, row.join("  ").trim())); }});
+      wrap.appendChild(hero);
+      shown++;
+    }}
+
+    var sections = doc.sections.filter(function (sec) {{
+      // The notes' own sheet index is the tab rail above, rendered twice — drop it.
+      return sec.heading !== "SHEETS";
+    }});
+
+    sections.forEach(function (sec) {{
+      var text = sec.label + " " + sec.lines.map(function (r) {{ return r.join(" "); }}).join(" ");
+      if (!matches(text)) return;
+      shown++;
+      var tone = /CAVEAT|WARNING|FLAG/.test(sec.heading) ? " warn"
+               : /POSITION|PURPOSE/.test(sec.heading) ? " accent" : "";
+      var card = el("section", "wb-card" + tone);
+      card.appendChild(el("h4", null, sec.label));
+      card.appendChild(sectionBody(sec.lines));
+      wrap.appendChild(card);
+    }});
+
+    return {{ node: wrap, shown: shown, total: sections.length + 1 }};
   }}
 
   function renderTable(sheet, needle) {{
@@ -332,13 +435,21 @@ PAGE = """<!doctype html>
     }} else {{
       body.appendChild(out.node);
     }}
+    var unit = sheet.prose ? " sections" : " rows";
     count.textContent = needle
-      ? out.shown + " of " + out.total + " rows"
-      : out.total + (out.total === 1 ? " row" : " rows");
+      ? out.shown + " of " + out.total + unit
+      : out.total + (out.total === 1 ? unit.replace(/s$/, "") : unit);
     blurb.textContent = sheet.blurb;
     Array.prototype.forEach.call(tabs.children, function (btn, i) {{
       btn.setAttribute("aria-selected", i === active ? "true" : "false");
     }});
+  }}
+
+  function select(i) {{
+    active = i;
+    search.value = "";
+    try {{ history.replaceState(null, "", "#" + sheets[i].name); }} catch (e) {{}}
+    render();
   }}
 
   sheets.forEach(function (sheet, i) {{
@@ -348,11 +459,7 @@ PAGE = """<!doctype html>
     btn.title = sheet.name;
     btn.appendChild(el("span", null, sheet.label));
     btn.appendChild(el("span", "n", sheet.rows.length));
-    btn.addEventListener("click", function () {{
-      active = i;
-      try {{ history.replaceState(null, "", "#" + sheet.name); }} catch (e) {{}}
-      render();
-    }});
+    btn.addEventListener("click", function () {{ select(i); }});
     tabs.appendChild(btn);
   }});
 
