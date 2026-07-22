@@ -164,6 +164,33 @@
   .ops-standalone .err-state{color:var(--ops-rust);}
   /* The CRT scanline overlay is a dark-only flourish — it reads as dirt on paper. */
   body.ops-standalone::before{display:none;}
+
+  /* Text must not ride the --z-* scale. .ops-standalone remaps that scale to fixed
+     dark inks chosen for the light paper ground — they do NOT flip with the theme,
+     so in dark mode --z-200 body copy renders dark-on-dark. --ops-ink/muted/subtle
+     are the theme-aware tokens; every piece of copy is re-pointed at them. */
+  .ops-standalone .body{color:var(--ops-ink);}
+  .ops-standalone .rhead h2{color:var(--ops-ink);}
+  .ops-standalone .meta{color:var(--ops-muted);}
+  .ops-standalone .meta b{color:var(--ops-ink);}
+  .ops-standalone .subj{color:var(--ops-ink);}
+  .ops-standalone .who{color:var(--ops-muted);}
+  .ops-standalone .prev,
+  .ops-standalone .when,
+  .ops-standalone .empty,
+  .ops-standalone .clip-note,
+  .ops-standalone .hint{color:var(--ops-subtle);}
+  .ops-standalone .clips{color:var(--ops-muted);}
+  .ops-standalone .clips b{color:var(--ops-ink);}
+  .ops-standalone .field label{color:var(--ops-muted);}
+  .ops-standalone .tab{color:var(--ops-muted);}
+  .ops-standalone .row{border-bottom-color:var(--ops-line);}
+  .ops-standalone .row.unread .who,
+  .ops-standalone .row.unread .subj{color:var(--ops-ink);}
+  .ops-standalone .rhead{border-bottom-color:var(--ops-line);}
+  .ops-standalone .titles h1{color:var(--ops-ink);}
+  .ops-standalone .titles .eyebrow{color:var(--ops-subtle);}
+  .ops-standalone .bar{border-bottom-color:var(--ops-line);}
 </style>
 <link rel="stylesheet" href="/internal/assets/operations-redesign.css">
 </head>
