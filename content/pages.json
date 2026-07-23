@@ -132,6 +132,16 @@
     "navLabel": "SEC registration"
   },
   {
+    "id": "erc-net-metering",
+    "titleBase": "SC-14 ERC &amp; net metering",
+    "rootFile": "erc-net-metering.html",
+    "internalFile": "erc-net-metering.html",
+    "extraLinks": [],
+    "footer": "standard",
+    "navCode": "SC-14",
+    "navLabel": "ERC &amp; net metering"
+  },
+  {
     "id": "by-laws-template",
     "titleBase": "By-laws template (PH stock corporation)",
     "rootFile": "by-laws-template.html",

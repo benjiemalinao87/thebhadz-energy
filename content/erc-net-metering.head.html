@@ -1,0 +1,10 @@
+<script>
+  // On the internal site the Command Center dashboard is the ONLY UI for this page.
+  // A standalone load (direct link, refresh, bookmark) bounces to the dashboard shell,
+  // which reopens this page inside the SPA via the ?open= deep link (assets/spa-router.js).
+  // Inside the shell this script re-runs after a swap, where #cc-view exists — no-op.
+  // The root public site (no /internal/ prefix) keeps rendering standalone as before.
+  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
+    location.replace('/internal/?open=erc-net-metering');
+  }
+</script>

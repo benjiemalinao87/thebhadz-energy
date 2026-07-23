@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-14 ERC &amp; net metering — Solar City</title>
+<script>
+  // Internal build only: the Command Center shell is the UI for these pages. A
+  // standalone load — refresh, bookmark, pasted link — hits the real file with no
+  // shell around it, so bounce to the dashboard, which reopens this page inside the
+  // SPA via ?open= (assets/spa-router.js). The slug is read from the path rather
+  // than templated in, so this one block serves every page. On the public root site
+  // the path is not under /internal/, so this is a no-op and pages render as before.
+  (function () {
+    if (document.getElementById('cc-view')) return; // already inside the shell
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== 'index') location.replace('/internal/?open=' + m[1].toLowerCase());
+  })();
+</script>
+
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  // On the internal site the Command Center dashboard is the ONLY UI for this page.
+  // A standalone load (direct link, refresh, bookmark) bounces to the dashboard shell,
+  // which reopens this page inside the SPA via the ?open= deep link (assets/spa-router.js).
+  // Inside the shell this script re-runs after a swap, where #cc-view exists — no-op.
+  // The root public site (no /internal/ prefix) keeps rendering standalone as before.
+  if (location.pathname.indexOf('/internal/') === 0 && !document.getElementById('cc-view')) {
+    location.replace('/internal/?open=erc-net-metering');
+  }
+</script>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand">
+      <a href="index.html">
+        <span class="wordmark">Solar City</span>
+        <span class="sub">MODULE ENGINEERING FILE</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a href="index.html"><span class="code">SC-00</span>Overview</a>
+      <a href="designer.html"><span class="code">SC-01</span>Panel designer</a>
+      <a href="build-guide.html"><span class="code">SC-02</span>Build guide</a>
+      <a href="bom.html"><span class="code">SC-03</span>BOM &amp; suppliers</a>
+      <a href="strategy.html"><span class="code">SC-04</span>Strategy</a>
+      <a href="sourcing.html"><span class="code">SC-05</span>Source &amp; install</a>
+      <a href="market.html"><span class="code">SC-06</span>Market &amp; pricing</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="competitors.html"><span class="code">SC-08</span>Biliran competitors</a>
+      <a href="map.html"><span class="code">SC-09</span>Biliran map</a>
+      <a href="roof-check.html"><span class="code">SC-10</span>Roof check <span style="opacity:.6">(online)</span></a>
+      <a href="ad-library.html"><span class="code">SC-11</span>Ad library</a>
+      <a href="founders.html"><span class="code">SC-12</span>Founder lessons</a>
+      <a href="sec-registration.html"><span class="code">SC-13</span>SEC registration</a>
+      <a href="erc-net-metering.html"><span class="code">SC-14</span>ERC &amp; net metering</a>
+    </nav>
+    <div class="foot">
+      REV A · 2026-07<br>
+      TARGET: 400&nbsp;W · 108HC M10<br>
+      SITE: PHILIPPINES
+    </div>
+  </aside>
+
+  <main class="content">
+    <p class="doc-eyebrow">SC-14 · ERC &amp; NET METERING <span class="rev">· REV A · 2026-07-23</span></p>
+    <h1>ERC, net metering &amp; renewable-energy regulation (Philippines)</h1>
+    <p class="lede">
+      Regulatory reference for the permit / net-metering checklist that must be attached to every
+      quote before a deposit is accepted (Founder OS §7). Covers who regulates what, the legal basis
+      for net metering, the 2025–2026 process reforms, the end-to-end application flow, and what
+      each rule means per package. This is the compliance backbone of the "permits and net-metering
+      handled" table-stakes promise in every Solar City offer.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">Research-dated 2026-07-23 — verify before quoting a customer</span>
+      Timelines, caps, and fees below are compiled from public sources as of 2026-07-23. Rules are
+      moving fast (three major reforms in the last 10 months). Verify against erc.gov.ph,
+      doe.gov.ph, and the local distribution utility (Meralco / BILECO) before committing a date or
+      peso figure to a homeowner. <span class="unverified">EST</span>
+    </div>
+
+    <h2><span class="sec">§ 0</span>Who regulates what</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Four bodies touch a residential solar install — know which one owns each step</caption>
+        <tr><th>Body</th><th>Role</th><th>Touches our install where</th></tr>
+        <tr>
+          <td><strong>DOE</strong> (Department of Energy)</td>
+          <td>Policy. Issues circulars that set program rules and deadlines for everyone below.</td>
+          <td>Net-metering program rules, the 10-working-day DU approval mandate, capacity caps.</td>
+        </tr>
+        <tr>
+          <td><strong>ERC</strong> (Energy Regulatory Commission)</td>
+          <td>Independent regulator under EPIRA (RA 9136, 2001). Sets/approves rates, licenses
+              generators (Certificates of Compliance), writes the binding rules DUs must follow,
+              enforces RPS.</td>
+          <td>Net-metering implementing rules (Resolution No. 09-2013), the export-credit rate,
+              the simplified four-document requirement, the CoC application fee.</td>
+        </tr>
+        <tr>
+          <td><strong>DU</strong> (distribution utility — Meralco, BILECO, other ECs)</td>
+          <td>Franchise holder for the wires. Processes the net-metering application, swaps the
+              meter, signs the net-metering agreement, credits exports on the bill.</td>
+          <td>The application itself. RA 9513 §10 <em>mandates</em> the DU to accommodate a
+              compliant application — it cannot refuse one.</td>
+        </tr>
+        <tr>
+          <td><strong>LGU</strong> (city/municipal engineering office)</td>
+          <td>Building &amp; electrical permits, final inspection.</td>
+          <td>Electrical permit before work; Certificate of Final Electrical Inspection (CFEI)
+              after — the CFEI is one of the four documents the DU requires.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 1</span>Legal basis</h2>
+    <ul>
+      <li><strong>RA 9136 (EPIRA, 2001)</strong> — created the ERC as the independent electricity
+          regulator; unbundled generation / transmission / distribution.</li>
+      <li><strong>RA 9513 (Renewable Energy Act, 2008), §10</strong> — the net-metering mandate:
+          DUs must let qualified end-users with on-grid RE systems export excess generation and
+          receive bill credits.</li>
+      <li><strong>ERC Resolution No. 09-2013</strong> — the implementing rules: eligibility,
+          interconnection standards (based on the Distribution Code), metering, and the credit
+          mechanism. Amended/supplemented by the 2025–2026 issuances in §3.</li>
+    </ul>
+
+    <h2><span class="sec">§ 2</span>Net-metering mechanics — the numbers that matter</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Parameter</th><th>Value</th><th>Engineering / sales consequence</th></tr>
+        <tr>
+          <td>Residential capacity cap</td>
+          <td>≤100&nbsp;kW per qualified end-user</td>
+          <td>No constraint for us — a LIWANAG-class rooftop is ~2–3&nbsp;kWp. (Non-residential cap
+              lifted from 100&nbsp;kW to 1&nbsp;MW by DOE circular, April 2026.)</td>
+        </tr>
+        <tr>
+          <td>Export credit rate</td>
+          <td>DU's <strong>blended generation cost</strong> — NOT the full retail rate
+              <span class="unverified">EST</span></td>
+          <td>Critical for the savings calculator's honesty (§1.6): a peso of self-consumed solar
+              is worth the full retail tariff; an exported peso is worth roughly half that. Size
+              systems for self-consumption first; never model exports at retail.</td>
+        </tr>
+        <tr>
+          <td>Credit carry-over</td>
+          <td>Peso credits offset subsequent bills; no cash-out</td>
+          <td>Frame as "lower bill," never "the utility pays you."</td>
+        </tr>
+        <tr>
+          <td>Metering</td>
+          <td>DU replaces the meter with a bidirectional (net) meter after approval</td>
+          <td>Meter swap is on the DU's clock — the one step we cannot compress; quote it as the
+              DU's timeline, not ours.</td>
+        </tr>
+        <tr>
+          <td>RECs (since Oct 2025)</td>
+          <td>The homeowner owns the Renewable Energy Certificates their system generates and may
+              trade them in the Renewable Energy Market</td>
+          <td>A real but small back-end line — treat as HYPOTHESIS in <code>ops/canvas.md</code>
+              until a peso value at residential scale is evidenced.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 3</span>The 2025–2026 reforms — why "permits handled" is now a quotable promise</h2>
+    <p>
+      The application process, historically the worst part of a residential install (months of DU
+      back-and-forth), was overhauled in the last year. These statutory timelines are the
+      speed-of-light constraints (§6) behind any install date we quote:
+    </p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Date</th><th>Issuance</th><th>What changed</th></tr>
+        <tr>
+          <td>2025-09-22</td>
+          <td>ERC advisory to all grid-connected DUs</td>
+          <td>Documentary requirements standardized and cut to <strong>four items</strong>:
+              application form · LGU-issued CFEI · amended net-metering agreement · CoC
+              application fee.</td>
+        </tr>
+        <tr>
+          <td>2025-10-03</td>
+          <td>DOE Supplemental Policy</td>
+          <td>End-users retain ownership of the RECs their systems generate; tradable in the
+              Renewable Energy Market.</td>
+        </tr>
+        <tr>
+          <td>2026-Q1</td>
+          <td>DOE circular on processing deadlines</td>
+          <td>DU must approve or reject a net-metering application within <strong>10 working
+              days</strong>; LGU must issue the electrical permit within <strong>3 working
+              days</strong> and the CFEI within <strong>7 working days</strong>.</td>
+        </tr>
+        <tr>
+          <td>2026-04</td>
+          <td>DOE circular on capacity</td>
+          <td>Non-residential net-metering cap raised 100&nbsp;kW → 1&nbsp;MW (residential stays
+              at 100&nbsp;kW).</td>
+        </tr>
+        <tr>
+          <td>~2026-Q3 <span class="unverified">EST</span></td>
+          <td>Framework in progress (announced)</td>
+          <td>Households <em>not</em> enrolling in net metering (pure self-consumption, off-grid)
+              to need only an electrical inspection — no DU application at all.</td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout info">
+      <span class="label">Field-verify before quoting hard dates</span>
+      How smoothly the 10-day rule works varies by DU. Run one real application end-to-end with the
+      local DU (BILECO for Biliran; Meralco if we expand) and log actual elapsed days in
+      <code>ops/status.md</code> before any quote template promises a number. Until then, quote the
+      statutory timeline with an honest stated buffer, per §6 (padding must be named).
+    </div>
+
+    <h2><span class="sec">§ 4</span>End-to-end application flow (the quote-gate checklist)</h2>
+    <p>
+      This is the sequence the §7 quote gate requires attached to every quote. A licensed
+      electrician's involvement is not optional — the LGU permit and CFEI both require a signed
+      plan.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>#</th><th>Step</th><th>Owner</th><th>Statutory clock</th></tr>
+        <tr><td>1</td><td>Electrical plan signed by a licensed electrical engineer / master electrician</td><td>Us (licensed partner)</td><td>—</td></tr>
+        <tr><td>2</td><td>LGU electrical permit</td><td>LGU</td><td>3 working days</td></tr>
+        <tr><td>3</td><td>Physical install per Distribution Code interconnection standards</td><td>Us</td><td>1–2 days on-roof</td></tr>
+        <tr><td>4</td><td>LGU final inspection → CFEI issued</td><td>LGU</td><td>7 working days</td></tr>
+        <tr><td>5</td><td>DU net-metering application (4 documents, §3)</td><td>Us on homeowner's behalf</td><td>10 working days to approve/reject</td></tr>
+        <tr><td>6</td><td>DU meter swap + signed net-metering agreement → energized with export credits</td><td>DU</td><td>DU schedule <span class="unverified">EST</span></td></tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 5</span>What each rule means per package</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>Same regulator, three different compliance stories</caption>
+        <tr><th></th><th>LIWANAG (on-grid)</th><th>ILAW (off-grid)</th><th>SANDIGAN (hybrid)</th></tr>
+        <tr>
+          <td>Net metering</td>
+          <td><strong>Required</strong> — it is the mechanism behind the ₱-saved/month outcome.
+              Full §4 flow applies.</td>
+          <td><strong>Not applicable</strong> — no grid export, no DU application. LGU electrical
+              permit + inspection only (and simpler still under the ~Q3-2026 framework).</td>
+          <td>Optional — net-meter the export while the battery covers backup. Full §4 flow if
+              enrolled.</td>
+        </tr>
+        <tr>
+          <td>What happens in a brownout?</td>
+          <td><strong>System shuts off</strong> (anti-islanding, required by the interconnection
+              standard). Never imply otherwise — hard stop, §1.6.</td>
+          <td>Runs — it never depended on the grid.</td>
+          <td>Backup circuits stay on via the battery; the grid-tied side still anti-islands.</td>
+        </tr>
+        <tr>
+          <td>Sales angle</td>
+          <td>"Permits and net metering handled, on the DU's statutory 10-day clock."</td>
+          <td>"No utility paperwork at all" — the simplest compliance story we sell.</td>
+          <td>Both of the above.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 6</span>Other RA 9513 mechanisms — and why they mostly don't apply to us</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Mechanism</th><th>What it is</th><th>Relevance</th></tr>
+        <tr>
+          <td>FIT (Feed-in Tariff)</td>
+          <td>ERC-set guaranteed 20-year rates for utility-scale RE plants</td>
+          <td>None — rooftop residential goes through net metering, not FIT.</td>
+        </tr>
+        <tr>
+          <td>RPS (Renewable Portfolio Standards)</td>
+          <td>ERC-enforced minimum RE share DUs must source, rising yearly</td>
+          <td>Indirect tailwind: DUs have a structural reason to cooperate with rooftop solar
+              rather than obstruct it.</td>
+        </tr>
+        <tr>
+          <td>GEOP (Green Energy Option Program)</td>
+          <td>Lets consumers with ≥100&nbsp;kW demand choose an RE supplier</td>
+          <td>None at residential scale; relevant only if we ever quote commercial.</td>
+        </tr>
+        <tr>
+          <td>REM / RECs (Renewable Energy Market)</td>
+          <td>Trading venue for Renewable Energy Certificates</td>
+          <td>Homeowner-owned RECs since Oct 2025 (§2) — parked as back-end HYPOTHESIS.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2><span class="sec">§ 7</span>Sources (accessed 2026-07-23)</h2>
+    <ul>
+      <li><a href="https://www.officialgazette.gov.ph/2008/12/16/republic-act-no-9513/">RA 9513 — Renewable Energy Act of 2008 (Official Gazette)</a></li>
+      <li><a href="https://www.surgepv.com/solar-compliance/philippines/guides/erc-net-metering-rules">ERC net-metering rules — complete guide 2026 (SurgePV)</a></li>
+      <li><a href="https://www.pv-magazine.com/2026/02/04/philippines-accelerates-permits-for-solar-net-metering/">Philippines accelerates permits for solar net metering (pv magazine, 2026-02-04)</a></li>
+      <li><a href="https://www.pv-magazine.com/2026/07/13/philippines-proposes-transmission-grid-reforms-updates-to-net-metering/">Philippines proposes grid reforms, updates to net metering (pv magazine, 2026-07-13)</a></li>
+      <li><a href="https://www.pna.gov.ph/articles/1275631">Easier solar rules eyed for non-net-metering households by Q3 (Philippine News Agency)</a></li>
+      <li><a href="https://solarquarter.com/2026/02/02/philippines-fast-tracks-net-metering-rollout-through-unified-lgu-reforms-erc-simplification-measures-and-expanded-consumer-incentives/">PH fast-tracks net-metering rollout (SolarQuarter, 2026-02-02)</a></li>
+      <li><a href="https://conventuslaw.com/special-report/special-report-on-renewal-energy-in-the-philippines/">Special report on renewable energy in the Philippines (Conventus Law)</a></li>
+    </ul>
+  </main>
+</div>
+
+
+</html>

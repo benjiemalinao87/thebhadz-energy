@@ -34,6 +34,7 @@ const pages = JSON.parse(readFileSync(join(CONTENT_DIR, 'pages.json'), 'utf8'));
 const WORKSPACE_REDESIGN_PAGES = new Set([
   'overview', 'designer', 'build-guide', 'bom', 'strategy', 'sourcing', 'market',
   'competitors', 'map', 'roof-check', 'ad-library', 'founders', 'sec-registration',
+  'erc-net-metering',
   'by-laws-template', 'articles-of-incorporation-template', 'treasurers-affidavit-template',
   'secretarys-certificate-template', 'founder-charter', 'founders-agreement-term-sheet',
 ]);

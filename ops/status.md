@@ -59,6 +59,8 @@ Until the ≥2-deposit bar is met, 50% traction is a **floor, not a ceiling** (�
 | 2026-07-19 | Bootstrapped `ops/` ledger; parked in-house panel manufacturing behind §1.2 gate (pre-revenue, 0 installs). Chose in-house **system** fabrication as the un-gated margin lever. | §1.2, §5, §7 | AI + founder |
 | 2026-07-19 | AI flagged a new "Founder Lessons" docs-site section (SC-12, `founders.html`) under §7's "Add/polish X on the docs site" row — no `ops/tree.md` hypothesis, no booked survey/deposit, and this week's traction split unlogged. Founder directed the AI to build it anyway ("I want you to build it but you can suggest on the presentation"), asked only for presentation input. Built as internal team-culture reading, explicitly labeled non-Mission and not customer-facing in the page copy itself, kept to a single page + assets with no new nav weight elsewhere. Traction work this week is unaffected — flag it if it starts consuming founder time earmarked for interviews/channel tests. | §7 ("Add/polish X"), §1.3 | AI + founder |
 
+| 2026-07-23 | Added SC-14 "ERC & net metering" docs page at founder request. §7's "Add/polish X on the docs site" row checked: unlike SC-12 this one maps to an existing requirement — the permit / net-metering checklist §7 itself mandates on every quote ("permits and net-metering handled" table stakes), same class as SC-13 SEC registration. Research dated 2026-07-23; DU turnaround must be field-verified before quote templates promise dates. | §7, §3 table stakes | AI + founder |
+
 ## 5. This week's Triple-A (CLAUDE.md §6)
 
 - **Analyze — what did the market teach us this week?** _Nothing yet — pre-market._
