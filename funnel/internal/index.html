@@ -495,22 +495,24 @@
 
     <!-- STAT STRIP -->
     <section class="cc-strip" aria-label="Key metrics">
-      <div class="cc-panel cc-stat" data-tone="cyan">
+      <div class="cc-panel cc-stat" data-section="leads" data-tone="cyan">
         <span class="label" style="color:var(--cyan)">Open Leads</span>
         <span class="value tone-cyan" id="cc-open-leads">—</span>
         <span class="sub">Live CRM count</span>
       </div>
-      <div class="cc-panel cc-stat" data-tone="green">
+      <!-- Deposits are money, so this tile follows Finance rather than Install ops:
+           hiding the books should hide the peso figures on the dashboard too. -->
+      <div class="cc-panel cc-stat" data-section="finance" data-tone="green">
         <span class="label" style="color:var(--green)">Deposits Banked</span>
         <span class="value tone-green" id="cc-deposits">—</span>
         <span class="sub" id="cc-deposit-cash">Live payment records</span>
       </div>
-      <div class="cc-panel cc-stat" data-tone="yellow">
+      <div class="cc-panel cc-stat" data-section="finance" data-tone="yellow">
         <span class="label" style="color:var(--yellow)">Available Cash</span>
         <span class="value tone-yellow" id="cc-available-cash">—</span>
         <span class="sub">After committed outflows</span>
       </div>
-      <div class="cc-panel cc-stat" data-tone="purple">
+      <div class="cc-panel cc-stat" data-section="install-ops" data-tone="purple">
         <span class="label" style="color:var(--purple)">Active Installs</span>
         <span class="value tone-purple" id="cc-active-installs">—</span>
         <span class="sub">Survey through energization</span>
@@ -821,9 +823,10 @@
 
   window.ccRefreshDashboardMetrics();
 
-  // Name the founder who is signed in, in the sidebar chip. Each founder has their
-  // own login (see /internal/team.html), so "who am I working as" should never be a
-  // guess — and the master account gets told it is the master.
+  // Name the founder who is signed in, and drop the sidebar entries their account
+  // can't open (Team & access → Sections). Removing links is presentation only: the
+  // page and its API are refused server-side by functions/internal/_middleware.js and
+  // functions/api/_middleware.js, so a typed URL gets a 403 either way.
   (async function showSignedInFounder() {
     var label = document.getElementById('cc-who-label');
     if (!label) return;
@@ -832,11 +835,52 @@
       if (!response.ok) return; // signed out — the /internal gate will handle it on the next navigation
       var data = await response.json();
       if (!data.ok || !data.user) return;
-      label.textContent = data.user.name + (data.user.role === 'master' ? ' · master' : ' · founder');
+
+      label.textContent = data.user.name + (data.user.role === 'master' ? ' · founder' : ' · limited access');
       if (data.user.must_change) {
         label.textContent = data.user.name + ' · set your password';
         document.getElementById('cc-who').style.borderColor = 'var(--yellow)';
       }
+
+      var hidden = data.user.hidden_pages || [];
+      if (!hidden.length || !data.sections) return;
+
+      // slug → section key, straight from the server's registry.
+      var slugToKey = {};
+      data.sections.forEach(function (section) {
+        (section.pages || []).forEach(function (slug) { slugToKey[slug] = section.key; });
+      });
+
+      function keyForHref(el) {
+        var match = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(new URL(el.href, location.href).pathname);
+        return match ? slugToKey[match[1].toLowerCase()] || null : null;
+      }
+      function isHidden(key) { return !!key && hidden.indexOf(key) !== -1; }
+
+      // Sidebar entries…
+      document.querySelectorAll('.cc-sb-item[href^="/internal/"]').forEach(function (item) {
+        if (isHidden(keyForHref(item))) item.remove();
+      });
+
+      // …the dashboard's console/doc cards that link into those sections…
+      document.querySelectorAll('a.cc-panel[href^="/internal/"]').forEach(function (card) {
+        if (isHidden(keyForHref(card))) card.remove();
+      });
+
+      // …and the metric tiles reading their data (whose API would 403 anyway).
+      document.querySelectorAll('.cc-stat[data-section]').forEach(function (tile) {
+        if (isHidden(tile.getAttribute('data-section'))) tile.remove();
+      });
+
+      // A group or section whose every entry just disappeared shouldn't leave a
+      // floating heading behind.
+      document.querySelectorAll('.cc-sb-group, .cc-sb-disclosure').forEach(function (group) {
+        if (!group.querySelector('.cc-sb-item')) group.remove();
+      });
+      document.querySelectorAll('.cc-main-inner > section').forEach(function (section) {
+        if (section.querySelector('.cc-section-head') && !section.querySelector('.cc-panel')) section.remove();
+        else if (section.classList.contains('cc-strip') && !section.querySelector('.cc-panel')) section.remove();
+      });
     } catch (_) { /* keep the static fallback text */ }
   })();
 </script>

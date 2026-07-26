@@ -861,6 +861,26 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 /* Up to five row actions per account — let them wrap rather than run off the edge. */
 .ops-team .ops-table .row-actions { flex-wrap: wrap; max-width: 260px; }
 .ops-team .ops-pill { border-radius: 999px; font-weight: 700; }
+.ops-team .ops-subpanel { margin-top: 22px; border-color: var(--ops-line); border-radius: var(--ops-radius); background: var(--ops-surface-2); }
+.ops-team .team-section-group { margin-bottom: 14px; }
+.ops-team .team-section-group h4 {
+  margin: 0 0 6px;
+  color: var(--ops-muted);
+  font: 650 11px/1.4 var(--ops-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ops-team .ops-checks { margin-top: 0; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.ops-team .ops-checks label {
+  align-items: center;
+  border-color: var(--ops-line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+}
+.ops-team .ops-checks input { margin-top: 0; }
+.ops-team .ops-checks em { font-style: normal; }
+html[data-theme="dark"] .ops-team .ops-checks label { background: var(--ops-surface) !important; border-color: var(--ops-line) !important; }
 .ops-team .ops-alert { border: 1px solid #e5c77b; border-left: 4px solid var(--ops-amber); border-radius: 9px; background: #fff8e6; color: #4a3a12; }
 
 /* ---------- responsive and motion ---------- */

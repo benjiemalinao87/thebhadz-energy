@@ -18,10 +18,10 @@ import {
   hashPassword,
   isSharedLogin,
   logActivity,
-  masterEmail,
   passwordProblem,
   verifyPassword,
 } from "../_auth.js";
+import { sectionsForClient } from "../_pages.js";
 
 const MAX_NAME = 80;
 
@@ -42,7 +42,9 @@ export async function onRequest(context) {
   const shared = isSharedLogin(user, env);
 
   if (request.method === "GET") {
-    return json({ ok: true, user, master_email: masterEmail(env), shared });
+    // The sidebar uses `sections` + `user.hidden_pages` to drop the links this account
+    // can't open. That's presentation only — both middlewares refuse the real thing.
+    return json({ ok: true, user, shared, sections: sectionsForClient() });
   }
 
   if (request.method !== "POST") return json({ ok: false, error: "Method not allowed." }, 405);

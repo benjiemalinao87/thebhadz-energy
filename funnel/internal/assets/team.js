@@ -20,20 +20,29 @@
 
   var state = {
     me: null,
-    masterEmail: "",
     sharedEmail: "",
     sharedEnabled: false,
     onSharedLogin: false,
     users: [],
+    sections: [],
+    editingId: null, // account whose section visibility is open in the editor
     entries: [],
     hasMore: false,
     oldestId: null,
   };
 
+  // Starting points for the common non-founder logins. Values are the sections that
+  // stay VISIBLE; everything else is hidden. They only prefill the tick boxes — whoever
+  // is setting up the account still reviews and saves.
+  var PRESETS = {
+    installer: ["install-ops", "engineering", "notes"],
+    intern: ["notes", "projects", "field"],
+    bookkeeper: ["finance", "legal"],
+  };
+
   var els = {
     status: document.getElementById("team-status"),
     refresh: document.getElementById("team-refresh"),
-    masterEmail: document.getElementById("team-master-email"),
     mustChange: document.getElementById("team-must-change"),
     sharedSession: document.getElementById("team-shared-session"),
     sharedStatus: document.getElementById("team-shared-status"),
@@ -56,6 +65,13 @@
     meMeta: document.getElementById("team-me-meta"),
     passwordForm: document.getElementById("team-password-form"),
     nameForm: document.getElementById("team-name-form"),
+    sections: document.getElementById("team-sections"),
+    sectionsWho: document.getElementById("team-sections-who"),
+    sectionsList: document.getElementById("team-sections-list"),
+    sectionsSave: document.getElementById("team-sections-save"),
+    sectionsCancel: document.getElementById("team-sections-cancel"),
+    sectionsNote: document.getElementById("team-sections-note"),
+    lede: document.getElementById("team-lede"),
   };
 
   document.querySelectorAll("[data-tab]").forEach(function (button) {
@@ -68,6 +84,12 @@
   els.passwordForm.addEventListener("submit", changePassword);
   els.nameForm.addEventListener("submit", changeName);
   els.activityMore.addEventListener("click", function () { loadActivity(true); });
+  els.sectionsSave.addEventListener("click", saveSections);
+  els.sectionsCancel.addEventListener("click", closeSections);
+  els.sections.addEventListener("click", function (event) {
+    var preset = event.target.closest("[data-preset]");
+    if (preset) applyPreset(preset.getAttribute("data-preset"));
+  });
   [els.filterUser, els.filterAction, els.filterDays].forEach(function (control) {
     control.addEventListener("change", function () { loadActivity(false); });
   });
@@ -84,17 +106,17 @@
     try {
       var session = await api("/api/session");
       state.me = session.user;
-      state.masterEmail = session.master_email || "";
       state.onSharedLogin = !!session.shared;
-      els.masterEmail.textContent = state.masterEmail || "the master account";
       renderMe();
 
       if (isMaster()) {
         var data = await api("/api/users");
         state.users = data.users || [];
+        state.sections = data.sections || [];
         state.sharedEmail = data.shared_email || "";
         state.sharedEnabled = !!data.shared_enabled;
         renderUsers();
+        if (state.editingId) openSections(state.editingId); // keep the editor in sync after a save
         renderSharedStatus();
         await renderFailedSignIns();
         els.accountsAdmin.hidden = false;
@@ -157,6 +179,14 @@
     els.sharedSession.hidden = !state.onSharedLogin;
     els.nameForm.elements.name.value = me.name;
 
+    // The page belongs to whoever is reading it: a limited account shouldn't be told
+    // about powers it doesn't have.
+    if (els.lede && !isMaster()) {
+      els.lede.textContent =
+        "Your login and your own activity. A founder decides which sections this account can " +
+        "see; ask one if you need something that isn't in your sidebar.";
+    }
+
     // On the shared login there is no personal account to edit — the API refuses it,
     // so don't offer forms that can only fail.
     if (state.onSharedLogin) {
@@ -215,37 +245,119 @@
     // Row actions stay secondary-styled: nothing in a table row should shout louder
     // than "Create account", and Delete is the only one that earns the danger colour.
     // The shared login only accepts the two the API will honour: rename and disable.
-    var actions = [button("rename", u.id, "Rename")];
+    var hiddenCount = (u.hidden_pages || []).length;
+    var actions = [
+      button("rename", u.id, "Rename"),
+      button("sections", u.id, hiddenCount ? "Sections · " + hiddenCount + " hidden" : "Sections"),
+    ];
     if (u.is_shared_login) {
       actions.push(button("toggle", u.id, u.active ? "Switch off shared access" : "Switch shared access on"));
     } else {
       actions.push(button("reset", u.id, "Reset password"));
-      if (!u.is_master_address) {
-        actions.push(button("role", u.id, u.role === "master" ? "Make founder" : "Make master"));
-        if (!u.is_self) {
-          actions.push(button("toggle", u.id, u.active ? "Disable" : "Enable"));
-          actions.push(button("delete", u.id, "Delete", "danger"));
-        }
+      actions.push(button("role", u.id, u.role === "master" ? "Make limited" : "Make founder"));
+      if (!u.is_self) {
+        actions.push(button("toggle", u.id, u.active ? "Disable" : "Enable"));
+        actions.push(button("delete", u.id, "Delete", "danger"));
       }
     }
     if (locked) actions.unshift(button("unlock", u.id, "Unlock"));
 
-    var roleNote = u.is_master_address
-      ? '<div class="muted">Protected address</div>'
-      : u.is_shared_login
-        ? '<div class="muted">Shared password · everyone</div>'
-        : "";
+    var access = hiddenCount
+      ? '<div class="muted">' + hiddenCount + " section" + (hiddenCount === 1 ? "" : "s") + " hidden</div>"
+      : "";
+    var roleNote = u.is_shared_login
+      ? '<div class="muted">Shared password · everyone</div>'
+      : u.role === "master"
+        ? '<div class="muted">Full access</div>'
+        : '<div class="muted">No account admin</div>';
 
     return '<tr><td><strong>' + html(u.name) + '</strong>' +
       (u.is_self ? ' <span class="ops-pill">You</span>' : "") +
       (u.is_shared_login ? ' <span class="ops-pill pending">Shared</span>' : "") +
       '<div class="muted">' + html(u.email) + '</div></td>' +
-      '<td>' + html(u.is_shared_login ? "Shared login" : roleLabel(u.role)) + roleNote + '</td>' +
+      '<td>' + html(u.is_shared_login ? "Shared login" : roleLabel(u.role)) + roleNote + access + '</td>' +
       '<td>' + badges + (u.failed_count ? '<div class="muted">' + u.failed_count + ' failed attempt(s)</div>' : "") + '</td>' +
       '<td>' + html(u.last_login_at ? when(u.last_login_at) : "Never") + '</td>' +
       '<td class="amount">' + (u.open_sessions || 0) + '</td>' +
       '<td>' + html(when(u.created_at)) + '<div class="muted">by ' + html(u.created_by || "—") + '</div></td>' +
       '<td><div class="row-actions">' + actions.join("") + '</div></td></tr>';
+  }
+
+  /* ── section visibility editor ─────────────────────────────────────────── */
+
+  function openSections(id) {
+    var user = state.users.filter(function (u) { return u.id === id; })[0];
+    if (!user) return closeSections();
+
+    state.editingId = id;
+    els.sectionsWho.textContent = user.name + " (" + user.email + ")";
+    els.sections.hidden = false;
+
+    var hidden = user.hidden_pages || [];
+    var groups = [];
+    state.sections.forEach(function (section) {
+      var group = groups.filter(function (g) { return g.name === section.group; })[0];
+      if (!group) { group = { name: section.group, items: [] }; groups.push(group); }
+      group.items.push(section);
+    });
+
+    els.sectionsList.innerHTML = groups.map(function (group) {
+      return '<div class="team-section-group"><h4>' + html(group.name) + '</h4><div class="ops-checks">' +
+        group.items.map(function (section) {
+          var visible = hidden.indexOf(section.key) === -1;
+          // Team & access stays on for everyone: it is where you change your own
+          // password, and where a temporary one sends you at first sign-in.
+          var locked = !!section.always_on;
+          return '<label' + (locked ? ' title="Everyone needs this to change their own password"' : "") + '>' +
+            '<input type="checkbox" data-section="' + esc(section.key) + '"' +
+            (visible || locked ? " checked" : "") + (locked ? " disabled" : "") + '> <span>' +
+            html(section.label) + (locked ? ' <em class="muted">(always on)</em>' : "") +
+            '</span></label>';
+        }).join("") + '</div></div>';
+    }).join("");
+
+    els.sectionsNote.textContent = user.role === "master"
+      ? "This account is a founder (full access). Hiding sections from a founder is unusual — they can unhide themselves."
+      : "Limited account: it also has no account admin and sees only its own activity.";
+    els.sections.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function closeSections() {
+    state.editingId = null;
+    els.sections.hidden = true;
+    els.sectionsList.innerHTML = "";
+  }
+
+  function applyPreset(name) {
+    var visible = PRESETS[name] || null; // null = "all"
+    els.sectionsList.querySelectorAll("[data-section]").forEach(function (box) {
+      if (box.disabled) return;
+      box.checked = !visible || visible.indexOf(box.getAttribute("data-section")) !== -1;
+    });
+  }
+
+  async function saveSections() {
+    if (!state.editingId) return;
+    var hidden = [];
+    els.sectionsList.querySelectorAll("[data-section]").forEach(function (box) {
+      if (!box.checked && !box.disabled) hidden.push(box.getAttribute("data-section"));
+    });
+
+    var user = state.users.filter(function (u) { return u.id === state.editingId; })[0];
+    if (user && user.is_self && hidden.length) {
+      if (!confirm("Hide " + hidden.length + " section(s) from your own account?\n\n" +
+        "You will stop seeing them yourself until you turn them back on here.")) return;
+    }
+
+    try {
+      await api("/api/users", "PATCH", { id: state.editingId, hidden_pages: hidden });
+      await load();
+      status(hidden.length
+        ? hidden.length + " section" + (hidden.length === 1 ? "" : "s") + " now hidden from " + (user ? user.name : "that account")
+        : "All sections visible to " + (user ? user.name : "that account"));
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   /** One line telling the master whether shared access is currently a way in. */
@@ -332,10 +444,12 @@
       role: String(data.get("role") || "founder"),
     };
     try {
-      await api("/api/users", "POST", payload);
+      var result = await api("/api/users", "POST", payload);
       alert("Account created for " + payload.name + ".\n\nSend them this temporary password over a channel you trust:\n\n" +
         payload.password + "\n\nThey must change it on first sign-in.");
       form.reset();
+      // A limited account exists to see a slice, so go straight to choosing that slice.
+      if (payload.role !== "master" && result.user) state.editingId = result.user.id;
       await load();
     } catch (error) {
       alert(error.message);
@@ -349,6 +463,8 @@
     var user = state.users.find(function (u) { return u.id === id; });
     if (!user) return;
     var act = button.getAttribute("data-act");
+
+    if (act === "sections") return openSections(id);
 
     try {
       if (act === "rename") {
@@ -365,7 +481,9 @@
       } else if (act === "role") {
         var target = user.role === "master" ? "founder" : "master";
         if (!confirm("Change " + user.name + " to " + roleLabel(target) + "?" +
-          (target === "master" ? "\n\nA master can create, edit and delete accounts and read everyone's activity." : ""))) return;
+          (target === "master"
+            ? "\n\nFull access: they can create, edit and delete accounts and read everyone's activity."
+            : "\n\nLimited: tools only, their own activity, and no account admin."))) return;
         await api("/api/users", "PATCH", { id: id, role: target });
       } else if (act === "toggle") {
         var question = user.is_shared_login
@@ -493,7 +611,9 @@
     };
   }
 
-  function roleLabel(role) { return role === "master" ? "Master" : "Founder"; }
+  // "master" is what a founder is: full access. "founder" is the limited role kept for
+  // installers, interns and bookkeepers.
+  function roleLabel(role) { return role === "master" ? "Founder" : "Limited"; }
 
   function actionLabel(action) {
     var known = {

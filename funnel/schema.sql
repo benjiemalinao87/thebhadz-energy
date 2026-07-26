@@ -261,9 +261,10 @@ CREATE INDEX IF NOT EXISTS idx_emails_mailbox ON emails(mailbox);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Founder accounts, sessions and audit trail (/internal auth).
--- One login per founder — no shared password. The master account
--- (benjiemalinao87@gmail.com) is the only role that may create, edit, disable or
--- delete accounts and read the whole activity log.
+-- One login per founder, plus the shared team password (which signs in as the
+-- shared-login account). Founders are equals: role 'master' is the default and may
+-- administer accounts and read the whole activity log; role 'founder' is the limited
+-- login used for installers, interns and bookkeepers.
 --
 -- These three tables are also created on demand by functions/_auth.js
 -- (ensureAuthSchema) so a deploy can never lock the team out because someone
@@ -273,7 +274,8 @@ CREATE TABLE IF NOT EXISTS users (
   id             TEXT PRIMARY KEY,
   email          TEXT NOT NULL UNIQUE,        -- stored lowercase; the login identity
   name           TEXT NOT NULL,
-  role           TEXT NOT NULL DEFAULT 'founder' CHECK (role IN ('master', 'founder')),
+  -- 'master' = a founder (full access, manages accounts); 'founder' = limited login.
+  role           TEXT NOT NULL DEFAULT 'master' CHECK (role IN ('master', 'founder')),
   -- pbkdf2-sha256$<iterations>$<salt b64url>$<hash b64url> — never a plain password
   password_hash  TEXT NOT NULL,
   active         INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
@@ -281,6 +283,10 @@ CREATE TABLE IF NOT EXISTS users (
   failed_count   INTEGER NOT NULL DEFAULT 0,  -- consecutive bad passwords
   locked_until   TEXT,                        -- ISO timestamp while rate-limited
   last_login_at  TEXT,
+  -- JSON array of section keys this account may NOT see (functions/_pages.js).
+  -- Empty = full access, which is what every founder gets; used for installers,
+  -- interns and bookkeepers. Enforced by both middlewares, not just the sidebar.
+  hidden_pages   TEXT NOT NULL DEFAULT '[]',
   created_by     TEXT,                        -- email of the master who created the row
   created_at     TEXT NOT NULL,
   updated_at     TEXT NOT NULL

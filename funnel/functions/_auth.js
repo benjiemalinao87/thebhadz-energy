@@ -13,9 +13,16 @@
  *
  * Roles
  * -----
- *   master   — benjiemalinao87@gmail.com (or env MASTER_EMAIL). Sees the whole
- *              activity log and may create / edit / disable / delete accounts.
- *   founder  — own login, all founder tools, own activity only.
+ *   master   — the default for every founder account: all tools, the whole team's
+ *              activity log, and account administration (create / edit / disable /
+ *              delete). The founders are equals, so there is no single owner account.
+ *   founder  — a deliberately limited login: all tools, but only its own activity and
+ *              no account administration. Use it for a bookkeeper, an assistant, or a
+ *              contractor — not for a founder.
+ *
+ * Two rules keep "everyone is master" from being able to break itself: there is always
+ * at least one active master, and the shared team login can never hold the role (see
+ * below — whoever knew the shared password would inherit account administration).
  *
  * The shared team password
  * ------------------------
@@ -37,13 +44,17 @@
  *   AUTH_SECRET         — random string signing session cookies (secret).
  *   DB                  — D1 binding holding users / user_sessions / activity_log.
  * Optional env:
- *   MASTER_EMAIL        — master account address (default benjiemalinao87@gmail.com).
- *   MASTER_PASSWORD     — initial master password, used once to seed that account.
+ *   MASTER_EMAIL        — bootstrap address: the account seeded ONLY when the users
+ *                         table is completely empty (default benjiemalinao87@gmail.com).
+ *                         It gets no special powers or protection afterwards.
+ *   MASTER_PASSWORD     — password for that bootstrap account, used once at creation.
  *   FOUNDER_PASSWORD    — the shared team password. Unset it to switch shared login off.
  *   SHARED_LOGIN_EMAIL  — identity the shared password signs in as (default team@macc-inc.com).
  *   PASSWORD_ITERATIONS — PBKDF2 rounds for NEW hashes (default 100000). Lower it
  *                         (e.g. 25000) if the Workers Free 10ms CPU limit bites at login.
  */
+
+import { parseHiddenPages } from "./_pages.js";
 
 export const COOKIE_NAME = "sc_founder";
 export const SESSION_MS = 1000 * 60 * 60 * 12; // 12 hours
@@ -184,7 +195,12 @@ export function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || ""));
 }
 
-export function masterEmail(env) {
+/**
+ * The address seeded when the accounts table is empty. Not a privileged identity —
+ * once real accounts exist this address is as ordinary as any other, and deleting it
+ * is permanent (bootstrapMaster only fires on a completely empty table).
+ */
+export function bootstrapEmail(env) {
   return normalizeEmail((env && env.MASTER_EMAIL) || DEFAULT_MASTER_EMAIL);
 }
 
@@ -218,6 +234,7 @@ export function publicUser(row) {
     role: row.role,
     active: Number(row.active) === 1,
     must_change: Number(row.must_change) === 1,
+    hidden_pages: parseHiddenPages(row.hidden_pages),
     last_login_at: row.last_login_at || null,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -247,6 +264,7 @@ export async function ensureAuthSchema(env) {
          failed_count INTEGER NOT NULL DEFAULT 0,
          locked_until TEXT,
          last_login_at TEXT,
+         hidden_pages TEXT NOT NULL DEFAULT '[]',
          created_by TEXT,
          created_at TEXT NOT NULL,
          updated_at TEXT NOT NULL
@@ -285,30 +303,29 @@ export async function ensureAuthSchema(env) {
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id)`),
   ]);
+
+  // Migration for databases created before per-account section visibility. SQLite has
+  // no ADD COLUMN IF NOT EXISTS, and a failing statement aborts a batch, so this runs
+  // on its own and treats "duplicate column" as success.
+  try {
+    await env.DB.prepare(`ALTER TABLE users ADD COLUMN hidden_pages TEXT NOT NULL DEFAULT '[]'`).run();
+  } catch (error) {
+    if (!/duplicate column/i.test(String(error && error.message))) throw error;
+  }
 }
 
 /**
- * Make sure the master account exists.
+ * Seed the very first master account, so a fresh database has a way in.
  *
- * Runs on login. Seeds it from MASTER_PASSWORD (or the legacy FOUNDER_PASSWORD)
- * the first time only — after that the database row is the source of truth and
- * changing the env var does nothing. Returns a short status for the audit log.
+ * Fires ONLY when there are no accounts at all. That matters: the founders are all
+ * masters and may delete any account, including this bootstrap address, and a deleted
+ * account must stay deleted rather than reappear at the next sign-in.
  */
 export async function bootstrapMaster(env) {
-  const email = masterEmail(env);
-  const existing = await env.DB.prepare(`SELECT id, role FROM users WHERE email = ?`).bind(email).first();
-  if (existing) {
-    // Someone edited this row down to a normal founder — put it back. This address
-    // is defined as the master account.
-    if (existing.role !== "master") {
-      await env.DB.prepare(`UPDATE users SET role = 'master', active = 1, updated_at = ? WHERE id = ?`)
-        .bind(nowIso(), existing.id)
-        .run();
-      return "restored_master_role";
-    }
-    return "";
-  }
+  const anyUser = await env.DB.prepare(`SELECT id FROM users LIMIT 1`).first();
+  if (anyUser) return "";
 
+  const email = bootstrapEmail(env);
   const seed = String(env.MASTER_PASSWORD || env.FOUNDER_PASSWORD || "");
   if (!seed) return "missing_seed_password";
 
@@ -488,7 +505,7 @@ export async function resolveSession(request, env) {
   try {
     row = await env.DB.prepare(
       `SELECT s.id AS session_id, s.expires_at, s.last_seen_at,
-              u.id, u.email, u.name, u.role, u.active, u.must_change,
+              u.id, u.email, u.name, u.role, u.active, u.must_change, u.hidden_pages,
               u.last_login_at, u.created_by, u.created_at, u.updated_at
        FROM user_sessions s JOIN users u ON u.id = s.user_id
        WHERE s.id = ?`

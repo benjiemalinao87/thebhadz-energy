@@ -40,7 +40,7 @@
   <main class="content ops-content ops-page ops-team">
     <p class="doc-eyebrow">SC-15 · TEAM &amp; ACCESS <span class="rev">· REV A · 2026-07-26</span></p>
     <h1>Who can get in, and what they did.</h1>
-    <p class="lede">Every founder has their own email and password, and the shared team password still works alongside them. The master account (<span id="team-master-email">benjiemalinao87@gmail.com</span>) creates, edits, disables and deletes accounts, and is the only account that can read the whole activity log.</p>
+    <p class="lede" id="team-lede">Every founder has their own email and password, and the shared team password still works alongside them. Founders are equals: each one can create, edit, disable and delete accounts and read the whole team's activity log. What keeps that accountable is the log itself, not a permission wall.</p>
 
     <div class="ops-topbar">
       <span class="ops-status" id="team-status">Loading accounts…</span>
@@ -97,8 +97,8 @@
           <label>Email<input name="email" type="email" maxlength="160" placeholder="jethro@macc-inc.com" required></label>
           <label>Temporary password<input name="password" type="text" minlength="10" maxlength="200" placeholder="At least 10 characters" required></label>
           <label>Role<select name="role">
-            <option value="founder">Founder — all tools, own activity only</option>
-            <option value="master">Master — also manages accounts and sees all activity</option>
+            <option value="master">Founder — full access, manages accounts (default)</option>
+            <option value="founder">Limited — all tools, but own activity only and no account admin</option>
           </select></label>
           <div class="ops-form-actions">
             <button type="submit" id="team-create-submit">Create account</button>
@@ -115,6 +115,35 @@
           </div>
         </div>
         <div id="team-user-list"></div>
+
+        <!-- Per-account section visibility. Opened from the Sections button on a row. -->
+        <section class="ops-subpanel" id="team-sections" hidden aria-labelledby="team-sections-title">
+          <div class="ops-section-head">
+            <div>
+              <span class="ops-kicker">WHAT THIS ACCOUNT CAN SEE</span>
+              <h2 id="team-sections-title">Sections for <span id="team-sections-who">—</span></h2>
+              <p>Untick a section to take it off their sidebar <strong>and</strong> refuse it server-side —
+                the page and its data both stop answering, so this is a real boundary, not a hidden menu.
+                Founders normally see everything; use this for installers, interns and bookkeepers.</p>
+            </div>
+          </div>
+
+          <div class="ops-toolbar">
+            <span class="ops-helper">Quick starts:</span>
+            <button type="button" class="secondary" data-preset="installer">Installer</button>
+            <button type="button" class="secondary" data-preset="intern">Intern / researcher</button>
+            <button type="button" class="secondary" data-preset="bookkeeper">Bookkeeper</button>
+            <button type="button" class="secondary" data-preset="all">Everything</button>
+          </div>
+
+          <div id="team-sections-list"></div>
+
+          <div class="ops-form-actions">
+            <button type="button" id="team-sections-save">Save what they can see</button>
+            <button type="button" class="secondary" id="team-sections-cancel">Cancel</button>
+            <span class="ops-helper" id="team-sections-note"></span>
+          </div>
+        </section>
       </div>
     </section>
 

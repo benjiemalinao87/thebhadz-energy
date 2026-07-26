@@ -38,9 +38,10 @@ founder-only internal CRM and command center.
   activity log), and internal copies of the SC docs.
 - `funnel/functions/` — Cloudflare Pages Functions: per-founder auth with database-backed
   sessions and an activity log, plus the `/api/leads` CRM endpoint (list / update stage /
-  update notes / delete) backed by D1. One account per founder;
-  `benjiemalinao87@gmail.com` is the master account that manages logins and sees all
-  activity. Setup and roles: `funnel/README.md` → "Founder access".
+  update notes / delete) backed by D1. One account per founder and all founders are
+  equals; limited accounts (installers, interns, bookkeepers) can have whole sections —
+  finance, contacts, mail — hidden, enforced on the pages *and* their APIs. Setup, roles
+  and section visibility: `funnel/README.md` → "Founder access".
 - `funnel/schema.sql` — D1 (SQLite) schema for the leads pipeline, founder accounts,
   sessions, and the activity log.
 - `funnel/wrangler.toml` — Cloudflare Pages + D1/R2 bindings.

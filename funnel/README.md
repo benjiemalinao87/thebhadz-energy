@@ -147,17 +147,35 @@ log. Once signed in, everything under **`/internal/*`** unlocks:
 
 ### Accounts and roles
 
+**The founders are equals — there is no owner account.** Every founder login is a
+`master`: full access to everything, account administration, and the whole activity log.
+No single address is privileged, and any founder can edit or delete any other's account.
+The audit trail, not a permission wall, is what makes that accountable.
+
 | Role | Can do |
 |---|---|
-| **master** — `benjiemalinao87@gmail.com` (env `MASTER_EMAIL`) | Everything a founder can, plus create / rename / disable / delete accounts, reset anyone's password, change roles, switch shared access on and off, and read the **entire** activity log. |
-| **founder** | All founder tools. Sees and changes **only their own** login, and sees only their own activity. |
-| **shared login** — `team@macc-inc.com` (env `SHARED_LOGIN_EMAIL`) | What the shared team password signs you in as: an ordinary founder-level account, listed in the Accounts table like any other. It can never be a master, has no password of its own to reset, and cannot be deleted — disable it to switch shared access off. |
+| **master** (the default for a founder) | All tools, plus create / rename / disable / delete accounts, reset passwords, change roles, set what each account can see, switch shared access on and off, and read the **entire** activity log. |
+| **founder** (the *limited* login) | All tools that are visible to it, but only its own activity and no account administration. This is what installers, interns and bookkeepers get. |
+| **shared login** — `team@macc-inc.com` (env `SHARED_LOGIN_EMAIL`) | What the shared team password signs you in as: an ordinary limited account, listed in the Accounts table like any other. It can never be a master, has no password of its own to reset, and cannot be deleted — disable it to switch shared access off. |
 
 Guard rails, enforced server-side in `functions/api/users.js` — not just hidden in the UI:
-the master address can't be demoted, disabled, deleted, or have its email changed here; the
-shared login can only be renamed or disabled (never promoted, re-emailed, re-passworded or
-deleted); nobody can delete or disable the account they're signed in with; there is always
-≥1 active master.
+there is always ≥1 active master; nobody can delete or disable the account they're signed in
+with; the shared login can only be renamed or disabled (never promoted, re-emailed,
+re-passworded or deleted); and Team & access itself can never be hidden from anyone, because
+that is where each person changes their own password.
+
+### Hiding sections from an account
+
+`Team & access → Accounts → Sections` sets, per account, which parts of the Command Center
+exist for them — for an installer who should see Install Operations but not the books, or an
+intern who should see notes and research but not the mailbox. Quick-start presets for
+Installer / Intern / Bookkeeper prefill sensible ticks.
+
+This is a **real boundary, not a hidden menu**. The section registry
+(`functions/_pages.js`) maps each section to its pages *and* its API paths, and both
+middlewares check it: `/internal/finance` returns 403 and `/api/finance` returns 403 for an
+account with Finance unticked. The sidebar and the dashboard's cards and metric tiles for
+that section also disappear, so nobody is teased with links they can't open.
 
 **The honest cost of the shared password:** actions taken through it are logged as "Shared
 team login", so the audit trail can tell you *what* happened but not *who* did it, and one
@@ -178,9 +196,9 @@ shared one for the workshop tablet, a phone with no account yet, or an urgent ha
   session → 302 redirect to `/login.html?next=…`. Doc and board files are never served
   unauthenticated.
 - `functions/api/_middleware.js` authenticates every `/api/*` call (except the public
-  `/api/lead` and the login/logout endpoints) **and writes an `activity_log` row for every
-  POST/PATCH/PUT/DELETE** — actor, action, record, HTTP status. That's what the master reads on
-  `/internal/team.html`, and it's central so no endpoint can forget to log.
+  `/api/lead` and the login/logout endpoints), refuses the APIs of sections hidden from that
+  account, **and writes an `activity_log` row for every POST/PATCH/PUT/DELETE** — actor,
+  action, record, HTTP status. It's central so no endpoint can forget either.
 - **The shared password goes through the same machinery.** A password-only submit is compared
   (constant-time) against `FOUNDER_PASSWORD` and opens a session on the shared-login account —
   it does not bypass sessions, revocation, or the audit trail. Two switches turn it off: disable

@@ -1,22 +1,27 @@
 /**
- * /api/users — founder accounts. MASTER ACCOUNT ONLY.
+ * /api/users — founder accounts. Any MASTER may administer them, and master is the
+ * default role for a founder: the founders are equals, with no single owner account.
  *
- *   GET                                                    -> { ok, users: [...], master_email }
+ *   GET                                                    -> { ok, users: [...] }
  *   POST   { name, email, password, role? }                 -> create an account
  *   PATCH  { id, name?, email?, role?, active?, password? } -> edit an account
  *   DELETE { id }                                           -> delete an account
  *
  * Guard rails (all enforced here, not in the browser):
- *   - the master address (env MASTER_EMAIL, default benjiemalinao87@gmail.com) can
- *     never be demoted, disabled or deleted — that is the account that can undo
- *     everything else, so locking it out would leave nobody able to fix it;
+ *   - there is always at least one active master, so the team can't lock itself out
+ *     of account administration;
+ *   - you cannot delete or disable the account you are signed in as (delete someone
+ *     else's, or have them do it, so there's always a live session to fix mistakes);
  *   - the shared team login (env SHARED_LOGIN_EMAIL) can be renamed and disabled —
  *     disabling it is how you switch shared access off — but never promoted to master,
- *     given a stored password, re-emailed, or deleted. Its password is FOUNDER_PASSWORD;
- *   - you cannot delete or disable the account you are signed in as;
- *   - there is always at least one active master;
+ *     given a stored password, re-emailed, or deleted. Its password is FOUNDER_PASSWORD,
+ *     and a shared string must never carry account administration;
  *   - a new or reset password must clear passwordProblem(), and resetting one signs
  *     that founder out of every device.
+ *
+ * Deliberately NOT guarded: every founder can edit or delete every other founder's
+ * account. That is what equal owners means — the audit trail, not a permission wall,
+ * is what makes it accountable.
  *
  * Every call writes its own activity_log row (the generic logger in
  * functions/api/_middleware.js skips this path) so account changes read as
@@ -31,13 +36,13 @@ import {
   isMaster,
   isValidEmail,
   logActivity,
-  masterEmail,
   normalizeEmail,
   passwordProblem,
   publicUser,
   sharedLoginEmail,
   sharedLoginEnabled,
 } from "../_auth.js";
+import { normalizeHiddenPages, parseHiddenPages, sectionsForClient } from "../_pages.js";
 
 const MAX_NAME = 80;
 const ROLES = ["master", "founder"];
@@ -86,14 +91,13 @@ export async function onRequest(context) {
   if (!env.DB) return json({ ok: false, error: "Database not configured (bind D1 as DB)." }, 500);
 
   await ensureAuthSchema(env);
-  const master = masterEmail(env);
   const shared = sharedLoginEmail(env);
 
   /* ── list ──────────────────────────────────────────────────────────────── */
   if (request.method === "GET") {
     const { results } = await env.DB.prepare(
       `SELECT u.id, u.email, u.name, u.role, u.active, u.must_change, u.locked_until,
-              u.failed_count, u.last_login_at, u.created_by, u.created_at, u.updated_at,
+              u.failed_count, u.last_login_at, u.hidden_pages, u.created_by, u.created_at, u.updated_at,
               (SELECT COUNT(*) FROM user_sessions s
                 WHERE s.user_id = u.id AND s.expires_at > ?) AS open_sessions
        FROM users u
@@ -107,14 +111,13 @@ export async function onRequest(context) {
       locked_until: row.locked_until || null,
       failed_count: Number(row.failed_count || 0),
       open_sessions: Number(row.open_sessions || 0),
-      is_master_address: row.email === master,
       is_shared_login: row.email === shared,
       is_self: row.id === actor.id,
     }));
     return json({
       ok: true,
       users,
-      master_email: master,
+      sections: sectionsForClient(),
       shared_email: shared,
       shared_enabled: sharedLoginEnabled(env),
     });
@@ -132,7 +135,8 @@ export async function onRequest(context) {
     const name = String(body.name || "").trim().slice(0, MAX_NAME);
     const email = normalizeEmail(body.email);
     const password = String(body.password || "");
-    const role = ROLES.includes(body.role) ? body.role : "founder";
+    // A new account is a founder unless told otherwise, and founders are masters.
+    const role = ROLES.includes(body.role) ? body.role : "master";
 
     if (!name) return json({ ok: false, error: "Name is required." }, 422);
     if (!isValidEmail(email)) return json({ ok: false, error: "A valid email address is required." }, 422);
@@ -148,13 +152,14 @@ export async function onRequest(context) {
     const clash = await env.DB.prepare(`SELECT id FROM users WHERE email = ?`).bind(email).first();
     if (clash) return json({ ok: false, error: "An account with that email already exists." }, 409);
 
+    const hidden = normalizeHiddenPages(body.hidden_pages);
     const now = new Date().toISOString();
     const id = randomId();
     await env.DB.prepare(
-      `INSERT INTO users (id, email, name, role, password_hash, active, must_change, created_by, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, 1, 1, ?, ?, ?)`
+      `INSERT INTO users (id, email, name, role, password_hash, active, must_change, hidden_pages, created_by, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 1, 1, ?, ?, ?, ?)`
     )
-      .bind(id, email, name, email === master ? "master" : role, await hashPassword(password, env), actor.email, now, now)
+      .bind(id, email, name, role, await hashPassword(password, env), JSON.stringify(hidden), actor.email, now, now)
       .run();
 
     await logActivity(env, {
@@ -163,7 +168,9 @@ export async function onRequest(context) {
       entityId: id,
       user: actor,
       status: 200,
-      detail: `Created ${role} account for ${name} <${email}>`,
+      detail:
+        `Created ${role === "master" ? "founder" : "limited"} account for ${name} <${email}>` +
+        (hidden.length ? ` · hidden: ${hidden.join(", ")}` : ""),
       request,
     });
     return json({
@@ -172,9 +179,10 @@ export async function onRequest(context) {
         id,
         email,
         name,
-        role: email === master ? "master" : role,
+        role,
         active: true,
         must_change: true,
+        hidden_pages: hidden,
         created_at: now,
         updated_at: now,
         created_by: actor.email,
@@ -195,13 +203,12 @@ export async function onRequest(context) {
     if (!id) return json({ ok: false, error: "A user id is required." }, 422);
 
     const target = await env.DB.prepare(
-      `SELECT id, email, name, role, active FROM users WHERE id = ?`
+      `SELECT id, email, name, role, active, hidden_pages FROM users WHERE id = ?`
     )
       .bind(id)
       .first();
     if (!target) return json({ ok: false, error: "Account not found." }, 404);
 
-    const targetIsMasterAddress = target.email === master;
     const targetIsSharedLogin = target.email === shared;
     const sets = [];
     const binds = [];
@@ -222,12 +229,6 @@ export async function onRequest(context) {
       const email = normalizeEmail(body.email);
       if (!isValidEmail(email)) return json({ ok: false, error: "A valid email address is required." }, 422);
       if (email !== target.email) {
-        if (targetIsMasterAddress) {
-          return json(
-            { ok: false, error: `The master address (${master}) cannot be changed here. Change MASTER_EMAIL first.` },
-            422
-          );
-        }
         if (targetIsSharedLogin) {
           return json(
             { ok: false, error: `The shared login address (${shared}) is set by SHARED_LOGIN_EMAIL, not here.` },
@@ -249,9 +250,6 @@ export async function onRequest(context) {
     if (typeof body.role === "string") {
       if (!ROLES.includes(body.role)) return json({ ok: false, error: "Unknown role." }, 422);
       if (body.role !== target.role) {
-        if (targetIsMasterAddress && body.role !== "master") {
-          return json({ ok: false, error: `${master} is the master account and cannot be demoted.` }, 422);
-        }
         // Whoever knows the shared password would inherit account admin. Never.
         if (targetIsSharedLogin) {
           return json(
@@ -273,9 +271,6 @@ export async function onRequest(context) {
       if (active !== Number(target.active)) {
         if (!active && target.id === actor.id) {
           return json({ ok: false, error: "You cannot disable the account you are signed in with." }, 422);
-        }
-        if (!active && targetIsMasterAddress) {
-          return json({ ok: false, error: `${master} is the master account and cannot be disabled.` }, 422);
         }
         if (!active && target.role === "master" && (await activeMasterCount(env, id)) === 0) {
           return json({ ok: false, error: "There must always be one active master account." }, 422);
@@ -308,6 +303,16 @@ export async function onRequest(context) {
       binds.push(target.id === actor.id ? 0 : 1);
       changes.push("password reset");
       revokeSessions = true;
+    }
+
+    if (body.hidden_pages !== undefined) {
+      const hidden = normalizeHiddenPages(body.hidden_pages);
+      const before = parseHiddenPages(target.hidden_pages);
+      if (hidden.join(",") !== before.join(",")) {
+        sets.push("hidden_pages = ?");
+        binds.push(JSON.stringify(hidden));
+        changes.push(hidden.length ? `sections hidden: ${hidden.join(", ")}` : "all sections visible");
+      }
     }
 
     if (body.unlock) {
@@ -355,9 +360,6 @@ export async function onRequest(context) {
 
     const target = await env.DB.prepare(`SELECT id, email, name, role FROM users WHERE id = ?`).bind(id).first();
     if (!target) return json({ ok: false, error: "Account not found." }, 404);
-    if (target.email === master) {
-      return json({ ok: false, error: `${master} is the master account and cannot be deleted.` }, 422);
-    }
     // Deleting it would only make the next shared sign-in recreate it, quietly undoing
     // what you meant. Disabling is the switch that actually holds.
     if (target.email === shared) {

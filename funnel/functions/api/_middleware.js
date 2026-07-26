@@ -13,6 +13,7 @@
  * form and the login/logout endpoints themselves.
  */
 import { currentUser, logActivity } from "../_auth.js";
+import { isSectionHidden, sectionForApi } from "../_pages.js";
 
 const PUBLIC_PATHS = new Set(["/api/lead", "/api/founder-login", "/api/founder-logout"]);
 
@@ -80,6 +81,27 @@ export async function onRequest(context) {
   const user = await currentUser(context);
   if (!user) {
     return json({ ok: false, error: "Not authorized. Sign in again." }, 401);
+  }
+
+  // A hidden section's data has to be unreachable, not just unlinked — otherwise
+  // hiding Finance from an installer stops at the sidebar and /api/finance still pays out.
+  const section = sectionForApi(pathname);
+  if (section && isSectionHidden(user, section.key)) {
+    if (typeof waitUntil === "function") {
+      waitUntil(
+        logActivity(env, {
+          user,
+          action: "section.denied",
+          entity: section.key,
+          method: request.method,
+          path: pathname,
+          status: 403,
+          detail: `${section.label} is hidden from this account`,
+          request,
+        })
+      );
+    }
+    return json({ ok: false, error: "That section is not available on your account." }, 403);
   }
 
   const shouldLog = MUTATING.has(request.method) && !SELF_LOGGED.has(pathname);

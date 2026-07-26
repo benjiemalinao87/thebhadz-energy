@@ -70,11 +70,17 @@ still apply, and its activity reads as "Shared team login" rather than a person.
   re-implement either, just call `currentUser(context)` and 401 when it returns null.**
 - `/api/session` (self-service), `/api/users` (master only), `/api/activity` (all for master,
   own rows for founders); `funnel/internal/team.html` + `assets/team.js` is the SC-15 UI.
-- Roles: `master` = `benjiemalinao87@gmail.com` (env `MASTER_EMAIL`) manages accounts and reads
-  the whole activity log; `founder` = own login + own activity. The master address cannot be
-  demoted, disabled or deleted, and there is always ≥1 active master. The shared login can only
-  be renamed or disabled — never promoted to master (whoever knows the password would inherit
-  account admin), re-emailed, re-passworded or deleted.
+- Roles: the founders are equals — `master` is the DEFAULT role and means full access plus
+  account administration and the whole activity log. `founder` is the *limited* login for
+  installers/interns/bookkeepers: tools only, own activity, no account admin. There is always
+  ≥1 active master; nobody can delete or disable the account they are signed in with; the
+  shared login can only be renamed or disabled — never promoted to master (whoever knows the
+  password would inherit account admin), re-emailed, re-passworded or deleted.
+- Per-account section visibility: `funnel/functions/_pages.js` is the registry mapping each
+  section to its page slugs AND its API paths; `users.hidden_pages` is a JSON deny-list.
+  **Both middlewares enforce it** — hiding a sidebar link alone would leave `/internal/finance`
+  and `/api/finance` wide open. Team & access is `alwaysOn` (everyone needs their own password
+  panel). Add a page to a section's `pages` array when you add a page, or it is visible to all.
 - Anything a founder does that should be attributable (note author, email sender) comes from the
   session, never from the request body.
 
