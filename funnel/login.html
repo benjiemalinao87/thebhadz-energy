@@ -31,11 +31,12 @@
   h1 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em; }
   .sub { color: var(--soft); font-size: 15px; margin: 0 0 22px; }
   label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 7px; }
-  input[type=password] {
+  .field { margin-bottom: 15px; }
+  input[type=password], input[type=email] {
     width: 100%; font-family: var(--sans); font-size: 17px; padding: 14px 15px;
     border: 1.5px solid #ded5c2; border-radius: 10px; background: #fff; color: var(--ink);
   }
-  input[type=password]:focus { outline: 2px solid var(--sun); outline-offset: 1px; border-color: var(--sun); }
+  input[type=password]:focus, input[type=email]:focus { outline: 2px solid var(--sun); outline-offset: 1px; border-color: var(--sun); }
   .btn {
     width: 100%; margin-top: 18px; font-family: var(--sans); font-size: 18px; font-weight: 700;
     padding: 15px; border: 0; border-radius: 999px; cursor: pointer; color: #3a2400;
@@ -53,56 +54,126 @@
   <main class="card">
     <div class="brand"><img class="mark" src="/assets/img/macc-wordmark.png" alt="MACC Systems and Engineering Inc." width="340" height="48"></div>
     <p class="eyebrow">Founder access</p>
-    <h1><span class="lock">🔒</span> Internal documentation</h1>
-    <p class="sub">Enter the founder password to open the strategy decks, operating tools, and Solar City engineering files.</p>
+    <h1><span class="lock">🔒</span> Sign in</h1>
+    <p class="sub" id="sub">Each founder has their own login. Sign in to open the strategy decks, operating tools, and Solar City engineering files.</p>
 
     <form id="login-form" novalidate>
-      <label for="pw">Founder password</label>
-      <input id="pw" name="password" type="password" autocomplete="current-password" placeholder="••••••••" autofocus required>
-      <button class="btn" type="submit" id="go">Unlock documentation</button>
+      <div class="field" id="email-field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" inputmode="email"
+               spellcheck="false" placeholder="you@macc-inc.com" autofocus>
+      </div>
+      <div class="field">
+        <label for="pw" id="pw-label">Password</label>
+        <input id="pw" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button class="btn" type="submit" id="go">Sign in</button>
       <div class="msg" id="msg" role="alert" aria-live="assertive"></div>
     </form>
 
-    <p class="foot">Founders only. <a href="/">← Back to site</a></p>
+    <p class="foot">
+      <a href="#" id="mode-toggle">Use the shared team password instead</a><br>
+      <span id="foot-note">Founders only. No account? Ask Benjie to create one.</span><br>
+      <a href="/">← Back to site</a>
+    </p>
   </main>
 
   <script>
     (function () {
       var form = document.getElementById("login-form");
+      var emailField = document.getElementById("email-field");
+      var email = document.getElementById("email");
       var pw = document.getElementById("pw");
+      var pwLabel = document.getElementById("pw-label");
       var msg = document.getElementById("msg");
       var btn = document.getElementById("go");
+      var sub = document.getElementById("sub");
+      var footNote = document.getElementById("foot-note");
+      var toggle = document.getElementById("mode-toggle");
+
+      var PERSONAL_SUB = "Each founder has their own login. Sign in to open the strategy decks, operating tools, and Solar City engineering files.";
+      var SHARED_SUB = "The shared team password still works. It signs you in as “Shared team login”, so anything you do is recorded under that name and not yours.";
+      var PERSONAL_NOTE = "Founders only. No account? Ask Benjie to create one.";
+      var SHARED_NOTE = "Prefer your own login — it keeps the activity log honest about who did what.";
+      var LABEL = "Sign in";
 
       // where to go after login (?next=/internal/... ), default to the docs overview
       var params = new URLSearchParams(location.search);
       var next = params.get("next") || "/internal/";
       if (next.indexOf("/internal") !== 0) next = "/internal/"; // only allow internal redirects
 
+      // Which mode the person used last, so the daily sign-in is one field either way.
+      var sharedMode = false;
+      try {
+        sharedMode = localStorage.getItem("sc_login_mode") === "shared";
+        var saved = localStorage.getItem("sc_login_email");
+        if (saved) email.value = saved;
+      } catch (_) {}
+      setMode(sharedMode, false);
+
+      function setMode(useShared, moveFocus) {
+        sharedMode = useShared;
+        emailField.hidden = useShared;
+        email.disabled = useShared;
+        sub.textContent = useShared ? SHARED_SUB : PERSONAL_SUB;
+        footNote.textContent = useShared ? SHARED_NOTE : PERSONAL_NOTE;
+        pwLabel.textContent = useShared ? "Shared team password" : "Password";
+        toggle.textContent = useShared ? "Sign in with my own email instead" : "Use the shared team password instead";
+        msg.textContent = "";
+        if (moveFocus) (useShared || email.value ? pw : email).focus();
+      }
+
+      toggle.addEventListener("click", function (e) {
+        e.preventDefault();
+        setMode(!sharedMode, true);
+      });
+
+      function fail(message) {
+        msg.textContent = message;
+        btn.disabled = false; btn.textContent = LABEL;
+      }
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         msg.textContent = "";
-        if (!pw.value) { msg.textContent = "Please enter the password."; return; }
+        if (!sharedMode && !email.value.trim()) { msg.textContent = "Please enter your email."; email.focus(); return; }
+        if (!pw.value) {
+          msg.textContent = sharedMode ? "Please enter the shared team password." : "Please enter your password.";
+          pw.focus();
+          return;
+        }
         btn.disabled = true; btn.textContent = "Checking…";
+
+        // No email at all is what tells the API "this is the shared team password".
+        var payload = sharedMode
+          ? { password: pw.value }
+          : { email: email.value.trim(), password: pw.value };
 
         fetch("/api/founder-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pw.value })
+          credentials: "same-origin",
+          body: JSON.stringify(payload)
         })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
           .then(function (res) {
             if (res.ok && res.j.ok) {
+              try {
+                localStorage.setItem("sc_login_mode", sharedMode ? "shared" : "personal");
+                if (!sharedMode) localStorage.setItem("sc_login_email", email.value.trim());
+              } catch (_) {}
+              // A temporary password (new account or a reset) must be replaced first.
+              if (res.j.user && res.j.user.must_change) {
+                window.location.href = "/internal/team.html?password=change";
+                return;
+              }
               window.location.href = next;
             } else {
-              msg.textContent = (res.j && res.j.error) || "Incorrect password.";
-              btn.disabled = false; btn.textContent = "Unlock documentation";
-              pw.select();
+              fail((res.j && res.j.error) || "Incorrect email or password.");
+              pw.value = ""; pw.focus();
             }
           })
-          .catch(function () {
-            msg.textContent = "Something went wrong. Please try again.";
-            btn.disabled = false; btn.textContent = "Unlock documentation";
-          });
+          .catch(function () { fail("Something went wrong. Please try again."); });
       });
     })();
   </script>

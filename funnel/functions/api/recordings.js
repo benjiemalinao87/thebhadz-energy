@@ -18,7 +18,7 @@
  *   POST   { action:"rename", id, title }        → { ok }
  *   DELETE ?id=<id>                              → { ok } (removes D1 row + R2 object)
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const MAX_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB per recording
 const PART_SIZE = 25 * 1024 * 1024; // 25 MB chunks (R2 multipart min is 5 MiB)
@@ -45,9 +45,10 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 function extensionFor(type, name) {
@@ -86,7 +87,7 @@ async function getRow(env, id) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await requireFounder(request, env))) {
+  if (!(await requireFounder(context))) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.DB) return json({ ok: false, error: "Database not configured (bind D1 as DB)." }, 500);

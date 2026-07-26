@@ -258,3 +258,71 @@ CREATE TABLE IF NOT EXISTS emails (
 CREATE INDEX IF NOT EXISTS idx_emails_created ON emails(created_at);
 CREATE INDEX IF NOT EXISTS idx_emails_direction ON emails(direction);
 CREATE INDEX IF NOT EXISTS idx_emails_mailbox ON emails(mailbox);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Founder accounts, sessions and audit trail (/internal auth).
+-- One login per founder — no shared password. The master account
+-- (benjiemalinao87@gmail.com) is the only role that may create, edit, disable or
+-- delete accounts and read the whole activity log.
+--
+-- These three tables are also created on demand by functions/_auth.js
+-- (ensureAuthSchema) so a deploy can never lock the team out because someone
+-- forgot to apply this file. Kept here so the schema stays readable in one place.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+  id             TEXT PRIMARY KEY,
+  email          TEXT NOT NULL UNIQUE,        -- stored lowercase; the login identity
+  name           TEXT NOT NULL,
+  role           TEXT NOT NULL DEFAULT 'founder' CHECK (role IN ('master', 'founder')),
+  -- pbkdf2-sha256$<iterations>$<salt b64url>$<hash b64url> — never a plain password
+  password_hash  TEXT NOT NULL,
+  active         INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
+  must_change    INTEGER NOT NULL DEFAULT 0 CHECK (must_change IN (0, 1)),
+  failed_count   INTEGER NOT NULL DEFAULT 0,  -- consecutive bad passwords
+  locked_until   TEXT,                        -- ISO timestamp while rate-limited
+  last_login_at  TEXT,
+  created_by     TEXT,                        -- email of the master who created the row
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+-- Server-side sessions: the cookie carries only a signed session id, so deleting
+-- or disabling an account kills its open sessions on the next request.
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id            TEXT PRIMARY KEY,
+  user_id       TEXT NOT NULL,
+  created_at    TEXT NOT NULL,
+  expires_at    TEXT NOT NULL,
+  last_seen_at  TEXT NOT NULL,
+  ip            TEXT,
+  user_agent    TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expires ON user_sessions(expires_at);
+
+-- Who did what, across every founder tool. Written by functions/api/_middleware.js
+-- for each mutating API call, and by the auth endpoints for logins and account admin.
+CREATE TABLE IF NOT EXISTS activity_log (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id      TEXT,                          -- NULL for failed logins with no account
+  actor_email  TEXT NOT NULL DEFAULT '',
+  actor_name   TEXT NOT NULL DEFAULT '',
+  action       TEXT NOT NULL,                 -- login | logout | notes.create | users.delete …
+  entity       TEXT NOT NULL DEFAULT '',      -- resource touched: notes, leads, users …
+  entity_id    TEXT NOT NULL DEFAULT '',
+  method       TEXT NOT NULL DEFAULT '',
+  path         TEXT NOT NULL DEFAULT '',
+  status       INTEGER,                       -- HTTP status of the attempt
+  detail       TEXT NOT NULL DEFAULT '',      -- short human summary
+  ip           TEXT,
+  user_agent   TEXT,
+  created_at   TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_action ON activity_log(action);

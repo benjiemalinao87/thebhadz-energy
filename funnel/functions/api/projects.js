@@ -9,7 +9,7 @@
  *
  * Every method requires a valid founder session cookie (same auth as /internal).
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const TYPES = ["Traction", "Product", "Ops"];
 const STATUSES = ["Backlog", "This week", "Doing", "Blocked", "Done"];
@@ -24,9 +24,10 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 function cleanDate(value) {
@@ -53,7 +54,7 @@ function cleanTask(input, existingId) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await requireFounder(request, env))) {
+  if (!(await requireFounder(context))) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.DB) {

@@ -54,6 +54,30 @@ Funnel conventions: keep it fully self-contained (no CDN/external requests — C
 static). Placeholders to replace before launch are listed in funnel/README.md (phone number,
 Messenger link, real testimonials, analytics pixel, confirmed prices).
 
+### Founder auth (one login per founder)
+
+`/internal/*` and every `/api/*` endpoint except `/api/lead` require a signed-in founder
+account. Two ways in: a founder's own email + password, or the shared team password
+(`FOUNDER_PASSWORD`), which signs in as the shared-login account (`SHARED_LOGIN_EMAIL`, default
+`team@macc-inc.com`) — an ordinary founder row, so sessions, revocation and the audit trail all
+still apply, and its activity reads as "Shared team login" rather than a person. Details in
+`funnel/README.md` → "Founder access"; the shape:
+
+- `funnel/functions/_auth.js` — accounts, PBKDF2 password hashing, database-backed sessions
+  (cookie = signed session id, so revocation is immediate), `currentUser(context)`, `logActivity`.
+- `funnel/functions/api/_middleware.js` — authenticates all `/api/*` and writes an `activity_log`
+  row for every mutating call. **New founder endpoints get auth and audit for free — don't
+  re-implement either, just call `currentUser(context)` and 401 when it returns null.**
+- `/api/session` (self-service), `/api/users` (master only), `/api/activity` (all for master,
+  own rows for founders); `funnel/internal/team.html` + `assets/team.js` is the SC-15 UI.
+- Roles: `master` = `benjiemalinao87@gmail.com` (env `MASTER_EMAIL`) manages accounts and reads
+  the whole activity log; `founder` = own login + own activity. The master address cannot be
+  demoted, disabled or deleted, and there is always ≥1 active master. The shared login can only
+  be renamed or disabled — never promoted to master (whoever knows the password would inherit
+  account admin), re-emailed, re-passworded or deleted.
+- Anything a founder does that should be attributable (note author, email sender) comes from the
+  session, never from the request body.
+
 ## Two sites, one content source — DO NOT hand-edit generated pages
 
 The engineering-file content exists in **two site trees** that must render identically apart
@@ -103,8 +127,8 @@ site — do not try to unify them):
   `content/overview.html`, output to root as `index.html`); `funnel/internal/index.html` is
   the bespoke Command Center dashboard, structurally unrelated.
 - Founder-tools-only pages (`finance.html`, `install-ops.html`, `founder-lab.html`, `leads.html`,
-  `meetings.html`, `notes.html`, `principles.html`, `strategy-deck-*.html`) exist only inside
-  `funnel/internal/` — there is no root twin, nothing to unify.
+  `meetings.html`, `notes.html`, `principles.html`, `team.html`, `strategy-deck-*.html`) exist only
+  inside `funnel/internal/` — there is no root twin, nothing to unify.
 
 ## Audience & tone
 

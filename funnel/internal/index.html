@@ -99,6 +99,9 @@
   }
   .cc-sb-user svg { color: var(--cyan); flex: none; }
   .cc-sb-user span { font-size: 11px; color: var(--z-300); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.cc-sb-user { text-decoration: none; }
+  a.cc-sb-user:hover { border-color: var(--cyan-bd); }
+  a.cc-sb-user:hover span { color: var(--z-100); }
 
   .cc-sb-nav { flex: 1; overflow-y: auto; padding: 10px 12px 4px; scrollbar-width: thin; scrollbar-color: rgba(113,113,122,0.6) transparent; }
   .cc-sb-nav::-webkit-scrollbar { width: 8px; }
@@ -280,10 +283,12 @@
       </div>
     </div>
 
-    <div class="cc-sb-user">
+    <!-- Filled in with the signed-in founder by the /api/session call at the end of
+         this file; the static text is the fallback if that request fails. -->
+    <a class="cc-sb-user" id="cc-who" href="/internal/team.html" title="Your login and the team's activity">
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
-      <span>Founder access · confidential</span>
-    </div>
+      <span id="cc-who-label">Founder access · confidential</span>
+    </a>
 
     <nav class="cc-sb-nav" aria-label="Primary">
       <div class="cc-sb-group">
@@ -433,6 +438,10 @@
 
       <div class="cc-sb-group">
         <div class="cc-sb-group-label">System</div>
+        <a class="cc-sb-item" href="/internal/team.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Team &amp; Access <span class="tail">15</span>
+        </a>
         <a class="cc-sb-item" href="https://solar-city-funnel.pages.dev/" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           Public Funnel
@@ -811,6 +820,25 @@
   };
 
   window.ccRefreshDashboardMetrics();
+
+  // Name the founder who is signed in, in the sidebar chip. Each founder has their
+  // own login (see /internal/team.html), so "who am I working as" should never be a
+  // guess — and the master account gets told it is the master.
+  (async function showSignedInFounder() {
+    var label = document.getElementById('cc-who-label');
+    if (!label) return;
+    try {
+      var response = await fetch('/api/session', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+      if (!response.ok) return; // signed out — the /internal gate will handle it on the next navigation
+      var data = await response.json();
+      if (!data.ok || !data.user) return;
+      label.textContent = data.user.name + (data.user.role === 'master' ? ' · master' : ' · founder');
+      if (data.user.must_change) {
+        label.textContent = data.user.name + ' · set your password';
+        document.getElementById('cc-who').style.borderColor = 'var(--yellow)';
+      }
+    } catch (_) { /* keep the static fallback text */ }
+  })();
 </script>
 <script src="/internal/assets/spa-router.js"></script>
 </body>

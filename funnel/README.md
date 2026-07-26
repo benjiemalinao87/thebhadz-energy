@@ -21,17 +21,21 @@ funnel/
 │   ├── assets/                # docs' shared CSS/JS (style.css, site.js, designer.js)
 │   └── vendor/d3.min.js
 ├── functions/
-│   ├── _auth.js               # shared: HMAC-signed session cookie helpers
+│   ├── _auth.js               # accounts, passwords, sessions, activity log (shared)
 │   ├── api/
+│   │   ├── _middleware.js     # gate + audit: authenticates /api/*, logs every write
 │   │   ├── lead.js            # POST /api/lead  (public) → validate + insert into D1
 │   │   ├── leads.js           # GET/PATCH/DELETE /api/leads (founder-gated) → pipeline data
 │   │   ├── notes.js           # GET/POST/PATCH/DELETE /api/notes (founder-gated) → team notes
 │   │   ├── note-image.js      # POST upload / GET serve note images (founder-gated, R2)
-│   │   ├── founder-login.js   # POST → verify password, set signed cookie
-│   │   └── founder-logout.js  # clear cookie
-│   └── internal/_middleware.js  # gate: valid cookie or redirect to /login
+│   │   ├── founder-login.js   # POST {email,password} → open a session
+│   │   ├── founder-logout.js  # end the session server-side + clear cookie
+│   │   ├── session.js         # GET who am I · POST change own password / name
+│   │   ├── users.js           # account admin (MASTER ONLY): create/edit/disable/delete
+│   │   └── activity.js        # audit trail (all founders for master, own rows otherwise)
+│   └── internal/_middleware.js  # gate: valid session or redirect to /login
 ├── wrangler.toml              # D1 binding (DB) + R2 binding (NOTES_R2 → solar-city-notes)
-├── schema.sql                 # leads + notes table schemas
+├── schema.sql                 # leads, notes, finance, install-ops + users/sessions/activity
 ├── _headers                   # security + cache headers
 └── README.md
 ```
@@ -130,31 +134,99 @@ screen when the API isn't reachable.
 ## Founder access & the leads pipeline
 
 The public funnel has a discreet 🔒 lock in the lower-right that opens **`/login.html`**.
-After a founder enters the shared password, everything under **`/internal/*`** unlocks:
+There are two ways in: **each founder's own email + password**, or the **shared team
+password** (`FOUNDER_PASSWORD`) via "Use the shared team password instead" on the login
+screen. Both open a normal session; the difference is whose name ends up in the activity
+log. Once signed in, everything under **`/internal/*`** unlocks:
 
-- **`/internal/`** — founder home: the leads pipeline + the SC-00…06 documentation.
+- **`/internal/`** — the Command Center dashboard.
 - **`/internal/leads.html`** — the premium **leads pipeline** board.
+- **`/internal/team.html`** — **SC-15 Team & access**: your own password, and (master only)
+  the founder accounts plus the whole team's activity log.
 - **`/internal/overview.html` … `market.html`** — the internal engineering/strategy file.
+
+### Accounts and roles
+
+| Role | Can do |
+|---|---|
+| **master** — `benjiemalinao87@gmail.com` (env `MASTER_EMAIL`) | Everything a founder can, plus create / rename / disable / delete accounts, reset anyone's password, change roles, switch shared access on and off, and read the **entire** activity log. |
+| **founder** | All founder tools. Sees and changes **only their own** login, and sees only their own activity. |
+| **shared login** — `team@macc-inc.com` (env `SHARED_LOGIN_EMAIL`) | What the shared team password signs you in as: an ordinary founder-level account, listed in the Accounts table like any other. It can never be a master, has no password of its own to reset, and cannot be deleted — disable it to switch shared access off. |
+
+Guard rails, enforced server-side in `functions/api/users.js` — not just hidden in the UI:
+the master address can't be demoted, disabled, deleted, or have its email changed here; the
+shared login can only be renamed or disabled (never promoted, re-emailed, re-passworded or
+deleted); nobody can delete or disable the account they're signed in with; there is always
+≥1 active master.
+
+**The honest cost of the shared password:** actions taken through it are logged as "Shared
+team login", so the audit trail can tell you *what* happened but not *who* did it, and one
+leaked string is a way in for anyone who has it. Personal logins are what make the log
+answer "who". Both are supported deliberately — use personal logins by default and keep the
+shared one for the workshop tablet, a phone with no account yet, or an urgent hand-off.
 
 ### How the gate works (genuinely private)
 
-- `functions/_auth.js` signs a session cookie `sc_founder` with **HMAC-SHA256(expiry, AUTH_SECRET)**.
-  It can't be forged without the secret; sessions last 12 hours.
+- **Passwords** are PBKDF2-SHA256 with a per-user salt, stored as
+  `pbkdf2-sha256$<iterations>$<salt>$<hash>`. The iteration count lives inside the string, so
+  changing `PASSWORD_ITERATIONS` never invalidates existing hashes. Minimum 10 characters.
+- **Sessions live in the database** (`user_sessions`). The cookie `sc_founder` carries only
+  `<sessionId>.<HMAC-SHA256(sessionId, AUTH_SECRET)>`, so a forged cookie is rejected without a
+  database hit, and disabling an account, deleting it, or resetting its password **kills its open
+  sessions on the next request**. Sessions last 12 hours and slide forward while you work.
 - `functions/internal/_middleware.js` runs before *any* `/internal/*` file is served. No valid
-  cookie → 302 redirect to `/login.html`. So the doc/board files are never served unauthenticated.
-- `POST /api/founder-login` checks the password (constant-time) and issues the cookie.
-  `/api/founder-logout` clears it. `/api/leads` re-checks the cookie on every call.
+  session → 302 redirect to `/login.html?next=…`. Doc and board files are never served
+  unauthenticated.
+- `functions/api/_middleware.js` authenticates every `/api/*` call (except the public
+  `/api/lead` and the login/logout endpoints) **and writes an `activity_log` row for every
+  POST/PATCH/PUT/DELETE** — actor, action, record, HTTP status. That's what the master reads on
+  `/internal/team.html`, and it's central so no endpoint can forget to log.
+- **The shared password goes through the same machinery.** A password-only submit is compared
+  (constant-time) against `FOUNDER_PASSWORD` and opens a session on the shared-login account —
+  it does not bypass sessions, revocation, or the audit trail. Two switches turn it off: disable
+  the shared login on Team & access (instant, and signs out everyone using it), or remove the
+  `FOUNDER_PASSWORD` secret entirely.
+- Repeated failures: 8 wrong passwords locks a personal account for 15 minutes (the master can
+  unlock it from Team & access). The shared login locks after 20 instead — it's the whole team's
+  way in, so one guesser must not be able to shut everybody out. An unknown email and a wrong
+  password return the same message, so the form can't be used to discover who has an account.
+- Note authorship and "who sent this email" now come from the session, not the request body —
+  which is exactly why shared-login work reads as "Shared team login" everywhere.
 
 ### Secrets (set once, in Cloudflare)
 
-Both are already set on this project; rotate anytime:
 ```bash
-echo -n "YOUR_NEW_PASSWORD" | npx wrangler pages secret put FOUNDER_PASSWORD --project-name solar-city-funnel
-# AUTH_SECRET is a random 64-hex string; regenerate to invalidate all sessions:
-openssl rand -hex 32 | npx wrangler pages secret put AUTH_SECRET --project-name solar-city-funnel
+# The initial master password — used ONCE to seed benjiemalinao87@gmail.com, then the
+# database row is authoritative and this variable does nothing.
+echo -n "A_STRONG_MASTER_PASSWORD" | npx wrangler pages secret put MASTER_PASSWORD --project-name thebhadz-energy
+# Signs session cookies. Regenerate to sign everyone out (passwords are unaffected).
+openssl rand -hex 32 | npx wrangler pages secret put AUTH_SECRET --project-name thebhadz-energy
+# The shared team password. Rotate it here; unset it to switch shared access off for good.
+echo -n "THE_SHARED_TEAM_PASSWORD" | npx wrangler pages secret put FOUNDER_PASSWORD --project-name thebhadz-energy
+# Optional: different master or shared-login address, or cheaper hashing if you hit the
+# Workers Free 10 ms CPU limit at login (error 1102). Iterations default to 100000.
+npx wrangler pages secret put MASTER_EMAIL --project-name thebhadz-energy
+npx wrangler pages secret put SHARED_LOGIN_EMAIL --project-name thebhadz-energy
+npx wrangler pages secret put PASSWORD_ITERATIONS --project-name thebhadz-energy
 ```
-Secrets only apply to **new deployments** — redeploy after changing them.
-**The current founder password is a placeholder (`solarcity2026`) — change it before sharing the link.**
+Secrets only apply to **new deployments** — redeploy after changing them. If `MASTER_PASSWORD`
+is unset, `FOUNDER_PASSWORD` doubles as the master's one-time seed password — so set
+`MASTER_PASSWORD` if you don't want those two to start out the same.
+
+### First deploy of per-founder auth (one-time)
+
+1. Set `MASTER_PASSWORD` + `AUTH_SECRET` (keep `FOUNDER_PASSWORD` as-is if you want shared
+   access to keep working), then deploy.
+2. Sign in at `/login.html` as `benjiemalinao87@gmail.com`. The master account is created on
+   that first sign-in; the `users` / `user_sessions` / `activity_log` tables are created on
+   demand too, so a forgotten `schema.sql` run can't lock the team out.
+3. On **`/internal/team.html` → Accounts**, add each founder with a temporary password and pass
+   it to them over a channel you trust. They must replace it on first sign-in (they land on the
+   change-password panel automatically).
+4. Everyone is signed out once by this deploy — the cookie format changed — but the shared
+   password still gets them back in, so nobody is stranded while you create accounts.
+5. When the team is fully on personal logins, switch shared access off (Team & access →
+   "Switch off shared access", or drop the `FOUNDER_PASSWORD` secret).
 
 ### The leads pipeline (D1-backed)
 

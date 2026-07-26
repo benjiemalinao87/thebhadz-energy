@@ -805,6 +805,64 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 .ops-finance .ops-table td { border-bottom-color: var(--ops-line); color: var(--ops-ink); }
 .ops-finance .ops-pill { border-radius: 999px; font-weight: 700; }
 
+/* ---------- Team & access (SC-15) ---------- */
+
+/* The generic ops-tools skin paints primary buttons and tab strips with var(--ink),
+   which the dark theme flips to a light colour — white on white. Finance solves that
+   for itself; Team & access gets the same workspace treatment here. */
+
+.ops-team { max-width: 1600px; }
+.ops-team .doc-eyebrow .rev { color: var(--ops-subtle); }
+.ops-team h1 { margin-top: 6px; }
+.ops-team .ops-topbar { justify-content: flex-end; margin: 20px 0 18px; }
+.ops-team .ops-status { margin-right: auto; color: var(--ops-muted); }
+.ops-team button,
+.ops-team .ops-button {
+  border-radius: 8px;
+  font-family: var(--ops-font);
+  font-weight: 700;
+}
+.ops-team .ops-topbar button,
+.ops-team .ops-topbar .ops-button,
+.ops-team .ops-form-actions button { min-height: 42px; }
+.ops-team button:not(.secondary):not(.danger),
+.ops-team .ops-button:not(.secondary):not(.danger) { border-color: var(--ops-amber); background: var(--ops-amber); color: #172b30; }
+.ops-team button.secondary,
+.ops-team .ops-button.secondary { border-color: var(--ops-line-strong); background: #fff; color: var(--ops-ink); }
+.ops-team .ops-tabs { width: max-content; gap: 0; margin: 24px 0 0; border: 1px solid var(--ops-line-strong); border-radius: 8px; overflow: hidden; background: #fff; }
+/* The :not() pairs match the primary-button rule's specificity above, so the tab
+   strip is not repainted amber by it. */
+.ops-team .ops-tabs button:not(.secondary):not(.danger) {
+  min-width: 150px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: var(--ops-muted);
+}
+.ops-team .ops-tabs button[aria-selected="true"]:not(.secondary):not(.danger) { background: var(--ops-petrol); color: #fff; }
+.ops-team .ops-panel { border: 1px solid var(--ops-line); border-radius: var(--ops-radius); background: #fff; padding: 22px; }
+.ops-team .ops-section-head h2 { color: var(--ops-ink); font: 750 22px var(--ops-font); }
+.ops-team .ops-section-head p { color: var(--ops-muted); }
+.ops-team .ops-kicker { color: var(--ops-petrol); }
+.ops-team .ops-metrics { grid-template-columns: repeat(3, minmax(150px, 1fr)); gap: 12px; border: 0; background: transparent; }
+.ops-team .ops-metric { min-height: 104px; padding: 18px; border: 1px solid var(--ops-line); border-radius: var(--ops-radius); background: #fff; box-shadow: var(--ops-shadow); }
+.ops-team .ops-metric span { color: var(--ops-muted); font: 600 12px var(--ops-font); letter-spacing: 0; text-transform: none; }
+.ops-team .ops-metric strong { color: var(--ops-ink); font: 750 clamp(18px, 1.65vw, 24px) var(--ops-font); }
+.ops-team .ops-metric small { color: var(--ops-muted); font-size: 12px; }
+.ops-team .ops-form { grid-template-columns: repeat(4, minmax(150px, 1fr)); border-color: var(--ops-line); border-radius: 9px; background: var(--ops-surface-2); }
+.ops-team .ops-form label,
+.ops-team .ops-filter label { color: var(--ops-muted); font: 650 12px var(--ops-font); letter-spacing: 0; }
+.ops-team :is(input, select, textarea) { min-height: 40px; border-color: var(--ops-line-strong); border-radius: 7px; color: var(--ops-ink); font-family: var(--ops-font); }
+.ops-team .ops-table-wrap { border-color: var(--ops-line); border-radius: 9px; }
+.ops-team .ops-table th { border-bottom-color: var(--ops-line-strong); background: var(--ops-surface-2); color: var(--ops-muted); }
+.ops-team .ops-table td { border-bottom-color: var(--ops-line); color: var(--ops-ink); }
+.ops-team .ops-table button { min-height: 30px; padding: 6px 9px; font-size: 10px; }
+/* Up to five row actions per account — let them wrap rather than run off the edge. */
+.ops-team .ops-table .row-actions { flex-wrap: wrap; max-width: 260px; }
+.ops-team .ops-pill { border-radius: 999px; font-weight: 700; }
+.ops-team .ops-alert { border: 1px solid #e5c77b; border-left: 4px solid var(--ops-amber); border-radius: 9px; background: #fff8e6; color: #4a3a12; }
+
 /* ---------- responsive and motion ---------- */
 
 @media (max-width: 1180px) {
@@ -915,6 +973,17 @@ html[data-theme="dark"] .ops-page :is(.ops-table td, table td) { color: var(--op
 html[data-theme="dark"] .ops-finance .ops-alert { color: #cce8f5; background: #102b38; border-color: #2f637b; }
 html[data-theme="dark"] .ops-finance .ops-tabs button { color: var(--ops-muted); background: var(--ops-surface) !important; }
 html[data-theme="dark"] .ops-finance .ops-tabs button[aria-selected="true"] { color: #fff; background: var(--ops-petrol) !important; }
+html[data-theme="dark"] .ops-team .ops-tabs button:not(.secondary):not(.danger) { color: var(--ops-muted); background: var(--ops-surface) !important; }
+html[data-theme="dark"] .ops-team .ops-tabs button[aria-selected="true"]:not(.secondary):not(.danger) { color: #fff; background: var(--ops-petrol) !important; }
+html[data-theme="dark"] .ops-team button.danger { color: #ffb4a8 !important; background: #2a1512 !important; border-color: #7d3227 !important; }
+/* The unmodified pill (e.g. the "You" marker) inherits a light background from
+   ops-tools; give it the dark surface so its label stays legible. */
+html[data-theme="dark"] .ops-team .ops-pill:not(.paid):not(.pending):not(.rework):not(.cancelled) {
+  color: var(--ops-ink);
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line-strong);
+}
+html[data-theme="dark"] .ops-team .ops-alert { color: #f3e3c0; background: #2c2413; border-color: #6b5622; }
 html[data-theme="dark"] .ops-notes .attach-btn {
   color: var(--ops-ink);
   background: #0a181b;

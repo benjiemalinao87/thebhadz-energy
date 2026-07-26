@@ -24,7 +24,7 @@
  *                   (macc-inc.com — same account as maccsyseng.com).
  * Plus the existing AUTH_SECRET (founder session) and DB (D1) bindings.
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 // Only addresses we actually own may appear in From — otherwise a founder could
 // send as anyone and torch the domain's reputation. These must be on a domain
@@ -43,9 +43,10 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 /** Loose RFC-ish check — enough to catch typos and header-injection attempts. */
@@ -68,7 +69,8 @@ function escapeHtml(s) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await requireFounder(request, env))) {
+  const founder = await requireFounder(context);
+  if (!founder) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.DB) {
@@ -145,7 +147,9 @@ export async function onRequest(context) {
     const body = String(b.body == null ? "" : b.body).slice(0, MAX_BODY);
     if (!body.trim()) return json({ ok: false, error: "The message body is empty." }, 422);
 
-    const sentBy = clean(b.sent_by, 80);
+    // "Who clicked send" is taken from the session, not the request body — an
+    // outbound company email must be attributable to a real account.
+    const sentBy = clean(founder.name || founder.email, 80);
 
     // Threading: if this is a reply, quote the original's Message-ID so mail
     // clients keep it in the same conversation.

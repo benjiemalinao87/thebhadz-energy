@@ -31,12 +31,18 @@ A self-contained conversion funnel that deploys to **Cloudflare Pages**, plus th
 founder-only internal CRM and command center.
 
 - `funnel/index.html` — public landing page selling the three ₱99,500 homeowner packages.
-- `funnel/login.html` — founder access gate.
+- `funnel/login.html` — founder sign-in: each founder's own email + password, or the
+  shared team password (which signs in as "Shared team login").
 - `funnel/internal/` — founder command center: dashboard (`index.html`), **Contacts CRM**
-  (`leads.html`), meeting log, principles, and internal copies of the SC docs.
-- `funnel/functions/` — Cloudflare Pages Functions: HMAC-signed founder auth, and the
-  `/api/leads` CRM endpoint (list / update stage / update notes / delete) backed by D1.
-- `funnel/schema.sql` — D1 (SQLite) schema for the leads pipeline.
+  (`leads.html`), meeting log, principles, **Team & access** (`team.html` — accounts +
+  activity log), and internal copies of the SC docs.
+- `funnel/functions/` — Cloudflare Pages Functions: per-founder auth with database-backed
+  sessions and an activity log, plus the `/api/leads` CRM endpoint (list / update stage /
+  update notes / delete) backed by D1. One account per founder;
+  `benjiemalinao87@gmail.com` is the master account that manages logins and sees all
+  activity. Setup and roles: `funnel/README.md` → "Founder access".
+- `funnel/schema.sql` — D1 (SQLite) schema for the leads pipeline, founder accounts,
+  sessions, and the activity log.
 - `funnel/wrangler.toml` — Cloudflare Pages + D1/R2 bindings.
 
 The command center and Contacts table use a dark "monitor / terminal" design system;

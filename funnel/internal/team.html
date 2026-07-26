@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-15 Team &amp; access — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // Query params are carried across so login's ?password=change survives the bounce.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") {
+      var extra = location.search ? "&" + location.search.slice(1) : "";
+      location.replace("/internal/?open=" + m[1].toLowerCase() + extra);
+    }
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/ops-tools.css">
+<link rel="stylesheet" href="assets/operations-redesign.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="wordmark">MACC</span><span class="sub">SOLAR CITY · FOUNDER COMMAND CENTER</span></a></div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="leads.html"><span class="code">CRM</span>Contacts</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="founder-lab.html"><span class="code">SC-08</span>Strategy lab</a>
+      <a href="finance.html"><span class="code">SC-09</span>Finance &amp; runway</a>
+      <a href="install-ops.html"><span class="code">SC-10</span>Install operations</a>
+      <a href="team.html"><span class="code">SC-15</span>Team &amp; access</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>ONE LOGIN PER FOUNDER<br>MASTER ACCOUNT ADMINISTERS</div>
+  </aside>
+
+  <main class="content ops-content ops-page ops-team">
+    <p class="doc-eyebrow">SC-15 · TEAM &amp; ACCESS <span class="rev">· REV A · 2026-07-26</span></p>
+    <h1>Who can get in, and what they did.</h1>
+    <p class="lede">Every founder has their own email and password, and the shared team password still works alongside them. The master account (<span id="team-master-email">benjiemalinao87@gmail.com</span>) creates, edits, disables and deletes accounts, and is the only account that can read the whole activity log.</p>
+
+    <div class="ops-topbar">
+      <span class="ops-status" id="team-status">Loading accounts…</span>
+      <button type="button" class="secondary" id="team-refresh">Refresh</button>
+      <a class="ops-button secondary" href="/api/founder-logout">Log out</a>
+    </div>
+
+    <div class="ops-alert" id="team-must-change" hidden>
+      <strong>Set your own password.</strong>
+      You are signed in with a temporary password that someone else created. Change it below before you carry on — until you do, the person who issued it can sign in as you.
+    </div>
+
+    <div class="ops-alert" id="team-shared-session" hidden>
+      <strong>You are on the shared team login.</strong>
+      Everything you do this session is recorded as “Shared team login”, not under your name, and you cannot manage accounts from here. Sign out and sign in with your own email to get your own trail.
+    </div>
+
+    <div class="ops-alert" id="team-shared-status" hidden>
+      <strong>Shared team password: <span id="team-shared-state">on</span>.</strong>
+      <span id="team-shared-note"></span>
+    </div>
+
+    <section class="ops-metrics" aria-label="Access summary" id="team-metrics" hidden>
+      <div class="ops-metric"><span>Accounts</span><strong id="team-count">0</strong><small>Founder logins that exist</small></div>
+      <div class="ops-metric good"><span>Active</span><strong id="team-active">0</strong><small>Can sign in right now</small></div>
+      <div class="ops-metric warn"><span>Disabled</span><strong id="team-disabled">0</strong><small>Blocked from signing in</small></div>
+      <div class="ops-metric"><span>Open sessions</span><strong id="team-sessions">0</strong><small>Unexpired sign-ins across devices</small></div>
+      <div class="ops-metric"><span>Actions logged (7d)</span><strong id="team-actions">0</strong><small>Recorded changes across all tools</small></div>
+      <div class="ops-metric"><span>Failed sign-ins (7d)</span><strong id="team-failed">0</strong><small>Wrong password or unknown email</small></div>
+    </section>
+
+    <nav class="ops-tabs" aria-label="Access sections" role="tablist">
+      <button type="button" role="tab" aria-selected="true" aria-controls="team-accounts" data-tab="accounts">Accounts</button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="team-activity" data-tab="activity">Activity log</button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="team-me" data-tab="me">My login</button>
+    </nav>
+
+    <!-- ── Accounts (master only) ─────────────────────────────────────────── -->
+    <section class="ops-panel" id="team-accounts" role="tabpanel" data-panel="accounts">
+      <div class="ops-empty" id="team-accounts-locked" hidden>
+        Only the master account can manage founder logins. Your own password is under <strong>My login</strong>.
+      </div>
+
+      <div id="team-accounts-admin" hidden>
+        <div class="ops-section-head">
+          <div>
+            <span class="ops-kicker">CREATE A LOGIN</span>
+            <h2>Add a founder</h2>
+            <p>They sign in with this email. Give them a temporary password over a channel you trust — they must replace it on first sign-in.</p>
+          </div>
+        </div>
+        <form class="ops-form" id="team-create-form">
+          <label>Full name<input name="name" maxlength="80" placeholder="Jethro …" required></label>
+          <label>Email<input name="email" type="email" maxlength="160" placeholder="jethro@macc-inc.com" required></label>
+          <label>Temporary password<input name="password" type="text" minlength="10" maxlength="200" placeholder="At least 10 characters" required></label>
+          <label>Role<select name="role">
+            <option value="founder">Founder — all tools, own activity only</option>
+            <option value="master">Master — also manages accounts and sees all activity</option>
+          </select></label>
+          <div class="ops-form-actions">
+            <button type="submit" id="team-create-submit">Create account</button>
+            <button type="button" class="secondary" id="team-suggest">Suggest a strong password</button>
+            <span class="ops-helper">Written to the activity log as your action.</span>
+          </div>
+        </form>
+
+        <div class="ops-section-head">
+          <div>
+            <span class="ops-kicker">EXISTING LOGINS</span>
+            <h2>Accounts</h2>
+            <p>Disabling or resetting an account signs it out of every device immediately. The shared team login is listed with them — disable it to switch shared access off; its password is the <code>FOUNDER_PASSWORD</code> secret in Cloudflare.</p>
+          </div>
+        </div>
+        <div id="team-user-list"></div>
+      </div>
+    </section>
+
+    <!-- ── Activity log ───────────────────────────────────────────────────── -->
+    <section class="ops-panel" id="team-activity" role="tabpanel" data-panel="activity" hidden>
+      <div class="ops-section-head">
+        <div>
+          <span class="ops-kicker">AUDIT TRAIL</span>
+          <h2>Activity</h2>
+          <p id="team-activity-scope">Every sign-in and every change made through the founder tools, newest first.</p>
+        </div>
+      </div>
+
+      <div class="ops-toolbar">
+        <div class="ops-filter"><label>Founder<select id="team-filter-user"><option value="">Everyone</option></select></label></div>
+        <div class="ops-filter"><label>Action<select id="team-filter-action">
+          <!-- Values are action-name prefixes: "login" also covers login_failed
+               and login_blocked, "users" covers users.create/update/delete. -->
+          <option value="">All actions</option>
+          <option value="login">Sign-ins, including failures</option>
+          <option value="login_failed">Failed sign-ins only</option>
+          <option value="logout">Sign-outs</option>
+          <option value="users">Account admin</option>
+          <option value="password">Password changes</option>
+          <option value="leads">Leads</option>
+          <option value="install-ops">Install operations</option>
+          <option value="finance">Finance</option>
+          <option value="notes">Notes</option>
+          <option value="projects">Project board</option>
+          <option value="mail">Mail</option>
+          <option value="meetings">Meetings</option>
+          <option value="recordings">Recordings</option>
+        </select></label></div>
+        <div class="ops-filter"><label>Period<select id="team-filter-days">
+          <option value="7">Last 7 days</option>
+          <option value="1">Last 24 hours</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="">Everything kept (180 days)</option>
+        </select></label></div>
+        <div class="ops-filter"><label>Search<input id="team-filter-q" type="search" maxlength="80" placeholder="Name, record, path…"></label></div>
+      </div>
+
+      <div id="team-activity-list"></div>
+      <div class="ops-form-actions">
+        <button type="button" class="secondary" id="team-activity-more" hidden>Load older activity</button>
+      </div>
+    </section>
+
+    <!-- ── My login (everyone) ────────────────────────────────────────────── -->
+    <section class="ops-panel" id="team-me" role="tabpanel" data-panel="me" hidden>
+      <div class="ops-section-head">
+        <div>
+          <span class="ops-kicker">MY ACCOUNT</span>
+          <h2 id="team-me-name">—</h2>
+          <p id="team-me-meta">—</p>
+        </div>
+      </div>
+
+      <form class="ops-form" id="team-password-form">
+        <label>Current password<input name="current_password" type="password" autocomplete="current-password" required></label>
+        <label>New password<input name="new_password" type="password" autocomplete="new-password" minlength="10" maxlength="200" placeholder="At least 10 characters" required></label>
+        <label>Repeat new password<input name="confirm_password" type="password" autocomplete="new-password" minlength="10" maxlength="200" required></label>
+        <div class="ops-form-actions">
+          <button type="submit" id="team-password-submit">Change my password</button>
+          <span class="ops-helper">Signs you out of every other device. This browser stays signed in.</span>
+        </div>
+      </form>
+
+      <form class="ops-form" id="team-name-form">
+        <label>Display name<input name="name" maxlength="80" placeholder="How your name appears on notes and the activity log" required></label>
+        <div class="ops-form-actions">
+          <button type="submit" class="secondary" id="team-name-submit">Update my name</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/team.js"></script>
+</html>

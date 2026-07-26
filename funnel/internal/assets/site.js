@@ -18,6 +18,14 @@
     }
   }
 
+  // Own-login management + the activity log, reachable from any page's sidebar.
+  if (nav && !nav.querySelector('a[href$="team.html"]')) {
+    var team = document.createElement("a");
+    team.href = "/internal/team.html";
+    team.innerHTML = '<span class="code">SC-15</span>Team &amp; access';
+    nav.append(team);
+  }
+
   var here = location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll(".nav a").forEach(function (a) {
     var target = a.getAttribute("href").split("/").pop();

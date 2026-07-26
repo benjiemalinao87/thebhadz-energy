@@ -1,5 +1,5 @@
 /** Founder-gated receipt upload/download using the existing private R2 binding. */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const TYPES = {
@@ -14,13 +14,15 @@ function json(body, status = 200) {
   });
 }
 
-async function authorized(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function authorized(context) {
+  return currentUser(context);
 }
 
-export async function onRequest({ request, env }) {
-  if (!(await authorized(request, env))) return json({ ok: false, error: "Not authorized." }, 401);
+export async function onRequest(context) {
+  const { request, env } = context;
+  if (!(await authorized(context))) return json({ ok: false, error: "Not authorized." }, 401);
   if (!env.NOTES_R2) return json({ ok: false, error: "Receipt storage is not configured." }, 500);
 
   if (request.method === "GET") {

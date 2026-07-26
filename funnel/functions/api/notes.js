@@ -10,7 +10,7 @@
  * keys remain valid; new entries may be { key, name, type, size, kind } objects.
  * Every method requires a valid founder session cookie (same auth as /internal).
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const MAX_BODY = 8000;
 const MAX_TITLE = 200;
@@ -24,9 +24,10 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 function validKey(value) {
@@ -59,7 +60,8 @@ function cleanAttachments(attachments) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await requireFounder(request, env))) {
+  const founder = await requireFounder(context);
+  if (!founder) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.DB) {
@@ -81,7 +83,9 @@ export async function onRequest(context) {
   if (method === "POST") {
     let b;
     try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
-    const author = String(b.author || "").slice(0, MAX_AUTHOR).trim();
+    // Authorship comes from the session now that every founder has their own login;
+    // a client-supplied name is only a fallback for older callers with no account name.
+    const author = (founder.name || String(b.author || "")).slice(0, MAX_AUTHOR).trim();
     const title = String(b.title || "").slice(0, MAX_TITLE).trim();
     const body = String(b.body || "").slice(0, MAX_BODY);
     const images = cleanAttachments(b.images === undefined ? [] : b.images);

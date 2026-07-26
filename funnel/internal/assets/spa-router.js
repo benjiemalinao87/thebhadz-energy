@@ -28,7 +28,10 @@
   var injected = []; // Per-view styles/scripts to remove before the next swap.
   var currentPath = location.pathname;
   var routeStatus = document.getElementById("cc-route-status");
-  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "projects", "finance"];
+  // Pages whose <main> is an ops workspace (.ops-content) rather than a document:
+  // the shell swaps to the light "operations" ground for these, which their styling
+  // assumes. Miss one and its text renders dark-on-dark in light mode.
+  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "projects", "finance", "team"];
 
   // Every internal page has two spellings: the file that actually exists
   // (/internal/leads.html) and the canonical address we show (/internal/leads).

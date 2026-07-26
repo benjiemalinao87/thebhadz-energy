@@ -2,7 +2,7 @@
  * /api/install-ops — founder-gated SC-10 installation, costing and crew records.
  * Linked received payments and paid/committed costs are synchronized to SC-09.
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const STAGES = ["survey", "quoted", "approved", "deposit_paid", "design", "permits", "procurement", "scheduled", "installing", "testing", "energized", "handover", "warranty", "cancelled"];
 const COST_STATUSES = ["planned", "committed", "paid"];
@@ -20,9 +20,10 @@ function json(body, status = 200) {
   });
 }
 
-async function authorized(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function authorized(context) {
+  return currentUser(context);
 }
 
 function text(value, max = 160) { return String(value || "").trim().slice(0, max); }
@@ -149,8 +150,9 @@ function stageNeedsCompliance(stage) {
   return ["deposit_paid", "design", "permits", "procurement", "scheduled", "installing", "testing", "energized", "handover", "warranty"].includes(stage);
 }
 
-export async function onRequest({ request, env }) {
-  if (!(await authorized(request, env))) return json({ ok: false, error: "Not authorized." }, 401);
+export async function onRequest(context) {
+  const { request, env } = context;
+  if (!(await authorized(context))) return json({ ok: false, error: "Not authorized." }, 401);
   if (!env.DB) return json({ ok: false, error: "Database not configured (bind D1 as DB)." }, 500);
 
   if (request.method === "GET") {

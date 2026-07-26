@@ -4,7 +4,7 @@
  * GET -> { ok, state, updated_at }
  * PUT { state } -> replace the shared state document
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const DOCUMENT_ID = "founder-strategy-v1";
 const MAX_STATE_BYTES = 64 * 1024;
@@ -16,14 +16,15 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 export async function onRequest(context) {
   const { request, env } = context;
-  if (!(await requireFounder(request, env))) {
+  if (!(await requireFounder(context))) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.DB) {

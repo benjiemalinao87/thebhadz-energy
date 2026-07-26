@@ -5,7 +5,7 @@
  * common business documents, stores them in private R2, and streams/downloads
  * them only after founder authentication.
  */
-import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
+import { currentUser } from "../_auth.js";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 const TYPES = {
@@ -33,9 +33,10 @@ function json(body, status = 200) {
   });
 }
 
-async function requireFounder(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
-  return env.AUTH_SECRET ? verifyToken(token, env.AUTH_SECRET) : false;
+// The founder behind this request, or null. functions/api/_middleware.js already
+// resolved (and logged) them; currentUser reuses that same lookup.
+function requireFounder(context) {
+  return currentUser(context);
 }
 
 function safeFilename(value) {
@@ -62,7 +63,7 @@ function classify(file) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await requireFounder(request, env))) {
+  if (!(await requireFounder(context))) {
     return json({ ok: false, error: "Not authorized." }, 401);
   }
   if (!env.NOTES_R2) {
