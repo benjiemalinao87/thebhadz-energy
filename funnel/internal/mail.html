@@ -21,7 +21,7 @@
 </script>
 <style>
   /* ============================================================
-     MACC Mailbox — shared company inbox for hello@ / main@maccsyseng.com
+     MACC Mailbox — shared company inbox; sends as official@ / alternate@macc-inc.com
      Command-center "monitor" theme (matches /internal dashboard).
      Backed by /api/mail (D1 in; Email Sending REST API out).
      ============================================================ */
@@ -284,8 +284,8 @@
       <div class="field">
         <label for="c-from">From</label>
         <select id="c-from">
-          <option value="main@maccsyseng.com">main@maccsyseng.com</option>
-          <option value="hello@maccsyseng.com">hello@maccsyseng.com</option>
+          <option value="official@macc-inc.com">official@macc-inc.com</option>
+          <option value="alternate@macc-inc.com">alternate@macc-inc.com</option>
         </select>
       </div>
       <div class="field">
@@ -414,8 +414,8 @@
     });
     if(!shown.length){
       var msg=emails.length?"Nothing matches that search."
-             :box==="out"?"Nothing sent yet. Use Compose to send from hello@ or main@maccsyseng.com."
-             :"No mail yet. Messages to hello@ or main@maccsyseng.com will land here.";
+             :box==="out"?"Nothing sent yet. Use Compose to send from official@ or alternate@macc-inc.com."
+             :"No mail yet. Messages to your company addresses will land here.";
       list.innerHTML='<div class="empty">'+msg+'</div>';
       return;
     }

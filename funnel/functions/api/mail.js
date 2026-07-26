@@ -1,5 +1,9 @@
 /**
- * /api/mail — founder-gated company mailbox for hello@ / main@maccsyseng.com.
+ * /api/mail — founder-gated company mailbox.
+ *
+ * Receives mail for the company addresses (routed in by the hello-fanout Email
+ * Worker) and sends outbound as official@ / alternate@macc-inc.com. Sending as
+ * those requires Email Sending enabled on macc-inc.com (DKIM published).
  *
  *   GET    ?id=N                      → { ok, email }        (single, marks it read)
  *   GET    ?box=in|out|all            → { ok, emails: [...] } (list, newest first, no bodies)
@@ -16,15 +20,17 @@
  *
  * Required env (set as Pages secrets):
  *   CF_API_TOKEN  — API token with "Email Sending: Edit" on this account.
- *   CF_ACCOUNT_ID — the Cloudflare account id that owns maccsyseng.com.
+ *   CF_ACCOUNT_ID — the Cloudflare account id that owns the sending domain
+ *                   (macc-inc.com — same account as maccsyseng.com).
  * Plus the existing AUTH_SECRET (founder session) and DB (D1) bindings.
  */
 import { COOKIE_NAME, getCookie, verifyToken } from "../_auth.js";
 
 // Only addresses we actually own may appear in From — otherwise a founder could
-// send as anyone and torch the domain's reputation.
-const SENDERS = ["hello@maccsyseng.com", "main@maccsyseng.com"];
-const DEFAULT_SENDER = "main@maccsyseng.com";
+// send as anyone and torch the domain's reputation. These must be on a domain
+// that has Email Sending enabled (DKIM published) or the send API rejects them.
+const SENDERS = ["official@macc-inc.com", "alternate@macc-inc.com"];
+const DEFAULT_SENDER = "official@macc-inc.com";
 
 const MAX_SUBJECT = 300;
 const MAX_BODY = 50000;
@@ -159,7 +165,7 @@ export async function onRequest(context) {
     const payload = {
       to,
       // REST API uses `address` in the from object (the Workers binding uses `email`).
-      from: { address: from, name: "MACC Systems & Engineering" },
+      from: { address: from, name: "MACC Inc." },
       subject,
       text: body,
       html: `<div style="white-space:pre-wrap;font-family:system-ui,sans-serif">${escapeHtml(body)}</div>`,
