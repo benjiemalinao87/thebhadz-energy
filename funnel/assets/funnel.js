@@ -213,7 +213,7 @@
     document.getElementById("calc-5yr").textContent = "~" + peso(r.five);
     var backupLine = (prio !== "save") ? " Plus lights, fans and WiFi through a brownout." : "";
     document.getElementById("calc-pkg").innerHTML =
-      "Best fit: <b>" + r.pkg.code + "</b> — " + r.pkg.tag + ". Fixed ₱99,500, installed." + backupLine;
+      "Best fit: <b>" + r.pkg.code + "</b> — " + r.pkg.tag + ". Request a free estimate for your installed price." + backupLine;
 
     // pre-fill the lead form so the quote request carries the estimate context
     setSelect("f-bill", billRange(r.bill));

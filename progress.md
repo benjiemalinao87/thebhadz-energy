@@ -1,5 +1,11 @@
 # Progress
 
+## Funnel packages: hide list price (2026-07-27) — done
+- Package cards no longer show FROM ₱99,500; show "Free estimate" + system meta
+- CTA on each card: "Request free estimate" → `#quote`
+- Calculator copy no longer prints fixed ₱99,500; still uses internal model for savings math
+- Files: `funnel/index.html`, `funnel/assets/funnel.js`, `funnel/assets/funnel.css`
+
 ## Command Center sidebar auto-collapse (2026-07-27) — done
 - Desktop icon rail (68px); hover/focus expands; pin keeps open
 - `funnel/internal/assets/sidebar-collapse.js` + CSS in `operations-redesign.css`

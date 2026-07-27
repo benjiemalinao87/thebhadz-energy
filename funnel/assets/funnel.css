@@ -575,6 +575,10 @@ section { padding: 56px 0; }
   line-height: 1;
   letter-spacing: -0.04em;
 }
+.estimate-row b {
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
 .price-row small {
   margin-top: 4px;
   color: var(--muted);

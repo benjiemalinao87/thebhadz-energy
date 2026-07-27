@@ -1,5 +1,13 @@
 # Lesson Learn
 
+## Funnel packages: price behind free estimate
+
+**Fixed:** 2026-07-27
+
+**What worked:** Replace the `price-row` list price with estimate-led copy ("Custom-priced for your home" / "Free estimate") and point each card CTA at `#quote` with "Request free estimate". Keep package meta (`Installed · …`) so cards still differentiate. Soften calculator result copy the same way so the landing page does not re-leak the list price.
+
+**Do not:** Leave "Fixed ₱99,500" in `funnel.js` calculator output when cards hide price — visitors hit both. Internal Mission / quote-builder can still use ₱99,500; public package cards should not contradict the estimate-first CTA.
+
 ## Command Center: sidebar auto-collapse as icon rail
 
 **Fixed:** 2026-07-27
