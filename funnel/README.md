@@ -360,6 +360,12 @@ What one click does, in this order, and why the order matters:
 4. **Only then** move the contact to **Quote Sent**, set a follow-up due in 2 days owned by
    the sending founder, and write a `quotes` row.
 
+Every send also writes an `emails` row, so a quotation appears in the Mailbox under **Sent**
+next to anything composed by hand — otherwise "Sent" would quietly mean "sent from the Compose
+box" and nobody could see what a customer was actually told. That row is written whether or not
+delivery succeeded (a failed send you can see beats a silent one), carries both bodies, and
+lists the PDF under attachments.
+
 A failed send returns 502 and leaves the contact's stage untouched — *Quote Sent* has to mean
 a quote was sent (Founder OS §1.4). The endpoint also re-checks the Founder-OS invariants that
 the UI enforces on screen, because a UI check is not a control: the compliance checklist must

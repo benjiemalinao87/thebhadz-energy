@@ -223,6 +223,25 @@ export async function onRequestPost(context) {
     sendError = String(err && err.message);
   }
 
+  // Every outbound company email belongs in the mailbox, whichever endpoint sent
+  // it — otherwise "Sent" quietly means "sent from the Compose box" and a founder
+  // cannot see what a customer was actually told. Written either way, following
+  // the rule in /api/mail: a failed send you can see beats a silent one.
+  const attachmentMeta = JSON.stringify([{
+    name: `MACC-quotation-${quote.quoteNo}.pdf`,
+    type: "application/pdf",
+    size: pdf.length,
+  }]);
+  await env.DB.prepare(
+    `INSERT INTO emails
+       (direction, mailbox, sender, recipient, subject, body_text, body_html,
+        attachments, message_id, in_reply_to, sent_by, error, read_at, created_at)
+     VALUES ('out', ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?)`
+  ).bind(
+    SENDER, SENDER, email, subject, text, html, attachmentMeta,
+    clean(founder.name || founder.email, 80), sendError, now, now
+  ).run();
+
   if (sendError) {
     // The stage is NOT advanced. "Quote sent" must mean a quote was sent.
     return json({ ok: false, leadId: lead.id, createdContact, error: sendError }, 502);
