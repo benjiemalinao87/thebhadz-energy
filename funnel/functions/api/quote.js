@@ -182,7 +182,16 @@ export async function onRequestPost(context) {
     `Your solar quotation ${quote.quoteNo} — ${quote.packageLabel || "MACC"} — ${quote.kwp ? quote.kwp.toFixed(2) + " kWp" : ""}`.trim(),
     300
   );
-  const { text, html } = composeEmail({ name, quote, preparedBy: quote.preparedBy });
+  // The opening line names where they live, which is the difference between a
+  // circular and a quote. Take the barangay off the front of the site address —
+  // if the address is not in that shape, the line simply drops the location
+  // rather than guessing at one.
+  const siteLabel = clean(customer.address, 200).split(",")[0].replace(/^\s*(brgy\.?|barangay)\s+/i, "").trim();
+  const { text, html } = composeEmail({
+    name,
+    quote: { ...quote, siteLabel: siteLabel.length <= 40 ? siteLabel : "" },
+    preparedBy: quote.preparedBy,
+  });
 
   const payload = {
     to: [{ address: email, name }],
@@ -257,76 +266,278 @@ export async function onRequestPost(context) {
     bytes: pdf.length,
   });
 }
-
-/**
- * The covering email. It carries the same truths as the sheet, because a
- * homeowner may read the mail and never open the attachment: what the price is,
- * what it saves, whether it backs up a brownout, and whether the number is firm.
+/* ── the covering email ─────────────────────────────────────────────────────
+ *
+ * A homeowner may read the mail and never open the attachment, so it carries
+ * the same truths as the sheet: what it saves, what it costs, whether it backs
+ * up a brownout, and whether the number is firm.
+ *
+ * Written as tables with inline styles, which is not a stylistic choice —
+ * Outlook renders through Word, which has no flexbox, no grid and no `gap`, and
+ * Gmail drops much of a <style> block. Anything structural therefore has to be
+ * a <table> and anything visual has to be on the element. The one <style> block
+ * present carries the dark-mode variant only, which is exactly the part that is
+ * allowed to be ignored: Apple Mail and Outlook.com honour it, Gmail on Android
+ * and iOS force their own inversion regardless.
+ *
+ * Layout is one column of paper — hairline rules and space, no filled panels.
+ * That is what makes the two disclosures, which DO carry colour, impossible to
+ * skim past. They are also the reason this design cannot be "tidied": the
+ * brownout statement (§1.6) and the indicative-price note (§7) are load-bearing.
  */
+
+// Brand ink, from the logo. Repeated as literals because email has no variables.
+const C = {
+  paper:   "#FFFFFF",
+  desk:    "#EEF1F5",
+  ink:     "#0A2540",
+  ink2:    "#5B6B7C",
+  ink3:    "#66788A",   // carries 10-11px text; darkened until it clears AA on white
+  rule:    "#E3E8EE",
+  ruleFirm:"#C9D3DE",
+  accent:  "#0D4B8C",
+  sun:     "#B4711A",
+  caution: "#A63A2B",
+};
+
+const LOGO = "https://www.maccsystemsandengineering.com/assets/img/macc-logo.png";
+const FACE = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif";
+
+const pesoInt = (n) => "&#8369;" + Math.round(Number(n) || 0).toLocaleString("en-PH");
+
+/** A labelled hairline row in the spec list. */
+function specRow(label, value, last) {
+  return (
+    `<tr><td style="padding:11px 0;${last ? "" : `border-bottom:1px solid ${C.rule};`}font-family:${FACE}">` +
+      `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>` +
+        `<td align="left" style="font-family:${FACE};font-size:11px;font-weight:600;letter-spacing:.12em;` +
+          `text-transform:uppercase;color:${C.ink3};white-space:nowrap">${label}</td>` +
+        `<td align="right" style="font-family:${FACE};font-size:15px;color:${C.ink};padding-left:16px">${value}</td>` +
+      `</tr></table></td></tr>`
+  );
+}
+
+/** A disclosure: a 2px coloured rule and text. Never a filled box, never removable. */
+function note(heading, bodyHtml, colour) {
+  return (
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0"><tr>` +
+      `<td width="2" bgcolor="${colour}" style="width:2px;background:${colour};font-size:0;line-height:0">&nbsp;</td>` +
+      `<td style="padding:0 0 0 18px">` +
+        `<div style="font-family:${FACE};font-size:11px;font-weight:700;letter-spacing:.13em;` +
+          `text-transform:uppercase;color:${colour === C.caution ? C.caution : C.ink};padding-bottom:5px">${heading}</div>` +
+        `<div style="font-family:${FACE};font-size:14.5px;line-height:1.62;color:${C.ink2}">${bodyHtml}</div>` +
+      `</td>` +
+    `</tr></table>`
+  );
+}
+
+/** One step of the sequence. Numbered because it genuinely is one, in order. */
+function stepRow(n, text, last) {
+  const dot = text.indexOf(". ");
+  const lead = dot > 0 ? text.slice(0, dot + 1) : text;
+  const rest = dot > 0 ? text.slice(dot + 1) : "";
+  return (
+    `<tr><td style="padding:11px 0;${last ? "" : `border-bottom:1px solid ${C.rule};`}">` +
+      `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>` +
+        `<td valign="top" width="24" style="width:24px;font-family:${FACE};font-size:12.5px;font-weight:600;` +
+          `color:${C.ink3};padding-top:2px">${n}</td>` +
+        `<td style="font-family:${FACE};font-size:15px;line-height:1.5;color:${C.ink2}">` +
+          `<b style="color:${C.ink};font-weight:600">${escapeHtml(lead)}</b>${escapeHtml(rest)}</td>` +
+      `</tr></table></td></tr>`
+  );
+}
+
 export function composeEmail({ name, quote, preparedBy }) {
-  const price = "PHP " + Math.round(quote.customerPrice || 0).toLocaleString("en-PH");
-  const saved = "PHP " + Math.round(quote.savedPerMonth || 0).toLocaleString("en-PH");
-  const first = String(name).split(/\s+/)[0];
+  const first = escapeHtml(String(name).split(/\s+/)[0] || "there");
+  const price = pesoInt(quote.customerPrice);
+  const saved = pesoInt(quote.savedPerMonth);
+  const pad = (inner) => `<tr><td style="padding:0 44px">${inner}</td></tr>`;
+  const gap = (h) => `<tr><td style="font-size:0;line-height:0;height:${h}px">&nbsp;</td></tr>`;
 
-  const lines = [
-    `Hi ${first},`,
+  // The opening line states the saving as a share of THEIR bill. Rounded DOWN to
+  // the nearest 5 and capped: this is the first sentence a scam-wary homeowner
+  // reads, and an overstated share is the cheapest possible way to lose them.
+  let share = 0;
+  if (quote.bill > 0 && quote.savedPerMonth > 0) {
+    share = Math.min(90, Math.floor((quote.savedPerMonth / quote.bill) * 20) * 5);
+  }
+  const where = String(quote.siteLabel || "").trim();
+  const thesis = share >= 10
+    ? `Your roof${where ? " in " + escapeHtml(where) : ""} can carry about ${share}% of what you pay BILECO each month.`
+    : `Here is what solar would do for your home${where ? " in " + escapeHtml(where) : ""}.`;
+
+  const payback = quote.paybackYears > 0
+    ? `<span style="color:${C.ink3};padding:0 6px">&middot;</span>pays back in about ${quote.paybackYears.toFixed(1)} years`
+    : "";
+
+  /* ---------- HTML ---------- */
+  const html =
+`<!--[if mso]><style>body,table,td{font-family:Arial,Helvetica,sans-serif !important}</style><![endif]-->
+<style>
+  :root{color-scheme:light dark;supported-color-schemes:light dark}
+  @media (prefers-color-scheme:dark){
+    .m-desk{background:#0B1219 !important}
+    .m-paper{background:#111A24 !important}
+    .m-ink,.m-ink *{color:#E8EEF4 !important}
+    .m-ink2,.m-ink2 *{color:#9DAEBE !important}
+    .m-ink3{color:#7C90A4 !important}
+    .m-sun{color:#E2A550 !important}
+    .m-rule{border-color:#223040 !important}
+    .m-logo-light{display:none !important}
+    .m-logo-dark{display:block !important}
+  }
+  @media only screen and (max-width:620px){
+    .m-pad{padding-left:24px !important;padding-right:24px !important}
+    .m-figure{font-size:44px !important}
+    .m-thesis{font-size:21px !important}
+  }
+</style>
+<table role="presentation" class="m-desk" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${C.desk};margin:0;padding:0">
+<tr><td align="center" style="padding:28px 12px 40px">
+<table role="presentation" class="m-paper" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;max-width:600px;background:${C.paper};border-radius:4px">
+
+${gap(38)}
+${pad(
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="m-rule" style="border-bottom:1px solid ${C.rule}"><tr>` +
+    `<td align="left" valign="bottom" style="padding-bottom:18px">` +
+      `<img class="m-logo-light" src="${LOGO}" width="92" height="34" alt="MACC Systems &amp; Engineering Inc." ` +
+        `style="display:block;width:92px;height:34px;border:0;outline:none;text-decoration:none">` +
+    `</td>` +
+    `<td align="right" valign="bottom" style="padding-bottom:18px;font-family:${FACE};font-size:11px;` +
+      `line-height:1.5;letter-spacing:.04em;color:${C.ink3};white-space:nowrap" class="m-ink3">` +
+      `QUOTATION ${escapeHtml(quote.quoteNo)}<br>Valid until ${escapeHtml(quote.validUntil)}` +
+    `</td>` +
+  `</tr></table>`
+)}
+
+${gap(30)}
+${pad(`<div class="m-ink" style="font-family:${FACE};font-size:17px;color:${C.ink}">Hi ${first},</div>`)}
+${gap(14)}
+${pad(
+  `<div class="m-thesis m-ink" style="font-family:${FACE};font-size:26px;line-height:1.3;letter-spacing:-.015em;` +
+  `font-weight:600;color:${C.ink}">${thesis}</div>`
+)}
+
+${gap(26)}
+${pad(
+  `<div class="m-figure m-sun" style="font-family:${FACE};font-size:58px;line-height:1;font-weight:600;` +
+    `letter-spacing:-.035em;color:${C.sun}">${saved}</div>` +
+  `<div class="m-ink2" style="font-family:${FACE};font-size:14px;color:${C.ink2};padding-top:8px">` +
+    `estimated saving every month${quote.bill > 0 ? ", on a " + pesoInt(quote.bill) + " bill" : ""}</div>` +
+  `<div class="m-ink" style="font-family:${FACE};font-size:15.5px;color:${C.ink};padding-top:16px">` +
+    `<b style="font-weight:600">${price}</b> all-in, installed${payback}</div>`
+)}
+
+${gap(30)}
+${pad(
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="m-rule" ` +
+    `style="border-top:1px solid ${C.rule}">` +
+    specRow("Package", escapeHtml(quote.packageLabel || "&mdash;")) +
+    specRow("System", (quote.kwp ? quote.kwp.toFixed(2) + " kWp" : "&mdash;") + " &middot; " + escapeHtml(quote.panelSummary || "")) +
+    specRow("Battery", escapeHtml(quote.batteryLabel || "None")) +
+    specRow("Prepared by", escapeHtml(preparedBy || ""), true) +
+  `</table>`
+)}
+
+${quote.brownout ? gap(26) + pad(note("During a brownout", escapeHtml(quote.brownout), C.caution)) : ""}
+${quote.indicative ? gap(26) + pad(note("About this price", escapeHtml(quote.indicative), C.ruleFirm)) : ""}
+
+${gap(34)}
+${pad(
+  `<div class="m-ink3" style="font-family:${FACE};font-size:11px;font-weight:600;letter-spacing:.14em;` +
+    `text-transform:uppercase;color:${C.ink3};padding-bottom:4px">What happens next</div>` +
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">` +
+    (quote.steps || []).map((s, i, a) => stepRow(i + 1, s, i === a.length - 1)).join("") +
+  `</table>`
+)}
+
+${gap(32)}
+${pad(
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>` +
+    `<td align="center" bgcolor="${C.accent}" style="background:${C.accent};border-radius:10px">` +
+      `<a href="mailto:${SENDER}?subject=${encodeURIComponent("Site survey - " + quote.quoteNo)}" ` +
+        `style="display:block;padding:16px 24px;font-family:${FACE};font-size:16px;font-weight:600;` +
+        `color:#FFFFFF;text-decoration:none;border-radius:10px">Confirm my free site survey</a>` +
+    `</td></tr></table>` +
+  `<div class="m-ink2" style="font-family:${FACE};font-size:13.5px;color:${C.ink2};text-align:center;padding-top:12px">` +
+    `Or simply reply to this email.</div>`
+)}
+
+${gap(26)}
+${pad(
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="m-rule" ` +
+    `style="border:1px solid ${C.rule};border-radius:8px"><tr>` +
+    `<td style="padding:13px 16px;font-family:${FACE};font-size:13.5px;line-height:1.5;color:${C.ink2}" class="m-ink2">` +
+      `<b style="color:${C.ink};font-weight:600">Your full quotation is attached as a PDF.</b><br>` +
+      `Complete bill of materials, warranties and terms.</td>` +
+  `</tr></table>`
+)}
+
+${gap(30)}
+${pad(
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="m-rule" ` +
+    `style="border-top:1px solid ${C.rule}"><tr><td style="padding-top:22px;font-family:${FACE};font-size:14px;line-height:1.62">` +
+    `<span class="m-ink" style="color:${C.ink};font-weight:600">${escapeHtml(preparedBy || "")}</span><br>` +
+    `<span class="m-ink" style="color:${C.ink}">MACC Systems &amp; Engineering Inc.</span><br>` +
+    `<span class="m-ink3" style="color:${C.ink3}">Biliran Province, Philippines</span>` +
+    `<div class="m-ink3" style="font-family:${FACE};font-size:11.5px;line-height:1.55;color:${C.ink3};padding-top:12px">` +
+      `No deposit is due until the permit, licensed-electrician sign-off and net-metering checklist on your ` +
+      `quotation are complete. This quotation was prepared solely for you.</div>` +
+  `</td></tr></table>`
+)}
+${gap(36)}
+
+</table>
+</td></tr></table>`;
+
+  /* ---------- plain text ----------
+   * Not a fallback nobody sees: some clients show it, and every serious spam
+   * filter reads it. It carries the same disclosures in the same order. */
+  const plain = [
+    `Hi ${String(name).split(/\s+/)[0] || "there"},`,
     "",
-    `Thank you for your time. Your quotation is attached as a PDF — quote number ${quote.quoteNo}, valid until ${quote.validUntil}.`,
+    thesisPlain(thesis),
     "",
-    `The short version:`,
-    `  Package:        ${quote.packageLabel}`,
-    `  System size:    ${quote.kwp ? quote.kwp.toFixed(2) + " kWp" : "—"} (${quote.panelSummary})`,
-    `  All-in price:   ${price}, installed`,
-    `  Est. savings:   ${saved} per month (${quote.savingsBasis})`,
-    `  Battery:        ${quote.batteryLabel}`,
+    `${plainPeso(quote.savedPerMonth)} estimated saving every month` +
+      (quote.bill > 0 ? `, on a ${plainPeso(quote.bill)} bill.` : "."),
+    `${plainPeso(quote.customerPrice)} all-in, installed` +
+      (quote.paybackYears > 0 ? ` - pays back in about ${quote.paybackYears.toFixed(1)} years.` : "."),
+    "",
+    `Package      ${quote.packageLabel}`,
+    `System       ${quote.kwp ? quote.kwp.toFixed(2) + " kWp" : "-"} - ${quote.panelSummary}`,
+    `Battery      ${quote.batteryLabel}`,
+    `Quotation    ${quote.quoteNo}, valid until ${quote.validUntil}`,
   ];
-
-  if (quote.brownout) lines.push("", "Please read this part before anything else:", quote.brownout);
-  if (quote.indicative) lines.push("", "About the price:", quote.indicative);
-
-  lines.push(
+  if (quote.brownout) plain.push("", "DURING A BROWNOUT", quote.brownout);
+  if (quote.indicative) plain.push("", "ABOUT THIS PRICE", quote.indicative);
+  plain.push(
     "",
-    "What happens next:",
-    ...quote.steps.map((s, i) => `  ${i + 1}. ${s}`),
+    "WHAT HAPPENS NEXT",
+    ...(quote.steps || []).map((s, i) => `  ${i + 1}. ${s}`),
     "",
-    "Before any deposit is accepted we complete the permit, licensed-electrician sign-off and",
-    "net-metering checklist printed on the quotation. Nothing is due from you until then.",
+    "Reply to this email to confirm your free site survey.",
     "",
-    "Just reply to this email if anything is unclear, or if you would like the free site survey booked.",
+    "Your full quotation is attached as a PDF - complete bill of materials,",
+    "warranties and terms.",
     "",
-    preparedBy || "MACC Systems & Engineering Inc.",
+    "No deposit is due until the permit, licensed-electrician sign-off and",
+    "net-metering checklist on your quotation are complete.",
+    "",
+    preparedBy || "",
     "MACC Systems & Engineering Inc.",
     "Biliran Province, Philippines",
   );
 
-  const text = lines.join("\n");
-  const html =
-    `<div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.55;color:#14303a;max-width:640px">` +
-    `<p>Hi ${escapeHtml(first)},</p>` +
-    `<p>Thank you for your time. Your quotation is attached as a PDF &mdash; quote number <b>${escapeHtml(quote.quoteNo)}</b>, valid until ${escapeHtml(quote.validUntil)}.</p>` +
-    `<table cellpadding="6" style="border-collapse:collapse;margin:18px 0;font-size:14px">` +
-    [
-      ["Package", quote.packageLabel],
-      ["System size", (quote.kwp ? quote.kwp.toFixed(2) + " kWp" : "—") + " (" + quote.panelSummary + ")"],
-      ["All-in price", "<b>" + price + "</b>, installed"],
-      ["Est. savings", saved + " per month (" + quote.savingsBasis + ")"],
-      ["Battery", quote.batteryLabel],
-    ].map(([k, v]) =>
-      `<tr><td style="border:1px solid #e4e1d6;color:#47636e">${escapeHtml(k)}</td>` +
-      `<td style="border:1px solid #e4e1d6">${k === "All-in price" ? v : escapeHtml(String(v))}</td></tr>`
-    ).join("") +
-    `</table>` +
-    (quote.brownout
-      ? `<p style="border-left:4px solid #b5372b;padding:8px 12px;background:#fff0ed"><b>Please read this before anything else:</b><br>${escapeHtml(quote.brownout)}</p>`
-      : "") +
-    (quote.indicative
-      ? `<p style="border-left:4px solid #b87a0a;padding:8px 12px;background:#fbf1dc"><b>About the price:</b><br>${escapeHtml(quote.indicative)}</p>`
-      : "") +
-    `<p><b>What happens next</b></p><ol>${quote.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol>` +
-    `<p style="color:#47636e;font-size:13.5px">Before any deposit is accepted we complete the permit, licensed-electrician sign-off and net-metering checklist printed on the quotation. Nothing is due from you until then.</p>` +
-    `<p>Just reply to this email if anything is unclear, or if you would like the free site survey booked.</p>` +
-    `<p style="margin-top:22px">${escapeHtml(preparedBy || "")}<br><b>MACC Systems &amp; Engineering Inc.</b><br>` +
-    `<span style="color:#7e929b;font-size:13px">Biliran Province, Philippines</span></p></div>`;
-
-  return { text, html };
+  return { text: plain.join("\n"), html };
 }
+
+/** Undo the HTML entities used in the display copy, for the text/plain part. */
+function thesisPlain(s) {
+  return String(s)
+    .replace(/&#8369;/g, "PHP ").replace(/&middot;/g, "-").replace(/&mdash;/g, "-")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)));
+}
+
+const plainPeso = (n) => "PHP " + Math.round(Number(n) || 0).toLocaleString("en-PH");

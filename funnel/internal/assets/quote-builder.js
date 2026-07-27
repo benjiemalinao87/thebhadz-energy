@@ -814,6 +814,10 @@
         panelSummary: m.panels + " x " + m.panel.watts + "W panels",
         customerPrice: m.customerPrice,
         savedPerMonth: m.savedPerMonth,
+        // The covering email states the saving as a share of THEIR bill, so it needs
+        // the bill itself — a peso figure with nothing to compare it to means little.
+        bill: m.bill,
+        paybackYears: m.paybackYears,
         savingsBasis: "~" + Math.round(m.offsetKwh) + " kWh/mo at PHP " + m.tariff.toFixed(2) + "/kWh",
         batteryLabel: m.batteryKwh > 0 ? m.batteryKwh.toFixed(1) + " kWh" : "None",
         batteryNote: m.batteryKwh > 0 ? m.battery.label : "Daytime self-consumption",
