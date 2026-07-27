@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MACC Product Capture</title>
+<link rel="stylesheet" href="assets/ui.css">
+</head>
+<body class="popup">
+<header>
+  <img src="icons/icon32.png" alt="">
+  <div><strong>Product Capture</strong><span>page → Google Sheet</span></div>
+  <button id="openOptions" class="icon-btn" title="Settings" type="button">⚙</button>
+</header>
+<div id="srcline" class="srcline">Reading page…</div>
+<div id="warn" class="warn" hidden></div>
+<form id="form" autocomplete="off">
+  <label class="full">Product<input id="product" placeholder="Product name"></label>
+  <label>Brand name<input id="brand"></label>
+  <label>Cost<input id="cost" placeholder="e.g. US $28.50–32.00 / pc"></label>
+  <label>Currency<input id="currency" placeholder="USD / PHP / CNY"></label>
+  <label>MOQ<input id="moq" placeholder="Min. order"></label>
+  <label>Supplier / Seller<input id="supplier"></label>
+  <label>Location<input id="location" placeholder="City, Country"></label>
+  <label class="full">Description<textarea id="description" rows="3"></textarea></label>
+  <label class="full">Other info<textarea id="other" rows="2" placeholder="Auto-collected extras (MOQ, ratings, group name…)"></textarea></label>
+  <label class="full">Notes<textarea id="notes" rows="2" placeholder="Your notes — why it matters, next step…"></textarea></label>
+  <label class="full">Page URL<input id="url" spellcheck="false"></label>
+  <input type="hidden" id="image">
+</form>
+<div class="actions">
+  <button id="save" class="primary" type="button">Save to Sheet</button>
+  <button id="copy" type="button" title="Copy as a tab-separated row you can paste straight into a sheet">Copy row</button>
+  <button id="reextract" type="button" title="Clear the form and re-read the page">↻</button>
+</div>
+<div id="status" class="status"></div>
+<div id="queueRow" class="queue" hidden>
+  <span id="queueMsg"></span>
+  <button id="retry" type="button">Retry queued</button>
+</div>
+<button id="openOptions2" class="linklike" type="button" hidden>Open settings</button>
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MACC Product Capture — Settings</title>
+<link rel="stylesheet" href="assets/ui.css">
+</head>
+<body class="options">
+<header>
+  <img src="icons/icon32.png" alt="">
+  <div><strong>Product Capture — Settings</strong><span>MACC sourcing → Google Sheet</span></div>
+</header>
+<main>
+  <label>Apps Script Web App URL
+    <input id="webhookUrl" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">
+    <span class="hint">From your Google Sheet: Extensions → Apps Script → Deploy → Web app (Execute as: Me, Who has access: Anyone). Full steps below and in README.md.</span>
+  </label>
+  <label>Shared secret (optional)
+    <input id="secret" placeholder="Leave empty unless you set SECRET in Code.gs" spellcheck="false">
+  </label>
+  <div class="row">
+    <button id="saveBtn" class="primary" type="button">Save settings</button>
+    <button id="testBtn" type="button">Send test row</button>
+    <span id="status" class="status"></span>
+  </div>
+
+  <h2>Offline queue</h2>
+  <div class="row">
+    <span id="queueMsg" class="hint"></span>
+    <button id="retryBtn" type="button">Retry now</button>
+    <button id="clearBtn" type="button">Clear queue</button>
+  </div>
+
+  <h2>Quick setup recap</h2>
+  <ol>
+    <li>Create (or open) the team Google Sheet.</li>
+    <li>In the sheet: <strong>Extensions → Apps Script</strong>, delete the placeholder code, paste the contents of <code>apps-script/Code.gs</code> from this extension’s folder, and save.</li>
+    <li><strong>Deploy → New deployment → Web app</strong> → Execute as <strong>Me</strong> → Who has access <strong>Anyone</strong> → Deploy, then authorize when Google asks.</li>
+    <li>Copy the <code>/exec</code> URL into the field above, save, then click <strong>Send test row</strong> — a TEST row should appear in the sheet’s <code>Products</code> tab.</li>
+    <li>Any time you edit Code.gs later: <strong>Deploy → Manage deployments → ✏️ → Version: New version</strong>. The old URL keeps serving old code until you do.</li>
+  </ol>
+</main>
+<script src="options.js"></script>
+</body>
+</html>
