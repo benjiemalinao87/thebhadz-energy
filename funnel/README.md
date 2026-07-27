@@ -330,13 +330,22 @@ team can read and reply from the company address instead of four personal Gmails
 ### Sending quotations (SC-16 → `/api/quote`)
 
 "Email quote to customer" in the quote builder sends the quotation as a PDF from
-**`quote@macc-inc.com`**, using the same two secrets as the mailbox above. Nothing extra to
-set — but `macc-inc.com` must itself be onboarded for sending, or the send fails with a
-403 from Cloudflare and the tool reports it verbatim:
+**`quote@macc-inc.com`**, using the same two secrets as the mailbox above.
+
+**No extra setup is required — this is already live.** `macc-inc.com` was onboarded for
+sending on 2026-07-26 (zone-wide, so any address `@macc-inc.com` is a valid From), and
+`CF_API_TOKEN` / `CF_ACCOUNT_ID` are both set on `thebhadz-energy`. To re-check any of that
+without changing anything:
 
 ```bash
-npx wrangler email sending enable macc-inc.com
+npx wrangler email sending list                          # macc-inc.com → enabled: yes
+npx wrangler email sending dns get macc-inc.com          # SPF, DKIM, DMARC p=reject, bounce MX
+npx wrangler pages secret list --project-name thebhadz-energy
 ```
+
+If a send ever fails, the tool surfaces Cloudflare's error verbatim rather than claiming
+success — a 403 there means the domain was disabled or the API token lost
+"Email Sending: Edit".
 
 The PDF is generated in the Function by `functions/_pdf.js` (a small hand-written PDF
 writer — standard-14 fonts, no dependency, in keeping with the repo's no-build-step rule)
