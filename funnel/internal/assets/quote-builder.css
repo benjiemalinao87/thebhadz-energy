@@ -74,8 +74,42 @@
 }
 .qs h1, .qs h2, .qs h3 { color: #111; }
 
+/* ---- paper quarantine ------------------------------------------------------
+ * The sheet renders inside .workspace-page, so the app's theme-driven rules land
+ * on it: .workspace-page styles p / li / strong / h3 / td / th directly, and in
+ * dark mode those inks are near-white — on white paper. Several of them sit
+ * behind html[data-theme="dark"] and out-specify anything scoped to .qs, so
+ * load order alone cannot win the cascade.
+ *
+ * The sheet is paper. What the founder sees on screen has to equal what the
+ * printer puts in a customer's hands, in either theme — so every colour the
+ * sheet uses is stated here and marked important. Add new sheet colours to this
+ * block rather than pinning them ad hoc further down, or dark mode silently
+ * eats them again.
+ */
+.qs, .qs * { color: #111 !important; }
+.qs { background: #fff !important; }
+.qs th, .qs td { background: #fff !important; }
+.qs thead th { background: #efefef !important; }
+.qs tbody tr:nth-child(even) td,
+.qs tbody tr:hover td { background: #fff !important; }
+.qs tbody tr.qs-group td { background: #dfeada !important; }
+.qs tbody tr.qs-sub   td { background: #f5f5f5 !important; }
+.qs tbody tr.qs-total td { background: #fdf0cf !important; }
+.qs .qs-headline .lead { background: #fdf3d6 !important; }
+/* The sheet's own deliberate greys — quieter than the body ink, still AA on white. */
+.qs .qs-brand small,
+.qs .qs-party span,
+.qs .qs-headline span,
+.qs .qs-headline small { color: #555 !important; }
+.qs .qs-foot { color: #666 !important; }
+/* An unconfirmed price must stay visibly flagged on the printout, so the badge
+   keeps the light-ground amber rather than the theme's (pale, dark-ground) one. */
+.qs .qb-unquoted { color: #8a5b00 !important; }
+
 .qs-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 2px solid #111; padding-bottom: 9px; }
 .qs-brand { font: 700 17px/1.15 "Helvetica Neue", Arial, sans-serif; letter-spacing: .02em; }
+.qs-logo { display: block; width: auto; height: 32px; margin-bottom: 6px; }
 .qs-brand small { display: block; margin-top: 3px; font: 400 10px/1.4 Arial, sans-serif; color: #444; letter-spacing: 0; }
 .qs-meta { text-align: right; font: 10px/1.6 "Courier New", monospace; white-space: nowrap; }
 .qs-meta b { font-weight: 700; }

@@ -445,7 +445,11 @@
 
     el("qb-sheet").innerHTML =
       '<div class="qs-head">' +
-        '<div class="qs-brand">MACC Systems &amp; Engineering Inc.' +
+        // Logo plus the legal name as real text: the name must survive the image
+        // failing to load, and a quotation should stay selectable and searchable.
+        '<div class="qs-brand">' +
+          '<img class="qs-logo" src="/assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc.">' +
+          'MACC Systems &amp; Engineering Inc.' +
           '<small>Biliran Province, Philippines<br>Solar supply, fabrication and installation</small>' +
         '</div>' +
         '<div class="qs-meta">' +
