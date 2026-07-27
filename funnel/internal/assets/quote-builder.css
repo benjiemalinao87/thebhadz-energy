@@ -48,6 +48,50 @@
 .qb-send-status.good { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
 .qb-send-status.bad { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
 
+/* Send confirmation. Both background AND ink are stated on every surface here —
+   the same rule the flag rail below is annotated with, for the same reason. */
+.qb-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .55);
+}
+.qb-dialog::backdrop { background: rgba(4, 12, 14, .58); backdrop-filter: blur(2px); }
+.qb-dialog form { display: grid; gap: 14px; padding: 22px 22px 18px; }
+.qb-dialog h2 {
+  margin: 0; font: 600 17px var(--sans); letter-spacing: -.01em; color: var(--ink);
+}
+.qb-dialog-lede { margin: -6px 0 0; font-size: 13px; line-height: 1.5; color: var(--faint); }
+.qb-dialog-lede b { color: var(--ink); font-weight: 600; }
+
+.qb-dialog-facts { margin: 0; display: grid; gap: 1px; background: var(--hairline);
+  border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden; }
+.qb-dialog-facts > div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 14px;
+  padding: 9px 12px; background: var(--paper);
+}
+.qb-dialog-facts dt {
+  font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--faint); white-space: nowrap;
+}
+.qb-dialog-facts dd {
+  margin: 0; font: 600 14px var(--mono); color: var(--ink);
+  text-align: right; overflow-wrap: anywhere;
+}
+
+.qb-dialog-flag {
+  margin: 0; padding: 9px 11px; font-size: 12.5px; line-height: 1.45;
+  border-left: 3px solid var(--sun);
+  background: var(--ws-amber-soft, #fff8e6); color: var(--ws-copy, var(--ink));
+}
+.qb-dialog-flag b { color: var(--ink); }
+.qb-dialog-after { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--faint); }
+.qb-dialog-after b { color: var(--ink); font-weight: 600; }
+.qb-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 2px; }
+
 /* Gate + advisory banners. These are not decoration — they carry the Founder-OS
    rules that make a quote legal to send, so they stay loud.
    Background AND text colour both come from theme tokens: a tinted panel that pins

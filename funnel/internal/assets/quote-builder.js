@@ -835,6 +835,51 @@
     };
   }
 
+  /**
+   * Confirm the send, showing the three things a founder would actually regret
+   * getting wrong: the recipient, the price on the document, and whether that
+   * price is firm. Resolves true only on the Send button.
+   *
+   * Focus opens on Cancel, not Send. This is an irreversible outward action and
+   * a stray Enter should not put a price in a customer's inbox.
+   */
+  function confirmSend(payload, m) {
+    var dlg = el("qb-confirm");
+
+    el("qbc-to").textContent = payload.customer.email;
+    el("qbc-no").textContent = payload.quote.quoteNo;
+    el("qbc-price").textContent = "₱" + Math.round(m.customerPrice).toLocaleString("en-PH");
+
+    var flag = el("qbc-flag");
+    if (payload.quote.indicative) {
+      flag.innerHTML = "<b>Stamped INDICATIVE.</b> " + m.unquoted + " line item" +
+        (m.unquoted === 1 ? " is" : "s are") + " still on a market estimate, so the sheet says so " +
+        "and no deposit can be taken until the numbers are firm.";
+      flag.hidden = false;
+    } else {
+      flag.hidden = true;
+    }
+
+    // Browsers without <dialog> fall back to the native prompt rather than sending
+    // unconfirmed — a missing dialog must never become a silent send.
+    if (!dlg || typeof dlg.showModal !== "function") {
+      return Promise.resolve(window.confirm(
+        "Email quote " + payload.quote.quoteNo + " to " + payload.customer.email + "?"
+      ));
+    }
+
+    return new Promise(function (resolve) {
+      function onClose() {
+        dlg.removeEventListener("close", onClose);
+        resolve(dlg.returnValue === "send");
+      }
+      dlg.returnValue = "cancel";      // Escape and backdrop both leave this untouched
+      dlg.addEventListener("close", onClose);
+      dlg.showModal();
+      el("qbc-cancel").focus();
+    });
+  }
+
   el("qb-send").addEventListener("click", function () {
     var btn = el("qb-send");
     var status = el("qb-send-status");
@@ -852,16 +897,10 @@
     if (!payload.customer.phone) return say("bad", "Add a phone number — it is how an existing contact is matched.");
     if (!payload.quote.preparedBy) return say("bad", "Put your name in “Prepared by” — a quote goes out attributable to a person.");
 
-    // Sending is not undoable from the customer's side, so it is confirmed once,
-    // with the two things that actually matter restated.
-    var confirmed = window.confirm(
-      "Email quote " + payload.quote.quoteNo + " to " + payload.customer.email + "?\n\n" +
-      "Contract price: PHP " + Math.round(m.customerPrice).toLocaleString("en-PH") +
-      (payload.quote.indicative ? "\nThis quote is stamped INDICATIVE." : "") +
-      "\n\nThey move to Quote Sent, with a follow-up due in 2 days."
-    );
-    if (!confirmed) return;
+    // Sending is not undoable from the customer's side, so it is confirmed once.
+    confirmSend(payload, m).then(function (ok) { if (ok) send(); });
 
+    function send() {
     btn.disabled = true;
     var was = btn.textContent;
     btn.textContent = "Sending…";
@@ -888,6 +927,7 @@
         btn.disabled = false;
         btn.textContent = was;
       });
+    }
   });
 
   el("qb-reset-fee").addEventListener("click", function () {

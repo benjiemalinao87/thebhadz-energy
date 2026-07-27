@@ -143,6 +143,37 @@
             <button type="button" class="secondary" id="qb-new-no">New quote no.</button>
           </div>
           <div id="qb-send-status" class="qb-send-status" hidden></div>
+
+          <!--
+            Sending is not undoable from the customer's side, so it is confirmed against
+            the three things a founder would actually regret getting wrong: who it goes
+            to, what price it carries, and whether that price is firm. A native <dialog>
+            rather than window.confirm — the browser one cannot show the price, cannot be
+            styled, and reads like a scripting error on a tool that quotes money.
+          -->
+          <dialog class="qb-dialog" id="qb-confirm" aria-labelledby="qb-confirm-title">
+            <form method="dialog">
+              <h2 id="qb-confirm-title">Send this quotation?</h2>
+              <p class="qb-dialog-lede">It goes from <b>quote@macc-inc.com</b> with the PDF attached,
+                and lands in the mailbox under Sent.</p>
+
+              <dl class="qb-dialog-facts">
+                <div><dt>To</dt><dd id="qbc-to">&mdash;</dd></div>
+                <div><dt>Quote no.</dt><dd id="qbc-no">&mdash;</dd></div>
+                <div><dt>Contract price</dt><dd id="qbc-price">&mdash;</dd></div>
+              </dl>
+
+              <p class="qb-dialog-flag" id="qbc-flag" hidden></p>
+
+              <p class="qb-dialog-after">They move to <b>Quote Sent</b> with a follow-up due in two
+                days. The stage only moves if the email actually goes.</p>
+
+              <div class="qb-dialog-actions">
+                <button type="submit" value="cancel" class="secondary" id="qbc-cancel">Cancel</button>
+                <button type="submit" value="send" id="qbc-send">Send quote</button>
+              </div>
+            </form>
+          </dialog>
           <p class="qb-note">Sending creates the contact if they are new, emails the PDF from
             quote@macc-inc.com, and moves them to <b>Quote Sent</b> with a follow-up due in two days.
             The stage only moves if the email actually goes.</p>
