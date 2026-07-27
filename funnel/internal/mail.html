@@ -21,8 +21,9 @@
 </script>
 <style>
   /* ============================================================
-     MACC Mailbox — shared company inbox; sends as official@ / alternate@macc-inc.com
-     Command-center "monitor" theme (matches /internal dashboard).
+     MACC Mailbox — the shared company inbox (official@ / alternate@macc-inc.com)
+     plus each founder's private personal mailbox (users.mailbox, assigned in
+     Team & access). Command-center "monitor" theme (matches /internal dashboard).
      Backed by /api/mail (D1 in; Email Sending REST API out).
      ============================================================ */
   :root{
@@ -246,6 +247,10 @@
   </div>
 
   <div class="tools">
+    <div class="tabs" id="mbox-tabs">
+      <button class="tab on" data-mbox="shared" type="button">Company</button>
+      <button class="tab" data-mbox="mine" type="button" id="tab-mine">My mailbox</button>
+    </div>
     <div class="tabs">
       <button class="tab on" data-box="in" type="button">Inbox</button>
       <button class="tab" data-box="out" type="button">Sent</button>
@@ -300,10 +305,6 @@
     <div class="field">
       <label for="c-body">Message</label>
       <textarea id="c-body" placeholder="Write your message…"></textarea>
-    </div>
-    <div class="field" style="max-width:260px;">
-      <label for="c-by">Sent by (your name)</label>
-      <input type="text" id="c-by" placeholder="e.g. Benjie" autocomplete="off">
     </div>
     <div class="actions">
       <button class="btn primary" id="btn-send" type="button">Send</button>
@@ -371,7 +372,22 @@
     });
   }
 
-  var emails=[], box="in", filter="", current=null;
+  var emails=[], box="in", mbox="shared", filter="", current=null, myMailbox=null;
+
+  // The shared company senders are fixed; the founder's own address arrives with
+  // the list response (my_mailbox) and is added as a third From option.
+  var SHARED_SENDERS=["official@macc-inc.com","alternate@macc-inc.com"];
+  function syncFrom(){
+    var sel=el("c-from"), keep=sel.value;
+    var options=SHARED_SENDERS.slice();
+    if(myMailbox)options.push(myMailbox);
+    sel.innerHTML=options.map(function(a){return '<option value="'+esc(a)+'">'+esc(a)+'</option>';}).join("");
+    if(options.indexOf(keep)>-1)sel.value=keep;
+    // In the personal mailbox, default new messages to sending as yourself.
+    else if(mbox==="mine"&&myMailbox)sel.value=myMailbox;
+    var mine=el("tab-mine");
+    if(mine&&myMailbox)mine.title=myMailbox;
+  }
 
   // ---------- load ----------
   // A transient toast is not enough on failure: the panel would just sit there
@@ -385,12 +401,13 @@
 
   function load(){
     el("loading").classList.remove("hide");
-    fetch("/api/mail?box="+encodeURIComponent(box))
+    fetch("/api/mail?box="+encodeURIComponent(box)+"&mbox="+encodeURIComponent(mbox))
       .then(authed)
       .then(function(d){
         el("loading").classList.add("hide");
         if(!d.ok){showError(d.error||"Could not load mail.");return;}
         emails=d.emails||[];
+        if(d.my_mailbox!==undefined){myMailbox=d.my_mailbox||null;syncFrom();}
         // The unread badge lives in this page's own .bar, which the SPA router
         // strips when it injects the page into the Command Center shell (the
         // shell supplies its own nav). So it is absent in the embedded view and
@@ -413,9 +430,15 @@
       return (String(m.sender)+" "+String(m.recipient)+" "+String(m.subject)).toLowerCase().indexOf(q)>-1;
     });
     if(!shown.length){
-      var msg=emails.length?"Nothing matches that search."
-             :box==="out"?"Nothing sent yet. Use Compose to send from official@ or alternate@macc-inc.com."
-             :"No mail yet. Messages to your company addresses will land here.";
+      var msg;
+      if(emails.length)msg="Nothing matches that search.";
+      else if(mbox==="mine"&&!myMailbox)msg="No personal mailbox is assigned to your account yet. A founder can set one for you in Team &amp; access (e.g. yourname@macc-inc.com).";
+      else if(mbox==="mine")msg=box==="out"
+        ?"Nothing sent yet. Use Compose to send as "+esc(myMailbox)+"."
+        :"No mail yet. Messages to "+esc(myMailbox)+" will land here — and only you can see them.";
+      else msg=box==="out"
+        ?"Nothing sent yet. Use Compose to send from official@ or alternate@macc-inc.com."
+        :"No mail yet. Messages to your company addresses will land here.";
       list.innerHTML='<div class="empty">'+msg+'</div>';
       return;
     }
@@ -589,6 +612,8 @@
       el("compose").setAttribute("data-reply-to",current.id);
     }else{
       el("c-to").value=""; el("c-subject").value=""; el("c-body").value="";
+      // New message: default the From to the mailbox being viewed.
+      el("c-from").value=(mbox==="mine"&&myMailbox)?myMailbox:"official@macc-inc.com";
       el("compose").removeAttribute("data-reply-to");
     }
     el("compose").classList.remove("hide");
@@ -604,7 +629,8 @@
     if(!subject){toast("Add a subject.");return;}
     if(!body.trim()){toast("The message is empty.");return;}
 
-    var payload={to:to,subject:subject,body:body,from:el("c-from").value,sent_by:el("c-by").value.trim()};
+    // "Sent by" comes from the signed-in session server-side — nothing to type.
+    var payload={to:to,subject:subject,body:body,from:el("c-from").value};
     var rt=el("compose").getAttribute("data-reply-to");
     if(rt)payload.reply_to_id=parseInt(rt,10);
 
@@ -627,12 +653,25 @@
   }
 
   // ---------- wiring ----------
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(t){
+  // Two independent tab groups: which mailbox (Company / My mailbox) and which
+  // folder (Inbox / Sent). Each toggles "on" only within its own group.
+  Array.prototype.forEach.call(document.querySelectorAll(".tab[data-box]"),function(t){
     t.addEventListener("click",function(){
-      Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.classList.remove("on");});
+      Array.prototype.forEach.call(document.querySelectorAll(".tab[data-box]"),function(x){x.classList.remove("on");});
       t.classList.add("on");
       box=t.getAttribute("data-box");
       el("reader").classList.add("hide");
+      load();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".tab[data-mbox]"),function(t){
+    t.addEventListener("click",function(){
+      Array.prototype.forEach.call(document.querySelectorAll(".tab[data-mbox]"),function(x){x.classList.remove("on");});
+      t.classList.add("on");
+      mbox=t.getAttribute("data-mbox");
+      el("reader").classList.add("hide");
+      el("compose").classList.add("hide");
+      syncFrom();
       load();
     });
   });
@@ -647,14 +686,6 @@
   el("btn-send").addEventListener("click",send);
   document.addEventListener("keydown",function(e){
     if(e.key==="Escape"){el("reader").classList.add("hide");el("compose").classList.add("hide");}
-  });
-
-  // remember who's sending, so nobody retypes it every time
-  var savedBy=null;
-  try{savedBy=localStorage.getItem("macc_mail_sender");}catch(e){}
-  if(savedBy)el("c-by").value=savedBy;
-  el("c-by").addEventListener("change",function(){
-    try{localStorage.setItem("macc_mail_sender",this.value.trim());}catch(e){}
   });
 
   load();

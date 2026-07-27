@@ -327,6 +327,40 @@ team can read and reply from the company address instead of four personal Gmails
   `cf-bounce` subdomain), and **Email Sending is Beta and requires a Workers Paid plan**.
   Receiving works on the free plan; only outbound needs the upgrade.
 
+### Personal founder mailboxes
+
+Besides the shared company mailbox, **each founder can have their own private mailbox** — a
+personal `@macc-inc.com` address (e.g. `benjie@macc-inc.com`) that only they can read, and
+that they can send as. The Mail page has a **Company / My mailbox** switcher; the personal
+address also appears as a third From option in Compose (sends carry the founder's display
+name instead of "MACC Inc.").
+
+How it works and what keeps it private:
+
+- The address lives on the account row (`users.mailbox`), assigned by any founder from
+  **Team & access → Set mailbox** (masters only; empty clears it; the shared team login can
+  never have one). It must be `@macc-inc.com` — the zone already enabled for sending
+  zone-wide — and unique across accounts. `official@`, `alternate@`, `quote@` and `team@`
+  are reserved.
+- `/api/mail` enforces the privacy rule on **every verb**, not just the list: any `emails`
+  row whose `mailbox` address is claimed in `users.mailbox` is invisible and untouchable
+  (403) to everyone except that account. Every unclaimed address is the shared company
+  mailbox, same as before. (Corollary: if an account is deleted or its mailbox cleared, its
+  old rows become shared again — clean them up first if that matters.)
+- **Sending as the personal address works today** with zero extra setup (macc-inc.com
+  sending is zone-wide). The From allow-list is the two shared senders plus *your own*
+  `users.mailbox`, taken from the session — the request body cannot pick someone else's.
+- **Receiving needs two one-time wiring steps per address** (until then the personal inbox
+  simply stays empty):
+  1. Enable Email Routing on the `macc-inc.com` zone (dashboard → Email → Email Routing) if
+     not already on, and add a routing rule sending the personal address to the
+     **hello-fanout** Worker — same worker the shared addresses use; it stores the row with
+     `mailbox` = the personal address, which is what scopes it.
+  2. Add the address to `PERSONAL_FORWARDS` in `workers/hello-fanout/wrangler.toml`
+     (format `personal=gmail;personal2=gmail2`) and redeploy the worker. A personal address
+     forwards **only to its owner's Gmail**, not the whole team's — the Gmail destination
+     must be a verified Destination Address on the account.
+
 ### Sending quotations (SC-16 → `/api/quote`)
 
 "Email quote to customer" in the quote builder sends the quotation as a PDF from

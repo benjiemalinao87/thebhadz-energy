@@ -237,11 +237,16 @@ CREATE TABLE IF NOT EXISTS meeting_recordings (
 
 CREATE INDEX IF NOT EXISTS idx_meeting_recordings_meeting ON meeting_recordings(meeting_id);
 
--- Company mailbox (/internal/mail.html) for hello@ and main@maccsyseng.com.
+-- Company mailbox (/internal/mail.html) for hello@ and main@maccsyseng.com, plus
+-- each founder's personal mailbox (users.mailbox, e.g. benjie@macc-inc.com).
 -- Inbound rows are written by the hello-fanout Email Worker (workers/hello-fanout),
--- which ALSO still forwards every message to the founders' Gmail inboxes — Gmail stays
--- the system of record for attachments, so nothing here is load-bearing for filings.
+-- which ALSO still forwards every message to Gmail — the whole team's inboxes for
+-- shared addresses, only the owner's for a personal address. Gmail stays the system
+-- of record for attachments, so nothing here is load-bearing for filings.
 -- Outbound rows are written by /api/mail when a founder sends or replies.
+-- The `mailbox` column decides who may see a row: an address claimed in
+-- users.mailbox is private to that account; every other address is the shared
+-- company mailbox, visible to all founders.
 CREATE TABLE IF NOT EXISTS emails (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   direction     TEXT NOT NULL CHECK (direction IN ('in', 'out')),
@@ -294,6 +299,11 @@ CREATE TABLE IF NOT EXISTS users (
   -- Empty = full access, which is what every founder gets; used for installers,
   -- interns and bookkeepers. Enforced by both middlewares, not just the sidebar.
   hidden_pages   TEXT NOT NULL DEFAULT '[]',
+  -- This founder's personal company address (e.g. benjie@macc-inc.com), or NULL for
+  -- none. Rows in `emails` whose mailbox matches it form that founder's PRIVATE
+  -- mailbox in /internal/mail.html — visible and sendable-from only by this account.
+  -- Must be on macc-inc.com (the sending-enabled zone) and unique across accounts.
+  mailbox        TEXT,
   created_by     TEXT,                        -- email of the master who created the row
   created_at     TEXT NOT NULL,
   updated_at     TEXT NOT NULL

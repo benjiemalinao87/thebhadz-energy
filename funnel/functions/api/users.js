@@ -4,7 +4,9 @@
  *
  *   GET                                                    -> { ok, users: [...] }
  *   POST   { name, email, password, role? }                 -> create an account
- *   PATCH  { id, name?, email?, role?, active?, password? } -> edit an account
+ *   PATCH  { id, name?, email?, role?, active?, password?, mailbox? } -> edit an account
+ *          (mailbox = the founder's personal @macc-inc.com address for /internal/mail;
+ *           empty string removes it)
  *   DELETE { id }                                           -> delete an account
  *
  * Guard rails (all enforced here, not in the browser):
@@ -46,6 +48,18 @@ import { normalizeHiddenPages, parseHiddenPages, sectionsForClient } from "../_p
 
 const MAX_NAME = 80;
 const ROLES = ["master", "founder"];
+
+// Personal mailboxes live on macc-inc.com — the zone with Email Sending enabled
+// zone-wide, so the address can both receive (via an Email Routing rule to the
+// hello-fanout Worker) and appear in From. Addresses the company already uses as
+// shared identities can never become someone's private mailbox.
+const MAILBOX_DOMAIN = "macc-inc.com";
+const RESERVED_MAILBOXES = [
+  "official@macc-inc.com",
+  "alternate@macc-inc.com",
+  "quote@macc-inc.com",
+  "team@macc-inc.com",
+];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -97,7 +111,8 @@ export async function onRequest(context) {
   if (request.method === "GET") {
     const { results } = await env.DB.prepare(
       `SELECT u.id, u.email, u.name, u.role, u.active, u.must_change, u.locked_until,
-              u.failed_count, u.last_login_at, u.hidden_pages, u.created_by, u.created_at, u.updated_at,
+              u.failed_count, u.last_login_at, u.hidden_pages, u.mailbox,
+              u.created_by, u.created_at, u.updated_at,
               (SELECT COUNT(*) FROM user_sessions s
                 WHERE s.user_id = u.id AND s.expires_at > ?) AS open_sessions
        FROM users u
@@ -203,7 +218,7 @@ export async function onRequest(context) {
     if (!id) return json({ ok: false, error: "A user id is required." }, 422);
 
     const target = await env.DB.prepare(
-      `SELECT id, email, name, role, active, hidden_pages FROM users WHERE id = ?`
+      `SELECT id, email, name, role, active, hidden_pages, mailbox FROM users WHERE id = ?`
     )
       .bind(id)
       .first();
@@ -303,6 +318,36 @@ export async function onRequest(context) {
       binds.push(target.id === actor.id ? 0 : 1);
       changes.push("password reset");
       revokeSessions = true;
+    }
+
+    if (typeof body.mailbox === "string") {
+      const mailbox = normalizeEmail(body.mailbox);
+      if (mailbox !== String(target.mailbox || "")) {
+        if (targetIsSharedLogin) {
+          return json(
+            { ok: false, error: "The shared team login uses the shared company mailbox — it cannot have a personal one." },
+            422
+          );
+        }
+        if (!mailbox) {
+          sets.push("mailbox = NULL");
+          changes.push("personal mailbox removed");
+        } else {
+          if (!isValidEmail(mailbox) || !mailbox.endsWith("@" + MAILBOX_DOMAIN)) {
+            return json({ ok: false, error: `A personal mailbox must be an address @${MAILBOX_DOMAIN}.` }, 422);
+          }
+          if (RESERVED_MAILBOXES.includes(mailbox)) {
+            return json({ ok: false, error: `${mailbox} is a shared company address and cannot be a personal mailbox.` }, 422);
+          }
+          const taken = await env.DB.prepare(`SELECT id FROM users WHERE mailbox = ? AND id != ?`)
+            .bind(mailbox, id)
+            .first();
+          if (taken) return json({ ok: false, error: "Another account already owns that mailbox address." }, 409);
+          sets.push("mailbox = ?");
+          binds.push(mailbox);
+          changes.push(`personal mailbox → ${mailbox}`);
+        }
+      }
     }
 
     if (body.hidden_pages !== undefined) {
