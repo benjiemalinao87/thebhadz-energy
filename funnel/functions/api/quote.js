@@ -46,10 +46,18 @@ function clean(value, max) {
   return String(value == null ? "" : value).replace(/[\r\n]+/g, " ").slice(0, max).trim();
 }
 
+/**
+ * Escape for HTML, and additionally encode every non-ASCII character as a numeric
+ * reference. That second part is not paranoia: the copy carries em dashes, the peso
+ * sign and Filipino place names, and if any mail client decides the part is
+ * windows-1252 the customer reads "LIWANAG â€" on-grid" on the document that is
+ * supposed to make us look like a real company. Pure-ASCII output cannot be
+ * misdecoded by anything.
+ */
 function escapeHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-  ));
+  return String(s == null ? "" : s)
+    .replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]))
+    .replace(/[^\x20-\x7E]/g, (c) => "&#" + c.codePointAt(0) + ";");
 }
 
 /** Digits only, so "0917 555 0142" and "09175550142" are the same person. */
@@ -255,7 +263,7 @@ export async function onRequestPost(context) {
  * homeowner may read the mail and never open the attachment: what the price is,
  * what it saves, whether it backs up a brownout, and whether the number is firm.
  */
-function composeEmail({ name, quote, preparedBy }) {
+export function composeEmail({ name, quote, preparedBy }) {
   const price = "PHP " + Math.round(quote.customerPrice || 0).toLocaleString("en-PH");
   const saved = "PHP " + Math.round(quote.savedPerMonth || 0).toLocaleString("en-PH");
   const first = String(name).split(/\s+/)[0];
@@ -295,7 +303,7 @@ function composeEmail({ name, quote, preparedBy }) {
   const html =
     `<div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.55;color:#14303a;max-width:640px">` +
     `<p>Hi ${escapeHtml(first)},</p>` +
-    `<p>Thank you for your time. Your quotation is attached as a PDF — quote number <b>${escapeHtml(quote.quoteNo)}</b>, valid until ${escapeHtml(quote.validUntil)}.</p>` +
+    `<p>Thank you for your time. Your quotation is attached as a PDF &mdash; quote number <b>${escapeHtml(quote.quoteNo)}</b>, valid until ${escapeHtml(quote.validUntil)}.</p>` +
     `<table cellpadding="6" style="border-collapse:collapse;margin:18px 0;font-size:14px">` +
     [
       ["Package", quote.packageLabel],
