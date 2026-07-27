@@ -12,6 +12,9 @@ Works in Chrome, Edge, Brave and any Chromium browser (Manifest V3). Plain
 HTML/CSS/JS, no build step, no dependencies — same philosophy as the rest of the
 repo.
 
+**Team SOP** (setup, per-site capture steps, review cadence, rules):
+[`docs/sop-product-capture.md`](../../docs/sop-product-capture.md).
+
 ## How it fits together
 
 ```

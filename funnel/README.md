@@ -275,7 +275,7 @@ cookie (`credentials: 'include'`), so there is no webhook secret: `/api/captures
 by the same founder auth as every other endpoint, each capture is attributed to the
 signed-in founder, and saves appear in the activity log. The section key is `captures`, so
 it can be hidden per-account like any other tool. Apply `schema.sql` (command above) once
-before first use.
+before first use. Team usage SOP: `docs/sop-product-capture.md` in the repo root.
 
 ### Team notes (D1 + R2-backed)
 
