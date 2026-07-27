@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-17 Next Actions — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/ops-tools.css">
+<link rel="stylesheet" href="assets/workspace-redesign.css">
+<style>
+  /* One ranked list. Urgency is carried by the left edge so the eye lands on the
+     blocked and overdue rows before it reads a single word. */
+  .na-group { margin-bottom: 22px; }
+  .na-group-head {
+    margin: 0 0 8px; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--faint); display: flex; align-items: center; gap: 8px;
+  }
+  .na-group-head span {
+    font-size: 10px; border: 1px solid var(--hairline); padding: 1px 6px; color: var(--faint);
+  }
+  .na-group-head.stop { color: #b42318; }
+  .na-group-head.warn { color: #8a5b00; }
+
+  .na-item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border: 1px solid var(--hairline); border-left: 4px solid var(--hairline);
+    background: var(--sheet); text-decoration: none; color: inherit; margin-bottom: 6px;
+  }
+  .na-item:hover { border-color: var(--copper); border-left-color: var(--copper); }
+  .na-item.stop { border-left-color: #b42318; }
+  .na-item.warn { border-left-color: var(--sun); }
+
+  .na-src {
+    flex: none; width: 62px; text-align: center; padding: 3px 0;
+    font: 600 9px var(--mono); letter-spacing: .08em; border: 1px solid var(--hairline);
+    color: var(--faint); background: var(--paper);
+  }
+  .na-src.src-lead { color: var(--copper); }
+  .na-src.src-install { color: var(--ok); }
+  .na-src.src-task { color: var(--faint); }
+
+  .na-body { flex: 1; min-width: 0; }
+  .na-body strong { display: block; font-size: 14px; line-height: 1.35; }
+  .na-body small { display: block; margin-top: 2px; color: var(--faint); font-size: 11.5px; }
+  .na-due { flex: none; font: 600 11px var(--mono); color: var(--faint); white-space: nowrap; }
+  .na-item.stop .na-due { color: #b42318; }
+  .na-item.warn .na-due { color: #8a5b00; }
+
+  @media (max-width: 700px) {
+    .na-item { flex-wrap: wrap; gap: 8px; }
+    .na-body { flex-basis: 100%; order: 3; }
+  }
+</style>
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="wordmark">MACC</span><span class="sub">SOLAR CITY · FOUNDER COMMAND CENTER</span></a></div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="next-actions.html"><span class="code">SC-17</span>Next actions</a>
+      <a href="leads.html"><span class="code">CRM</span>Contacts</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="founder-lab.html"><span class="code">SC-08</span>Strategy lab</a>
+      <a href="finance.html"><span class="code">SC-09</span>Finance &amp; runway</a>
+      <a href="install-ops.html"><span class="code">SC-10</span>Install operations</a>
+      <a href="quote-builder.html"><span class="code">SC-16</span>Quote builder</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>ONE STEP PER ITEM<br>NO NEXT STEP = ADRIFT</div>
+  </aside>
+
+  <main class="content ops-content workspace-page">
+    <p class="doc-eyebrow">SC-17 · NEXT ACTIONS <span class="rev">· REV A · 2026-07-27</span></p>
+    <h1>What to do next, in one list.</h1>
+    <p class="lede">Every lead, install and board task reduced to a single next step, ranked by what is
+      actually blocking money. Nothing is stored here — it reads the tools that own the data, so it can
+      never disagree with them.</p>
+
+    <div class="ops-topbar">
+      <span class="ops-status" id="na-status">Loading…</span>
+      <button type="button" class="ops-button secondary" id="na-refresh">Refresh</button>
+    </div>
+
+    <div id="na-root">
+      <div id="na-skipped" hidden></div>
+
+      <section class="ops-metrics" id="na-metrics" aria-label="Next action summary"></section>
+
+      <div class="ops-alert">
+        <strong>Read this list top-down.</strong>
+        Hard gates and overdue work come first because they are the only things that stop a deposit being
+        banked. “No next step set” is not an empty row — it is a live lead nobody has committed to advancing.
+      </div>
+
+      <div id="na-list" style="margin-top:18px"></div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/next-actions.js"></script>

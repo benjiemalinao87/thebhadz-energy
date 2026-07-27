@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC-16 Quote Builder — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/ops-tools.css">
+<link rel="stylesheet" href="assets/workspace-redesign.css">
+<link rel="stylesheet" href="assets/quote-builder.css">
+
+<div class="frame">
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="wordmark">MACC</span><span class="sub">SOLAR CITY · FOUNDER COMMAND CENTER</span></a></div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="next-actions.html"><span class="code">SC-17</span>Next actions</a>
+      <a href="leads.html"><span class="code">CRM</span>Contacts</a>
+      <a href="projects.html"><span class="code">SC-07</span>Project board</a>
+      <a href="founder-lab.html"><span class="code">SC-08</span>Strategy lab</a>
+      <a href="finance.html"><span class="code">SC-09</span>Finance &amp; runway</a>
+      <a href="install-ops.html"><span class="code">SC-10</span>Install operations</a>
+      <a href="quote-builder.html"><span class="code">SC-16</span>Quote builder</a>
+      <a href="strategy-deck-en.html"><span class="code">DECK</span>Founder strategy</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>QUOTES PRINT WITH THE PERMIT GATE<br>NEVER QUOTE BACKUP ON ON-GRID</div>
+  </aside>
+
+  <main class="content ops-content workspace-page">
+    <p class="doc-eyebrow">SC-16 · QUOTE BUILDER <span class="rev">· REV A · 2026-07-26</span></p>
+    <h1>Bill range in. Printable, itemised quote out.</h1>
+    <p class="lede">Enter the homeowner's BILECO bill, pick the package, and the tool sizes the array, builds the bill of
+      materials, prices it against the SC-06 ladder, and prints a customer-ready quotation with the compliance
+      checklist already attached.</p>
+
+    <div class="ops-topbar">
+      <span class="ops-status">Sizing assumptions are editable · every figure on the sheet is an estimate until suppliers confirm</span>
+      <a class="ops-button secondary" href="install-ops.html">Install operations →</a>
+    </div>
+
+    <!-- The script anchors on this wrapper, not on <main>: spa-router.js renames the
+         incoming <main> to id="cc-main" on every SPA swap, so an id there would vanish. -->
+    <div class="qb-grid" id="qb-root">
+      <div class="qb-controls qb-screen-only">
+
+        <div class="qb-box">
+          <h3>Customer</h3>
+          <div class="qb-fields">
+            <label>Full name<input id="qb-customer" maxlength="120" placeholder="Juan dela Cruz"></label>
+            <label>Site address / barangay<input id="qb-address" maxlength="200" placeholder="Brgy. Caraycaray, Naval, Biliran"></label>
+            <div class="qb-fields two" style="display:grid">
+              <label>Phone<input id="qb-phone" maxlength="40" placeholder="0917…"></label>
+              <label>Prepared by<input id="qb-prepared" maxlength="80" placeholder="Founder name"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="qb-box">
+          <h3>Their BILECO bill</h3>
+          <div class="qb-fields">
+            <label>Monthly bill range<select id="qb-bill-band"></select></label>
+            <label>Or exact amount from the bill (₱)
+              <input id="qb-bill-exact" type="number" min="0" step="50" placeholder="Overrides the range">
+            </label>
+            <div class="qb-fields two" style="display:grid">
+              <label>BILECO rate (₱/kWh)<input id="qb-tariff" type="number" min="1" step="0.0001"></label>
+              <label>Yield (kWh/kWp/day)<input id="qb-yield" type="number" min="1" step="0.1"></label>
+            </div>
+          </div>
+          <p class="qb-note">Ask to see last month's bill rather than asking what they usually pay — the exact figure
+            sizes the system properly and the conversation stays past-specific. Rate and yield are both marked EST in
+            SC-08; replace the yield with metered output once the first install is running.</p>
+        </div>
+
+        <div class="qb-box">
+          <h3>System</h3>
+          <div class="qb-fields">
+            <label>Package
+              <select id="qb-type">
+                <option value="liwanag">LIWANAG — on-grid (bill reduction only)</option>
+                <option value="ilaw">ILAW — off-grid</option>
+                <option value="sandigan">SANDIGAN — hybrid (bill + backup)</option>
+              </select>
+            </label>
+            <label>Panel<select id="qb-panel"></select></label>
+            <label>Inverter<select id="qb-inverter"></select></label>
+            <div id="qb-battery-wrap" class="qb-fields" hidden>
+              <label>Battery<select id="qb-battery"></select></label>
+              <label>Battery units<input id="qb-battery-qty" type="number" min="1" step="1" value="1"></label>
+            </div>
+            <div class="qb-fields two" style="display:grid">
+              <label>Consumption covered (%)<input id="qb-coverage" type="number" min="10" max="100" step="5"></label>
+              <label>Panel count override<input id="qb-panels-override" type="number" min="1" step="1" placeholder="Auto"></label>
+            </div>
+          </div>
+          <p class="qb-note">On-grid defaults to 70% coverage because export is credited below the retail rate — size for
+            daytime self-consumption first. Use the panel override once the roof survey gives you the real usable area.</p>
+        </div>
+
+        <div class="qb-box">
+          <h3>Money</h3>
+          <div class="qb-fields">
+            <label style="flex-direction:row;align-items:center;gap:8px">
+              <input id="qb-vat" type="checkbox" checked style="width:auto"> Add 12% VAT on materials
+            </label>
+            <label>Fabrication, delivery &amp; installation fee (₱)<input id="qb-fee" type="number" min="0" step="500" placeholder="Auto"></label>
+            <label>Our delivery cost — crew, transport, permits (₱)<input id="qb-delivery-cost" type="number" min="0" step="500" placeholder="Auto"></label>
+            <label>Contract price to the customer (₱)<input id="qb-price" type="number" min="0" step="500" placeholder="From the ladder"></label>
+            <div class="qb-actions">
+              <button type="button" class="secondary" id="qb-reset-fee">Reset to auto</button>
+            </div>
+          </div>
+          <p class="qb-note">Materials pass through at supplier cost; the margin sits in the fee line. The contract price
+            defaults to the SC-06 ladder, not to the sheet total — pricing runs corridor-first, never cost-plus.</p>
+        </div>
+
+        <div class="qb-box">
+          <h3>Quote document</h3>
+          <div class="qb-fields two">
+            <label>Quote no.<input id="qb-quote-no" maxlength="40"></label>
+            <label>Date<input id="qb-date" type="date"></label>
+            <label>Valid for (days)<input id="qb-validity" type="number" min="1" step="1" value="14"></label>
+          </div>
+          <div class="qb-actions" style="margin-top:12px">
+            <button type="button" id="qb-print">Print / save as PDF</button>
+            <button type="button" class="secondary" id="qb-copy">Copy summary</button>
+            <button type="button" class="secondary" id="qb-new-no">New quote no.</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="qb-sheet-col">
+        <div class="qb-screen-only">
+          <div class="qb-readout" id="qb-readout"></div>
+          <div id="qb-next" class="qb-next"></div>
+          <div id="qb-flags"></div>
+          <p class="qb-note" style="margin-top:12px">The sheet below is exactly what prints. Everything else on this page
+            is founder-only and disappears at print time.</p>
+        </div>
+
+        <div class="qs-wrap">
+          <div class="qs" id="qb-sheet"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/quote-builder.js"></script>

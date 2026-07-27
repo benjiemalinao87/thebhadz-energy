@@ -18,6 +18,16 @@
 
 export const SECTIONS = [
   {
+    key: "next-actions",
+    label: "Next actions (roll-up)",
+    group: "Operations",
+    // Reads /api/leads, /api/install-ops and /api/projects rather than owning data.
+    // Those APIs stay individually gated, so hiding a section still hides its rows
+    // here — the page degrades to what the account may actually see.
+    pages: ["next-actions"],
+    apis: [],
+  },
+  {
     key: "leads",
     label: "Contacts / leads pipeline",
     group: "Operations",
@@ -58,6 +68,16 @@ export const SECTIONS = [
     group: "Operations",
     pages: ["install-ops"],
     apis: ["/api/install-ops"],
+  },
+  {
+    key: "quotes",
+    label: "Quote builder (customer pricing)",
+    group: "Operations",
+    // Its own section rather than a page under install-ops: this is the one tool that
+    // sets the price a customer sees, so it can be granted to whoever sells and
+    // withheld from whoever only installs.
+    pages: ["quote-builder"],
+    apis: [],
   },
   {
     key: "finance",
