@@ -18,6 +18,16 @@
 /assets/img/*
   Cache-Control: public, max-age=3600, must-revalidate
 
+# Same rules for the v2 candidate redesign — its assets live under /v2/assets/,
+# which the patterns above do not match, so without these a stale stylesheet
+# survives a redeploy and v2 renders unstyled.
+/v2/assets/*.css
+  Cache-Control: no-cache
+/v2/assets/*.js
+  Cache-Control: no-cache
+/v2/assets/img/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
 # HTML pages should always be fresh.
 /*.html
   Cache-Control: no-cache
