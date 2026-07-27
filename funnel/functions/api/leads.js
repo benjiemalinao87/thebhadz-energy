@@ -12,7 +12,10 @@
  */
 import { currentUser } from "../_auth.js";
 
-const STAGES = ["lead", "contacted", "demoed", "proposal", "sold", "lost"];
+// "quote_sent" sits after demoed and before proposal: a quotation has gone out, but
+// nothing has been negotiated yet. It is written by /api/quote, never by hand — the
+// stage is only reached when an email actually left the building (Founder OS §1.4).
+const STAGES = ["lead", "contacted", "demoed", "quote_sent", "proposal", "sold", "lost"];
 
 /**
  * Add the next-action columns to databases created before they existed.

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS leads (
   monthly_bill  TEXT,
   package       TEXT,
   financing     INTEGER DEFAULT 0,        -- 0/1
-  stage         TEXT NOT NULL DEFAULT 'lead',  -- lead|contacted|demoed|proposal|sold|lost
+  stage         TEXT NOT NULL DEFAULT 'lead',  -- lead|contacted|demoed|quote_sent|proposal|sold|lost
   notes         TEXT,
   -- The ONE next step that advances this lead, plus when it is due and who owns it.
   -- Structured rather than buried in notes so overdue work can surface on its own
@@ -339,3 +339,22 @@ CREATE TABLE IF NOT EXISTS activity_log (
 CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);
 CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_activity_action ON activity_log(action);
+
+-- Quotations actually sent to a customer. One row per send, written by /api/quote
+-- only after the email left — so this table is the evidence behind a lead sitting in
+-- the quote_sent stage, not a record of quotes that were merely rendered on screen.
+CREATE TABLE IF NOT EXISTS quotes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  quote_no       TEXT NOT NULL,
+  lead_id        INTEGER,
+  customer_name  TEXT NOT NULL,
+  customer_email TEXT NOT NULL,
+  package        TEXT,
+  kwp            REAL,
+  contract_price REAL,
+  indicative     INTEGER DEFAULT 0,          -- 0/1: priced on unconfirmed supplier numbers
+  sent_by        TEXT,
+  sent_at        TEXT NOT NULL               -- ISO timestamp
+);
+
+CREATE INDEX IF NOT EXISTS idx_quotes_lead ON quotes(lead_id);

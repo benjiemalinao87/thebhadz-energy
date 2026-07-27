@@ -64,7 +64,10 @@
               <label>Phone<input id="qb-phone" maxlength="40" placeholder="0917…"></label>
               <label>Prepared by<input id="qb-prepared" maxlength="80" placeholder="Founder name"></label>
             </div>
+            <label>Email<input id="qb-email" type="email" maxlength="254" placeholder="Needed to send the quote"></label>
           </div>
+          <p class="qb-note">Phone is how a contact is matched, so an existing lead is updated rather than
+            duplicated. Email is where the quotation goes.</p>
         </div>
 
         <div class="qb-box">
@@ -134,10 +137,15 @@
             <label>Valid for (days)<input id="qb-validity" type="number" min="1" step="1" value="14"></label>
           </div>
           <div class="qb-actions" style="margin-top:12px">
-            <button type="button" id="qb-print">Print / save as PDF</button>
+            <button type="button" id="qb-send">Email quote to customer</button>
+            <button type="button" class="secondary" id="qb-print">Print / save as PDF</button>
             <button type="button" class="secondary" id="qb-copy">Copy summary</button>
             <button type="button" class="secondary" id="qb-new-no">New quote no.</button>
           </div>
+          <div id="qb-send-status" class="qb-send-status" hidden></div>
+          <p class="qb-note">Sending creates the contact if they are new, emails the PDF from
+            quote@macc-inc.com, and moves them to <b>Quote Sent</b> with a follow-up due in two days.
+            The stage only moves if the email actually goes.</p>
         </div>
       </div>
 

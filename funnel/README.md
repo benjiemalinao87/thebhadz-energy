@@ -327,6 +327,42 @@ team can read and reply from the company address instead of four personal Gmails
   `cf-bounce` subdomain), and **Email Sending is Beta and requires a Workers Paid plan**.
   Receiving works on the free plan; only outbound needs the upgrade.
 
+### Sending quotations (SC-16 → `/api/quote`)
+
+"Email quote to customer" in the quote builder sends the quotation as a PDF from
+**`quote@macc-inc.com`**, using the same two secrets as the mailbox above. Nothing extra to
+set — but `macc-inc.com` must itself be onboarded for sending, or the send fails with a
+403 from Cloudflare and the tool reports it verbatim:
+
+```bash
+npx wrangler email sending enable macc-inc.com
+```
+
+The PDF is generated in the Function by `functions/_pdf.js` (a small hand-written PDF
+writer — standard-14 fonts, no dependency, in keeping with the repo's no-build-step rule)
+and laid out by `functions/_quote-pdf.js`. There is **no PDF library to install**.
+
+What one click does, in this order, and why the order matters:
+
+1. **Render the PDF.** If the document cannot be produced, nothing else happens.
+2. **Upsert the contact** — matched on email, then on phone digits, so `0917 555 0142` and
+   `09175550142` are the same person and a quote never forks a lead into two rows.
+3. **Send the mail.** This is the step that fails for reasons outside us.
+4. **Only then** move the contact to **Quote Sent**, set a follow-up due in 2 days owned by
+   the sending founder, and write a `quotes` row.
+
+A failed send returns 502 and leaves the contact's stage untouched — *Quote Sent* has to mean
+a quote was sent (Founder OS §1.4). The endpoint also re-checks the Founder-OS invariants that
+the UI enforces on screen, because a UI check is not a control: the compliance checklist must
+be present, a battery-less system must carry the brownout statement (§1.6), and unconfirmed
+supplier prices must be stamped INDICATIVE (§7). Any of those missing is a 422 and no contact
+is created.
+
+The PDF's *wording* is read out of the sheet already rendered on screen — the brownout
+statement, the checklist, the milestones, the warranties and the terms are lifted from the
+DOM rather than written a second time, so the customer's PDF cannot drift from the sheet the
+founder proof-read. Only the numbers come from the model.
+
 ### Deploy note
 
 Because Functions + the D1 binding must be detected, **always deploy from inside `funnel/`**:

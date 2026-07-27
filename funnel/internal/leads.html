@@ -33,7 +33,7 @@
     --z-500:#71717a; --z-400:#a1a1aa; --z-300:#d4d4d8; --z-200:#e4e4e7; --z-100:#f4f4f5; --z-50:#fafafa;
     --cyan:#67e8f9; --green:#4ade80; --yellow:#facc15; --red:#fb7185; --purple:#c084fc; --blue:#60a5fa; --amber:#f59e0b;
     /* stage tones */
-    --lead:#60a5fa; --contacted:#c084fc; --demoed:#f59e0b; --proposal:#facc15; --sold:#4ade80; --lost:#fb7185;
+    --lead:#60a5fa; --contacted:#c084fc; --demoed:#f59e0b; --quote_sent:#38bdf8; --proposal:#facc15; --sold:#4ade80; --lost:#fb7185;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -159,6 +159,7 @@
   .st-lead{color:var(--lead);border-color:rgba(96,165,250,0.35);background-color:rgba(96,165,250,0.10);}
   .st-contacted{color:var(--contacted);border-color:rgba(192,132,252,0.35);background-color:rgba(192,132,252,0.10);}
   .st-demoed{color:var(--demoed);border-color:rgba(245,158,11,0.35);background-color:rgba(245,158,11,0.10);}
+  .st-quote_sent{color:var(--quote_sent);border-color:rgba(56,189,248,0.35);background-color:rgba(56,189,248,0.10);}
   .st-proposal{color:var(--proposal);border-color:rgba(250,204,21,0.35);background-color:rgba(250,204,21,0.10);}
   .st-sold{color:var(--sold);border-color:rgba(74,222,128,0.35);background-color:rgba(74,222,128,0.10);}
   .st-lost{color:var(--lost);border-color:rgba(251,113,133,0.35);background-color:rgba(251,113,133,0.10);}
@@ -314,6 +315,7 @@
       {id:"lead",label:"New Lead"},
       {id:"contacted",label:"Contacted"},
       {id:"demoed",label:"Demoed"},
+      {id:"quote_sent",label:"Quote Sent"},
       {id:"proposal",label:"Proposal"},
       {id:"sold",label:"Sold"},
       {id:"lost",label:"Lost"}
@@ -460,7 +462,7 @@
        pipeline. A lead in a selling stage with no next action is called out as
        adrift rather than sitting quietly in the list. */
 
-    var SELLING_STAGES=["lead","contacted","demoed","proposal"];
+    var SELLING_STAGES=["lead","contacted","demoed","quote_sent","proposal"];
     function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
     /** Whole days from today; negative = overdue. Compared as dates, not timestamps. */
     function daysUntil(ymd){

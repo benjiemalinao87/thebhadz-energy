@@ -38,6 +38,16 @@
 
 .qb-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* Send result. Same token pairs as the flag rail, so it cannot repeat the
+   pinned-background/inherited-ink bug that made those unreadable in dark mode. */
+.qb-send-status {
+  margin-top: 10px; padding: 9px 11px; font-size: 12.5px; line-height: 1.45;
+  border-left: 4px solid var(--sun);
+  background: var(--ws-amber-soft, #fff8e6); color: var(--ws-copy, var(--ink));
+}
+.qb-send-status.good { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
+.qb-send-status.bad { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
+
 /* Gate + advisory banners. These are not decoration — they carry the Founder-OS
    rules that make a quote legal to send, so they stay loud.
    Background AND text colour both come from theme tokens: a tinted panel that pins

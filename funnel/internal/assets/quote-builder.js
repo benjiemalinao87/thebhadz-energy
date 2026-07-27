@@ -724,6 +724,168 @@
     }
   });
 
+  /* --------------------------------------------------- send to the customer */
+
+  /**
+   * Build the payload for /api/quote.
+   *
+   * The NUMBERS come from the model. The WORDS are read back out of the sheet
+   * that is already on screen — the brownout statement, the compliance
+   * checklist, the milestones, the warranties and the terms are lifted from the
+   * rendered DOM rather than written a second time here. That is deliberate:
+   * these are the sentences the Founder OS requires on a quote, and a second
+   * copy of them in a payload builder is a copy that will eventually disagree
+   * with the one the founder proof-read on screen.
+   */
+  function quotePayload(m) {
+    var sheet = el("qb-sheet");
+    var textOf = function (node) { return node ? node.innerText.replace(/\s+/g, " ").trim() : ""; };
+    var listOf = function (sel) {
+      return Array.prototype.map.call(sheet.querySelectorAll(sel), textOf).filter(Boolean);
+    };
+    // Both callouts share the .qs-brownout box style, so they are told apart by
+    // their heading rather than by document order.
+    var callout = function (heading) {
+      var found = "";
+      Array.prototype.forEach.call(sheet.querySelectorAll(".qs-brownout"), function (node) {
+        var strong = node.querySelector("strong");
+        if (!strong || strong.innerText.trim().toLowerCase().indexOf(heading) !== 0) return;
+        var copy = node.cloneNode(true);
+        var h = copy.querySelector("strong");
+        if (h) h.remove();
+        found = textOf(copy);
+      });
+      return found;
+    };
+    // A section of .qs-legal, located by its heading and read from what follows.
+    var legal = function (heading) {
+      var out = [];
+      Array.prototype.forEach.call(sheet.querySelectorAll(".qs-legal h3"), function (h3) {
+        if (h3.innerText.trim().toLowerCase().indexOf(heading) !== 0) return;
+        var next = h3.nextElementSibling;
+        if (!next) return;
+        if (next.tagName === "UL" || next.tagName === "OL") {
+          out = Array.prototype.map.call(next.querySelectorAll("li"), textOf);
+        } else {
+          out = [textOf(next)];
+        }
+      });
+      return out;
+    };
+
+    // The bill of materials, flattened to the rows the PDF draws. Same order and
+    // the same figures as bomRowsHtml — this is a shape change, not a recount.
+    var rows = [];
+    m.groups.forEach(function (g) {
+      if (g.name) rows.push({ kind: "group", label: g.name });
+      g.items.forEach(function (it) {
+        rows.push({
+          kind: "item", indent: !!g.name, label: it.label,
+          qty: it.qty, price: it.price, total: it.total, quoted: it.quoted,
+        });
+      });
+    });
+    rows.push({ kind: "subtotal", label: "MATERIALS SUBTOTAL", total: m.materials });
+    if (m.vatOn) {
+      rows.push({ kind: "group", label: "TAX" });
+      rows.push({ kind: "item", indent: true, label: "VAT 12%", qty: 1, price: m.vat, total: m.vat });
+    }
+    rows.push({ kind: "group", label: "OTHER COSTS" });
+    rows.push({ kind: "item", indent: true, label: "Fabrication, Delivery and Installation Fee", qty: 1, price: m.fee, total: m.fee });
+    rows.push({ kind: "total", label: "TOTAL", total: m.total });
+
+    var validity = parseInt(val("qb-validity"), 10) || 14;
+    var date = val("qb-date") || todayISO();
+
+    return {
+      customer: {
+        name: val("qb-customer"),
+        email: val("qb-email"),
+        phone: val("qb-phone"),
+        address: val("qb-address"),
+      },
+      quote: {
+        quoteNo: val("qb-quote-no"),
+        date: date,
+        validUntil: addDays(date, validity),
+        preparedBy: val("qb-prepared"),
+        packageLabel: SYSTEM_TYPES[m.type].label,
+        kwp: m.kwp,
+        panelSummary: m.panels + " x " + m.panel.watts + "W panels",
+        customerPrice: m.customerPrice,
+        savedPerMonth: m.savedPerMonth,
+        savingsBasis: "~" + Math.round(m.offsetKwh) + " kWh/mo at PHP " + m.tariff.toFixed(2) + "/kWh",
+        batteryLabel: m.batteryKwh > 0 ? m.batteryKwh.toFixed(1) + " kWh" : "None",
+        batteryNote: m.batteryKwh > 0 ? m.battery.label : "Daytime self-consumption",
+        hasBattery: m.batteryKwh > 0,
+        unquoted: m.unquoted,
+        rows: rows,
+        brownout: callout("what happens during a brownout"),
+        indicative: callout("indicative quotation"),
+        checklist: listOf(".qs-gate li"),
+        steps: listOf(".qs-steps li"),
+        warranties: legal("warranties"),
+        basis: (legal("basis of the savings estimate")[0] || ""),
+        terms: legal("terms and conditions"),
+      },
+    };
+  }
+
+  el("qb-send").addEventListener("click", function () {
+    var btn = el("qb-send");
+    var status = el("qb-send-status");
+    var m = current || compute();
+    var payload = quotePayload(m);
+
+    var say = function (kind, message) {
+      status.hidden = false;
+      status.className = "qb-send-status " + kind;
+      status.textContent = message;
+    };
+
+    if (!payload.customer.name) return say("bad", "Add the customer's name first — the quote is addressed to them.");
+    if (!payload.customer.email) return say("bad", "Add the customer's email address — that is where the quote goes.");
+    if (!payload.customer.phone) return say("bad", "Add a phone number — it is how an existing contact is matched.");
+    if (!payload.quote.preparedBy) return say("bad", "Put your name in “Prepared by” — a quote goes out attributable to a person.");
+
+    // Sending is not undoable from the customer's side, so it is confirmed once,
+    // with the two things that actually matter restated.
+    var confirmed = window.confirm(
+      "Email quote " + payload.quote.quoteNo + " to " + payload.customer.email + "?\n\n" +
+      "Contract price: PHP " + Math.round(m.customerPrice).toLocaleString("en-PH") +
+      (payload.quote.indicative ? "\nThis quote is stamped INDICATIVE." : "") +
+      "\n\nThey move to Quote Sent, with a follow-up due in 2 days."
+    );
+    if (!confirmed) return;
+
+    btn.disabled = true;
+    var was = btn.textContent;
+    btn.textContent = "Sending…";
+    say("busy", "Rendering the PDF and sending…");
+
+    fetch("/api/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.data.ok) {
+          say("bad", res.data && res.data.error ? res.data.error : "The quote could not be sent.");
+          return;
+        }
+        say("good",
+          "Sent to " + res.data.sentTo + " · " +
+          (res.data.createdContact ? "new contact created" : "existing contact updated") +
+          " · moved to Quote Sent · " + Math.round(res.data.bytes / 1024) + " KB PDF.");
+      })
+      .catch(function (err) { say("bad", "Network error: " + String(err && err.message)); })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = was;
+      });
+  });
+
   el("qb-reset-fee").addEventListener("click", function () {
     el("qb-fee").value = "";
     el("qb-price").value = "";

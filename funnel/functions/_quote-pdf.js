@@ -1,0 +1,251 @@
+/**
+ * The quotation, laid out on paper.
+ *
+ * This is the second renderer of the same quote — the first is the on-screen
+ * sheet in internal/assets/quote-builder.js. They deliberately share the MODEL
+ * (the client posts the computed figures; nothing is recalculated here), so the
+ * numbers cannot disagree. Only the layout is written twice, because a browser
+ * laying out HTML and a PDF placing glyphs are not the same machine.
+ *
+ * What must never diverge, and is asserted by /api/quote before this runs:
+ *   - the compliance checklist prints on every quote (Founder OS §7)
+ *   - a system with no battery prints the brownout truth (Founder OS §1.6)
+ *   - unconfirmed prices stamp the sheet INDICATIVE (Founder OS §7)
+ */
+import { A4, Page, buildPdf, textWidth, wrap } from "./_pdf.js";
+
+const M = 42;                       // page margin
+const RIGHT = A4.width - M;
+const INK = 0;
+const MUTED = 0.35;
+
+const peso = (n) => "PHP " + Number(n || 0).toLocaleString("en-PH", {
+  minimumFractionDigits: 2, maximumFractionDigits: 2,
+});
+const pesoShort = (n) => "PHP " + Math.round(Number(n || 0)).toLocaleString("en-PH");
+
+/** Column geometry for the bill-of-materials table. */
+const COL = {
+  item: M + 6,
+  qty: M + 330,
+  unit: M + 405,
+  total: RIGHT - 6,
+};
+const ROW_H = 13;
+
+export function renderQuotePdf(q) {
+  const pages = [];
+  let page = new Page(A4);
+  let y = M;
+  pages.push(page);
+
+  /** Start a new page when the next block would run past the bottom margin. */
+  const need = (space) => {
+    if (y + space <= A4.height - M) return;
+    page = new Page(A4);
+    pages.push(page);
+    y = M;
+    page.text("MACC Systems & Engineering Inc.", M, y + 8, { size: 8, gray: MUTED });
+    page.text("Quotation " + q.quoteNo + " (continued)", RIGHT, y + 8, { size: 8, gray: MUTED, align: "right" });
+    y += 20;
+  };
+
+  const para = (text, opts = {}) => {
+    const size = opts.size || 8.5;
+    const lines = wrap(text, RIGHT - M, size, opts.bold);
+    need(lines.length * (size + 3) + 4);
+    for (const line of lines) {
+      page.text(line, opts.x == null ? M : opts.x, y + size, { size, bold: opts.bold, gray: opts.gray });
+      y += size + 3;
+    }
+    y += opts.gap == null ? 4 : opts.gap;
+  };
+
+  const heading = (text) => {
+    need(24);
+    y += 6;
+    page.text(text.toUpperCase(), M, y + 9, { size: 9, bold: true });
+    y += 14;
+  };
+
+  // ---- letterhead ----------------------------------------------------------
+  page.text("MACC", M, y + 20, { size: 22, bold: true });
+  page.text("SYSTEMS & ENGINEERING INC.", M, y + 32, { size: 8, bold: true, gray: 0.25 });
+  page.text("Biliran Province, Philippines", M, y + 44, { size: 8, gray: MUTED });
+  page.text("Solar supply, fabrication and installation", M, y + 54, { size: 8, gray: MUTED });
+
+  page.text("QUOTATION", RIGHT, y + 12, { size: 11, bold: true, align: "right" });
+  page.text("No. " + q.quoteNo, RIGHT, y + 26, { size: 8.5, align: "right" });
+  page.text("Date: " + q.date, RIGHT, y + 37, { size: 8.5, align: "right" });
+  page.text("Valid until: " + q.validUntil, RIGHT, y + 48, { size: 8.5, align: "right" });
+  y += 62;
+  page.line(M, y, RIGHT, y, { lineWidth: 1.2 });
+  y += 16;
+
+  // ---- parties -------------------------------------------------------------
+  const half = (RIGHT - M - 14) / 2;
+  const boxTop = y;
+  const partyLines = [
+    ["PREPARED FOR", [q.customer.name, q.customer.address, q.customer.phone, q.customer.email].filter(Boolean)],
+    ["PREPARED BY", [q.preparedBy, "MACC Systems & Engineering Inc.", q.packageLabel + " package"].filter(Boolean)],
+  ];
+  let boxHeight = 0;
+  partyLines.forEach(([, lines]) => { boxHeight = Math.max(boxHeight, 20 + lines.length * 11 + 6); });
+  partyLines.forEach(([label, lines], i) => {
+    const x = M + i * (half + 14);
+    page.stroke(x, boxTop, half, boxHeight, { gray: 0.6 });
+    page.text(label, x + 7, boxTop + 12, { size: 7, bold: true, gray: 0.35 });
+    lines.forEach((line, n) => {
+      page.text(line, x + 7, boxTop + 25 + n * 11, { size: 8.5 });
+    });
+  });
+  y = boxTop + boxHeight + 16;
+
+  // ---- headline: price and the outcome it buys -----------------------------
+  // A price never appears without its outcome (Founder OS §3), so these live in
+  // one band and are written together.
+  const cells = [
+    ["TOTAL INVESTMENT", pesoShort(q.customerPrice), "All-in, installed"],
+    ["EST. MONTHLY SAVINGS", pesoShort(q.savedPerMonth), q.savingsBasis],
+    ["SYSTEM SIZE", q.kwp.toFixed(2) + " kWp", q.panelSummary],
+    ["BATTERY STORAGE", q.batteryLabel, q.batteryNote],
+  ];
+  const cw = (RIGHT - M) / 4;
+  const bandH = 40;
+  page.rect(M, y, cw, bandH, { rgb: [0.992, 0.953, 0.839] });
+  page.stroke(M, y, RIGHT - M, bandH, { gray: 0 });
+  cells.forEach(([label, value, note], i) => {
+    const x = M + i * cw;
+    if (i > 0) page.line(x, y, x, y + bandH, { gray: 0.8 });
+    page.text(label, x + 7, y + 12, { size: 6.5, bold: true, gray: 0.35 });
+    page.text(value, x + 7, y + 25, { size: 11, bold: true });
+    page.text(note, x + 7, y + 35, { size: 6.5, gray: 0.4 });
+  });
+  y += bandH + 16;
+
+  // ---- bill of materials ---------------------------------------------------
+  const tableHead = () => {
+    page.rect(M, y, RIGHT - M, ROW_H + 2, { gray: 0.93 });
+    page.stroke(M, y, RIGHT - M, ROW_H + 2, { gray: 0.55 });
+    page.text("Item", COL.item, y + 10, { size: 8, bold: true });
+    page.text("Qty", COL.qty, y + 10, { size: 8, bold: true });
+    page.text("Price/Unit", COL.unit, y + 10, { size: 8, bold: true });
+    page.text("Total Price", COL.total, y + 10, { size: 8, bold: true, align: "right" });
+    y += ROW_H + 2;
+  };
+  tableHead();
+
+  for (const row of q.rows) {
+    if (y + ROW_H > A4.height - M - 40) {
+      need(999);          // force the page break, then repeat the header
+      tableHead();
+    }
+    const isGroup = row.kind === "group";
+    const isSub = row.kind === "subtotal";
+    const isTotal = row.kind === "total";
+    if (isGroup) page.rect(M, y, RIGHT - M, ROW_H, { rgb: [0.874, 0.918, 0.855] });
+    else if (isSub) page.rect(M, y, RIGHT - M, ROW_H, { gray: 0.96 });
+    else if (isTotal) page.rect(M, y, RIGHT - M, ROW_H, { rgb: [0.992, 0.941, 0.812] });
+    page.stroke(M, y, RIGHT - M, ROW_H, { gray: 0.6 });
+
+    const bold = isGroup || isSub || isTotal;
+    const indent = row.kind === "item" && row.indent ? 12 : 0;
+    let label = row.label;
+    // The badge is part of the label so it cannot be separated from its price.
+    if (row.quoted === false) label += "  (INDICATIVE)";
+    const maxLabel = COL.qty - COL.item - 10 - indent;
+    while (label && textWidth(label, 8, bold) > maxLabel) label = label.slice(0, -2);
+    page.text(label, COL.item + indent, y + 9.5, { size: 8, bold });
+
+    if (row.qty != null) page.text(String(row.qty), COL.qty + 10, y + 9.5, { size: 8, bold, align: "center" });
+    if (row.price != null) page.text(row.price.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), COL.unit + 55, y + 9.5, { size: 8, bold, align: "right" });
+    if (row.total != null) page.text(row.total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), COL.total, y + 9.5, { size: 8, bold, align: "right" });
+    else if (isGroup) page.text("-", COL.total, y + 9.5, { size: 8, bold, align: "right" });
+    y += ROW_H;
+  }
+
+  // Contract price, set apart from the materials arithmetic above it: the price
+  // comes off the SC-06 ladder, not off this table.
+  page.rect(M, y, RIGHT - M, ROW_H + 4, { rgb: [0.992, 0.941, 0.812] });
+  page.stroke(M, y, RIGHT - M, ROW_H + 4, { gray: 0, lineWidth: 1 });
+  page.text("CONTRACT PRICE (fixed package)", COL.item, y + 11, { size: 9, bold: true });
+  page.text(peso(q.customerPrice), COL.total, y + 11, { size: 9, bold: true, align: "right" });
+  y += ROW_H + 4 + 16;
+
+  // ---- brownout truth ------------------------------------------------------
+  // Triggered by the ABSENCE OF A BATTERY, never by the package name: a hybrid
+  // quoted without storage backs nothing up either (Founder OS §1.6).
+  if (q.brownout) {
+    const lines = wrap(q.brownout, RIGHT - M - 18, 8);
+    const h = 16 + lines.length * 10 + 8;
+    need(h + 10);
+    page.stroke(M, y, RIGHT - M, h, { gray: 0, lineWidth: 1.2 });
+    page.text("WHAT HAPPENS DURING A BROWNOUT", M + 9, y + 13, { size: 7.5, bold: true });
+    lines.forEach((line, i) => page.text(line, M + 9, y + 25 + i * 10, { size: 8 }));
+    y += h + 12;
+  }
+
+  // ---- indicative stamp ----------------------------------------------------
+  if (q.indicative) {
+    const lines = wrap(q.indicative, RIGHT - M - 18, 8);
+    const h = 16 + lines.length * 10 + 8;
+    need(h + 10);
+    page.stroke(M, y, RIGHT - M, h, { gray: 0, lineWidth: 1.2 });
+    page.text("INDICATIVE QUOTATION", M + 9, y + 13, { size: 7.5, bold: true });
+    lines.forEach((line, i) => page.text(line, M + 9, y + 25 + i * 10, { size: 8 }));
+    y += h + 12;
+  }
+
+  // ---- compliance gate -----------------------------------------------------
+  // Prints on every quote. It cannot be switched off, and a deposit cannot be
+  // accepted until all of it is signed off (Founder OS §7).
+  {
+    const items = q.checklist.map((t) => wrap(t, RIGHT - M - 34, 8));
+    const h = 22 + items.reduce((n, l) => n + l.length * 10 + 3, 0) + 8;
+    need(h + 10);
+    page.stroke(M, y, RIGHT - M, h, { gray: 0, lineWidth: 1.2 });
+    page.text("COMPLIANCE CHECKLIST - COMPLETED BEFORE ANY DEPOSIT IS ACCEPTED", M + 9, y + 14, { size: 8, bold: true });
+    let iy = y + 27;
+    items.forEach((lines) => {
+      page.stroke(M + 12, iy - 6, 7, 7, { gray: 0 });
+      lines.forEach((line, i) => page.text(line, M + 26, iy + i * 10, { size: 8 }));
+      iy += lines.length * 10 + 3;
+    });
+    y += h + 12;
+  }
+
+  // ---- what happens next ---------------------------------------------------
+  heading("What happens next");
+  q.steps.forEach((step, i) => para((i + 1) + ".  " + step, { size: 8, gap: 1 }));
+  y += 6;
+
+  // ---- warranties, basis, terms -------------------------------------------
+  heading("Warranties");
+  q.warranties.forEach((w) => para("-  " + w, { size: 8, gap: 1 }));
+
+  heading("Basis of the savings estimate");
+  para(q.basis, { size: 8 });
+
+  if (q.terms && q.terms.length) {
+    heading("Terms");
+    q.terms.forEach((t) => para("-  " + t, { size: 8, gap: 1 }));
+  }
+
+  // ---- signatures ----------------------------------------------------------
+  need(60);
+  y += 14;
+  page.line(M, y, M + half, y, { gray: 0 });
+  page.line(M + half + 14, y, RIGHT, y, { gray: 0 });
+  page.text("Conforme - Customer signature over printed name / Date", M, y + 11, { size: 7.5 });
+  page.text("For MACC Systems & Engineering Inc. - " + q.preparedBy + " / Date", M + half + 14, y + 11, { size: 7.5 });
+  y += 26;
+
+  page.line(M, y, RIGHT, y, { gray: 0.75 });
+  wrap(
+    "This quotation is confidential and prepared solely for the named customer. Equipment prices marked " +
+    "indicative are market estimates pending supplier confirmation.",
+    RIGHT - M, 7
+  ).forEach((line, i) => page.text(line, M, y + 11 + i * 9, { size: 7, gray: 0.4 }));
+
+  return buildPdf(pages, { title: "Quotation " + q.quoteNo, author: "MACC Systems & Engineering Inc." });
+}
