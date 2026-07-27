@@ -80,26 +80,38 @@ function collectRow() {
   };
 }
 
+function showAppLink(text, url) {
+  const a = $('appLink');
+  a.textContent = text;
+  a.href = url;
+  a.hidden = false;
+}
+
 async function save() {
   const row = collectRow();
   if (!row.product && !row.description) {
     setStatus('Add at least a product name or description first.', 'err');
     return;
   }
-  const { webhookUrl } = await chrome.storage.sync.get({ webhookUrl: '' });
-  if (!webhookUrl) {
-    setStatus('Not connected to a Google Sheet yet — open settings and paste your Apps Script URL.', 'err');
+  const { appUrl } = await chrome.storage.sync.get({ appUrl: '' });
+  if (!appUrl) {
+    setStatus('Not connected yet — open settings and paste your Command Center URL.', 'err');
     $('openOptions2').hidden = false;
     return;
   }
   $('save').disabled = true;
+  $('appLink').hidden = true;
   setStatus('Saving…');
   try {
     const resp = await chrome.runtime.sendMessage({ type: 'save', row });
     if (resp && resp.ok) {
-      setStatus('Saved to the Google Sheet ✓', 'ok');
+      setStatus('Saved to the Command Center ✓', 'ok');
+      showAppLink('View captures in the Command Center →', appUrl + '/internal/captures');
+    } else if (resp && resp.queued && resp.error === 'not-signed-in') {
+      setStatus('You’re signed out of the Command Center — row queued (' + resp.queueSize + ' waiting). Sign in, then hit “Retry queued”.', 'warn');
+      showAppLink('Open the Command Center to sign in →', appUrl + '/internal/');
     } else if (resp && resp.queued) {
-      setStatus('Sheet unreachable — row queued on this device (' + resp.queueSize + ' waiting). Use “Retry queued” when back online.', 'warn');
+      setStatus('App unreachable — row queued on this device (' + resp.queueSize + ' waiting). Use “Retry queued” when back online.', 'warn');
     } else {
       setStatus('Save failed: ' + ((resp && resp.error) || 'unknown error'), 'err');
     }
@@ -132,7 +144,11 @@ async function retryQueue() {
   const resp = await chrome.runtime.sendMessage({ type: 'retryQueue' });
   $('retry').disabled = false;
   if (resp && resp.ok) setStatus(resp.flushed ? 'Uploaded ' + resp.flushed + ' queued row(s) ✓' : 'Queue is empty.', 'ok');
-  else setStatus('Still unreachable: ' + ((resp && resp.error) || 'unknown error'), 'warn');
+  else if (resp && resp.error === 'not-signed-in') {
+    const { appUrl } = await chrome.storage.sync.get({ appUrl: '' });
+    setStatus('Still signed out of the Command Center — sign in, then retry.', 'warn');
+    if (appUrl) showAppLink('Open the Command Center to sign in →', appUrl + '/internal/');
+  } else setStatus('Still unreachable: ' + ((resp && resp.error) || 'unknown error'), 'warn');
   refreshQueue();
 }
 

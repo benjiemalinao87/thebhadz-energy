@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MACC Product Capture",
-  "version": "1.0.0",
-  "description": "One-click capture of product & supplier info (Alibaba, Facebook, any product page) into the MACC sourcing Google Sheet.",
+  "version": "2.0.0",
+  "description": "One-click capture of product & supplier info (Alibaba, Facebook, any product page) into the MACC Command Center.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -10,7 +10,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "Capture product to Google Sheet",
+    "default_title": "Capture product to the Command Center",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -27,8 +27,5 @@
     "open_in_tab": true
   },
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": [
-    "https://script.google.com/*",
-    "https://script.googleusercontent.com/*"
-  ]
+  "optional_host_permissions": ["https://*/*", "http://localhost/*"]
 }

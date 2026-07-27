@@ -132,6 +132,13 @@ export const SECTIONS = [
     apis: [],
   },
   {
+    key: "captures",
+    label: "Product captures (supplier sourcing)",
+    group: "Research",
+    pages: ["captures"],
+    apis: ["/api/captures"],
+  },
+  {
     key: "engineering",
     label: "Engineering file (panel design, BOM, build)",
     group: "Engineering",

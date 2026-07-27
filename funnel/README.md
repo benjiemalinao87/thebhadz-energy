@@ -35,7 +35,7 @@ funnel/
 │   │   └── activity.js        # audit trail (all founders for master, own rows otherwise)
 │   └── internal/_middleware.js  # gate: valid session or redirect to /login
 ├── wrangler.toml              # D1 binding (DB) + R2 binding (NOTES_R2 → solar-city-notes)
-├── schema.sql                 # leads, notes, finance, install-ops + users/sessions/activity
+├── schema.sql                 # leads, notes, finance, install-ops, product captures + users/sessions/activity
 ├── _headers                   # security + cache headers
 └── README.md
 ```
@@ -263,6 +263,19 @@ Query leads directly anytime:
 ```bash
 npx wrangler d1 execute solar-city-leads --remote --command "SELECT name, phone, stage FROM leads ORDER BY created_at DESC;"
 ```
+
+### Product captures (D1-backed, fed by the browser extension)
+
+Supplier/product research clipped from the web lands in the `product_captures` table via
+`POST /api/captures` and shows on **/internal/captures** (SC-19 · Product Captures): search,
+expand a row for description/notes, annotate, delete, export CSV. Rows are created by the
+**MACC Product Capture** Chrome extension (`tools/product-scraper-extension` in the repo
+root — its README covers install and use). The extension sends the founder's own session
+cookie (`credentials: 'include'`), so there is no webhook secret: `/api/captures` is gated
+by the same founder auth as every other endpoint, each capture is attributed to the
+signed-in founder, and saves appear in the activity log. The section key is `captures`, so
+it can be hidden per-account like any other tool. Apply `schema.sql` (command above) once
+before first use.
 
 ### Team notes (D1 + R2-backed)
 

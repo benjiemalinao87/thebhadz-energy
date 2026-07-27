@@ -401,3 +401,32 @@ CREATE TABLE IF NOT EXISTS price_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_price_items_kind ON price_items(kind);
+
+-- Product/supplier captures clipped from the web by the MACC Product Capture
+-- browser extension (tools/product-scraper-extension → POST /api/captures).
+-- Free-text columns on purpose: a capture is field evidence ("US $28.50 - 32.00
+-- / piece"), not a normalized price — the BOM convention is that every supplier
+-- figure carries its date and source, which captured_at + url provide.
+CREATE TABLE IF NOT EXISTS product_captures (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  captured_at  TEXT NOT NULL,              -- ISO timestamp stamped by the extension at save
+  brand        TEXT NOT NULL DEFAULT '',
+  product      TEXT NOT NULL DEFAULT '',
+  description  TEXT NOT NULL DEFAULT '',
+  cost         TEXT NOT NULL DEFAULT '',   -- verbatim price text, ranges/units included
+  currency     TEXT NOT NULL DEFAULT '',
+  location     TEXT NOT NULL DEFAULT '',
+  supplier     TEXT NOT NULL DEFAULT '',
+  moq          TEXT NOT NULL DEFAULT '',
+  source       TEXT NOT NULL DEFAULT '',   -- hostname (www.alibaba.com, facebook.com …)
+  url          TEXT NOT NULL DEFAULT '',
+  image        TEXT NOT NULL DEFAULT '',
+  other        TEXT NOT NULL DEFAULT '',   -- auto-collected extras, one per line
+  notes        TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',   -- founder name from the session, never the body
+  created_at   TEXT NOT NULL,
+  updated_at   TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_captures_created ON product_captures(created_at);
+CREATE INDEX IF NOT EXISTS idx_captures_source ON product_captures(source);

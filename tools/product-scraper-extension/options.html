@@ -8,19 +8,17 @@
 <body class="options">
 <header>
   <img src="icons/icon32.png" alt="">
-  <div><strong>Product Capture — Settings</strong><span>MACC sourcing → Google Sheet</span></div>
+  <div><strong>Product Capture — Settings</strong><span>page → MACC Command Center</span></div>
 </header>
 <main>
-  <label>Apps Script Web App URL
-    <input id="webhookUrl" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">
-    <span class="hint">From your Google Sheet: Extensions → Apps Script → Deploy → Web app (Execute as: Me, Who has access: Anyone). Full steps below and in README.md.</span>
-  </label>
-  <label>Shared secret (optional)
-    <input id="secret" placeholder="Leave empty unless you set SECRET in Code.gs" spellcheck="false">
+  <label>Command Center URL
+    <input id="appUrl" placeholder="https://your-funnel-domain.example (or …pages.dev)" spellcheck="false">
+    <span class="hint">The address of the deployed funnel app — the same one you open for /internal. Saving asks Chrome for permission to talk to that site; captures authenticate with your own founder sign-in there, so no extra password is needed.</span>
   </label>
   <div class="row">
     <button id="saveBtn" class="primary" type="button">Save settings</button>
-    <button id="testBtn" type="button">Send test row</button>
+    <button id="testBtn" type="button">Test connection</button>
+    <button id="openAppBtn" type="button">Open Command Center</button>
     <span id="status" class="status"></span>
   </div>
 
@@ -33,11 +31,11 @@
 
   <h2>Quick setup recap</h2>
   <ol>
-    <li>Create (or open) the team Google Sheet.</li>
-    <li>In the sheet: <strong>Extensions → Apps Script</strong>, delete the placeholder code, paste the contents of <code>apps-script/Code.gs</code> from this extension’s folder, and save.</li>
-    <li><strong>Deploy → New deployment → Web app</strong> → Execute as <strong>Me</strong> → Who has access <strong>Anyone</strong> → Deploy, then authorize when Google asks.</li>
-    <li>Copy the <code>/exec</code> URL into the field above, save, then click <strong>Send test row</strong> — a TEST row should appear in the sheet’s <code>Products</code> tab.</li>
-    <li>Any time you edit Code.gs later: <strong>Deploy → Manage deployments → ✏️ → Version: New version</strong>. The old URL keeps serving old code until you do.</li>
+    <li>One-time, server side (ships with the repo): apply <code>funnel/schema.sql</code> to D1 and deploy the funnel app — full commands in this folder’s README.md.</li>
+    <li>Paste the deployed app’s URL above and <strong>Save settings</strong> — allow the permission prompt so the extension may reach that site.</li>
+    <li>Sign in to the Command Center in this browser (your own founder email + password).</li>
+    <li><strong>Test connection</strong> — it should report you’re signed in and the captures API is reachable.</li>
+    <li>Captured rows appear on <strong>/internal/captures</strong> (SC-19 · Product Captures), attributed to whoever is signed in.</li>
   </ol>
 </main>
 <script src="options.js"></script>

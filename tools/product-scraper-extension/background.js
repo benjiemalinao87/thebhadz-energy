@@ -1,8 +1,19 @@
-// Service worker: owns the POST to the Apps Script web app so an in-flight save
-// survives the popup closing, and keeps the offline queue + toolbar badge.
+// Service worker: owns the POST to the Command Center's /api/captures so an
+// in-flight save survives the popup closing, and keeps the offline queue + badge.
+//
+// Auth: requests are sent with credentials:'include', so the founder's own
+// sc_founder session cookie signs them — the same login as /internal, giving
+// per-founder attribution and the activity log for free. That requires the
+// founder to be signed in to the Command Center in this browser profile, and the
+// extension to hold (optional) host permission for the app's origin — both are
+// arranged by the options page.
 
 async function getSettings() {
-  return chrome.storage.sync.get({ webhookUrl: '', secret: '' });
+  return chrome.storage.sync.get({ appUrl: '' });
+}
+
+function capturesEndpoint(appUrl) {
+  return appUrl.replace(/\/+$/, '') + '/api/captures';
 }
 
 async function getQueue() {
@@ -22,28 +33,28 @@ async function updateBadge(n) {
   } catch (e) { /* badge is cosmetic */ }
 }
 
-async function postRows(rows, extra) {
-  const { webhookUrl, secret } = await getSettings();
-  if (!webhookUrl) return { ok: false, error: 'no-webhook' };
+async function callApp(method, query, body) {
+  const { appUrl } = await getSettings();
+  if (!appUrl) return { ok: false, error: 'no-app' };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 20000);
   try {
-    // text/plain avoids a CORS preflight, which Apps Script web apps can't answer.
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      redirect: 'follow',
+    const res = await fetch(capturesEndpoint(appUrl) + (query || ''), {
+      method,
+      credentials: 'include',
       signal: ctrl.signal,
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(Object.assign({ secret, rows }, extra || {}))
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined
     });
+    if (res.status === 401) return { ok: false, error: 'not-signed-in' };
     const text = await res.text();
-    if (!res.ok) return { ok: false, error: 'HTTP ' + res.status, network: res.status >= 500 };
     let parsed;
     try { parsed = JSON.parse(text); } catch (e) {
-      return { ok: false, error: 'Unexpected response (a Google login page?) — redeploy the web app with access set to “Anyone”.' };
+      return { ok: false, error: 'Unexpected response from ' + new URL(capturesEndpoint(appUrl)).host + ' — is the URL your Command Center deployment?' };
     }
+    if (!res.ok) return { ok: false, error: (parsed && parsed.error) || 'HTTP ' + res.status, network: res.status >= 500 };
     if (parsed && parsed.ok) return parsed;
-    return { ok: false, error: (parsed && parsed.error) || 'Apps Script reported failure' };
+    return { ok: false, error: (parsed && parsed.error) || 'The app reported failure' };
   } catch (e) {
     const msg = e && e.name === 'AbortError' ? 'Timed out after 20s' : String((e && e.message) || e);
     return { ok: false, error: msg, network: true };
@@ -53,9 +64,11 @@ async function postRows(rows, extra) {
 }
 
 async function handleSave(row) {
-  const r = await postRows([row]);
+  const r = await callApp('POST', '', { rows: [row] });
   if (r.ok) return { ok: true, added: r.added };
-  if (r.error === 'no-webhook') return r;
+  if (r.error === 'no-app') return r;
+  // Auth lapses and network failures both queue: the capture is preserved, the
+  // founder signs in (or gets signal back) and hits "Retry queued".
   const queue = await getQueue();
   queue.push(row);
   await setQueue(queue);
@@ -65,7 +78,7 @@ async function handleSave(row) {
 async function handleRetry() {
   const queue = await getQueue();
   if (!queue.length) return { ok: true, flushed: 0, queueSize: 0 };
-  const r = await postRows(queue);
+  const r = await callApp('POST', '', { rows: queue });
   if (r.ok) {
     await setQueue([]);
     return { ok: true, flushed: queue.length, queueSize: 0 };
@@ -78,7 +91,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || !msg.type) return { ok: false, error: 'empty message' };
     if (msg.type === 'save') return handleSave(msg.row);
     if (msg.type === 'retryQueue') return handleRetry();
-    if (msg.type === 'testConnection') return postRows([], { test: true });
+    if (msg.type === 'testConnection') return callApp('GET', '?limit=1');
     if (msg.type === 'clearQueue') { await setQueue([]); return { ok: true }; }
     return { ok: false, error: 'unknown message: ' + msg.type };
   };
