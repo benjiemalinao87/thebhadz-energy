@@ -235,6 +235,7 @@ export function publicUser(row) {
     active: Number(row.active) === 1,
     must_change: Number(row.must_change) === 1,
     hidden_pages: parseHiddenPages(row.hidden_pages),
+    mailbox: row.mailbox || null,
     last_login_at: row.last_login_at || null,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -304,13 +305,20 @@ export async function ensureAuthSchema(env) {
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id)`),
   ]);
 
-  // Migration for databases created before per-account section visibility. SQLite has
-  // no ADD COLUMN IF NOT EXISTS, and a failing statement aborts a batch, so this runs
+  // Migrations for databases created before newer columns. SQLite has no
+  // ADD COLUMN IF NOT EXISTS, and a failing statement aborts a batch, so each runs
   // on its own and treats "duplicate column" as success.
-  try {
-    await env.DB.prepare(`ALTER TABLE users ADD COLUMN hidden_pages TEXT NOT NULL DEFAULT '[]'`).run();
-  } catch (error) {
-    if (!/duplicate column/i.test(String(error && error.message))) throw error;
+  const migrations = [
+    `ALTER TABLE users ADD COLUMN hidden_pages TEXT NOT NULL DEFAULT '[]'`,
+    // Per-founder personal mailbox address (see schema.sql).
+    `ALTER TABLE users ADD COLUMN mailbox TEXT`,
+  ];
+  for (const sql of migrations) {
+    try {
+      await env.DB.prepare(sql).run();
+    } catch (error) {
+      if (!/duplicate column/i.test(String(error && error.message))) throw error;
+    }
   }
 }
 
@@ -501,20 +509,31 @@ export async function resolveSession(request, env) {
   const id = await sessionIdFromToken(getCookie(request, COOKIE_NAME), env.AUTH_SECRET);
   if (!id) return null;
 
-  let row;
-  try {
-    row = await env.DB.prepare(
+  const sessionQuery = () =>
+    env.DB.prepare(
       `SELECT s.id AS session_id, s.expires_at, s.last_seen_at,
               u.id, u.email, u.name, u.role, u.active, u.must_change, u.hidden_pages,
-              u.last_login_at, u.created_by, u.created_at, u.updated_at
+              u.mailbox, u.last_login_at, u.created_by, u.created_at, u.updated_at
        FROM user_sessions s JOIN users u ON u.id = s.user_id
        WHERE s.id = ?`
     )
       .bind(id)
       .first();
+
+  let row;
+  try {
+    row = await sessionQuery();
   } catch {
-    // Tables not created yet — treat as signed out rather than 500 the whole site.
-    return null;
+    // Missing table, or a column this code selects that predates the deployed
+    // database (e.g. users.mailbox). Run the idempotent schema pass and retry once,
+    // so a schema-widening deploy doesn't sign every open session out; if it still
+    // fails, treat as signed out rather than 500 the whole site.
+    try {
+      await ensureAuthSchema(env);
+      row = await sessionQuery();
+    } catch {
+      return null;
+    }
   }
   if (!row) return null;
 

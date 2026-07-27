@@ -14,8 +14,17 @@ compatibility_date = "2025-07-01"
 # The list of verified destination addresses lives in a var so it can be changed
 # without touching code. Keep these in sync with the account's verified
 # Destination Addresses (Email Routing -> Destination Addresses).
+#
+# PERSONAL_FORWARDS maps each founder's personal company address to their own
+# Gmail — mail to a personal address forwards ONLY to its owner, not the whole
+# team. Format: semicolon-separated `personal=gmail` pairs. Keep the left side in
+# sync with users.mailbox (set in /internal/team.html), and wire one Email Routing
+# rule per personal address to this worker on the macc-inc.com zone (Email Routing
+# must be enabled there first). Example:
+#   PERSONAL_FORWARDS = "benjie@macc-inc.com=benjiemalinao87@gmail.com;jethro@macc-inc.com=androidjeth@gmail.com"
 [vars]
 FORWARD_TO = "androidjeth@gmail.com,aver.corpin@gmail.com,benjiemalinao87@gmail.com,engr.juncab@gmail.com"
+PERSONAL_FORWARDS = ""
 
 # Same D1 database the funnel Pages project uses, so /internal/mail.html can read
 # inbound mail. Writing here is best-effort: if D1 is down the forward still happens.

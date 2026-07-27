@@ -173,6 +173,7 @@
     var me = state.me;
     els.meName.textContent = me.name;
     els.meMeta.textContent = me.email + " · " + roleLabel(me.role) +
+      (me.mailbox ? " · mailbox " + me.mailbox : "") +
       " · last sign-in " + (me.last_login_at ? when(me.last_login_at) : "just now") +
       (me.must_change ? " · temporary password in use" : "");
     els.mustChange.hidden = !me.must_change || state.onSharedLogin;
@@ -250,6 +251,7 @@
       button("rename", u.id, "Rename"),
       button("sections", u.id, hiddenCount ? "Sections · " + hiddenCount + " hidden" : "Sections"),
     ];
+    if (!u.is_shared_login) actions.push(button("mailbox", u.id, u.mailbox ? "Mailbox" : "Set mailbox"));
     if (u.is_shared_login) {
       actions.push(button("toggle", u.id, u.active ? "Switch off shared access" : "Switch shared access on"));
     } else {
@@ -274,7 +276,8 @@
     return '<tr><td><strong>' + html(u.name) + '</strong>' +
       (u.is_self ? ' <span class="ops-pill">You</span>' : "") +
       (u.is_shared_login ? ' <span class="ops-pill pending">Shared</span>' : "") +
-      '<div class="muted">' + html(u.email) + '</div></td>' +
+      '<div class="muted">' + html(u.email) + '</div>' +
+      (u.mailbox ? '<div class="muted">✉ ' + html(u.mailbox) + '</div>' : "") + '</td>' +
       '<td>' + html(u.is_shared_login ? "Shared login" : roleLabel(u.role)) + roleNote + access + '</td>' +
       '<td>' + badges + (u.failed_count ? '<div class="muted">' + u.failed_count + ' failed attempt(s)</div>' : "") + '</td>' +
       '<td>' + html(u.last_login_at ? when(u.last_login_at) : "Never") + '</td>' +
@@ -471,6 +474,19 @@
         var name = prompt("Display name for " + user.email, user.name);
         if (name === null || !name.trim()) return;
         await api("/api/users", "PATCH", { id: id, name: name.trim() });
+      } else if (act === "mailbox") {
+        var suggested = user.mailbox ||
+          (user.name.trim().split(/\s+/)[0] || "").toLowerCase().replace(/[^a-z0-9.-]/g, "") + "@macc-inc.com";
+        var addr = prompt(
+          "Personal mailbox address for " + user.name + " (must be @macc-inc.com).\n\n" +
+          "Mail to this address shows only in their own mailbox on the Mail page, and they can send as it. " +
+          "Leave empty and press OK to remove the mailbox.\n\n" +
+          "Remember to add the matching Email Routing rule and PERSONAL_FORWARDS entry " +
+          "on the hello-fanout Worker so inbound mail actually arrives (see funnel/README.md).",
+          suggested
+        );
+        if (addr === null) return;
+        await api("/api/users", "PATCH", { id: id, mailbox: addr.trim() });
       } else if (act === "reset") {
         var suggestion = strongPassword();
         var next = prompt("New temporary password for " + user.name +

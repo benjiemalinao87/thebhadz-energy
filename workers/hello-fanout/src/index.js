@@ -1,20 +1,31 @@
 /**
- * Email Routing fan-out worker for hello@ and main@maccsyseng.com.
+ * Email Routing fan-out worker for the company addresses (hello@ and
+ * main@maccsyseng.com) AND the founders' personal addresses (@macc-inc.com,
+ * one routing rule per address pointing at this same worker).
  *
  * Two jobs, in priority order:
- *   1. FORWARD to the founders' Gmail inboxes. This is the job that must never
- *      break — Gmail holds the real copy, including attachments, and is what we
- *      fall back on for anything that matters (SEC/government correspondence).
- *   2. STORE a copy in D1 so /internal/mail.html can show a shared inbox.
- *      Best-effort: a D1 failure must never cost us a delivery.
+ *   1. FORWARD to Gmail. This is the job that must never break — Gmail holds the
+ *      real copy, including attachments, and is what we fall back on for anything
+ *      that matters (SEC/government correspondence). Company addresses fan out to
+ *      EVERY founder's Gmail (FORWARD_TO); a personal address forwards ONLY to its
+ *      owner's Gmail (PERSONAL_FORWARDS) — a founder's personal mail must not land
+ *      in the whole team's inboxes.
+ *   2. STORE a copy in D1 so /internal/mail.html can show it. Best-effort: a D1
+ *      failure must never cost us a delivery. The stored `mailbox` column is the
+ *      address the mail arrived at, which is also what /api/mail uses to keep a
+ *      personal mailbox private to the account that claims it (users.mailbox).
  *
  * Cloudflare's message.forward() forwards to ONE recipient per call, so to copy
  * an incoming email to several inboxes we call it once per address.
  *
- * Destinations come from the FORWARD_TO var (see wrangler.toml) as a
- * comma-separated list. Every address MUST be a *verified* Destination Address
- * on the account — forwarding to a Pending/unverified address fails silently
- * and that recipient just never gets the mail.
+ * Destinations come from wrangler.toml vars:
+ *   FORWARD_TO        — comma-separated Gmail list for the shared company addresses.
+ *   PERSONAL_FORWARDS — semicolon-separated `personal=gmail` pairs, e.g.
+ *                       "benjie@macc-inc.com=benjiemalinao87@gmail.com;...".
+ *                       Keep the left side in sync with users.mailbox in D1.
+ * Every destination MUST be a *verified* Destination Address on the account —
+ * forwarding to a Pending/unverified address fails silently and that recipient
+ * just never gets the mail.
  */
 import PostalMime from "postal-mime";
 
@@ -60,12 +71,30 @@ async function storeInbound(env, message, parsed) {
     .run();
 }
 
+/** Parse PERSONAL_FORWARDS ("addr=gmail;addr2=gmail2") into a lowercase map. */
+function personalRoutes(env) {
+  const map = {};
+  for (const pair of String(env.PERSONAL_FORWARDS || "").split(";")) {
+    const idx = pair.indexOf("=");
+    if (idx <= 0) continue;
+    const personal = pair.slice(0, idx).trim().toLowerCase();
+    const dest = pair.slice(idx + 1).trim();
+    if (personal && dest) map[personal] = dest;
+  }
+  return map;
+}
+
 export default {
   async email(message, env, ctx) {
-    const destinations = (env.FORWARD_TO || "")
-      .split(",")
-      .map((addr) => addr.trim())
-      .filter(Boolean);
+    // A personal address forwards to its owner alone; everything else is a company
+    // address and fans out to the whole team.
+    const personalDest = personalRoutes(env)[String(message.to || "").toLowerCase()];
+    const destinations = personalDest
+      ? [personalDest]
+      : (env.FORWARD_TO || "")
+          .split(",")
+          .map((addr) => addr.trim())
+          .filter(Boolean);
 
     // Parse before forwarding: message.raw is single-use, and forwarding first
     // would leave nothing to read. If parsing fails we still forward.
