@@ -547,8 +547,11 @@
           kv("Phone",'<a href="'+telHref(l.phone)+'">'+esc(l.phone||"—")+'</a>')+
           (l.email?kv("Email",'<a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>'):"")+
           (l.goal?kv("Goal",esc(l.goal)):"")+
+          (l.address?kv("Address",'<a href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'" target="_blank" rel="noopener">'+esc(l.address)+'</a>'):"")+
           (l.monthly_bill?kv("Bill",esc(l.monthly_bill)):"")+
           (l.package?kv("Package",esc(l.package)):"")+
+          (l.current_solution?kv("Doing now",esc(l.current_solution)):"")+
+          ((l.interview_opt_in==1||l.interview_opt_in===true)?kv("Interview","Open to a 15-min call"):"")+
           kv("Financing",isFin(l)?"Yes — wants installments":"No")+
           ((l.utm_source||l.source)?kv("Source",esc(l.utm_source||l.source)):"")+
           kv("Received",fmtDate(l.created_at))+

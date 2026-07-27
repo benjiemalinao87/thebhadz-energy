@@ -6,9 +6,15 @@ CREATE TABLE IF NOT EXISTS leads (
   phone         TEXT NOT NULL,
   email         TEXT,
   goal          TEXT,
+  address       TEXT,                     -- site address; the survey cannot be booked without it
   monthly_bill  TEXT,
   package       TEXT,
   financing     INTEGER DEFAULT 0,        -- 0/1
+  -- Research fields (Founder OS §2: the lead form is a research instrument).
+  -- What they already do about the problem tells us whether the pain is real;
+  -- prior spend on a genset/UPS/quote is the signal, a complaint is not.
+  current_solution  TEXT,
+  interview_opt_in  INTEGER DEFAULT 0,    -- 0/1: will talk to us even if they never buy
   stage         TEXT NOT NULL DEFAULT 'lead',  -- lead|contacted|demoed|quote_sent|proposal|sold|lost
   notes         TEXT,
   -- The ONE next step that advances this lead, plus when it is due and who owns it.

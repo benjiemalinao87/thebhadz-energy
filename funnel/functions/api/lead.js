@@ -24,6 +24,32 @@ function json(body, status = 200) {
   });
 }
 
+/**
+ * Add the columns this endpoint writes to databases created before they existed.
+ *
+ * Same pattern (and same reasoning) as ensureNextActionColumns in leads.js: SQLite has
+ * no ADD COLUMN IF NOT EXISTS and a failing statement aborts a batch, so each runs alone
+ * and "duplicate column" counts as success. Without this, deploying the wider INSERT
+ * below against an older database would drop every lead on the floor.
+ */
+let schemaChecked = false;
+async function ensureLeadColumns(env) {
+  if (schemaChecked) return;
+  const columns = [
+    "ALTER TABLE leads ADD COLUMN address TEXT",
+    "ALTER TABLE leads ADD COLUMN current_solution TEXT",
+    "ALTER TABLE leads ADD COLUMN interview_opt_in INTEGER DEFAULT 0",
+  ];
+  for (const sql of columns) {
+    try {
+      await env.DB.prepare(sql).run();
+    } catch (err) {
+      if (!/duplicate column/i.test(String(err && err.message))) throw err;
+    }
+  }
+  schemaChecked = true;
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -56,9 +82,17 @@ export async function onRequest(context) {
     phone,
     email: (data.email || "").toString().trim(),
     goal,
+    // The survey cannot be booked without this. It was collected by the form and
+    // silently discarded here until 2026-07-27.
+    address: (data.address || "").toString().trim(),
     monthly_bill: (data.monthly_bill || "").toString(),
     package: (data.package || "").toString(),
     financing: data.financing === "yes" || data.financing === true ? 1 : 0,
+    // Research fields: what they already do about the problem (prior spend is the
+    // signal that the pain is real), and whether they'll talk to us even if they
+    // never buy.
+    current_solution: (data.current_solution || "").toString().trim(),
+    interview_opt_in: data.interview === "yes" || data.interview === true ? 1 : 0,
     source: (data.source || "funnel").toString(),
     utm_source: (data.utm_source || "").toString(),
     utm_medium: (data.utm_medium || "").toString(),
@@ -73,16 +107,20 @@ export async function onRequest(context) {
   // --- Store in D1 ---
   if (env.DB) {
     try {
+      await ensureLeadColumns(env);
       await env.DB.prepare(
         `INSERT INTO leads
-          (name, phone, email, goal, monthly_bill, package, financing, stage,
+          (name, phone, email, goal, address, monthly_bill, package, financing,
+           current_solution, interview_opt_in, stage,
            source, utm_source, utm_medium, utm_campaign, referrer, ip, country,
            created_at, updated_at)
-         VALUES (?,?,?,?,?,?,?, 'lead', ?,?,?,?,?,?,?, ?,?)`
+         VALUES (?,?,?,?,?,?,?,?,?,?, 'lead', ?,?,?,?,?,?,?, ?,?)`
       )
         .bind(
-          lead.name, lead.phone, lead.email, lead.goal, lead.monthly_bill,
-          lead.package, lead.financing, lead.source, lead.utm_source,
+          lead.name, lead.phone, lead.email, lead.goal, lead.address,
+          lead.monthly_bill, lead.package, lead.financing,
+          lead.current_solution, lead.interview_opt_in,
+          lead.source, lead.utm_source,
           lead.utm_medium, lead.utm_campaign, lead.referrer, lead.ip,
           lead.country, lead.created_at, lead.updated_at
         )
@@ -101,6 +139,8 @@ export async function onRequest(context) {
       `• ${lead.name} — ${lead.phone}\n` +
       `• Goal: ${lead.goal}${lead.package ? ` · ${lead.package}` : ""}\n` +
       `• Bill: ${lead.monthly_bill || "n/a"}${lead.financing ? " · wants financing" : ""}\n` +
+      `• Address: ${lead.address || "not given"}\n` +
+      `• Doing now: ${lead.current_solution || "not given"}${lead.interview_opt_in ? " · open to an interview" : ""}\n` +
       `• Source: ${lead.utm_source || lead.source}`;
     tasks.push(
       fetch(env.LEAD_WEBHOOK_URL, {

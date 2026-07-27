@@ -32,6 +32,9 @@ async function ensureNextActionColumns(env) {
     "ALTER TABLE leads ADD COLUMN next_action TEXT",
     "ALTER TABLE leads ADD COLUMN next_action_due TEXT",
     "ALTER TABLE leads ADD COLUMN next_action_owner TEXT",
+    "ALTER TABLE leads ADD COLUMN address TEXT",
+    "ALTER TABLE leads ADD COLUMN current_solution TEXT",
+    "ALTER TABLE leads ADD COLUMN interview_opt_in INTEGER DEFAULT 0",
   ];
   for (const sql of columns) {
     try {
@@ -86,7 +89,8 @@ export async function onRequest(context) {
   // ---- List ----
   if (method === "GET") {
     const { results } = await env.DB.prepare(
-      `SELECT id, name, phone, email, goal, monthly_bill, package, financing,
+      `SELECT id, name, phone, email, goal, address, monthly_bill, package, financing,
+              current_solution, interview_opt_in,
               stage, notes, next_action, next_action_due, next_action_owner,
               source, utm_source, created_at, updated_at
        FROM leads ORDER BY datetime(created_at) DESC`

@@ -376,6 +376,18 @@
             </div>
 
             <div class="field full">
+              <label for="f-current">What are you doing about it right now?</label>
+              <select id="f-current" name="current_solution">
+                <option value="">Select one</option>
+                <option>Nothing yet - just paying the bill</option>
+                <option>Running a generator</option>
+                <option>Using a UPS or battery backup</option>
+                <option>Cutting back on appliance use</option>
+                <option>Got a solar quote before and didn't push through</option>
+              </select>
+            </div>
+
+            <div class="field full">
               <span class="grp-label">Preferred package</span>
               <select id="f-package" name="package">
                 <option value="">Not sure yet - recommend one</option>
@@ -389,6 +401,11 @@
             <label class="finance-check">
               <input type="checkbox" name="financing" value="yes">
               <span>I'd like monthly installment options</span>
+            </label>
+
+            <label class="finance-check">
+              <input type="checkbox" name="interview" value="yes">
+              <span>I'm open to a 15-minute call about our power situation, even if I don't buy.</span>
             </label>
 
             <button class="btn btn-primary btn-block btn-lg" type="submit" id="submit-btn">
