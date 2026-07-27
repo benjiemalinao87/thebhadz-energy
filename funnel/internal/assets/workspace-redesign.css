@@ -19,6 +19,9 @@
   --ws-green-soft: #eaf5ee;
   --ws-red: #b5372b;
   --ws-red-soft: #fff0ed;
+  /* Amber as TEXT. --ws-amber is a fill colour and drops to ~2:1 as ink on the light
+     canvas, so anything that writes a warning in words uses this instead. */
+  --ws-warn-ink: #8a5b00;
   --ws-blueprint: #10233f;
   --ws-radius: 10px;
   --ws-shadow: 0 1px 1px rgba(7, 63, 67, .05), 0 10px 28px rgba(7, 63, 67, .06);
@@ -56,6 +59,7 @@ html[data-theme="dark"] {
   --ws-green-soft: #123326;
   --ws-red: #f07a67;
   --ws-red-soft: #391c19;
+  --ws-warn-ink: #f0c669;
   --ws-blueprint: #081323;
   --ws-shadow: 0 1px 2px rgba(0,0,0,.18), 0 14px 34px -22px rgba(0,0,0,.85);
   --copper-bright: #ffae70;

@@ -28,8 +28,10 @@
   .na-group-head span {
     font-size: 10px; border: 1px solid var(--hairline); padding: 1px 6px; color: var(--faint);
   }
-  .na-group-head.stop { color: #b42318; }
-  .na-group-head.warn { color: #8a5b00; }
+  /* Urgency colours come from the theme tokens, not raw hex: the light-mode reds and
+     ambers drop below readable contrast on the dark ground. */
+  .na-group-head.stop { color: var(--ws-red, #b42318); }
+  .na-group-head.warn { color: var(--ws-warn-ink, #8a5b00); }
 
   .na-item {
     display: flex; align-items: center; gap: 14px; padding: 12px 14px;
@@ -37,7 +39,7 @@
     background: var(--sheet); text-decoration: none; color: inherit; margin-bottom: 6px;
   }
   .na-item:hover { border-color: var(--copper); border-left-color: var(--copper); }
-  .na-item.stop { border-left-color: #b42318; }
+  .na-item.stop { border-left-color: var(--ws-red, #b42318); }
   .na-item.warn { border-left-color: var(--sun); }
 
   .na-src {
@@ -53,8 +55,8 @@
   .na-body strong { display: block; font-size: 14px; line-height: 1.35; }
   .na-body small { display: block; margin-top: 2px; color: var(--faint); font-size: 11.5px; }
   .na-due { flex: none; font: 600 11px var(--mono); color: var(--faint); white-space: nowrap; }
-  .na-item.stop .na-due { color: #b42318; }
-  .na-item.warn .na-due { color: #8a5b00; }
+  .na-item.stop .na-due { color: var(--ws-red, #b42318); }
+  .na-item.warn .na-due { color: var(--ws-warn-ink, #8a5b00); }
 
   @media (max-width: 700px) {
     .na-item { flex-wrap: wrap; gap: 8px; }

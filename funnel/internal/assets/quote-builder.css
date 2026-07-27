@@ -34,17 +34,24 @@
 .qb-readout span { display: block; color: var(--faint); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
 .qb-readout strong { display: block; margin-top: 4px; font: 700 16px var(--mono); overflow-wrap: anywhere; }
 .qb-readout .good strong { color: var(--ok); }
-.qb-readout .bad strong { color: #b42318; }
+.qb-readout .bad strong { color: var(--ws-red, #b42318); }
 
 .qb-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* Gate + advisory banners. These are not decoration — they carry the Founder-OS
-   rules that make a quote legal to send, so they stay loud. */
-.qb-flag { padding: 12px 14px; border-left: 4px solid var(--sun); background: #fff8e6; font-size: 12.5px; line-height: 1.5; }
+   rules that make a quote legal to send, so they stay loud.
+   Background AND text colour both come from theme tokens: a tinted panel that pins
+   only its background inherits the page's ink, which turns the heading invisible on
+   the light tint in dark mode. */
+.qb-flag {
+  padding: 12px 14px; border-left: 4px solid var(--sun);
+  background: var(--ws-amber-soft, #fff8e6); color: var(--ws-copy, var(--ink));
+  font-size: 12.5px; line-height: 1.5;
+}
 .qb-flag + .qb-flag { margin-top: 8px; }
-.qb-flag strong { display: block; margin-bottom: 2px; }
-.qb-flag.stop { border-color: #b42318; background: #fff2f0; }
-.qb-flag.ok { border-color: var(--ok); background: #edf8f1; }
+.qb-flag strong { display: block; margin-bottom: 2px; color: var(--ink); }
+.qb-flag.stop { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
+.qb-flag.ok { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
 
 /* The single next action, given its own weight above the flag rail — one thing to do,
    not a list to interpret. */
@@ -55,7 +62,7 @@
 #qb-flags { margin-top: 14px; }
 
 /* A price we have not confirmed with a supplier must never look like one we have. */
-.qb-unquoted { color: #8a5b00; font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.qb-unquoted { color: var(--ws-warn-ink, #8a5b00); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
 
 /* ---------- the quote sheet (screen preview = print output) ---------- */
 
