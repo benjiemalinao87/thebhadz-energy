@@ -45,6 +45,28 @@ their freight surcharge = our corridor evidence); check for any on-island instal
 ### Test 3 — (reserve slot)
 - _Do not start until Test 1 or 2 is scored (§4)._
 
+## Offer test — BANTAY support-tier attach rate (SC-18)
+
+Not a channel test and **does not consume a middle-ring slot** — it runs on the contract
+itself, at the real price, with zero ad spend. Pre-registered here because §2 requires a
+committed number before launch and results may not be reinterpreted afterward.
+
+- **Hypothesis:** of the first **10 signed customers**, **≥4 tick a paid support tier at
+  contract signing** (BANTAY PLUS ₱600/mo or the ₱6,000/yr prepay; BANTAY 24 ₱2,499/mo
+  counts only for livelihood/commercial buyers).
+- **Instrument:** a tier tick-box printed on the contract + the sealed 90-day PLUS trial
+  card in the Signing Folio. Attach recorded at signing, conversion recorded at day 90.
+- **Budget:** ≤₱3,000 (print + folio materials, hand-assembled, 5 copies) · **Owner:** ______
+- **End condition:** 10 signed customers, or 2026-12-31, whichever first.
+- **Pass:** ≥4/10 attach → build the customer status portal + monitoring automation.
+- **Fail:** <4/10 → the price or the framing is wrong; re-run `ops/positioning.md`
+  **before** building anything (§3 re-position on evidence).
+- **Secondary number (day-90 trial conversion):** ≥50% of trial starts convert to a paid
+  month. Below that, the free tier is doing the job and the paid rung needs redesign.
+- **Banned in the ask (§2):** "would you pay ₱600 for faster support?" The tick-box on a
+  real contract at a real price is the only admissible evidence.
+- **Score:** _pending — 0/10 signed customers as of 2026-07-27._
+
 ## Scale gate (§4 — do not scale a leaky bucket)
 
 No spend beyond the first test budget until **≥2 leads from the first batch pay a real

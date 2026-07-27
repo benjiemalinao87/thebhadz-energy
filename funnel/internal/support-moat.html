@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support as the moat — BANTAY service architecture — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/img/macc-mark.png">
+<style>
+  /* Colours come from the workspace design tokens (assets/workspace-redesign.css) so
+     this page follows the light/dark toggle instead of pinning its own palette —
+     the SC-16/SC-17 readability bug was exactly that. Local names are aliases only;
+     the fallbacks keep the page sane if the shared sheet ever fails to load.
+     Surfaces that are deliberately dark in BOTH themes (the hero, the tier caps)
+     keep explicit light ink, because their background is fixed. */
+  .workspace-support-moat{
+    --panel:var(--ws-surface,#fff); --panel2:var(--ws-surface-2,#f0f1ec);
+    --line:var(--ws-line,#d7d9d2); --ink:var(--ws-ink,#102f34);
+    --soft:var(--ws-copy,#294950); --faint:var(--ws-muted,#5d7072);
+    --deep:var(--ws-petrol,#073f43); --deep2:var(--ws-petrol-2,#0a5558);
+    --accent:var(--ws-copper,#b9682d); --accent-ink:var(--ws-warn-ink,#8a5b00);
+    --fill:var(--ws-amber,#f5b81b);
+    --blue:var(--ws-petrol,#073f43); --blue-ink:var(--ws-petrol-2,#0a5558);
+    --green:var(--ws-green,#267a56); --green-ink:var(--ws-green,#267a56);
+    --red:var(--ws-red,#b5372b); --red-soft:var(--ws-red-soft,#fff0ed);
+    --shadow:var(--ws-shadow,0 1px 1px rgba(7,63,67,.05),0 10px 28px rgba(7,63,67,.06));
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --sans:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body.workspace-support-moat{margin:0;font-family:var(--sans);color:var(--ink);
+    background:var(--ws-canvas,#f7f6f2);min-height:100vh;line-height:1.62;}
+  a{color:var(--accent);}
+
+  .bar{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);
+    background:var(--deep);position:sticky;top:0;z-index:20;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;text-decoration:none;color:#fff;letter-spacing:0.02em;}
+  .brand img{width:32px;height:32px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;}
+  .bar h1{font-size:16px;font-weight:600;color:#c9dcda;margin:0;}
+  .bar .sp{flex:1;}
+  .bar .link{font-family:var(--mono);font-size:12.5px;color:#d2e2e0;text-decoration:none;border:1px solid rgba(255,255,255,.28);padding:7px 12px;border-radius:6px;}
+  .bar .link:hover{color:#fff;border-color:rgba(255,255,255,.55);}
+
+  .wrap{max-width:1020px;margin:0 auto;padding:44px 28px 120px;}
+  .ey{font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+
+  /* hero — deliberately dark in both themes, so its ink is fixed light */
+  .hero{background:linear-gradient(135deg,var(--deep),var(--deep2));border:1px solid var(--line);
+    border-radius:18px;padding:44px 40px;margin-bottom:16px;position:relative;overflow:hidden;color:#fff;}
+  .hero::after{content:"";position:absolute;right:-70px;top:-70px;width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(245,184,27,0.30),rgba(245,184,27,0) 70%);}
+  .hero .ey{color:#ffd257;}
+  .hero .statement{font-size:clamp(26px,4.1vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1.12;margin:0;max-width:19ch;position:relative;color:#fff;}
+  .hero .statement .hl{color:#ffd257;}
+  .hero .gloss{color:#d6e6e4;font-size:16.5px;max-width:62ch;margin:20px 0 0;position:relative;}
+  .hero .gloss strong{color:#fff;}
+
+  .stamp{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+    letter-spacing:0.09em;text-transform:uppercase;border:1px solid var(--line);background:var(--panel);
+    color:var(--faint);border-radius:999px;padding:5px 12px;margin:0 6px 8px 0;}
+  .stamp b{color:var(--accent-ink);font-weight:600;}
+  .stamps{margin:0 0 34px;}
+
+  /* section heads */
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:46px 0 4px;flex-wrap:wrap;}
+  .sec-head h2{font-size:25px;margin:0;letter-spacing:-0.015em;color:var(--ink);}
+  .sec-head .n{font-family:var(--mono);font-size:12.5px;color:var(--faint);}
+  .sec-sub{color:var(--soft);font-size:15.5px;max-width:70ch;margin:8px 0 22px;}
+
+  /* generic panel */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:22px 24px;box-shadow:var(--shadow);}
+  p.lead{font-size:16.5px;color:var(--soft);max-width:70ch;}
+
+  /* six-tile summary */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .tile{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:12px;padding:18px 19px;box-shadow:var(--shadow);}
+  .tile .t-n{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:0.1em;}
+  .tile h3{font-size:16.5px;margin:6px 0 7px;letter-spacing:-0.01em;line-height:1.28;color:var(--ink);}
+  .tile p{margin:0;font-size:14px;color:var(--soft);}
+  .tile:nth-child(2){border-top-color:var(--blue);}
+  .tile:nth-child(3){border-top-color:var(--green);}
+  .tile:nth-child(4){border-top-color:var(--blue);}
+  .tile:nth-child(5){border-top-color:var(--green);}
+
+  /* two-column compare */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:22px 24px;box-shadow:var(--shadow);}
+  .col.them{border-left:4px solid var(--faint);}
+  .col.us{border-left:4px solid var(--accent);}
+  .col h3{margin:0 0 4px;font-size:17px;letter-spacing:-0.01em;color:var(--ink);}
+  .col .who{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);margin:0 0 14px;}
+  .col.us .who{color:var(--accent);}
+  .col ul{margin:0;padding-left:18px;}
+  .col li{font-size:14.5px;color:var(--soft);margin-bottom:9px;}
+  .col li strong,.col li em{color:var(--ink);}
+
+  /* moat layers */
+  .layers{display:flex;flex-direction:column;gap:10px;}
+  .layer{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+  .layer .when{font-family:var(--mono);font-size:12px;color:var(--accent-ink);letter-spacing:0.06em;}
+  .layer h3{margin:0 0 5px;font-size:17px;color:var(--ink);}
+  .layer p{margin:0;font-size:14.5px;color:var(--soft);}
+  .layer p strong{color:var(--ink);}
+  .layer::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+  .layer:nth-child(2)::before{background:var(--blue);}
+  .layer:nth-child(3)::before{background:var(--green);}
+  .layer:nth-child(2) .when{color:var(--blue-ink);}
+  .layer:nth-child(3) .when{color:var(--green-ink);}
+
+  /* tier ladder */
+  .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;}
+  .tier{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+  .tier .cap{padding:5px;background:var(--faint);}
+  .tier.t2 .cap{background:var(--blue);}
+  .tier.t1 .cap{background:var(--accent);}
+  .tier .body{padding:22px 22px 24px;}
+  .tier .name{font-size:21px;font-weight:800;letter-spacing:-0.01em;margin:0;color:var(--ink);}
+  .tier .name span{color:var(--faint);font-weight:600;font-size:12px;font-family:var(--mono);display:block;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;}
+  .tier.t2 .name span{color:var(--blue-ink);}
+  .tier.t1 .name span{color:var(--accent-ink);}
+  .tier .price{font-family:var(--mono);font-size:27px;font-weight:700;margin:12px 0 2px;color:var(--ink);}
+  .tier .per{font-size:12.5px;color:var(--faint);font-family:var(--mono);margin:0 0 14px;}
+  .tier .clock{font-size:15px;font-weight:700;color:var(--accent-ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;margin:0 0 14px;}
+  .tier.t3 .clock{color:var(--soft);}
+  .tier.t2 .clock{color:var(--blue-ink);}
+  .tier .for{font-size:13.5px;color:var(--faint);margin:0 0 12px;min-height:3.4em;}
+  .tier ul{margin:0;padding-left:17px;}
+  .tier li{font-size:13.5px;color:var(--soft);margin-bottom:7px;}
+  .tier li strong{color:var(--ink);}
+
+  /* matrix table */
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:var(--shadow);}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px;color:var(--soft);}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top;}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:var(--faint);
+    background:var(--panel2);position:sticky;top:0;}
+  thead th.c1{color:var(--soft);} thead th.c2{color:var(--blue-ink);} thead th.c3{color:var(--accent-ink);}
+  tbody tr:last-child td{border-bottom:0;}
+  td strong{color:var(--ink);}
+  td.k{color:var(--ink);font-weight:600;width:24%;}
+  td em{color:var(--faint);font-style:normal;font-size:12.5px;}
+  .yes{color:var(--green-ink);font-weight:700;}
+  .no{color:var(--faint);}
+
+  /* big rule callout */
+  .rule{background:var(--ws-amber-soft,#fff4cd);
+    border:1px solid var(--accent);border-radius:15px;padding:28px 30px;margin:22px 0;}
+  .rule .ey{color:var(--accent-ink);}
+  .rule p.big{font-size:clamp(19px,2.5vw,25px);font-weight:800;letter-spacing:-0.015em;line-height:1.28;margin:0 0 12px;max-width:26ch;color:var(--ink);}
+  .rule p{color:var(--soft);font-size:15px;margin:0;max-width:72ch;}
+  .rule p strong{color:var(--ink);}
+  .rule code{font-family:var(--mono);font-size:13px;color:var(--ink);}
+
+  .hardstop{background:var(--red-soft);border:1px solid var(--red);border-radius:13px;padding:20px 23px;margin:18px 0;}
+  .hardstop .ey{color:var(--red);}
+  .hardstop p{margin:0;font-size:14.5px;color:var(--soft);max-width:74ch;}
+  .hardstop p strong{color:var(--ink);}
+  .hardstop p + p{margin-top:10px;}
+
+  /* mechanics cards */
+  .mech{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .m{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:19px 21px;box-shadow:var(--shadow);}
+  .m .mn{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.12em;}
+  .m h3{margin:5px 0 8px;font-size:17px;letter-spacing:-0.01em;color:var(--ink);}
+  .m p{margin:0 0 9px;font-size:14.5px;color:var(--soft);}
+  .m p em{color:var(--ink);font-style:italic;}
+  .m .why{border-top:1px solid var(--line);padding-top:9px;font-size:13px;color:var(--soft);margin:0;}
+  .m .why b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:4px;font-weight:600;}
+
+  /* unboxing */
+  .moment{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .moment .mhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+  .moment h3{margin:0;font-size:19px;letter-spacing:-0.01em;color:var(--ink);}
+  .moment .tag{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);}
+  .moment .when2{font-size:13.5px;color:var(--faint);}
+  .moment > p{color:var(--soft);font-size:14.5px;max-width:72ch;}
+  .moment > p strong{color:var(--ink);}
+  .items{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  .item{display:grid;grid-template-columns:26px 1fr;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px 15px;}
+  .item .ix{font-family:var(--mono);font-size:11px;color:var(--accent);padding-top:2px;}
+  .item h4{margin:0 0 4px;font-size:14.5px;letter-spacing:-0.005em;color:var(--ink);}
+  .item p{margin:0;font-size:13px;color:var(--soft);}
+  .item p strong{color:var(--ink);}
+  .item .cost{font-family:var(--mono);font-size:11px;color:var(--faint);display:block;margin-top:5px;}
+
+  /* econ */
+  .econ-note{background:var(--ws-green-soft,#eaf5ee);border:1px solid var(--green);border-radius:12px;padding:18px 21px;margin-top:14px;}
+  .econ-note .ey{color:var(--green-ink);}
+  .econ-note p{margin:0;font-size:14.5px;color:var(--soft);max-width:74ch;}
+  .econ-note p strong{color:var(--ink);}
+  .econ-note p + p{margin-top:9px;}
+
+  /* ship columns */
+  .ship{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .sc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:19px 21px;border-top:3px solid var(--green);box-shadow:var(--shadow);}
+  .sc:nth-child(2){border-top-color:var(--blue);}
+  .sc:nth-child(3){border-top-color:var(--faint);}
+  .sc h3{margin:0 0 3px;font-size:16px;color:var(--ink);}
+  .sc .gate{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:0.06em;margin:0 0 12px;}
+  .sc ul{margin:0;padding-left:17px;}
+  .sc li{font-size:13.5px;color:var(--soft);margin-bottom:8px;}
+  .sc li code{font-family:var(--mono);font-size:12px;color:var(--ink);}
+
+  /* decisions */
+  .dec{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:19px 22px;margin-bottom:11px;box-shadow:var(--shadow);}
+  .dec .dq{font-size:16px;font-weight:700;margin:0 0 8px;letter-spacing:-0.01em;color:var(--ink);}
+  .dec .dn{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:0.1em;}
+  .dec p{margin:0;font-size:14.5px;color:var(--soft);}
+  .dec .rec{border-top:1px solid var(--line);margin-top:10px;padding-top:9px;font-size:14px;color:var(--soft);}
+  .dec .rec b{color:var(--accent-ink);font-family:var(--mono);font-size:10.5px;letter-spacing:0.09em;text-transform:uppercase;display:block;margin-bottom:4px;}
+
+  .hyp{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-ink);
+    border:1px solid var(--accent);border-radius:4px;padding:1px 6px;vertical-align:middle;white-space:nowrap;}
+
+  .note{color:var(--faint);font-size:13.5px;border-top:1px solid var(--line);margin-top:52px;padding-top:18px;max-width:78ch;}
+  .note b{color:var(--soft);}
+  .note code{font-family:var(--mono);font-size:12.5px;color:var(--soft);}
+
+  @media (max-width:900px){
+    .tiles,.mech,.items,.ship,.ladder{grid-template-columns:1fr;}
+    .split{grid-template-columns:1fr;}
+    .layer{grid-template-columns:1fr;gap:6px;}
+  }
+  @media (max-width:760px){
+    .wrap{padding:30px 18px 80px;}
+    .hero{padding:28px 24px;}
+  }
+</style>
+<link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
+</head>
+<body class="workspace-page workspace-support-moat">
+  <div class="bar">
+    <a class="brand" href="/internal/"><img src="/assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc."> MACC</a>
+    <h1>Support as the moat — BANTAY service architecture</h1>
+    <div class="sp"></div>
+    <a class="link" href="/internal/">↩ Founder home</a>
+    <a class="link" href="/api/founder-logout">Log out</a>
+  </div>
+
+  <div class="wrap">
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="ey">SC-18 · Service architecture · draft for founder review</p>
+      <p class="statement">The panel is a commodity. <span class="hl">The person who picks up the phone is not.</span></p>
+      <p class="gloss">
+        Any competitor can match our hardware by Friday — same Tier-1 panels, same Deye inverter,
+        same Shopee listing. Nobody off this island can be standing in your kitchen in Naval within
+        the hour. Support is the only line of our offer a competitor has to <strong>move house</strong>
+        to copy. So we stop treating it as post-sale cost, and start selling it as the product —
+        with the hardware as the delivery mechanism.
+      </p>
+    </section>
+
+    <p class="stamps">
+      <span class="stamp">Status <b>Draft — not customer-facing</b></span>
+      <span class="stamp">Every number below <b>HYPOTHESIS</b></span>
+      <span class="stamp">Ledger <b>0 installs · 0 leads</b></span>
+      <span class="stamp">Gate <b>Sales asset now, product later</b></span>
+    </p>
+
+    <!-- THE ONE-SLIDE VERSION -->
+    <div class="sec-head">
+      <h2>The five-minute version</h2>
+      <span class="n">read this if you read nothing else · 6</span>
+    </div>
+    <p class="sec-sub">Six ideas. If we agree on these, the rest is detail.</p>
+    <div class="tiles">
+      <div class="tile">
+        <p class="t-n">01</p>
+        <h3>Support isn't after the sale. It <em>is</em> the sale.</h3>
+        <p>In a scam-wary market with zero installs behind us, the buyer's real question is not
+          "how many watts?" It is "will these people still exist in March?" The service promise is
+          the answer, and it's the first screen of every ad.</p>
+      </div>
+      <div class="tile">
+        <p class="t-n">02</p>
+        <h3>One ladder, three rungs: BANTAY · BANTAY&nbsp;PLUS · BANTAY&nbsp;24.</h3>
+        <p>Named, not "Tier 3/2/1" — customers hear tier numbers backwards. <em>Bantay</em> =
+          watchman. The free rung never expires and never feels like a downgrade.</p>
+      </div>
+      <div class="tile">
+        <p class="t-n">03</p>
+        <h3>Our fault is always free and always fast.</h3>
+        <p>Paid tiers never buy a faster fix for a defect we caused — that's extortion and it ends
+          up on Facebook. They buy speed on the things that <em>aren't</em> our fault, plus
+          preventive work and a person on call.</p>
+      </div>
+      <div class="tile">
+        <p class="t-n">04</p>
+        <h3>We call you first.</h3>
+        <p>The inverter reports to us, not to the homeowner. "You should never be the one to tell
+          us your system is down" is a sentence no PH residential installer is currently able to say.</p>
+      </div>
+      <div class="tile">
+        <p class="t-n">05</p>
+        <h3>A published SLA we pay for missing.</h3>
+        <p>Miss the window, the month is free. A costly signal a scammer literally cannot afford
+          to copy — which is exactly why it works as the anti-scam proof we otherwise don't have.</p>
+      </div>
+      <div class="tile">
+        <p class="t-n">06</p>
+        <h3>Sold by road, not by customer.</h3>
+        <p>One-hour response is a function of driving distance, so we only sell it where we already
+          have systems nearby. Neighbors unlock each other's tier. Density becomes a moat competitors
+          can't buy their way into.</p>
+      </div>
+    </div>
+
+    <!-- WHY HERE -->
+    <div class="sec-head">
+      <h2>Why this works <em>here</em>, and nowhere else</h2>
+      <span class="n">the Biliran argument · 1</span>
+    </div>
+    <p class="sec-sub">
+      This idea would be mediocre in Metro Manila, where a competitor is fifteen minutes away.
+      On an island where the nearest confirmed installer is across a strait, it's structural.
+    </p>
+    <div class="split">
+      <div class="col them">
+        <h3>The industry default</h3>
+        <p class="who">What everyone else does</p>
+        <ul>
+          <li>Install, gather everyone on the terrace, do a 20-minute orientation, hand over a
+            laminated card, take a photo.</li>
+          <li>Give a mobile number that may or may not be answered in eight months.</li>
+          <li>Silence — until something breaks.</li>
+          <li>When it breaks: the homeowner has to notice, diagnose it themselves, and prove it
+            to a stranger on Messenger.</li>
+          <li>Then wait three weeks for a part, a technician, and a ferry.</li>
+          <li>Warranty is a <em>document</em>. Service is an <em>afterthought</em>. Support is a
+            <em>cost centre</em> everyone quietly hopes nobody uses.</li>
+        </ul>
+      </div>
+      <div class="col us">
+        <h3>What we do instead</h3>
+        <p class="who">The disruption</p>
+        <ul>
+          <li>Handover is a <strong>ceremony with an object</strong> — a box built to be opened
+            in front of the family, and later shown to the neighbour.</li>
+          <li>A named engineer with a printed name, not a hotline.</li>
+          <li>We watch the system daily and <strong>we call them</strong> — including at month 6
+            and month 12 when nothing is wrong.</li>
+          <li>Response windows written down, printed in the contract, and <strong>paid for when
+            we miss them</strong>.</li>
+          <li>Our own performance published on a scorecard page anyone can read.</li>
+          <li>Warranty is a <em>clock</em>. Service is the <em>product</em>. Support is the
+            <em>reason the ₱99,500 closes at all</em>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h2>Three moats, stacked</h2>
+      <span class="n">what compounds · 3</span>
+    </div>
+    <p class="sec-sub">
+      Each layer buys time for the next. The third one is the part to show anyone who thinks this
+      is a distraction from the panel factory.
+    </p>
+    <div class="layers">
+      <div class="layer">
+        <span class="when">Year 1 · sells</span>
+        <div>
+          <h3>Trust moat</h3>
+          <p>We have no track record, so we buy credibility with a promise that costs us money to
+            break. The published SLA + penalty is the only anti-scam signal available to a company
+            with zero installs that isn't a fabricated testimonial.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <span class="when">Year 2 · defends</span>
+        <div>
+          <h3>Density moat</h3>
+          <p>Our cost to serve falls as systems-per-road rises. A Cebu or Tacloban installer's
+            cost-per-visit here is fixed by geography and can never fall. At ~15 systems per
+            barangay we can serve a one-hour SLA profitably; they cannot serve a one-<em>day</em>
+            one at any price. That makes attacking Biliran unprofitable for them.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <span class="when">Year 3 · unlocks Model A</span>
+        <div>
+          <h3>Data moat</h3>
+          <p>Monitoring every system we install produces the only real Biliran typhoon-and-yield
+            dataset in existence. That dataset is precisely what the Founder OS says Model A must
+            launch on — locally honored warranty, PH typhoon field data, service turnaround — and
+            never on ₱/W spec parity. <strong>The support business is the road to the factory,
+            not a detour from it.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE LADDER -->
+    <div class="sec-head">
+      <h2>The BANTAY ladder</h2>
+      <span class="n">three rungs · your tiers, re-shaped</span>
+    </div>
+    <p class="sec-sub">
+      Your structure held. Two changes: the top rung is re-aimed at <strong>livelihood and
+      commercial</strong> customers (₱2,499/mo is 30% of the flagship price every year — a
+      homeowner will not buy that, a water-refilling station whose downtime costs ₱4,000/day will),
+      and every window is stated as <strong>first human reply</strong>, never "fix time", because
+      a fix depends on parts and weather and we must not promise what we don't control.
+    </p>
+    <div class="ladder">
+      <div class="tier t3">
+        <div class="cap"></div>
+        <div class="body">
+          <p class="name"><span>Included forever</span>BANTAY</p>
+          <p class="price">₱0</p>
+          <p class="per">bundled with every install, for life</p>
+          <p class="clock">First human reply ≤ 48 h</p>
+          <p class="for">Every customer we've ever installed for. Never expires, never gets sold back to them.</p>
+          <ul>
+            <li>Daily automated monitoring — <strong>we</strong> spot the fault</li>
+            <li>Remote diagnosis over Messenger / phone</li>
+            <li>Full warranty &amp; workmanship cover at top-tier speed (see the fairness rule)</li>
+            <li>Public knowledge base, Waray / Tagalog / English</li>
+            <li>Site visit within 14 days · callout billed if not our fault</li>
+            <li>Month-6 and month-12 check-in call</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tier t2">
+        <div class="cap"></div>
+        <div class="body">
+          <p class="name"><span>The homeowner rung</span>BANTAY PLUS</p>
+          <p class="price">₱600<span style="font-size:13px;color:var(--faint)">/mo</span></p>
+          <p class="per">₱20/day · or ₱6,000/yr prepaid (2 months free)</p>
+          <p class="clock">First human reply ≤ 12 h</p>
+          <p class="for">Families who want a person, not a portal — and who'd rather never think about the roof again.</p>
+          <ul>
+            <li>Everything in BANTAY</li>
+            <li>Site visit within 3 days, <strong>no callout fee</strong> (labor waived, parts at cost)</li>
+            <li>1 preventive clean + electrical check per year</li>
+            <li>Annual production report vs. what we promised at sale</li>
+            <li>Free re-check after every named typhoon</li>
+            <li>Priority on the install calendar for upgrades</li>
+            <li><strong>We miss the window → that month is free</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="tier t1">
+        <div class="cap"></div>
+        <div class="body">
+          <p class="name"><span>Livelihood &amp; commercial</span>BANTAY 24</p>
+          <p class="price">₱2,499<span style="font-size:13px;color:var(--faint)">/mo</span></p>
+          <p class="per">sold where downtime costs more than this per day</p>
+          <p class="clock">First human reply ≤ 1 h (07:00–21:00)</p>
+          <p class="for">Water-refilling stations, sari-sari freezers, resorts, clinics, poultry, internet cafés, work-from-home households.</p>
+          <ul>
+            <li>Everything in BANTAY PLUS</li>
+            <li>Overnight reply ≤ 3 h · site visit within 24 h</li>
+            <li>Unlimited callouts, 2 preventive visits/yr</li>
+            <li><strong>Loaner inverter</strong> while yours is out <span class="hyp">gated</span></li>
+            <li>Named engineer, direct mobile, no queue</li>
+            <li>First claim on spare-parts stock</li>
+            <li><strong>We miss the window → ₱1,000 credit, automatic</strong></li>
+            <li>Only sold in barangays where we already have ≥8 systems</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h2>Side by side</h2>
+      <span class="n">the version that goes in the contract</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>&nbsp;</th>
+            <th class="c1">BANTAY · free</th>
+            <th class="c2">BANTAY PLUS · ₱600/mo</th>
+            <th class="c3">BANTAY 24 · ₱2,499/mo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="k">First human reply</td><td>≤ 48 h</td><td>≤ 12 h</td><td>≤ 1 h (07–21), ≤ 3 h overnight</td></tr>
+          <tr><td class="k">Remote diagnosis</td><td>Next working day</td><td>Same day</td><td>Immediate</td></tr>
+          <tr><td class="k">Site visit (non-warranty)</td><td>Within 14 days</td><td>Within 3 days</td><td>Within 24 h</td></tr>
+          <tr><td class="k">Site visit (our fault)</td><td colspan="3" style="color:var(--accent-ink);font-weight:600">Within 24 h on every tier, free, forever — see the fairness rule below</td></tr>
+          <tr><td class="k">Callout fee</td><td>₱___ per visit <em>(TBD after install&nbsp;1)</em></td><td class="yes">Waived</td><td class="yes">Waived, unlimited</td></tr>
+          <tr><td class="k">Proactive monitoring</td><td class="yes">Yes — daily</td><td class="yes">Yes — daily + alert call</td><td class="yes">Yes — we move before you notice</td></tr>
+          <tr><td class="k">Preventive visits / yr</td><td class="no">0 (billed on request)</td><td>1 (clean + check)</td><td>2 (clean + check + thermal)</td></tr>
+          <tr><td class="k">Post-typhoon re-check</td><td class="no">Billed</td><td class="yes">Free, named storms</td><td class="yes">Free, priority order</td></tr>
+          <tr><td class="k">Loaner inverter</td><td class="no">—</td><td class="no">—</td><td class="yes">Yes <span class="hyp">unlocks at 25 subs</span></td></tr>
+          <tr><td class="k">Named engineer</td><td class="no">Shared line</td><td>Named on the card</td><td class="yes">Direct mobile</td></tr>
+          <tr><td class="k">If we miss the window</td><td class="no">Logged on the public scorecard</td><td class="yes">That month is free</td><td class="yes">₱1,000 credit, automatic</td></tr>
+          <tr><td class="k">Availability</td><td>Everywhere we install</td><td>Everywhere we install</td><td>Only where ≥8 systems within ~20 min</td></tr>
+          <tr><td class="k">Term</td><td>Life of the system</td><td>Monthly, cancel anytime</td><td>Monthly, cancel anytime</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FAIRNESS RULE -->
+    <div class="sec-head">
+      <h2>The rule that makes it fair</h2>
+      <span class="n">the most important decision on this page</span>
+    </div>
+    <div class="rule">
+      <p class="ey">Non-negotiable design rule</p>
+      <p class="big">If it's our fault, the clock is one hour — on the free tier — forever.</p>
+      <p>
+        The instant a customer suspects that paying ₱600 gets a faster fix for a defect <em>we</em>
+        caused, we have invented a protection racket, and one Facebook post ends us in a province
+        this small. So the paid rungs never touch warranty or workmanship. They buy speed and
+        attention on the things that are genuinely <strong>not our fault</strong> — plus preventive
+        work, plus a person who already knows their roof.
+      </p>
+    </div>
+    <div class="split">
+      <div class="col us">
+        <h3>Always free, always top-speed, every tier</h3>
+        <p class="who">Our fault</p>
+        <ul>
+          <li>Any hardware we supplied that fails inside warranty</li>
+          <li>Any workmanship defect — leaks, loose racking, bad crimps, wrong breaker</li>
+          <li>Anything that stops or degrades production on a system we installed</li>
+          <li>Permit or BILECO net-metering paperwork we filed wrong</li>
+          <li>Anything unsafe. Full stop — this one has no clock at all, we just come.</li>
+          <li>Warranty claims chased with the distributor <em>by us</em>, not by the homeowner</li>
+        </ul>
+      </div>
+      <div class="col them">
+        <h3>What the paid rungs actually buy</h3>
+        <p class="who">Not our fault</p>
+        <ul>
+          <li>"Why is my bill still high?" — usage coaching, appliance audits</li>
+          <li>New aircon / freezer / circuit added after install</li>
+          <li>Damage from their own roof, their own tree, their own rewiring</li>
+          <li>Cleaning, and the annual electrical check</li>
+          <li>Post-typhoon inspection when nothing is actually broken</li>
+          <li>Front of the calendar queue, and a human at 12 hours instead of 48</li>
+          <li>Peace of mind — which is the real thing being sold, and is allowed to be</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MECHANICS -->
+    <div class="sec-head">
+      <h2>The mechanics</h2>
+      <span class="n">what makes it a moat and not a price list · 8</span>
+    </div>
+    <p class="sec-sub">Any competitor can print three tiers. These are the parts that are hard to copy.</p>
+    <div class="mech">
+
+      <div class="m">
+        <p class="mn">M1</p>
+        <h3>We call you first</h3>
+        <p>Deye / Solis / Growatt inverters all expose cloud monitoring. One daily automated sweep,
+          one anomaly rule, one alert to us. The homeowner's first contact about a fault is us
+          ringing <em>them</em>.</p>
+        <p class="why"><b>Why it's a moat</b>It reverses the relationship the whole industry runs on.
+          The line — "you should never be the one to tell us your system is down" — is an ad, a
+          product spec, and a service standard in nine words.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M2</p>
+        <h3>The public scorecard</h3>
+        <p>A page anyone can open: tickets this month, median first reply, % of windows met,
+          longest miss and why. Our own performance, in public, including the bad months.</p>
+        <p class="why"><b>Why it's a moat</b>SaaS status-page transparency, applied to hardware
+          service. It cannot be faked and no competitor will publish theirs. Ships only once we have
+          real data — inventing these numbers is a hard stop.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M3</p>
+        <h3>An SLA we pay for missing</h3>
+        <p>Miss the PLUS window and the month is free automatically — no claim form, we credit it
+          ourselves from the ticket log.</p>
+        <p class="why"><b>Why it's a moat</b>A costly signal. A fly-by-night operator cannot afford
+          to make this promise, so making it separates us from them in one sentence — which is
+          exactly the job an anti-scam signal has to do.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M4</p>
+        <h3>Sold by road, not by customer</h3>
+        <p>BANTAY 24 is only offered where we already have ≥8 systems within a ~20-minute drive.
+          We publish the map of unlocked barangays.</p>
+        <p class="why"><b>Why it's a moat</b>The scarcity is real, not manufactured, so we can say
+          it out loud. It also turns customers into our sales force: to unlock their own tier,
+          neighbours have to recruit neighbours.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M5</p>
+        <h3>The Kapitbahay clause</h3>
+        <p>A referral that closes pays either the ₱3,000 referral fee or six months of BANTAY PLUS
+          free — customer's choice. Referral source logged on every lead.</p>
+        <p class="why"><b>Why it's a moat</b>The visible rooftop plus the neighbour's brownout is
+          already our viral mechanic. This wires the subscription directly into it, and the
+          service-credit option costs us less than cash while raising retention.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M6</p>
+        <h3>One number, one name</h3>
+        <p>No ticket IDs, no queue theatre, no "your reference is SR-4471". A named engineer,
+          printed on a card in their breaker box.</p>
+        <p class="why"><b>Why it's a moat</b>In a trust market a name beats a helpdesk, and we're
+          small enough that this is true rather than staged. It stops being true at ~200 customers —
+          that's the point to re-design it, not now.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M7</p>
+        <h3>The service book</h3>
+        <p>Every visit, alert and reading logged to their private page and exportable as a PDF.
+          The system has papers when the house is sold or refinanced.</p>
+        <p class="why"><b>Why it's a moat</b>Costs nothing extra — it's a byproduct of doing the
+          job — but it makes leaving us expensive, and it makes our installs the ones that hold
+          resale value.</p>
+      </div>
+
+      <div class="m">
+        <p class="mn">M8</p>
+        <h3>The unprompted call</h3>
+        <p>Month 6 and month 12, on every tier including free, we call when nothing is wrong.
+          Three questions: is the bill where we said, anything odd, anyone asking about it.</p>
+        <p class="why"><b>Why it's a moat</b>It is the single cheapest thing on this page and no
+          competitor does it. It also doubles as our discovery interview and our referral ask —
+          which is how it stays inside the traction half of the time split.</p>
+      </div>
+
+    </div>
+
+    <!-- TYPHOON -->
+    <div class="sec-head">
+      <h2>The typhoon protocol</h2>
+      <span class="n">where honesty is the feature</span>
+    </div>
+    <p class="sec-sub">
+      A one-hour SLA is a lie when the bridge is closed and forty customers call at once. The storm
+      is the exact moment the promise is tested, so it gets written down <em>before</em> we sell it.
+    </p>
+    <div class="panel">
+      <p class="lead" style="margin-top:0"><strong>Printed in the contract, on every tier:</strong></p>
+      <ul style="margin:0;padding-left:20px">
+        <li style="margin-bottom:9px;color:var(--soft)">When PAGASA raises Signal No. 2 over Biliran, all tier clocks suspend and one shared emergency protocol takes over.</li>
+        <li style="margin-bottom:9px;color:var(--soft)">Work is ordered by <strong>safety risk first, production loss second</strong> — never by who pays more. A BANTAY-free customer with an arcing conductor is ahead of a BANTAY 24 customer with a dirty array, always.</li>
+        <li style="margin-bottom:9px;color:var(--soft)">We post a status update on the page every 12 hours during the event, including "no crews moving today."</li>
+        <li style="margin-bottom:9px;color:var(--soft)">Paid tiers get their days back: any month containing a suspension is pro-rated automatically.</li>
+        <li style="margin-bottom:0;color:var(--soft)">Normal clocks restart when roads reopen, and we say publicly when that was.</li>
+      </ul>
+    </div>
+    <div class="hardstop">
+      <p class="ey">Hard stop — carried through from the package rules</p>
+      <p>No support tier may imply that an <strong>on-grid LIWANAG</strong> system keeps the lights
+        on during a brownout. It does not — anti-islanding shuts the inverter down by law and by
+        design, and that is true at ₱0/mo and at ₱2,499/mo. The "what happens in a brownout?" row
+        stays in the comparison table, and BANTAY 24 sold to a LIWANAG customer must state in
+        writing that it buys <em>faster service</em>, not <em>backup power</em>.</p>
+      <p>Second hard stop: no response window goes into any customer-facing document until a
+        licensed electrician / REE is on retainer and named, with their PRC number printed. A
+        one-hour promise backed by two founders and no licence is a liability, not a moat.</p>
+    </div>
+
+    <!-- THE UNBOXING -->
+    <div class="sec-head">
+      <h2>The unboxing</h2>
+      <span class="n">two moments, two objects</span>
+    </div>
+    <p class="sec-sub">
+      You asked for the Apple-packaging feeling. The insight worth stealing from Apple isn't the
+      cardboard — it's that the box is <em>staged for an audience</em>. Ours has two audiences: the
+      family, and the neighbour they will show it to. Both moments below are budgeted as marketing,
+      not as fulfilment.
+    </p>
+
+    <div class="moment">
+      <div class="mhead">
+        <span class="tag">Moment 1</span>
+        <h3>The Signing Folio</h3>
+        <span class="when2">handed over when they pay the deposit — the most nervous five minutes of the whole relationship</span>
+      </div>
+      <p>
+        Rigid navy folio, chevron mark debossed, their name printed on the cover. This is where the
+        anti-scam work happens: everything a scammer would be vague about is printed, dated and
+        signed in ink.
+      </p>
+      <div class="items">
+        <div class="item"><span class="ix">A</span><div><h4>The contract, countersigned in ink</h4><p>Both founders' wet signatures, not a scan. Costly, deliberate, and it reads as such.</p></div></div>
+        <div class="item"><span class="ix">B</span><div><h4>Permit &amp; BILECO net-metering checklist</h4><p>Every step, whose job it is (ours), and the expected date. The checklist the rules already require on every quote.</p></div></div>
+        <div class="item"><span class="ix">C</span><div><h4>The electrician's PRC licence, printed</h4><p>Name, number, expiry. The single fastest way to separate ourselves from a Facebook-page installer.</p></div></div>
+        <div class="item"><span class="ix">D</span><div><h4>"What happens next" timeline card</h4><p>Real dates: survey → design approval → permit filed → install → energized → first lower bill.</p></div></div>
+        <div class="item"><span class="ix">E</span><div><h4>Warranty on one page, plain language</h4><p>What's covered, what's not, for how long, and who to call. Written to be understood, not to be defensible.</p></div></div>
+        <div class="item"><span class="ix">F</span><div><h4>The sealed BANTAY PLUS card</h4><p>Heavier stock, sealed sleeve, opened last. <strong>90 days free, then ₱600/mo, cancel anytime.</strong> Scan to activate. This is the upsell — and the pricing experiment.</p></div></div>
+      </div>
+    </div>
+
+    <div class="moment">
+      <div class="mhead">
+        <span class="tag">Moment 2</span>
+        <h3>The Handover Box</h3>
+        <span class="when2">opened on the day the system energizes, with the family watching — filmed, with permission</span>
+      </div>
+      <p>
+        Target build cost <strong>₱900–1,400</strong>. That is roughly 1.2% of the package price to
+        buy the object the customer shows every visitor for the next ten years. Booked as marketing
+        spend, and the first one is built by hand by us.
+      </p>
+      <div class="items">
+        <div class="item"><span class="ix">1</span><div><h4>"Sistema Mo" card</h4><p>Their actual system on one laminated card: panel count and serials, inverter model, install date, every warranty end-date, PRC number, BILECO reference. Magnet-backed — it lives on the breaker box.<span class="cost">≈ ₱80</span></p></div></div>
+        <div class="item"><span class="ix">2</span><div><h4>The Warranty Folio</h4><p>Bound booklet, their name printed inside, both founders signed. Not a leaflet. It should feel like a deed.<span class="cost">≈ ₱180</span></p></div></div>
+        <div class="item"><span class="ix">3</span><div><h4>The BANTAY card</h4><p>Thick PVC, credit-card size. Named engineer, one mobile number, QR to their private status page. The AppleCare card of this business.<span class="cost">≈ ₱60</span></p></div></div>
+        <div class="item"><span class="ix">4</span><div><h4>"Ano ang gagawin kapag…" flip card</h4><p>Waray / Tagalog / English, big type. Brownout · breaker tripped · storm coming · panels dirty · bill looks wrong · inverter beeping. The only piece they'll actually use.<span class="cost">≈ ₱90</span></p></div></div>
+        <div class="item"><span class="ix">5</span><div><h4>Spares sleeve</h4><p>Two spare fuses, an MC4 tool, cable ties, the exact breaker size written on the bag. Costs almost nothing; reads as "these people thought of everything."<span class="cost">≈ ₱150</span></p></div></div>
+        <div class="item"><span class="ix">6</span><div><h4>Cleaning kit</h4><p>Branded microfibre + small squeegee. A free-tier customer can maintain their own array — and the kit sits on a shelf reminding them of us monthly.<span class="cost">≈ ₱120</span></p></div></div>
+        <div class="item"><span class="ix">7</span><div><h4>Yard sign + sticker sheet</h4><p>The visible rooftop is the viral mechanic; the sign is what makes it legible from the road. Placed with permission, photographed for the handover post.<span class="cost">≈ ₱250</span></p></div></div>
+        <div class="item"><span class="ix">8</span><div><h4>The upgrade card, again</h4><p>If they didn't tick a tier at signing, the 90-day PLUS trial is offered once more here — at the exact moment they are happiest. Then never again unprompted.<span class="cost">≈ ₱40</span></p></div></div>
+      </div>
+    </div>
+
+    <!-- ECONOMICS -->
+    <div class="sec-head">
+      <h2>Does it pay?</h2>
+      <span class="n">every figure below is a hypothesis until install #1</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr><th>Line</th><th class="c1">BANTAY</th><th class="c2">BANTAY PLUS</th><th class="c3">BANTAY 24</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="k">Revenue / customer / yr</td><td>₱0</td><td>₱7,200 (₱6,000 prepaid)</td><td>₱29,988</td></tr>
+          <tr><td class="k">Expected visits / yr <span class="hyp">est</span></td><td>0.5</td><td>1.8</td><td>3.5</td></tr>
+          <tr><td class="k">Cost / visit <em>(fuel + 2 h founder time, Biliran)</em></td><td colspan="3">₱___ — <strong>fill after install #1</strong>. Placeholder ₱450 used below.</td></tr>
+          <tr><td class="k">Visit cost / yr</td><td>₱225</td><td>₱810</td><td>₱1,575</td></tr>
+          <tr><td class="k">Remote support time / yr</td><td>₱150</td><td>₱600</td><td>₱2,400</td></tr>
+          <tr><td class="k">Gross margin / yr</td><td>−₱375 <em>(cost of trust)</em></td><td class="yes">≈ ₱5,790</td><td class="yes">≈ ₱26,000</td></tr>
+          <tr><td class="k">What actually justifies it</td><td colspan="3" style="color:var(--accent-ink)">The free tier is a <strong>sales cost</strong>, not a service cost. It exists so the ₱99,500 closes.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="econ-note">
+      <p class="ey">Two things to be honest about in the pitch</p>
+      <p><strong>1. Year one, this earns nothing.</strong> Five installs at a 40% attach rate is two
+        subscribers — ₱1,200 a month. Anyone selling this as a revenue line is fooling themselves.
+        Its year-one job is to <em>raise the close rate on the ₱99,500</em> and to make the referral
+        loop turn. Revenue is a year-two argument.</p>
+      <p><strong>2. The loaner inverter is self-funding, and must stay that way.</strong> At 25 PLUS
+        subscribers (₱15,000/mo) the subscription buys a spare 5 kW hybrid in roughly three months.
+        Until that spare is physically in the workshop, the loaner does not appear in any
+        customer-facing document — a promise we can't deliver is a value gap, and one of those
+        costs more than every peso this page earns.</p>
+    </div>
+
+    <!-- GATES -->
+    <div class="sec-head">
+      <h2>What the Founder OS permits, today</h2>
+      <span class="n">checked against the ledger · 0 installs, 0 leads</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Rule</th><th>What it demands here</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="k">§1.6 value gap</td><td>No brownout implication on LIWANAG; no loaner promise before the spare exists; no window before the electrician is retained.</td><td class="no">Enforced above — <strong>hard stops</strong></td></tr>
+          <tr><td class="k">§7 fabricated proof</td><td>The public scorecard ships with real numbers or not at all.</td><td class="no">Blocked until data exists</td></tr>
+          <tr><td class="k">§3 back end</td><td>Subscription = back-end revenue. Labeled HYPOTHESIS in the canvas until its threshold clears.</td><td class="yes">Logged</td></tr>
+          <tr><td class="k">§3 whole-cow / new SKU</td><td>New SKU only after N leads in the bin + M paid at a test price. Set at <strong>10 signed installs and 4 paid tiers</strong>.</td><td class="yes">Pre-registered</td></tr>
+          <tr><td class="k">§3 corridor pricing</td><td>Price from what they already pay — electrician callout ₱500–1,500, a lost day and a ₱1,000 trip to Tacloban, genset fuel — not from our cost sheet.</td><td class="yes">₱600 sits inside it; ₱2,499 does not, for residential</td></tr>
+          <tr><td class="k">§2 no hypotheticals</td><td>Never ask "would you pay ₱600?". Put the tier on the real contract at the real price and count ticks.</td><td class="yes">That is the fire test</td></tr>
+          <tr><td class="k">§7 fabrication / inventory spend</td><td>No spare-inverter purchase, no box tooling, no print run beyond 5 units before the Mission is met.</td><td class="no">Hand-built for the first five</td></tr>
+          <tr><td class="k">§1.8 Ready-Fire-Aim</td><td>Fire the paper this month. The portal, the scorecard, the monitoring automation all wait for a real customer.</td><td class="yes">See the ship plan</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rule" style="margin-top:22px">
+      <p class="ey">The pre-registered fire test</p>
+      <p class="big">Of the first 10 signed customers, ≥ 4 tick a paid tier at contract signing.</p>
+      <p>
+        Measured on the contract itself, at the real price, before any of the software exists.
+        Pass → build the portal and the monitoring automation. Fail → the problem is the price or
+        the framing, and we re-run positioning before we build anything. Either way we learn it
+        from money, not from opinions. Written into <code>ops/channel-tests.md</code> before the
+        first folio is printed.
+      </p>
+    </div>
+
+    <!-- SHIP PLAN -->
+    <div class="sec-head">
+      <h2>What ships when</h2>
+      <span class="n">paper first, software last · 3</span>
+    </div>
+    <p class="sec-sub">
+      The whole thing is deliverable on paper. Everything digital is deferred until a paying
+      customer has proven they want it — that discipline is the difference between this being a
+      moat and it being another month of building.
+    </p>
+    <div class="ship">
+      <div class="sc">
+        <h3>This month — zero code</h3>
+        <p class="gate">before install #1 · cost ≈ ₱3,000</p>
+        <ul>
+          <li>The one-page tier sheet, printed, in the quote pack</li>
+          <li>Tier tick-box added to the contract template</li>
+          <li>The fairness rule written into the warranty page</li>
+          <li>Typhoon protocol clause drafted</li>
+          <li>Signing Folio, hand-assembled, 5 copies</li>
+          <li>Electrician / REE retainer signed and PRC number printed</li>
+          <li>Fire test pre-registered in <code>ops/channel-tests.md</code></li>
+        </ul>
+      </div>
+      <div class="sc">
+        <h3>After install #1</h3>
+        <p class="gate">paid for by the first deposit</p>
+        <ul>
+          <li>Handover Box v1, hand-built, for our own first customer</li>
+          <li>Inverter cloud monitoring turned on, checked manually each morning</li>
+          <li>Public knowledge base: one page, ten questions, real photos of <em>our</em> install</li>
+          <li>Month-6 call scheduled in the calendar</li>
+          <li>Real cost-per-visit measured and filled into the table above</li>
+        </ul>
+      </div>
+      <div class="sc">
+        <h3>Gated — do not start</h3>
+        <p class="gate">unlocks on the numbers, not on dates</p>
+        <ul>
+          <li>Customer status-page portal → at 10 installs</li>
+          <li>Automated monitoring + alerting → at 15 installs</li>
+          <li>Public SLA scorecard → at 25 tickets of real data</li>
+          <li>Spare loaner inverter → at 25 PLUS subscribers</li>
+          <li>Printed box tooling / bulk run → at 20 installs</li>
+          <li>BANTAY 24 offered anywhere → at ≥8 systems in that barangay</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- DECISIONS -->
+    <div class="sec-head">
+      <h2>What I need you to decide</h2>
+      <span class="n">for the founder meeting · 5</span>
+    </div>
+    <p class="sec-sub">Each one has my recommendation attached. Disagree on the record, not in the hallway.</p>
+
+    <div class="dec">
+      <p class="dn">Decision 1</p>
+      <p class="dq">Do we accept the fairness rule — our fault is always free and always fast?</p>
+      <p>It costs us margin on the free tier and it removes the most obvious upsell lever in the business.</p>
+      <p class="rec"><b>My call</b>Accept it, and put it in writing on the website. It is the single sentence that makes the paid tiers feel like a service instead of a hostage fee, and it is the one we'd never be able to walk back once we'd broken it.</p>
+    </div>
+    <div class="dec">
+      <p class="dn">Decision 2</p>
+      <p class="dq">Does BANTAY 24 stay residential at ₱2,499, or re-aim at livelihood/commercial?</p>
+      <p>₱2,499/mo is ₱29,988/yr — 30% of the flagship price, every year. Against the corridor a homeowner actually compares to (an electrician callout, a lost day, genset fuel), that is far outside the window.</p>
+      <p class="rec"><b>My call</b>Re-aim it. Sell it to businesses whose downtime costs more per day than the plan costs per month, and give homeowners the ₱6,000 annual prepay instead. Keep the ₱2,499 number — it's right for the buyer it's right for.</p>
+    </div>
+    <div class="dec">
+      <p class="dn">Decision 3</p>
+      <p class="dq">Do we publish the SLA <em>and</em> the penalty?</p>
+      <p>Publishing a window we miss twice is worse than never publishing one. This is a promise we have to actually keep, with two people and a motorbike.</p>
+      <p class="rec"><b>My call</b>Publish, but only the windows we'd hit on our worst week — 48 h and 12 h, not 24 h and 4 h. Under-promise the clock, then beat it publicly. The penalty is what makes the promise mean anything, so it ships with it or neither ships.</p>
+    </div>
+    <div class="dec">
+      <p class="dn">Decision 4</p>
+      <p class="dq">Is the Handover Box marketing spend or fulfilment cost?</p>
+      <p>₱900–1,400 per install. At five installs that is ~₱6,000 of a pre-revenue budget.</p>
+      <p class="rec"><b>My call</b>Marketing, and we hand-build the first five ourselves. It is cheaper than a boosted post and it is the only asset that keeps selling after we leave the property.</p>
+    </div>
+    <div class="dec">
+      <p class="dn">Decision 5</p>
+      <p class="dq">Who owns support?</p>
+      <p>The rules require a named owner per live deliverable, and an unowned service promise is how SLAs get missed in week three.</p>
+      <p class="rec"><b>My call</b>One of us owns "customer &amp; service" outright, including the month-6 calls and the scorecard, and it goes in the T5T every Friday as a number — median first reply — not as a status update.</p>
+    </div>
+
+    <p class="note">
+      <b>SC-18 · REV A · 2026-07-27 · draft for founder review.</b> Nothing on this page is
+      customer-facing yet. Every price, response window, cost and attach rate is a
+      <span class="hyp">hypothesis</span> until it has been tested against a real contract and a
+      real ledger — the ledger currently reads 0 installs, 0 leads, 0 deposits, so no figure here
+      has been ground-truthed by anyone. Companion entries: back-end line in
+      <code>ops/canvas.md</code>, attach-rate test in <code>ops/channel-tests.md</code>, decision
+      logged in <code>ops/status.md</code>. Read alongside SC-05 Source &amp; install and SC-06
+      Market &amp; pricing.
+    </p>
+
+  </div>
+</body>
+</html>

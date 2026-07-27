@@ -102,6 +102,7 @@ export const SECTIONS = [
       "market",
       "strategy-deck-en",
       "strategy-deck-tl",
+      "support-moat",
       "principles",
       "founder-charter",
       "founders",
