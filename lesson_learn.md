@@ -1,5 +1,41 @@
 # Lesson Learn
 
+## Command Center: sidebar auto-collapse as icon rail
+
+**Fixed:** 2026-07-27
+
+**What worked:** Drive collapse with a body class (`cc-sb-collapsed`) + pure CSS `:hover` / `:focus-within` for expand, and a small pin script for persistence. Hide bare text labels with `font-size: 0` on `.cc-sb-item` so existing markup (icon + text node + `.tail`) needs no label wrappers. Keep mobile drawer separate via `matchMedia('(min-width: 981px)')`.
+
+**Do not:** Animate collapse on mobile (conflicts with the off-canvas drawer), or put the pin over the logo in the 68px rail — hide the pin until the rail is expanded.
+
+## Fleet monitor: keep Advanced UI in its own directory
+
+**Done:** 2026-07-27
+
+**What worked:** Ship the Advanced fleet visualization as a self-contained `monitor/` tree (HTML/CSS/JS + mock `data.js`) instead of folding into `content/` + `build-pages.mjs` or the Command Center SPA. Offline `file://` works; no CDN.
+
+**Do not:** Hand-edit generated SC pages for a product experiment that still uses mock telemetry — isolate until real inverter data and auth wiring exist.
+
+## Cursor canvas: Pill tabs may not switch views
+
+**Fixed:** 2026-07-27
+
+**Problem:** User could only see the Basic mock; Pill tab clicks did not change the focused variant (and wrapping `Pill` in `<span>` for `key` typing made the control less reliable).
+
+**Fix:** Drive focus with `Button` + `Select` (`useCanvasState`), and also list all four mocks under `CollapsibleSection` so each style is reachable by expand even if focus controls fail.
+
+**Do not:** Rely on `Pill` alone as the only way to switch exclusive canvas views.
+
+## Cursor canvas: Pill `key` typing
+
+**Fixed:** 2026-07-27
+
+**Problem:** Canvas TypeScript check failed with `Property 'key' does not exist on type 'PillProps'` when mapping `<Pill key={…}>`.
+
+**Fix:** Put `key` on a wrapping `<span>` (or other host element); keep `active` / `onClick` on `Pill`.
+
+**Do not:** Assume every `cursor/canvas` primitive accepts React's `key` in its published props type — wrap when the checker complains.
+
 ## Meeting log: auto-collapse open actions column
 
 **Fixed:** 2026-07-22
@@ -86,3 +122,19 @@ AUTH_SECRET=<any-random-string-for-local>
 4. `meetings.js`: cache action rows before grouping (re-render destroys DOM if you re-query `:scope > .ai` after first group pass).
 
 **Do not:** Regroup action items by querying only direct children after moving nodes into `.owner-group` — keep a cached `actionRows[]` array and rebuild the panel from it.
+
+## PH solar competitive research → Excel
+
+**Done:** 2026-07-22
+
+**What worked:** Combine (1) company primary pages for named packages, (2) pinas.solar / r/SolarPH quote datasets for real street prices, (3) Visayas city pages for Biliran-relevant hybrids, and (4) non-solar alternatives. Output a multi-sheet workbook (`outputs/ph-solar-competitive-landscape.xlsx`) with README caveats + Sources sheet.
+
+**Do not:** Treat installer marketing "#1" / install-count claims or stale promo prices (e.g. Buskowitz 2024 Dragon) as EVIDENCED. Do not put Solar City into the same 3–10 kWp custom pond — our pond is fixed ₱80–100k packages. Never imply LIWANAG has brownout backup when comparing to hybrid competitors.
+
+## Enrich competitor Excel with Facebook page/post research
+
+**Done:** 2026-07-22
+
+**What worked:** Scrape public FB page intros for follower counts (no login), sample post hooks from indexed URLs, then add dedicated sheets (`FB_Pages`, `FB_Post_Patterns`, `FB_Sample_Posts`, `FB_Groups`, `FB_Playbook_SolarCity`) rather than cramming into Companies. Separated "copy mechanics" from "copy claims" so brownout-hybrid stories stay off LIWANAG.
+
+**Do not:** Treat follower counts or video views as traction evidence (Mom Test). Do not boost until Biliran FB group slice list + funnel instrumentation are done. Login walls block some pages — mark PARTIAL and move on.
