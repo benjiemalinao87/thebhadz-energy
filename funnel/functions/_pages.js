@@ -60,6 +60,16 @@ export const SECTIONS = [
     apis: ["/api/install-ops"],
   },
   {
+    key: "quotes",
+    label: "Quote builder (customer pricing)",
+    group: "Operations",
+    // Its own section rather than a page under install-ops: this is the one tool that
+    // sets the price a customer sees, so it can be granted to whoever sells and
+    // withheld from whoever only installs.
+    pages: ["quote-builder"],
+    apis: [],
+  },
+  {
     key: "finance",
     label: "Finance & runway (money)",
     group: "Money",

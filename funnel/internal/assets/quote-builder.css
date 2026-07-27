@@ -1,0 +1,173 @@
+/**
+ * SC-16 Quote builder — screen controls + the printable quote sheet.
+ *
+ * Two visual worlds in one file:
+ *   .qb-*        the founder-facing controls (ops-tools look, dark-capable)
+ *   .qs-*        the quote sheet itself — always black-on-white, A4, print-first.
+ *
+ * The sheet is styled as if it were already on paper, so what the founder sees on
+ * screen is what comes out of the printer. @media print then removes everything
+ * that is not the sheet.
+ */
+
+/* ---------- controls ---------- */
+
+.qb-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.qb-controls { position: sticky; top: 18px; display: grid; gap: 16px; }
+
+.qb-box { border: 1px solid var(--hairline); background: var(--sheet); padding: 16px; }
+.qb-box > h3 { margin: 0 0 12px; font: 600 12px var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--copper); }
+.qb-fields { display: grid; gap: 12px; }
+.qb-fields.two { grid-template-columns: 1fr 1fr; }
+.qb-fields label { display: flex; flex-direction: column; gap: 5px; color: var(--faint); font: 600 11px var(--mono); letter-spacing: .03em; }
+.qb-fields input, .qb-fields select, .qb-fields textarea {
+  width: 100%; border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+  padding: 8px 9px; font: 14px var(--sans); border-radius: 0;
+}
+.qb-fields textarea { resize: vertical; line-height: 1.45; }
+.qb-fields input:focus, .qb-fields select:focus, .qb-fields textarea:focus { outline: 2px solid var(--sun); outline-offset: 1px; }
+.qb-fields .span2 { grid-column: 1 / -1; }
+.qb-note { margin: 10px 0 0; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
+
+.qb-readout { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); }
+.qb-readout > div { background: var(--paper); padding: 11px; min-width: 0; }
+.qb-readout span { display: block; color: var(--faint); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.qb-readout strong { display: block; margin-top: 4px; font: 700 16px var(--mono); overflow-wrap: anywhere; }
+.qb-readout .good strong { color: var(--ok); }
+.qb-readout .bad strong { color: #b42318; }
+
+.qb-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Gate + advisory banners. These are not decoration — they carry the Founder-OS
+   rules that make a quote legal to send, so they stay loud. */
+.qb-flag { padding: 12px 14px; border-left: 4px solid var(--sun); background: #fff8e6; font-size: 12.5px; line-height: 1.5; }
+.qb-flag + .qb-flag { margin-top: 8px; }
+.qb-flag strong { display: block; margin-bottom: 2px; }
+.qb-flag.stop { border-color: #b42318; background: #fff2f0; }
+.qb-flag.ok { border-color: var(--ok); background: #edf8f1; }
+
+/* A price we have not confirmed with a supplier must never look like one we have. */
+.qb-unquoted { color: #8a5b00; font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ---------- the quote sheet (screen preview = print output) ---------- */
+
+.qs-wrap { background: #6b6b6b; padding: 20px; overflow-x: auto; }
+.qs {
+  width: 210mm; min-height: 297mm; margin: 0 auto; padding: 14mm 14mm 16mm;
+  background: #fff; color: #111; box-shadow: 0 2px 18px rgba(0,0,0,.35);
+  font: 11px/1.45 "Helvetica Neue", Arial, sans-serif; box-sizing: border-box;
+}
+.qs h1, .qs h2, .qs h3 { color: #111; }
+
+.qs-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 2px solid #111; padding-bottom: 9px; }
+.qs-brand { font: 700 17px/1.15 "Helvetica Neue", Arial, sans-serif; letter-spacing: .02em; }
+.qs-brand small { display: block; margin-top: 3px; font: 400 10px/1.4 Arial, sans-serif; color: #444; letter-spacing: 0; }
+.qs-meta { text-align: right; font: 10px/1.6 "Courier New", monospace; white-space: nowrap; }
+.qs-meta b { font-weight: 700; }
+
+.qs-title { margin: 14px 0 10px; text-align: center; font: 700 15px Arial, sans-serif; letter-spacing: .04em; }
+
+.qs-party { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.qs-party > div { border: 1px solid #999; padding: 8px 10px; }
+.qs-party span { display: block; font: 700 8.5px Arial, sans-serif; letter-spacing: .09em; color: #555; text-transform: uppercase; margin-bottom: 3px; }
+.qs-party p { margin: 0; font-size: 11px; line-height: 1.5; }
+
+/* The headline band: price and the outcome it buys, side by side. A price without
+   its outcome is a bug (Founder OS §3), so the markup keeps them in one block. */
+.qs-headline { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #111; margin-bottom: 12px; }
+.qs-headline > div { padding: 8px 10px; border-right: 1px solid #ccc; }
+.qs-headline > div:last-child { border-right: 0; }
+.qs-headline span { display: block; font: 700 8px Arial, sans-serif; letter-spacing: .08em; color: #555; text-transform: uppercase; }
+.qs-headline strong { display: block; margin-top: 3px; font: 700 14px "Courier New", monospace; }
+.qs-headline small { display: block; margin-top: 2px; font-size: 8.5px; color: #666; }
+.qs-headline .lead { background: #fdf3d6; }
+
+.qs table { width: 100%; border-collapse: collapse; margin: 0 0 10px; }
+/* The site's table styling is theme-variable driven; the sheet is always paper, so
+   colour is pinned here or the header row goes near-invisible in light mode. */
+.qs th, .qs td { border: 1px solid #8a8a8a; padding: 3px 6px; font-size: 10.5px; color: #111; }
+.qs thead th { background: #efefef; color: #111; font: 700 10.5px Arial, sans-serif; text-align: center; letter-spacing: 0; text-transform: none; }
+.qs td.num, .qs th.num { text-align: right; font-family: "Courier New", monospace; white-space: nowrap; }
+.qs td.qty { text-align: center; font-family: "Courier New", monospace; }
+.qs tr.qs-group td { background: #dfeada; font-weight: 700; }
+.qs tr.qs-sub td { background: #f5f5f5; font-weight: 700; }
+.qs tr.qs-total td { background: #fdf0cf; font-weight: 700; font-size: 11.5px; }
+.qs td.qs-indent { padding-left: 20px; }
+
+.qs-legal { margin-top: 12px; }
+.qs-legal h3 { margin: 11px 0 4px; font: 700 10.5px Arial, sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.qs-legal ul { margin: 0 0 0 16px; padding: 0; }
+/* Colour is pinned rather than inherited: the surrounding app is theme-driven and
+   would otherwise tint the paperwork. */
+.qs-legal li, .qs-legal p, .qs-gate li, .qs-brownout, .qs-sign div { color: #111; }
+.qs-legal li { margin: 0 0 2px; font-size: 10px; line-height: 1.45; }
+.qs-legal p { margin: 0 0 4px; font-size: 10px; line-height: 1.45; }
+
+/* The compliance checklist is a hard gate on any quote leaving the building
+   (Founder OS §7) — boxed and bordered so it cannot be mistaken for boilerplate. */
+.qs-gate { border: 1.5px solid #111; padding: 9px 11px; margin-top: 12px; }
+.qs-gate h3 { margin: 0 0 5px; }
+.qs-gate ul { list-style: none; margin: 0; }
+.qs-gate li { margin-bottom: 3px; padding-left: 17px; position: relative; }
+.qs-gate li::before { content: ""; position: absolute; left: 0; top: 1px; width: 9px; height: 9px; border: 1px solid #111; }
+
+/* Brownout truth for on-grid. Never softened, never removed. */
+.qs-brownout { border: 1.5px solid #b42318; padding: 8px 11px; margin-top: 10px; font-size: 10px; line-height: 1.45; }
+.qs-brownout strong { display: block; margin-bottom: 2px; text-transform: uppercase; font-size: 9.5px; letter-spacing: .06em; }
+
+.qs-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 20px; }
+.qs-sign div { border-top: 1px solid #111; padding-top: 4px; font-size: 9.5px; }
+
+.qs-foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #bbb; font-size: 8.5px; color: #666; line-height: 1.5; }
+
+@media (max-width: 1180px) {
+  .qb-grid { grid-template-columns: 1fr; }
+  .qb-controls { position: static; }
+}
+@media (max-width: 760px) {
+  .qb-fields.two { grid-template-columns: 1fr; }
+  .qs-wrap { padding: 10px; }
+  .qs { width: 100%; min-height: 0; padding: 12px; }
+  .qs-headline { grid-template-columns: 1fr 1fr; }
+  .qs-party { grid-template-columns: 1fr; }
+}
+
+/* ---------- print ---------- */
+
+@media print {
+  @page { size: A4; margin: 10mm; }
+
+  /*
+   * The page has two possible ancestries and printing must work from both:
+   *   standalone   body > .frame > main.content.ops-content
+   *   SPA shell    body.cc-body > .cc-main#cc-view > main#cc-main.ops-content
+   * So rather than blanket-hiding ancestors (which breaks whichever chain it guesses
+   * wrong), name the chrome explicitly and flatten both container chains.
+   */
+  .sidebar, .cc-sidebar, .cc-topbar, .cc-menu-toggle, .cc-skip-link, .cc-sb-user,
+  .qb-controls, .qb-screen-only, .ops-topbar, .doc-eyebrow,
+  .ops-content > h1, .ops-content > .lede { display: none !important; }
+
+  html, body, .cc-body, .frame, .content, .ops-content, .workspace-page,
+  .cc-main, #cc-view, #cc-main, .qb-grid, .qb-sheet-col, .qs-wrap {
+    display: block !important; position: static !important; float: none !important;
+    margin: 0 !important; padding: 0 !important; border: 0 !important;
+    background: #fff !important; box-shadow: none !important;
+    max-width: none !important; width: auto !important; min-width: 0 !important;
+    height: auto !important; min-height: 0 !important; overflow: visible !important;
+  }
+
+  .qs {
+    width: auto !important; min-height: 0 !important; margin: 0 !important;
+    padding: 0 !important; box-shadow: none !important; font-size: 10px !important;
+  }
+  .qs table { page-break-inside: auto; }
+  .qs tr { page-break-inside: avoid; }
+  .qs-gate, .qs-brownout, .qs-sign { page-break-inside: avoid; }
+  .qs-legal { page-break-before: auto; }
+
+  /* Group/total shading must survive the printer's default of dropping backgrounds. */
+  .qs tr.qs-group td, .qs tr.qs-sub td, .qs tr.qs-total td, .qs thead th, .qs-headline .lead {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+}
