@@ -135,6 +135,71 @@
     { label: "TWIN 6mm² Solar Cable (per metre)", price: 140, qty: function (g) { return Math.ceil(g.panels * 7 / 10) * 10; } }
   ];
 
+  /* ------------------------------------------------------- the saved price list
+   * The arrays above are the SHIPPED catalogue — the Tacloban sheet plus equipment
+   * estimates. /api/price-items holds the founders' corrections on top, so a price
+   * that comes back from a supplier call is a form submission, not a code change.
+   *
+   * The originals are snapshotted once so applying the overlay is idempotent: an
+   * item whose override is later deleted has to fall back to what shipped, not to
+   * whatever it was overridden to last time.
+   */
+  var BOS_GROUPS = [
+    { name: "RAILING SETS", defs: RAILING },
+    { name: "SURGE / BREAKER SET", defs: PROTECTION },
+    { name: "CABLES", defs: CABLES },
+  ];
+
+  [INVERTERS, PANELS, BATTERIES].forEach(function (arr) {
+    arr.forEach(function (it) {
+      it.key = it.id;
+      it._base = { price: it.price, quoted: it.quoted, label: it.label };
+    });
+  });
+  BOS_GROUPS.forEach(function (g) {
+    g.defs.forEach(function (d) {
+      d.key = d.label;                       // stable: the shipped label, never re-keyed
+      d._base = { price: d.price, quoted: true, label: d.label };
+    });
+  });
+
+  var CATALOG = {};        // item_key → saved row
+  var CUSTOM_LINES = [];   // founder-added balance-of-system lines
+
+  function applyCatalog() {
+    var all = [INVERTERS, PANELS, BATTERIES].concat(BOS_GROUPS.map(function (g) { return g.defs; }));
+    all.forEach(function (arr) {
+      arr.forEach(function (it) {
+        var row = CATALOG[it.key];
+        if (!row) {
+          it.price = it._base.price; it.quoted = it._base.quoted;
+          it.label = it._base.label; it.hidden = false;
+          return;
+        }
+        it.price = row.price;
+        it.quoted = row.confirmed === 1;
+        it.label = row.label || it._base.label;
+        it.hidden = row.active === 0;
+      });
+    });
+    CUSTOM_LINES = Object.keys(CATALOG)
+      .map(function (k) { return CATALOG[k]; })
+      .filter(function (r) { return r.custom === 1 && r.kind === "bos" && r.active !== 0; });
+  }
+
+  function loadCatalog() {
+    return fetch("/api/price-items", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : { ok: false }; })
+      .then(function (d) {
+        if (!d.ok) return false;
+        CATALOG = {};
+        (d.items || []).forEach(function (row) { CATALOG[row.item_key] = row; });
+        applyCatalog();
+        return true;
+      })
+      .catch(function () { return false; });   // offline: the shipped catalogue still works
+  }
+
   // The price ladder from SC-06 §3. The corridor sets the price; the BOM never does.
   function packageFor(kwp, batteryKwh) {
     if (kwp <= 2.4 && batteryKwh <= 3) {
@@ -255,17 +320,37 @@
     head.push(line(panel.label, panels, panel.price, panel.quoted));
     groups.push({ name: null, items: head.filter(Boolean) });
 
+    // A hidden line is one a founder switched off (the customer already has rails,
+    // say). A line whose saved price is not supplier-confirmed counts toward the
+    // INDICATIVE stamp exactly like an unconfirmed inverter — `line` handles that.
     function mapGroup(name, defs) {
-      var items = defs.map(function (d) { return line(d.label, d.qty(geom), d.price, true); }).filter(Boolean);
+      var items = defs
+        .filter(function (d) { return !d.hidden; })
+        .map(function (d) { return line(d.label, d.qty(geom), d.price, d.quoted !== false); })
+        .filter(Boolean);
+      CUSTOM_LINES
+        .filter(function (r) { return (r.group_name || "") === name; })
+        .forEach(function (r) {
+          var it = line(r.label, r.qty_fixed, r.price, r.confirmed === 1);
+          if (it) items.push(it);
+        });
       if (items.length) groups.push({ name: name, items: items });
     }
-    mapGroup("RAILING SETS", RAILING);
-    mapGroup("SURGE / BREAKER SET", PROTECTION);
-    mapGroup("CABLES", CABLES);
+    BOS_GROUPS.forEach(function (g) { mapGroup(g.name, g.defs); });
 
     if (batteryKwh > 0) {
       groups.push({ name: "BATTERY", items: [line(battery.label, batteryQty, battery.price, battery.quoted)].filter(Boolean) });
     }
+
+    // Custom lines the founder did not file under one of the shipped groups. They
+    // get their own heading rather than being dropped — a line that silently fails
+    // to appear is money quietly absorbed into the fabrication fee.
+    var known = BOS_GROUPS.map(function (g) { return g.name; });
+    var loose = CUSTOM_LINES
+      .filter(function (r) { return known.indexOf(r.group_name || "") === -1; })
+      .map(function (r) { return line(r.label, r.qty_fixed, r.price, r.confirmed === 1); })
+      .filter(Boolean);
+    if (loose.length) groups.push({ name: "ADDITIONAL ITEMS", items: loose });
 
     var materials = 0;
     groups.forEach(function (g) { g.items.forEach(function (it) { materials += it.total; }); });
@@ -835,6 +920,313 @@
     };
   }
 
+  /* ---------------------------------------------------------- price list editor */
+
+  var PL_KINDS = [
+    { kind: "inverter", title: "Inverters", arr: function () { return INVERTERS; } },
+    { kind: "panel", title: "Panels", arr: function () { return PANELS; } },
+    { kind: "battery", title: "Batteries", arr: function () { return BATTERIES; } },
+  ];
+
+  function plSay(kind, message) {
+    var s = el("qb-pl-status");
+    s.className = "qb-pl-status " + (kind || "");
+    s.textContent = message || "";
+  }
+
+  /** Persist one line, then re-apply the overlay and repaint the sheet. */
+  function plSave(row) {
+    plSay("", "Saving…");
+    return fetch("/api/price-items", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(row),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.data.ok) {
+          plSay("bad", (res.data && res.data.error) || "Could not save.");
+          return false;
+        }
+        CATALOG[res.data.item.item_key] = res.data.item;
+        applyCatalog();
+        refresh();
+        plSay("good", "Saved.");
+        return true;
+      })
+      .catch(function (err) { plSay("bad", String(err && err.message)); return false; });
+  }
+
+  function plRow(item, kind, groupName) {
+    var saved = CATALOG[item.key] || null;
+    var firm = item.quoted !== false;
+    var wrap = document.createElement("div");
+    wrap.className = "qb-pl-row" + (item.hidden ? " is-off" : "");
+
+    var name = document.createElement("div");
+    name.className = "name";
+    var b = document.createElement("b");
+    b.textContent = item.label;
+    var small = document.createElement("small");
+    small.textContent = saved && saved.confirmed === 1 && saved.source_note
+      ? saved.source_note
+      : (firm ? "Tacloban supplier sheet, 2026-07" : "Estimate — not yet supplier-confirmed");
+    name.appendChild(b);
+    name.appendChild(small);
+
+    var price = document.createElement("input");
+    price.type = "number";
+    price.min = "0";
+    price.step = "50";
+    price.value = item.price;
+    price.setAttribute("aria-label", "Unit price for " + item.label);
+
+    var flag = document.createElement("button");
+    flag.type = "button";
+    flag.className = "qb-pl-flag" + (firm ? " is-firm" : "");
+    flag.textContent = firm ? "Firm" : "Est.";
+    flag.title = firm ? "Supplier-confirmed. Click to mark it an estimate again."
+                      : "Estimate. Click to record a supplier confirmation.";
+
+    var drop = document.createElement("button");
+    drop.type = "button";
+    drop.className = "drop";
+    drop.textContent = item.hidden ? "↺" : "×";
+    drop.title = item.hidden ? "Put this line back" : "Drop this line from new quotes";
+    drop.setAttribute("aria-label", drop.title);
+
+    var payload = function () {
+      return {
+        item_key: item.key, kind: kind, label: item.label,
+        price: Number(price.value) || 0, group_name: groupName || null,
+        custom: saved ? saved.custom : 0,
+        qty_fixed: saved ? saved.qty_fixed : null,
+        confirmed: firm ? 1 : 0,
+        source_note: saved ? saved.source_note : "",
+        active: item.hidden ? 0 : 1,
+      };
+    };
+
+    price.addEventListener("change", function () { plSave(payload()); });
+
+    // Everything that needs more input opens INSIDE the row. A native prompt on top
+    // of a dialog loses the row you were looking at and cannot show what it is about.
+    var inline = document.createElement("div");
+    inline.className = "qb-pl-inline";
+    inline.hidden = true;
+
+    function closeInline() { inline.hidden = true; inline.innerHTML = ""; }
+
+    flag.addEventListener("click", function () {
+      if (firm) {
+        // Doubting a number never needs paperwork.
+        plSave(Object.assign(payload(), { confirmed: 0, source_note: "" })).then(paint);
+        return;
+      }
+      if (!inline.hidden) { closeInline(); return; }
+      // Turning an estimate into a firm price is the one edit here that changes what
+      // a customer is told, so it has to name its source (§7).
+      inline.hidden = false;
+      inline.innerHTML =
+        '<label class="qb-pl-inline-label">Who quoted this price, and when?</label>' +
+        '<div class="qb-pl-inline-controls">' +
+          '<input type="text" maxlength="200" placeholder="Photonergy · Ric Santos · 2026-07-28">' +
+          '<button type="button" class="ok">Mark firm</button>' +
+          '<button type="button" class="secondary cancel">Cancel</button>' +
+        '</div>' +
+        '<p class="qb-pl-inline-note">Kept for us, never printed on a customer quote. ' +
+        'It is how anyone can tell later whether the number was ever real.</p>';
+      var input = inline.querySelector("input");
+      input.focus();
+      var commit = function () {
+        var note = input.value.trim();
+        if (!note) { plSay("bad", "A confirmed price needs a source."); input.focus(); return; }
+        plSave(Object.assign(payload(), { confirmed: 1, source_note: note })).then(paint);
+      };
+      inline.querySelector(".ok").addEventListener("click", commit);
+      inline.querySelector(".cancel").addEventListener("click", closeInline);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        if (e.key === "Escape") { e.preventDefault(); closeInline(); }
+      });
+    });
+
+    drop.addEventListener("click", function () {
+      plSave(Object.assign(payload(), { active: item.hidden ? 1 : 0 })).then(paint);
+    });
+
+    wrap.appendChild(name);
+    wrap.appendChild(price);
+    wrap.appendChild(flag);
+    wrap.appendChild(drop);
+    wrap.appendChild(inline);
+    return wrap;
+  }
+
+  function paint() {
+    var body = el("qb-pl-body");
+    body.innerHTML = "";
+    var estimates = 0;
+
+    PL_KINDS.forEach(function (g) {
+      var head = document.createElement("div");
+      head.className = "qb-pl-group";
+      head.textContent = g.title;
+      body.appendChild(head);
+      g.arr().forEach(function (it) {
+        if (it.id === "none") return;               // "No battery" has no price to edit
+        if (it.quoted === false) estimates++;
+        body.appendChild(plRow(it, g.kind, null));
+      });
+    });
+
+    BOS_GROUPS.forEach(function (g) {
+      var head = document.createElement("div");
+      head.className = "qb-pl-group";
+      head.textContent = g.name;
+      body.appendChild(head);
+      g.defs.forEach(function (d) {
+        if (d.quoted === false) estimates++;
+        body.appendChild(plRow(d, "bos", g.name));
+      });
+      CUSTOM_LINES.filter(function (r) { return (r.group_name || "") === g.name; })
+        .forEach(function (r) { body.appendChild(plCustomRow(r)); });
+    });
+
+    var loose = CUSTOM_LINES.filter(function (r) {
+      return BOS_GROUPS.map(function (g) { return g.name; }).indexOf(r.group_name || "") === -1;
+    });
+    if (loose.length) {
+      var head = document.createElement("div");
+      head.className = "qb-pl-group";
+      head.textContent = "Additional items";
+      body.appendChild(head);
+      loose.forEach(function (r) { body.appendChild(plCustomRow(r)); });
+    }
+
+    el("qb-pl-count").textContent = estimates
+      ? estimates + " price" + (estimates === 1 ? " is" : "s are") + " still an estimate."
+      : "Every price is supplier-confirmed.";
+  }
+
+  /** A founder-added line: label and quantity are editable too, and it can be deleted. */
+  function plCustomRow(row) {
+    var shim = {
+      key: row.item_key, label: row.label, price: row.price,
+      quoted: row.confirmed === 1, hidden: row.active === 0,
+    };
+    var node = plRow(shim, "bos", row.group_name);
+    var drop = node.querySelector(".drop");
+    drop.textContent = "×";
+    drop.title = "Delete this line";
+    var clone = drop.cloneNode(true);          // drop the deactivate handler
+    drop.parentNode.replaceChild(clone, drop);
+    var inline = node.querySelector(".qb-pl-inline");
+    clone.addEventListener("click", function () {
+      if (!inline.hidden) { inline.hidden = true; inline.innerHTML = ""; return; }
+      inline.hidden = false;
+      inline.innerHTML =
+        '<div class="qb-pl-inline-controls">' +
+          '<span class="qb-pl-inline-label">Delete this line for good?</span>' +
+          '<button type="button" class="danger ok">Delete</button>' +
+          '<button type="button" class="secondary cancel">Keep it</button>' +
+        '</div>';
+      inline.querySelector(".cancel").addEventListener("click", function () {
+        inline.hidden = true; inline.innerHTML = "";
+      });
+      inline.querySelector(".ok").addEventListener("click", function () {
+        fetch("/api/price-items", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ item_key: row.item_key }),
+        }).then(function () {
+          delete CATALOG[row.item_key];
+          applyCatalog();
+          refresh();
+          paint();
+          plSay("good", "Deleted.");
+        });
+      });
+    });
+    var qty = document.createElement("small");
+    qty.textContent = "Custom line · qty " + row.qty_fixed;
+    node.querySelector(".name").appendChild(qty);
+    return node;
+  }
+
+  el("qb-prices").addEventListener("click", function () {
+    // Re-read before showing: another founder may have corrected a price since this
+    // tab was opened, and the sheet behind the dialog has to agree with the list.
+    loadCatalog().then(function () {
+      refresh();
+      paint();
+      plSay("", "");
+      el("qb-price-list").showModal();
+    });
+  });
+  el("qb-pl-close").addEventListener("click", function () { el("qb-price-list").close(); });
+
+  // One inline form rather than a chain of four native prompts: a founder adding a
+  // line needs to see the label, quantity and price together to know the total is
+  // what they meant, and needs to be able to go back a field without starting over.
+  el("qb-pl-add").addEventListener("click", function () {
+    var form = el("qb-pl-new");
+    var open = form.hidden;
+    form.hidden = !open;
+    el("qb-pl-add").textContent = open ? "Cancel" : "Add a line";
+    if (open) el("qb-pl-new-label").focus();
+    else plNewReset();
+  });
+
+  function plNewReset() {
+    el("qb-pl-new-label").value = "";
+    el("qb-pl-new-qty").value = "1";
+    el("qb-pl-new-price").value = "";
+    el("qb-pl-new-group").selectedIndex = 0;
+  }
+
+  function plNewSubmit() {
+    var label = el("qb-pl-new-label").value.trim();
+    var qty = Number(el("qb-pl-new-qty").value);
+    var price = Number(el("qb-pl-new-price").value);
+    if (!label) { plSay("bad", "Give the line a name."); el("qb-pl-new-label").focus(); return; }
+    if (!(qty > 0)) { plSay("bad", "Quantity has to be more than zero."); el("qb-pl-new-qty").focus(); return; }
+    if (!(price >= 0)) { plSay("bad", "Enter a unit price."); el("qb-pl-new-price").focus(); return; }
+
+    plSave({
+      item_key: "custom-" + Date.now().toString(36),
+      kind: "bos", label: label, price: price, qty_fixed: qty,
+      group_name: el("qb-pl-new-group").value || null,
+      custom: 1, confirmed: 0, source_note: "", active: 1,
+    }).then(function (ok) {
+      if (!ok) return;
+      plNewReset();
+      el("qb-pl-new").hidden = true;
+      el("qb-pl-add").textContent = "Add a line";
+      paint();
+    });
+  }
+
+  el("qb-pl-new-save").addEventListener("click", plNewSubmit);
+  el("qb-pl-new").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); plNewSubmit(); }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      el("qb-pl-new").hidden = true;
+      el("qb-pl-add").textContent = "Add a line";
+      plNewReset();
+    }
+  });
+
+  // A new line's running total, so a wrong quantity is visible before it is saved.
+  ["qb-pl-new-qty", "qb-pl-new-price"].forEach(function (id) {
+    el(id).addEventListener("input", function () {
+      var q = Number(el("qb-pl-new-qty").value) || 0;
+      var p = Number(el("qb-pl-new-price").value) || 0;
+      el("qb-pl-new-total").textContent = q && p ? "= ₱" + (q * p).toLocaleString("en-PH") : "";
+    });
+  });
+
   /**
    * Confirm the send, showing the three things a founder would actually regret
    * getting wrong: the recipient, the price on the document, and whether that
@@ -956,4 +1348,9 @@
   el("qb-quote-no").value = nextQuoteNo();
 
   refresh();
+
+  // Paint immediately from the shipped catalogue, then again once the saved price
+  // list arrives. A slow or failed fetch leaves a working quote on screen rather
+  // than an empty one — the built-in prices are still real prices.
+  loadCatalog().then(function (loaded) { if (loaded) refresh(); });
 })();

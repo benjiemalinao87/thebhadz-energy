@@ -358,3 +358,36 @@ CREATE TABLE IF NOT EXISTS quotes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_quotes_lead ON quotes(lead_id);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- SC-16 price list. The quote builder ships with a built-in catalogue (the
+-- Tacloban supplier sheet for balance-of-system, plus equipment estimates); this
+-- table holds the founders' edits on top of it, so a price correction is a form
+-- submission rather than a JavaScript edit and a redeploy.
+--
+-- `confirmed` is the important column: it is what decides whether a quote prints
+-- stamped INDICATIVE (Founder OS §7). It cannot be set without `source_note` —
+-- who quoted the number and when — because a flag that turns an estimate into a
+-- firm price with one click, and records nothing, is worse than no flag at all.
+--
+-- Quantities for built-in balance-of-system lines stay derived from the array
+-- geometry in code; only `qty_fixed` custom lines carry their own quantity.
+CREATE TABLE IF NOT EXISTS price_items (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind          TEXT NOT NULL,              -- inverter | panel | battery | bos
+  item_key      TEXT NOT NULL UNIQUE,       -- built-in id / label, or custom-<n>
+  label         TEXT NOT NULL,
+  price         REAL NOT NULL,
+  qty_fixed     REAL,                       -- custom lines only; NULL = geometry-derived
+  group_name    TEXT,                       -- BOS grouping shown on the sheet
+  confirmed     INTEGER NOT NULL DEFAULT 0, -- 0/1 — drives the INDICATIVE stamp
+  source_note   TEXT,                       -- required to set confirmed
+  confirmed_at  TEXT,
+  confirmed_by  TEXT,
+  custom        INTEGER NOT NULL DEFAULT 0, -- 0 = overrides a built-in, 1 = founder-added
+  active        INTEGER NOT NULL DEFAULT 1, -- 0 hides a line from new quotes
+  updated_at    TEXT NOT NULL,
+  updated_by    TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_items_kind ON price_items(kind);

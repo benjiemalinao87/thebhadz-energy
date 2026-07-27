@@ -137,6 +137,7 @@
             <label>Valid for (days)<input id="qb-validity" type="number" min="1" step="1" value="14"></label>
           </div>
           <div class="qb-actions" style="margin-top:12px">
+            <button type="button" class="secondary" id="qb-prices">Price list</button>
             <button type="button" id="qb-send">Email quote to customer</button>
             <button type="button" class="secondary" id="qb-print">Print / save as PDF</button>
             <button type="button" class="secondary" id="qb-copy">Copy summary</button>
@@ -151,6 +152,43 @@
             rather than window.confirm — the browser one cannot show the price, cannot be
             styled, and reads like a scripting error on a tool that quotes money.
           -->
+          <!--
+            The price list. Every unit price the sheet uses, with the one control that
+            matters: whether a supplier actually quoted it. That flag is what removes
+            the INDICATIVE stamp, so it cannot be set without saying who quoted it.
+          -->
+          <dialog class="qb-dialog qb-dialog-wide" id="qb-price-list" aria-labelledby="qb-price-title">
+            <div class="qb-pl-head">
+              <div>
+                <h2 id="qb-price-title">Price list</h2>
+                <p class="qb-dialog-lede">Shared by every founder. Edits apply to new quotes
+                  immediately. <b id="qb-pl-count"></b></p>
+              </div>
+              <button type="button" class="secondary" id="qb-pl-close" aria-label="Close price list">Close</button>
+            </div>
+            <div class="qb-pl-body" id="qb-pl-body"></div>
+            <div class="qb-pl-new" id="qb-pl-new" hidden>
+              <label>Line<input type="text" id="qb-pl-new-label" maxlength="120" placeholder="Extra conduit run, 6m"></label>
+              <label>Qty<input type="number" id="qb-pl-new-qty" min="0" step="1" value="1"></label>
+              <label>Unit price<input type="number" id="qb-pl-new-price" min="0" step="50" placeholder="0"></label>
+              <label>Section<select id="qb-pl-new-group">
+                <option value="">Additional items</option>
+                <option value="RAILING SETS">Railing sets</option>
+                <option value="SURGE / BREAKER SET">Surge / breaker set</option>
+                <option value="CABLES">Cables</option>
+              </select></label>
+              <div class="qb-pl-new-go">
+                <span class="qb-pl-new-total" id="qb-pl-new-total"></span>
+                <button type="button" id="qb-pl-new-save">Add line</button>
+              </div>
+            </div>
+
+            <div class="qb-pl-foot">
+              <button type="button" class="secondary" id="qb-pl-add">Add a line</button>
+              <span class="qb-pl-status" id="qb-pl-status"></span>
+            </div>
+          </dialog>
+
           <dialog class="qb-dialog" id="qb-confirm" aria-labelledby="qb-confirm-title">
             <form method="dialog">
               <h2 id="qb-confirm-title">Send this quotation?</h2>
