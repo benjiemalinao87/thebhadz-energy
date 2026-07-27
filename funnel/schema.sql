@@ -11,6 +11,12 @@ CREATE TABLE IF NOT EXISTS leads (
   financing     INTEGER DEFAULT 0,        -- 0/1
   stage         TEXT NOT NULL DEFAULT 'lead',  -- lead|contacted|demoed|proposal|sold|lost
   notes         TEXT,
+  -- The ONE next step that advances this lead, plus when it is due and who owns it.
+  -- Structured rather than buried in notes so overdue work can surface on its own
+  -- (SC-17 next-action board) instead of relying on somebody re-reading every card.
+  next_action        TEXT,
+  next_action_due    TEXT,                     -- YYYY-MM-DD
+  next_action_owner  TEXT,
   source        TEXT,
   utm_source    TEXT,
   utm_medium    TEXT,
@@ -24,6 +30,7 @@ CREATE TABLE IF NOT EXISTS leads (
 
 CREATE INDEX IF NOT EXISTS idx_leads_stage ON leads(stage);
 CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at);
+CREATE INDEX IF NOT EXISTS idx_leads_next_due ON leads(next_action_due);
 
 -- Founder team notes (images live in R2, keys stored as a JSON array)
 CREATE TABLE IF NOT EXISTS notes (

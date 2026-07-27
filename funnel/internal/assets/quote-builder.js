@@ -498,6 +498,24 @@
         '</ul>' +
       '</div>' +
 
+      // The customer's own next action, and the milestones after it. Onboarding
+      // "bumpers" (§6): the homeowner should never have to chase us to find out
+      // what happens next.
+      '<div class="qs-steps">' +
+        '<h3>What happens next</h3>' +
+        '<ol>' +
+          '<li><b>You confirm the site survey date.</b> This is the only thing we need from you right now.</li>' +
+          '<li><b>Free site survey.</b> We check the roof, orientation and your main panel, and confirm this design.</li>' +
+          '<li><b>Final quotation and contract.</b> Fixed price, signed before any work or payment.</li>' +
+          (m.spec.gridTied
+            ? '<li><b>Permit and BILECO net-metering filed by us.</b> You do not queue for anything.</li>'
+            : '<li><b>Permit filed by us,</b> with plans signed by a licensed electrical practitioner.</li>') +
+          '<li><b>Installation.</b> Typically one to two days on site.</li>' +
+          '<li><b>Testing, energising and walkthrough.</b> We show you the monitoring app and what to do on a fault.</li>' +
+          '<li><b>Your first lower bill.</b> We check in to confirm the savings are real.</li>' +
+        '</ol>' +
+      '</div>' +
+
       '<div class="qs-legal">' +
         '<h3>Terms and conditions</h3>' +
         '<ul>' +
@@ -536,6 +554,62 @@
         '"indicative" are market estimates pending supplier confirmation.</div>';
   }
 
+  /*
+   * The one next action for this quote.
+   *
+   * Ordered by what actually blocks the sale, hardest blocker first, so the founder
+   * never has to read the whole flag rail to work out what to do. Every quote resolves
+   * to exactly one action — "several things to consider" is how a lead goes cold (§2).
+   */
+  function nextAction(m) {
+    if (!val("qb-customer").trim()) {
+      return {
+        state: "blocked",
+        action: "Name the customer before anything else.",
+        why: "An unnamed quote can't be sent, tracked, or followed up. Fill in the customer block."
+      };
+    }
+    if (m.margin <= 0) {
+      return {
+        state: "blocked",
+        action: "Re-spec this system — it loses " + peso(Math.abs(m.margin)) + ".",
+        why: "Cost " + peso(m.ourCost) + " against a price of " + peso(m.customerPrice) +
+          ". Drop the battery tier or move up the ladder. Do not send it and hope."
+      };
+    }
+    if (m.spec.battery && m.batteryKwh === 0) {
+      return {
+        state: "blocked",
+        action: "Add a battery or switch this to LIWANAG.",
+        why: m.spec.label + " is sold on backup and this configuration has no storage. Sending it as-is is the value gap (§1.6)."
+      };
+    }
+    if (m.unquoted > 0) {
+      return {
+        state: "caution",
+        action: "Send as an INDICATIVE quote, then get the " + m.unquoted + " open supplier price" +
+          (m.unquoted === 1 ? "" : "s") + " confirmed.",
+        why: "The sheet is already stamped indicative, so it is honest to send today — but no deposit is accepted " +
+          "until the numbers are firm. Call list: docs/inverter-battery-brand-research.md §9."
+      };
+    }
+    return {
+      state: "go",
+      action: "Send it, then book the site survey on a named date.",
+      why: "This is a sales-mode interaction, so it ends with a commitment ask (§2): \"Can I come Saturday 9am " +
+        "or is Sunday better?\" A quote that ends in \"I'll message you\" is a zombie lead."
+    };
+  }
+
+  function renderNextAction(m) {
+    var na = nextAction(m);
+    var tone = na.state === "blocked" ? "stop" : (na.state === "go" ? "ok" : "");
+    el("qb-next").innerHTML =
+      '<div class="qb-next-head">Next action</div>' +
+      '<div class="qb-flag ' + tone + '"><strong>' + esc(na.action) + '</strong>' + esc(na.why) + '</div>';
+    return na;
+  }
+
   /** Plain-text summary — the founder's Messenger follow-up, one click away. */
   function summaryText(m) {
     var lines = [
@@ -551,7 +625,9 @@
       "Simple payback: about " + m.paybackYears.toFixed(1) + " years (estimate)",
       "",
       "Includes: supply, fabrication, delivery, installation, testing, LGU electrical permit with licensed-practitioner sign-off" +
-        (m.spec.gridTied ? ", and the BILECO net-metering application handled by us." : ", plus commissioning and owner training.")
+        (m.spec.gridTied ? ", and the BILECO net-metering application handled by us." : ", plus commissioning and owner training."),
+      "",
+      "Next step: a free site survey so we can confirm the roof and lock the design. Which day works — Saturday or Sunday?"
     ];
     if (m.spec.gridTied && !m.spec.battery) {
       lines.push("", "Important: this is a grid-tied system. It switches off during a brownout (safety rule) — it lowers your bill, it is not backup power.");
@@ -572,6 +648,7 @@
     syncBatteryVisibility();
     current = compute();
     renderReadout(current);
+    renderNextAction(current);
     renderFlags(current);
     renderSheet(current);
     var feeField = el("qb-fee");

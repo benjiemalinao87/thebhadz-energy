@@ -46,6 +46,14 @@
 .qb-flag.stop { border-color: #b42318; background: #fff2f0; }
 .qb-flag.ok { border-color: var(--ok); background: #edf8f1; }
 
+/* The single next action, given its own weight above the flag rail — one thing to do,
+   not a list to interpret. */
+.qb-next { margin-top: 14px; }
+.qb-next-head { font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--copper); margin-bottom: 5px; }
+.qb-next .qb-flag { border-left-width: 5px; font-size: 13px; }
+.qb-next .qb-flag strong { font-size: 14px; }
+#qb-flags { margin-top: 14px; }
+
 /* A price we have not confirmed with a supplier must never look like one we have. */
 .qb-unquoted { color: #8a5b00; font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
 
@@ -115,6 +123,12 @@
 .qs-brownout { border: 1.5px solid #b42318; padding: 8px 11px; margin-top: 10px; font-size: 10px; line-height: 1.45; }
 .qs-brownout strong { display: block; margin-bottom: 2px; text-transform: uppercase; font-size: 9.5px; letter-spacing: .06em; }
 
+/* "What happens next" — the customer's own milestone list. */
+.qs-steps { border: 1px solid #999; padding: 9px 11px; margin-top: 10px; }
+.qs-steps h3 { margin: 0 0 5px; font: 700 10.5px Arial, sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #111; }
+.qs-steps ol { margin: 0 0 0 16px; padding: 0; }
+.qs-steps li { margin: 0 0 2px; font-size: 10px; line-height: 1.45; color: #111; }
+
 .qs-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 20px; }
 .qs-sign div { border-top: 1px solid #111; padding-top: 4px; font-size: 9.5px; }
 
@@ -163,7 +177,7 @@
   }
   .qs table { page-break-inside: auto; }
   .qs tr { page-break-inside: avoid; }
-  .qs-gate, .qs-brownout, .qs-sign { page-break-inside: avoid; }
+  .qs-gate, .qs-brownout, .qs-sign, .qs-steps { page-break-inside: avoid; }
   .qs-legal { page-break-before: auto; }
 
   /* Group/total shading must survive the printer's default of dropping backgrounds. */

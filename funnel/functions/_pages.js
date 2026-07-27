@@ -18,6 +18,16 @@
 
 export const SECTIONS = [
   {
+    key: "next-actions",
+    label: "Next actions (roll-up)",
+    group: "Operations",
+    // Reads /api/leads, /api/install-ops and /api/projects rather than owning data.
+    // Those APIs stay individually gated, so hiding a section still hides its rows
+    // here — the page degrades to what the account may actually see.
+    pages: ["next-actions"],
+    apis: [],
+  },
+  {
     key: "leads",
     label: "Contacts / leads pipeline",
     group: "Operations",
