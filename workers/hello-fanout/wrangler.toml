@@ -24,7 +24,7 @@ compatibility_date = "2025-07-01"
 #   PERSONAL_FORWARDS = "benjie@macc-inc.com=benjiemalinao87@gmail.com;jethro@macc-inc.com=androidjeth@gmail.com"
 [vars]
 FORWARD_TO = "androidjeth@gmail.com,aver.corpin@gmail.com,benjiemalinao87@gmail.com,engr.juncab@gmail.com"
-PERSONAL_FORWARDS = ""
+PERSONAL_FORWARDS = "benjie@macc-inc.com=benjiemalinao87@gmail.com;jethro@macc-inc.com=androidjeth@gmail.com;acedenver@macc-inc.com=aver.corpin@gmail.com;jundhel@macc-inc.com=engr.juncab@gmail.com"
 
 # Same D1 database the funnel Pages project uses, so /internal/mail.html can read
 # inbound mail. Writing here is best-effort: if D1 is down the forward still happens.
