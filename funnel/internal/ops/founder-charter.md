@@ -78,7 +78,61 @@ in §8 calls it.
 Founders' Agreement mechanism. Invoking it is a named last resort, not a negotiating
 move.
 6. **How we argue:** hard on the idea in the group channel, never about the person,
-nothing held for a private sidebar — no ghost grudges.
+nothing held for a private sidebar — no ghost grudges. The meeting-level mechanics of
+this rule are the debate protocol below.
+
+### The debate protocol — keeping a hard conversation about the idea — PROPOSED (drafted 2026-07-27)
+
+Rule 6 states the value; this is the procedure that enforces it in the room. Sources:
+Blue Ocean's fair process (engagement, explanation, expectation clarity), the Nvidia
+Way's whiteboard culture and public-postmortem norms, Torres's compare-and-contrast
+framing, the Mom Test's statement classification (turned on ourselves), Blank's
+everything-is-a-hypothesis, and Ready, Fire, Aim's test-don't-argue tempo.
+
+1. **Write it down before we argue it** (Nvidia Way: the whiteboard; Torres). A
+contested topic enters the meeting as a written half-pager: the claim, 2–3 alternatives
+side by side (never whether-or-not), and *what evidence would change the author's own
+mind*. No document → the item waits a week. Writing separates the idea from its author;
+you can attack a whiteboard, you can't attack a person's improvisation without it
+landing on the person.
+2. **Reversible disagreements aren't debated — they're fired** (Ready, Fire, Aim;
+Blank). First question on any dispute: "is this checkable for ≤ ▸ ₱5k within a week?"
+Yes → design the test together and stop arguing; the market referees. Most heated
+founder arguments are about things real homeowners would settle for free.
+3. **Steelman before you counter** (fair process: engagement). Before criticizing,
+restate the other founder's position until they say "yes, that's it." You earn the
+right to attack an idea only after proving you can hold it.
+4. **Classify your own statements** (Mom Test, turned inward). Everything said in a
+debate is one of: *fact* (name the source), *hypothesis* (name the test that would
+settle it), or *preference* (say "this is taste" out loud, and taste loses to either of
+the other two). "That will never work" is a hypothesis missing its test, not an
+argument.
+5. **Sentences start with the idea, never with "you."** "The ₱99,500 stall data says…"
+is legal; "you always…", "you never…", and motive-reading ("you just want to build the
+factory") end the speaker's turn immediately — any founder may call it, including
+mid-sentence. Nvidia rule: blunt about the work, never about the person, and always in
+front of the group so nothing festers as gossip.
+6. **The owner speaks last** (Nvidia Way; §3.2 above). The domain owner facilitates and
+gives their own view only after every other founder has spoken, least-senior first, so
+nobody anchors the room.
+7. **Explain the decision, set expectations** (Blue Ocean: fair process). When the
+owner decides they say, same meeting: which alternative won, why against the Mission
+number, what they heard in the dissent, and the revisit-when condition — logged same
+day. Founders commit to decisions they lost when the process was visibly fair; that is
+the mechanism that makes §3.3 disagree-and-commit real instead of resentful.
+8. **Erase the whiteboard** (Nvidia Way). After the log entry the argument is over: no
+side-channel relitigating, no "I told you so" until the revisit-when condition actually
+fires — and then it's data, said once, in the group channel.
+9. **Break glass.** Any founder may call "**timeout**" the moment voices rise or it
+turns personal — a mandatory ▸ 10-minute break, and the call itself is never debated.
+Two timeouts on one item → it's tabled, both sides write the rule-1 half-pager, and it
+returns next meeting through the front door. A meeting that turned personal gets its
+own public postmortem (§2.1): what tripped it, which rule failed, lesson extracted,
+nobody defends their outburst — then the whiteboard is erased on that too.
+
+*What it costs:* speed in the room — writing first, steelmanning, and speaking last are
+all slower than winning the argument. We pay it, because decisions made this way stick
+instead of replaying every Friday.
 
 ## 4. Decision making — PROPOSED
 
@@ -211,6 +265,7 @@ Every ratification, amendment, and override gets a row. Newest first.
 
 | Date | Decision | Why | Revisit when |
 |---|---|---|---|
+| 2026-07-27 | Debate protocol drafted into §3 (PROPOSED): write-first, fire reversible disputes, steelman, classify statements, no "you"-sentences, owner speaks last, fair-process close, erase the whiteboard, timeout rule | Last meeting turned personal; §3.6 stated the value but had no in-room procedure | Ratify at next Friday meeting; review after 4 meetings under the protocol |
 | 2026-07-21 | Charter drafted: §1 agreed; §2–10 PROPOSED pending founder ratification | One reference place instead of memory; drafted from the Founder OS + founder pillars (innovation, Kaizen, customer service, community impact) | First Friday meeting after creation |
 
 ---
