@@ -245,7 +245,11 @@
     <a class="brand" href="/internal/"><img src="/assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc."> MACC</a>
     <h1>Support as the moat — BANTAY service architecture</h1>
     <div class="sp"></div>
-    <a class="link" href="/internal/">↩ Founder home</a>
+    <!-- .back is the router's contract: spa-router.js strips a page's own .bar when it
+         contains a .back link, so the shell's sidebar is the only navigation inside the
+         SPA. Without it this bar renders on top of the shell chrome and the Log out
+         button wraps under the title. The bar still shows on a standalone load. -->
+    <a class="link back" href="/internal/">↩ Founder home</a>
     <a class="link" href="/api/founder-logout">Log out</a>
   </div>
 
