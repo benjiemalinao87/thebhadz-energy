@@ -115,7 +115,7 @@ PAGE = """<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SC-08a Competitor research workbook — BADJJ Energy Systems</title>
+<title>SC-08a Competitor research workbook — MACC Systems &amp; Engineering Inc.</title>
 <script>
   // The Command Center shell is the UI for this page. A standalone load — refresh,
   // bookmark, pasted link — hits this real file with no shell around it, so bounce to
@@ -129,7 +129,7 @@ PAGE = """<!doctype html>
 </script>
 <script src="/internal/assets/theme.js"></script>
 <link rel="stylesheet" href="/internal/assets/style.css">
-<link rel="icon" href="/assets/img/badjj-favicon.png">
+<link rel="icon" href="/assets/img/macc-mark.png">
 <link rel="stylesheet" href="/internal/assets/workspace-redesign.css">
 <style>
   .wb-tabs {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 4px; }}
@@ -202,8 +202,8 @@ PAGE = """<!doctype html>
   <aside class="sidebar">
     <div class="brand">
       <a href="/internal/overview.html">
-        <img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>
-        <span class="sub">MODULE ENGINEERING FILE</span></span>
+        <img class="logo-mark" src="/assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc."><span class="brand-text"><span class="wordmark">MACC</span>
+        <span class="sub">SOLAR CITY · MODULE ENGINEERING FILE</span></span>
       </a>
     </div>
     <nav class="nav" aria-label="Document sections">

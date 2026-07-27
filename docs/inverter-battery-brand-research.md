@@ -319,7 +319,7 @@ What the user asked about specifically. The honest picture:
   white-label supply **[V]**. They also do co-certification deals with inverter brands
   (Sol-Ark) **[V]**, so they are partnership-minded.
 - **Pylontech publishes nothing** about OEM/ODM. Their brand equity *is* the product; a
-  BADJJ-badged Pylontech would cannibalize it. Low probability.
+  MACC-badged Pylontech would cannibalize it. Low probability.
 - **Solis and SolaX** run brand-led channel strategies. No published OEM program.
 - **Industry-typical OEM economics [S, general]:** white-label with existing tooling runs
   ~10–50 units MOQ at the low end; true OEM with custom casing/branding/packaging runs

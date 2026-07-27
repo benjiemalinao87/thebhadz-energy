@@ -118,6 +118,14 @@ section { padding: 56px 0; }
   height: 46px;
   object-fit: contain;
 }
+/* The corporate lockup already contains the company name, so it replaces the
+   mark + text wordmark rather than sitting beside them. Both the header and the
+   footer are dark navy, so both use the reversed (near-white) cut of the logo. */
+.logo .lockup {
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
 .logo .wm { display: grid; gap: 1px; line-height: 1; }
 .logo .wm b { font-size: 26px; letter-spacing: -0.05em; }
 .logo .wm span {
@@ -1105,6 +1113,7 @@ footer a:hover { color: #fff; }
   .wrap { width: min(100% - 28px, 1160px); }
   .nav-wrap { min-height: 70px; }
   .logo .wm b { font-size: 22px; }
+  .logo .lockup { height: 27px; }
   .nav-actions .phone { display: none; }
   .btn-nav { min-width: 0; padding: 11px 13px; font-size: 12px; }
   .hero { padding: 48px 0 26px; }

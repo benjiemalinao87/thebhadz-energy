@@ -94,7 +94,7 @@ Escalation ladder, each step with a clock:
 
 ## 9. IP assignment & confidentiality
 
-- All work product to date and forward — this repo, the BADJJ/Solar City brands, the
+- All work product to date and forward — this repo, the MACC/Solar City brands, the
   designer, docs, funnel, install checklists, jigs, customer data — assigned to the
   corporation on incorporation; prior personal IP listed and licensed or carved out:
   [LIST or "none"].

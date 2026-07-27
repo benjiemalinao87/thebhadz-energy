@@ -194,7 +194,7 @@
       n = saved.date === stamp ? (saved.n || 0) + 1 : 1;
       localStorage.setItem(key, JSON.stringify({ date: stamp, n: n }));
     } catch (_) { /* private mode — fall back to 1 */ }
-    return "BADJJ-" + stamp + "-" + String(n).padStart(3, "0");
+    return "MACC-" + stamp + "-" + String(n).padStart(3, "0");
   }
 
   /* ------------------------------------------------------------------- the math */
@@ -445,8 +445,8 @@
 
     el("qb-sheet").innerHTML =
       '<div class="qs-head">' +
-        '<div class="qs-brand">BADJJ Energy Systems' +
-          '<small>MACC Systems &amp; Engineering Inc. · Biliran Province, Philippines<br>Solar supply, fabrication and installation</small>' +
+        '<div class="qs-brand">MACC Systems &amp; Engineering Inc.' +
+          '<small>Biliran Province, Philippines<br>Solar supply, fabrication and installation</small>' +
         '</div>' +
         '<div class="qs-meta">' +
           '<b>QUOTATION</b><br>No. ' + esc(quoteNo) + '<br>Date: ' + esc(date) + '<br>Valid until: ' + esc(addDays(date, validity)) +
@@ -457,7 +457,7 @@
 
       '<div class="qs-party">' +
         '<div><span>Prepared for</span><p><b>' + esc(customer) + '</b><br>' + esc(address) + (phone ? '<br>' + esc(phone) : '') + '</p></div>' +
-        '<div><span>Prepared by</span><p><b>' + esc(prepared) + '</b><br>BADJJ Energy Systems<br>' + esc(SYSTEM_TYPES[m.type].label) + ' package</p></div>' +
+        '<div><span>Prepared by</span><p><b>' + esc(prepared) + '</b><br>MACC Systems &amp; Engineering Inc.<br>' + esc(SYSTEM_TYPES[m.type].label) + ' package</p></div>' +
       '</div>' +
 
       // Price and the outcome it buys, together. Never one without the other (§3).
@@ -531,7 +531,7 @@
           '<li>Solar panels — manufacturer product warranty, plus performance warranty per the manufacturer\'s published terms.</li>' +
           '<li>Inverter — manufacturer warranty, serviced through the brand\'s Philippine service channel.</li>' +
           (m.batteryKwh > 0 ? '<li>Battery — manufacturer warranty per the published terms for the supplied model.</li>' : "") +
-          '<li>Workmanship and our fabricated racking, harnesses and enclosures — warranted by BADJJ Energy Systems.</li>' +
+          '<li>Workmanship and our fabricated racking, harnesses and enclosures — warranted by MACC Systems &amp; Engineering Inc.</li>' +
           '<li>Exact warranty periods for the equipment supplied are stated on the signed contract, and are the manufacturer\'s own terms. ' +
             'We do not extend or restate them here.</li>' +
         '</ul>' +
@@ -546,11 +546,10 @@
 
       '<div class="qs-sign">' +
         '<div>Conforme — Customer signature over printed name / Date</div>' +
-        '<div>For BADJJ Energy Systems — ' + esc(prepared) + ' / Date</div>' +
+        '<div>For MACC Systems &amp; Engineering Inc. — ' + esc(prepared) + ' / Date</div>' +
       '</div>' +
 
-      '<div class="qs-foot">BADJJ Energy Systems is the trading name of MACC Systems &amp; Engineering Inc. ' +
-        'This quotation is confidential and prepared solely for the named customer. Equipment prices marked ' +
+      '<div class="qs-foot">This quotation is confidential and prepared solely for the named customer. Equipment prices marked ' +
         '"indicative" are market estimates pending supplier confirmation.</div>';
   }
 
@@ -613,7 +612,7 @@
   /** Plain-text summary — the founder's Messenger follow-up, one click away. */
   function summaryText(m) {
     var lines = [
-      "BADJJ Energy Systems — " + SYSTEM_TYPES[m.type].label,
+      "MACC Systems & Engineering Inc. — " + SYSTEM_TYPES[m.type].label,
       "Quote " + (val("qb-quote-no") || "—") + " · " + (val("qb-date") || todayISO()),
       "For: " + (val("qb-customer") || "—"),
       "",

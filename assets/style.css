@@ -58,7 +58,14 @@ body {
   padding: 0 24px 22px;
   border-bottom: 1px solid #26324a;
 }
-.brand a { text-decoration: none; }
+.brand a { text-decoration: none; display: flex; align-items: center; gap: 11px; }
+/* The MACC chevron is navy-and-grey artwork, so on the dark sidebar it sits on a
+   white plate rather than being recoloured — the mark keeps its real brand colours. */
+.brand .logo-mark {
+  width: 40px; height: 40px; flex: 0 0 40px; object-fit: contain;
+  background: #fff; border-radius: 8px; padding: 3px;
+}
+.brand .brand-text { display: block; }
 .brand .wordmark {
   font-family: var(--sans);
   font-weight: 800;

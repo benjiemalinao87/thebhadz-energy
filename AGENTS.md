@@ -506,6 +506,6 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 
 - Local funnel + Command Center must be run from inside `funnel/` (`cd funnel && npx wrangler pages dev . --port 8000`); starting Wrangler from the repo root can shim Functions and break `/api/*` with 405.
 - Cloudflare Pages serves `funnel/` as the site root; the repo-root engineering docs are a separate static site.
-- Internal Command Center brand is BADJJ Energy Systems (`funnel/internal/`); public brand remains Solar City.
+- One brand across both site trees: **MACC Systems & Engineering Inc.** (the BADJJ Energy Systems trading name was retired 2026-07-27). "Solar City" now names the engineering file and the SC-xx codes, not the company.
 - Recent founder collaborators named in meeting notes include Ace Denver Corpin, Jundhel Cabradilla, and Jethro Abatias (alongside Benjie Malinao).
-- Corporate legal name is not finalized; "MEC" / "Systems and Engineering" is an interim placeholder only.
+- Corporate legal name per the logo supplied by the founders: **MACC Systems & Engineering Inc.** (note "Systems", plural).

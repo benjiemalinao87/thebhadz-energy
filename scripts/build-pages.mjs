@@ -2,9 +2,13 @@
 /**
  * Single-source page generator.
  *
- * Solar City runs two "views" of the same engineering-file content:
- *   - the public/root site   (repo root,        brand "Solar City",        relative asset paths)
- *   - the internal Command Center (funnel/internal/, brand "BADJJ Energy Systems", /internal/ absolute paths)
+ * MACC Systems & Engineering Inc. runs two "views" of the same engineering-file content:
+ *   - the public/root site        (repo root,        relative asset paths)
+ *   - the internal Command Center (funnel/internal/,  /internal/ absolute paths, founder-auth-gated)
+ *
+ * Both carry the MACC corporate brand; "Solar City" survives as the name of the engineering
+ * file itself (and the SC-xx page codes), which is why it stays in the sub-line rather than
+ * in the wordmark.
  *
  * Historically these were two hand-maintained copies of the same HTML, and they drifted
  * (see git history — 8-93 line diffs per page before this script existed). This script makes
@@ -67,21 +71,25 @@ const FOOTERS = {
   biliran:  'REV A · 2026-07<br>\n      MARKET: BILIRAN · BILECO<br>\n      SITE: PHILIPPINES',
 };
 
+// `name` is what {{BRAND}} expands to in body copy — the company, not the document.
+// The sidebar shows the chevron glyph (macc-mark.png) rather than the full lockup:
+// the lockup already contains the word MACC, which the wordmark beside it repeats.
+// funnel/assets/img/macc-logo.png is the full lockup, for wider light-ground uses.
 const BRAND = {
   root: {
-    name: 'Solar City',
+    name: 'MACC',
     assetPrefix: '',
     homeHref: 'index.html',
-    brandMark: '<span class="wordmark">Solar City</span>\n        <span class="sub">MODULE ENGINEERING FILE</span>',
-    favicon: '',
+    brandMark: '<img class="logo-mark" src="assets/img/macc-mark.png" alt="MACC Systems &amp; Engineering Inc."><span class="brand-text"><span class="wordmark">MACC</span>\n        <span class="sub">SOLAR CITY · MODULE ENGINEERING FILE</span></span>',
+    favicon: '<link rel="icon" href="assets/img/macc-mark.png">\n',
     footerExtra: '',
   },
   internal: {
-    name: 'BADJJ',
+    name: 'MACC',
     assetPrefix: '/internal/',
     homeHref: '/internal/overview.html',
-    brandMark: '<img class="logo-mark" src="/assets/img/badjj-logo.png" alt="BADJJ"><span class="brand-text"><span class="wordmark">BADJJ</span>\n        <span class="sub">MODULE ENGINEERING FILE</span></span>',
-    favicon: '<link rel="icon" href="/assets/img/badjj-favicon.png">\n',
+    brandMark: '<img class="logo-mark" src="/assets/img/macc-mark.png" alt="MACC Systems &amp; Engineering Inc."><span class="brand-text"><span class="wordmark">MACC</span>\n        <span class="sub">SOLAR CITY · MODULE ENGINEERING FILE</span></span>',
+    favicon: '<link rel="icon" href="/assets/img/macc-mark.png">\n',
     footerExtra: `\n      <div style="margin-top:12px;border-top:1px solid #26324a;padding-top:12px">
         <a href="/internal/" style="color:#8fa0b5;text-decoration:none">↩ Founder home</a><br>
         <a href="/api/founder-logout" style="color:#8fa0b5;text-decoration:none">Log out</a>
@@ -178,10 +186,12 @@ function render(entry, site) {
   const headExtra = existsSync(headExtraPath) ? readFileSync(headExtraPath, 'utf8').trimEnd() : '';
   const trailing = existsSync(scriptsPath) ? readFileSync(scriptsPath, 'utf8').trimEnd() : '';
 
-  const brandSuffix = entry.id === 'overview' ? '' : ` — ${site === 'root' ? 'Solar City' : 'BADJJ Energy Systems'}`;
+  // Both sites carry the full legal name in the tab title — it is the first thing a
+  // homeowner checking whether we are a real company will look at.
+  const LEGAL_NAME = 'MACC Systems & Engineering Inc.';
   const title = entry.id === 'overview'
-    ? (site === 'root' ? 'Solar City — Module Engineering File' : 'BADJJ Energy Systems — Module Engineering File')
-    : `${entry.titleBase}${brandSuffix}`;
+    ? `Solar City — Module Engineering File — ${LEGAL_NAME}`
+    : `${entry.titleBase} — ${LEGAL_NAME}`;
 
   const extraLinks = (entry.extraLinks || [])
     .map(l => `<link rel="stylesheet" href="${b.assetPrefix}${l}">`)

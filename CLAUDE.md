@@ -87,13 +87,25 @@ still apply, and its activity reads as "Shared team login" rather than a person.
 ## Two sites, one content source — DO NOT hand-edit generated pages
 
 The engineering-file content exists in **two site trees** that must render identically apart
-from branding and link paths:
+from link paths:
 
-- **Root site** (this directory) — public-facing brand "Solar City", relative paths
-  (`assets/…`), deployed as its own static site.
-- **`funnel/internal/`** — the founder/team Command Center, brand "BADJJ Energy Systems"
-  (BADJJ logo, absolute `/internal/…` paths, founder-auth-gated), deployed as part of the
-  `funnel` Cloudflare Pages project. Your team works from here day to day.
+- **Root site** (this directory) — public-facing, relative paths (`assets/…`), deployed as
+  its own static site.
+- **`funnel/internal/`** — the founder/team Command Center, absolute `/internal/…` paths,
+  founder-auth-gated, deployed as part of the `funnel` Cloudflare Pages project. Your team
+  works from here day to day.
+
+**One company name across everything: MACC Systems & Engineering Inc.** (the former "BADJJ
+Energy Systems" trading name was retired 2026-07-27; the only surviving BADJJ references are
+the verbatim meeting minutes in `funnel/internal/meetings.html`, which are a historical
+record and are marked superseded rather than rewritten). "Solar City" is no longer a brand —
+it is the name of the engineering file itself and the source of the SC-xx page codes, which
+is why it appears in sidebar sub-lines, not in wordmarks. Brand assets, in both
+`assets/img/` (root) and `funnel/assets/img/` (funnel):
+`macc-logo.png` (full lockup, navy — light grounds), `macc-logo-reversed.png` (same lockup
+in near-white — dark grounds, e.g. the funnel header/footer), and `macc-mark.png` (the
+chevron glyph alone — favicon, and the sidebar mark on its white plate). `assets/macc-logo-master.png`
+is the untouched supplied master that all three are cut from.
 
 These two trees **used to be hand-copied** and drifted badly (8–93 line diffs per page,
 including a missing Founder-OS-mandated strategy.html row and five pages entirely absent
@@ -101,8 +113,9 @@ from the internal Command Center). That's fixed structurally now:
 
 - **`content/*.html`** — the single source of truth. One `<main>` body partial per shared
   page (no `<main>` wrapper, no sidebar, no `<head>` — just the doc content). Body copy
-  uses the `{{BRAND}}` token wherever the product name should switch between "Solar City"
-  (root) and "BADJJ" (internal) — e.g. "branded {{BRAND}} power boxes."
+  uses the `{{BRAND}}` token wherever the company name belongs — e.g. "branded {{BRAND}}
+  power boxes." It expands to "MACC" on both sites; keep using it rather than hard-coding
+  the name, so a future rename stays a one-line change in `scripts/build-pages.mjs`.
   - `content/<id>.head.html` — optional per-page inline `<style>` block for that page's `<head>`.
   - `content/<id>.scripts.html` — everything that goes after `</main>` (trailing `<script>` tags).
   - `content/pages.json` — the registry: which pages exist, their SC-code + nav label, output

@@ -1,7 +1,7 @@
 # thebhadz-energy
 
 Interactive technical documentation, customer funnel, and founder command center for
-**BADJJ Energy Systems** — designing, building, and scaling production of our own ~400W
+**MACC Systems & Engineering Inc.** — designing, building, and scaling production of our own ~400W
 residential solar panels (module assembly from purchased cells), plus a source-and-install
 revenue arm.
 
