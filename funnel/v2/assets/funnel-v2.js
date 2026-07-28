@@ -10,6 +10,11 @@
   var form = document.getElementById("lead-form");
   if (!form) return;
 
+  // Same-origin by default; a <meta name="lead-endpoint"> overrides it so this page
+  // can live in its own Pages project without the API.
+  var epMeta = document.querySelector('meta[name="lead-endpoint"]');
+  var LEAD_ENDPOINT = (epMeta && epMeta.content) || "/api/lead";
+
   // ---- Goal pills (radio group) ----
   var pillWrap = document.getElementById("goal-pills");
   function syncPills() {
@@ -123,7 +128,13 @@
       if (window.gtag) window.gtag("event", "generate_lead");
     }
 
-    fetch("/api/lead", {
+    // Deliberately different from v1: v1 shows success even when the POST fails, which
+    // is fine for a static preview but on a real deploy it tells a homeowner we have
+    // their details when we do not. Here a failure says so and offers a way through.
+    var fail = document.getElementById("send-fail");
+    if (fail) fail.classList.remove("show");
+
+    fetch(LEAD_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -131,9 +142,10 @@
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
       .then(function () { done(); })
       .catch(function () {
-        // Static preview or function not deployed yet: still show success so
-        // the funnel is testable. Real deploys hit the function above.
-        done();
+        if (fail) {
+          fail.classList.add("show");
+          fail.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       })
       .finally(function () {
         submitBtn.disabled = false;

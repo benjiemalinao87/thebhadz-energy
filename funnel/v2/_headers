@@ -1,0 +1,26 @@
+# Cloudflare Pages — HTTP headers for the STANDALONE v2 project.
+# Only used when funnel/v2 is its own Pages project with Root directory = funnel/v2,
+# where these paths sit at the root. The copy at funnel/_headers covers /v2/* for the
+# combined project.
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# CSS/JS change between deploys without changing filenames, so make browsers
+# revalidate every time instead of serving a stale cached copy for 24h.
+/assets/*.css
+  Cache-Control: no-cache
+/assets/*.js
+  Cache-Control: no-cache
+
+# Images rarely change — keep them cached but allow revalidation.
+/assets/img/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# HTML pages should always be fresh.
+/*.html
+  Cache-Control: no-cache

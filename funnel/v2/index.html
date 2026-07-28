@@ -10,11 +10,17 @@
 <meta property="og:type" content="website">
 <meta name="robots" content="noindex">
 <link rel="icon" href="assets/img/macc-mark.png">
+<!-- Where the form posts. This page can be deployed as its own Cloudflare Pages
+     project, in which case functions/ (and therefore /api/lead) is NOT part of the
+     build root — so it posts cross-origin to the project that does own the API.
+     lead.js sends Access-Control-Allow-Origin: * and handles the OPTIONS preflight.
+     Delete this tag to fall back to a same-origin /api/lead. -->
+<meta name="lead-endpoint" content="https://thebhadz-energy.pages.dev/api/lead">
 <link rel="stylesheet" href="assets/funnel-v2.css">
 </head>
 <body>
 
-<div class="v2-flag">CANDIDATE REDESIGN (v2) — the live page is at <a href="/">/</a></div>
+<div class="v2-flag">CANDIDATE REDESIGN (v2) — current live page: <a href="https://thebhadz-energy.pages.dev/">thebhadz-energy.pages.dev</a></div>
 
 <header class="topbar">
   <div class="wrap nav-wrap">
@@ -514,6 +520,14 @@
               <input type="checkbox" name="interview" value="yes">
               <span>I'm open to a 15-minute call about our power situation, even if I don't buy.</span>
             </label>
+
+            <div class="send-fail" id="send-fail" role="alert">
+              <p><b>That didn't send.</b> Rather than leave you thinking we have your details when we don't, please reach us directly — we'll pick it up straight away.</p>
+              <div class="send-fail-acts">
+                <a class="btn btn-primary" href="tel:+639000000000">Call 0900 000 0000</a>
+                <a class="btn btn-ghost" href="https://m.me/">Messenger</a>
+              </div>
+            </div>
 
             <button class="btn btn-primary btn-block btn-lg" type="submit" id="submit-btn">Send my estimate request</button>
             <p class="form-legal">We respect your privacy. Your details are never shared or sold.</p>

@@ -376,6 +376,16 @@ p{margin:0}
 .finance-check span{font-size:14px;color:rgba(222,236,248,.88);line-height:1.45}
 .form-legal{text-align:center;font-size:12.4px;color:rgba(200,220,238,.6);margin-top:14px}
 
+/* send failure — shown only when the POST genuinely failed */
+.send-fail{display:none;gap:12px;flex-direction:column;
+  background:rgba(201,59,34,.16);border:1px solid rgba(201,59,34,.5);
+  border-radius:10px;padding:15px 16px;margin-bottom:16px}
+.send-fail.show{display:flex}
+.send-fail p{font-size:14px;line-height:1.5;color:#FFD5CC}
+.send-fail b{color:#fff}
+.send-fail-acts{display:flex;gap:10px;flex-wrap:wrap}
+.send-fail-acts .btn{font-size:14px;padding:10px 16px}
+
 /* success swap — funnel.js adds .sent to the form */
 .form-success{display:none;text-align:center;padding:26px 6px}
 .form-fields{display:block}

@@ -8,7 +8,11 @@
  * Bindings/vars:
  *   DB (D1)            — required for storage; if absent the lead is still acknowledged.
  *   LEAD_WEBHOOK_URL   — optional Slack/Discord/Zapier incoming webhook.
- *   LEAD_NOTIFY_EMAIL + LEAD_FROM_EMAIL — optional email via MailChannels.
+ *   LEAD_NOTIFY_EMAIL  — optional; who gets the alert. Comma-separated for several.
+ *   LEAD_FROM_EMAIL    — optional; defaults to official@macc-inc.com. Must be on a
+ *                        domain configured for Cloudflare Email Sending.
+ *   CF_API_TOKEN + CF_ACCOUNT_ID — required for the email alert. Already bound for
+ *                        api/mail.js, which sends through the same REST endpoint.
  */
 
 const CORS = {
@@ -16,6 +20,12 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
+}
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -150,23 +160,74 @@ export async function onRequest(context) {
       }).catch(() => {})
     );
   }
-  if (env.LEAD_NOTIFY_EMAIL && env.LEAD_FROM_EMAIL) {
+  // Email alert via Cloudflare Email Sending — the same REST path api/mail.js already
+  // sends founder mail through, reusing CF_API_TOKEN + CF_ACCOUNT_ID. This replaced
+  // MailChannels on 2026-07-28: MailChannels withdrew its free Cloudflare Workers
+  // service, so that call had been failing silently and no lead alert ever arrived.
+  //
+  // LEAD_NOTIFY_EMAIL may be a comma-separated list. Sending is best-effort — a lead
+  // is already stored and acknowledged before we get here, so a failed alert must
+  // never fail the submission.
+  const notify = String(env.LEAD_NOTIFY_EMAIL || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (notify.length && env.CF_API_TOKEN && env.CF_ACCOUNT_ID) {
+    const line = (label, value) => `${label}: ${value || "—"}`;
+    const body = [
+      `New lead from the funnel.`,
+      ``,
+      line("Name", lead.name),
+      line("Phone", lead.phone),
+      line("Email", lead.email),
+      line("Address", lead.address),
+      ``,
+      line("Wants", lead.goal),
+      line("Package", lead.package),
+      line("Monthly bill", lead.monthly_bill),
+      line("Doing now", lead.current_solution),
+      lead.financing ? "Asked about monthly installments." : null,
+      lead.interview_opt_in ? "Open to a 15-minute call even if they don't buy." : null,
+      ``,
+      line("Source", lead.utm_source || lead.source),
+      line("Received", lead.created_at),
+      ``,
+      `Reply today — the form promises a same-day reply.`,
+      `Pipeline: https://thebhadz-energy.pages.dev/internal/leads`,
+    ]
+      .filter((l) => l !== null)
+      .join("\n");
+
+    const payload = {
+      to: notify.map((address) => ({ address })),
+      from: { address: env.LEAD_FROM_EMAIL || "official@macc-inc.com", name: "MACC Funnel" },
+      subject: `New lead: ${lead.name}${lead.goal ? ` — ${lead.goal}` : ""}`,
+      text: body,
+      html: `<div style="white-space:pre-wrap;font-family:system-ui,sans-serif">${escapeHtml(body)}</div>`,
+    };
+    // Let the homeowner's own address be the reply target where they gave one.
+    if (lead.email) payload.reply_to = { address: lead.email, name: lead.name };
+
     tasks.push(
-      fetch("https://api.mailchannels.net/tx/v1/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: env.LEAD_NOTIFY_EMAIL }] }],
-          from: { email: env.LEAD_FROM_EMAIL, name: "Solar City Funnel" },
-          subject: `New lead: ${lead.name} (${lead.goal})`,
-          content: [
-            {
-              type: "text/plain",
-              value: Object.entries(lead).map(([k, v]) => `${k}: ${v}`).join("\n"),
-            },
-          ],
-        }),
-      }).catch(() => {})
+      fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/email/sending/send`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.CF_API_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      )
+        .then(async (res) => {
+          if (!res.ok) {
+            const detail = await res.text();
+            console.error("Lead alert send failed:", res.status, detail.slice(0, 400));
+          }
+        })
+        .catch((err) => console.error("Lead alert request failed:", String(err).slice(0, 200)))
     );
   }
   if (tasks.length) {
