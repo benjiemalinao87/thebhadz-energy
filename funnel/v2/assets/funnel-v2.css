@@ -413,17 +413,11 @@ p{margin:0}
 .foot-row{display:flex;align-items:center;gap:11px;font-size:14.8px;text-decoration:none;color:#EAF2FA}
 .foot-row svg{width:17px;height:17px;flex:0 0 auto;color:rgba(234,242,250,.7)}
 a.foot-row:hover,a.foot-row:hover svg{color:var(--sun)}
-.btn-msgr{display:inline-flex;align-items:center;gap:10px;background:#0A7CFF;color:#fff;
-  text-decoration:none;font-size:15px;font-weight:700;padding:12px 20px;border-radius:9px;
-  transition:background .16s ease,transform .12s ease}
-.btn-msgr:hover{background:#0668D8;transform:translateY(-1px)}
-.btn-msgr svg{width:20px;height:20px}
 .foot-base{border-top:1px solid rgba(234,242,250,.16);padding-block:16px;font-size:12.8px;
   color:rgba(234,242,250,.7);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
 
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *{animation:none !important;transition:none !important}
-  .btn:hover,.pkg:hover,.btn-msgr:hover{transform:none}
-  .gal-track{transition:none}
+  .btn:hover,.pkg:hover,  .gal-track{transition:none}
 }
