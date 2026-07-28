@@ -1,0 +1,16 @@
+# Wrangler config for the STANDALONE v2 Pages project (Root directory = funnel/v2).
+#
+# Why this file has to exist: without it, Cloudflare walks up and finds
+# funnel/wrangler.toml, whose `pages_build_output_dir = "."` resolves to funnel/ —
+# which is *above* this project's root directory. The build then fails with
+# "build output directory is outside of the repository". Declaring the output dir
+# here stops the search and keeps it inside the root.
+#
+# Deliberately carries NO bindings. This project is pure static hosting: the
+# Pages Functions (and therefore /api/lead, D1 and R2) belong to the thebhadz-energy
+# project, and index.html posts there cross-origin via its <meta name="lead-endpoint">.
+# A public static site has no business holding a database binding.
+
+name = "macc-funnel-v2"
+pages_build_output_dir = "."
+compatibility_date = "2024-11-01"
