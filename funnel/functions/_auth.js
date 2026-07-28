@@ -71,11 +71,6 @@ const MAX_ITERATIONS = 600000;
 const KEY_BITS = 256;
 const MIN_PASSWORD = 10;
 const MAX_PASSWORD = 200;
-const LOCK_AFTER_FAILURES = 8;
-// The shared login is the whole team's way in, so locking it after 8 guesses would let
-// one stranger shut everyone out. A higher bar still stops sustained guessing.
-const SHARED_LOCK_AFTER_FAILURES = 20;
-const LOCK_MS = 1000 * 60 * 15; // 15 minutes
 const TOUCH_SESSION_MS = 1000 * 60 * 5; // don't rewrite last_seen_at more often than this
 const ACTIVITY_KEEP_DAYS = 180;
 
@@ -263,7 +258,6 @@ export async function ensureAuthSchema(env) {
          active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
          must_change INTEGER NOT NULL DEFAULT 0 CHECK (must_change IN (0,1)),
          failed_count INTEGER NOT NULL DEFAULT 0,
-         locked_until TEXT,
          last_login_at TEXT,
          hidden_pages TEXT NOT NULL DEFAULT '[]',
          created_by TEXT,
@@ -366,7 +360,7 @@ export async function ensureSharedAccount(env) {
   const email = sharedLoginEmail(env);
   const existing = await env.DB.prepare(
     `SELECT id, email, name, role, password_hash, active, must_change, failed_count,
-            locked_until, last_login_at, created_by, created_at, updated_at
+            last_login_at, created_by, created_at, updated_at
      FROM users WHERE email = ?`
   )
     .bind(email)
@@ -401,7 +395,6 @@ export async function ensureSharedAccount(env) {
     active: 1,
     must_change: 0,
     failed_count: 0,
-    locked_until: null,
     last_login_at: null,
     created_by: "shared-login",
     created_at: now,
@@ -586,28 +579,22 @@ export function currentSessionId(context) {
 
 /* ── login attempt bookkeeping ────────────────────────────────────────────── */
 
-export const SHARED_LOCK_LIMIT = SHARED_LOCK_AFTER_FAILURES;
-
-export function lockRemainingMs(row) {
-  if (!row || !row.locked_until) return 0;
-  return Math.max(0, Date.parse(row.locked_until) - Date.now());
-}
-
-export async function recordFailedLogin(env, row, limit) {
-  const threshold = Number.isFinite(limit) ? limit : LOCK_AFTER_FAILURES;
+/**
+ * Wrong passwords are counted, never punished — there is no account lockout. The count
+ * is an audit signal (it shows up as "attempt N" in the activity log and as a failed
+ * sign-in count on Team & access) and resets on the next successful login.
+ */
+export async function recordFailedLogin(env, row) {
   const failed = Number(row.failed_count || 0) + 1;
-  const lockedUntil = failed >= threshold ? new Date(Date.now() + LOCK_MS).toISOString() : null;
-  await env.DB.prepare(`UPDATE users SET failed_count = ?, locked_until = ?, updated_at = ? WHERE id = ?`)
-    .bind(failed, lockedUntil, nowIso(), row.id)
+  await env.DB.prepare(`UPDATE users SET failed_count = ?, updated_at = ? WHERE id = ?`)
+    .bind(failed, nowIso(), row.id)
     .run();
-  return { failed, lockedUntil };
+  return { failed };
 }
 
 export async function recordSuccessfulLogin(env, row) {
   const now = nowIso();
-  await env.DB.prepare(
-    `UPDATE users SET failed_count = 0, locked_until = NULL, last_login_at = ?, updated_at = ? WHERE id = ?`
-  )
+  await env.DB.prepare(`UPDATE users SET failed_count = 0, last_login_at = ?, updated_at = ? WHERE id = ?`)
     .bind(now, now, row.id)
     .run();
 }

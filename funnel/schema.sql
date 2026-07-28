@@ -298,8 +298,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash  TEXT NOT NULL,
   active         INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
   must_change    INTEGER NOT NULL DEFAULT 0 CHECK (must_change IN (0, 1)),
-  failed_count   INTEGER NOT NULL DEFAULT 0,  -- consecutive bad passwords
-  locked_until   TEXT,                        -- ISO timestamp while rate-limited
+  -- Consecutive bad passwords: an audit signal only. There is no lockout — a founder
+  -- mistyping their password is never shut out. Resets on the next successful login.
+  failed_count   INTEGER NOT NULL DEFAULT 0,
   last_login_at  TEXT,
   -- JSON array of section keys this account may NOT see (functions/_pages.js).
   -- Empty = full access, which is what every founder gets; used for installers,

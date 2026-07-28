@@ -234,10 +234,8 @@
   }
 
   function userRow(u) {
-    var locked = u.locked_until && Date.parse(u.locked_until) > Date.now();
     var badges = [
       '<span class="ops-pill ' + (u.active ? "paid" : "cancelled") + '">' + (u.active ? "Active" : "Disabled") + '</span>',
-      locked ? '<span class="ops-pill rework">Locked</span>' : "",
       u.must_change && !u.is_shared_login ? '<span class="ops-pill pending">Temp password</span>' : "",
       u.is_shared_login && u.active && !state.sharedEnabled
         ? '<span class="ops-pill pending">No password set</span>' : "",
@@ -262,7 +260,6 @@
         actions.push(button("delete", u.id, "Delete", "danger"));
       }
     }
-    if (locked) actions.unshift(button("unlock", u.id, "Unlock"));
 
     var access = hiddenCount
       ? '<div class="muted">' + hiddenCount + " section" + (hiddenCount === 1 ? "" : "s") + " hidden</div>"
@@ -510,8 +507,6 @@
             (user.active ? "\n\nThey are signed out of every device immediately." : "");
         if (!confirm(question)) return;
         await api("/api/users", "PATCH", { id: id, active: !user.active });
-      } else if (act === "unlock") {
-        await api("/api/users", "PATCH", { id: id, unlock: true });
       } else if (act === "delete") {
         if (!confirm("Delete the account for " + user.name + " <" + user.email + ">?\n\n" +
           "Their login stops working immediately. Their entries in the activity log are kept.")) return;

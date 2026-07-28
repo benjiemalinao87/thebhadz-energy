@@ -101,7 +101,7 @@ export async function onRequest(context) {
     if (problem) return json({ ok: false, error: problem }, 422);
 
     await env.DB.prepare(
-      `UPDATE users SET password_hash = ?, must_change = 0, failed_count = 0, locked_until = NULL, updated_at = ?
+      `UPDATE users SET password_hash = ?, must_change = 0, failed_count = 0, updated_at = ?
        WHERE id = ?`
     )
       .bind(await hashPassword(newPassword, env), new Date().toISOString(), user.id)

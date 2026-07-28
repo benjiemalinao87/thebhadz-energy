@@ -110,7 +110,7 @@ export async function onRequest(context) {
   /* ── list ──────────────────────────────────────────────────────────────── */
   if (request.method === "GET") {
     const { results } = await env.DB.prepare(
-      `SELECT u.id, u.email, u.name, u.role, u.active, u.must_change, u.locked_until,
+      `SELECT u.id, u.email, u.name, u.role, u.active, u.must_change,
               u.failed_count, u.last_login_at, u.hidden_pages, u.mailbox,
               u.created_by, u.created_at, u.updated_at,
               (SELECT COUNT(*) FROM user_sessions s
@@ -123,7 +123,6 @@ export async function onRequest(context) {
 
     const users = (results || []).map((row) => ({
       ...publicUser(row),
-      locked_until: row.locked_until || null,
       failed_count: Number(row.failed_count || 0),
       open_sessions: Number(row.open_sessions || 0),
       is_shared_login: row.email === shared,
@@ -358,11 +357,6 @@ export async function onRequest(context) {
         binds.push(JSON.stringify(hidden));
         changes.push(hidden.length ? `sections hidden: ${hidden.join(", ")}` : "all sections visible");
       }
-    }
-
-    if (body.unlock) {
-      sets.push("failed_count = 0", "locked_until = NULL");
-      changes.push("unlocked");
     }
 
     if (!sets.length) return json({ ok: false, error: "Nothing to update." }, 422);

@@ -13,20 +13,18 @@
  * Its activity is logged as "Shared team login" because there is no person to name.
  * Unset FOUNDER_PASSWORD to turn shared access off entirely.
  *
- * Failure handling: 8 consecutive bad passwords locks a personal account for 15 minutes
- * (20 for the shared login — it is the whole team's way in, so one guesser must not be
- * able to shut everyone out). An unknown email and a wrong password answer identically,
- * so the form can't be used to enumerate who has an account.
+ * Failure handling: wrong passwords are counted and logged, but never lock an account —
+ * a founder mistyping their password must never be shut out of their own tools. An
+ * unknown email and a wrong password answer identically, so the form can't be used to
+ * enumerate who has an account.
  */
 import {
-  SHARED_LOCK_LIMIT,
   bootstrapMaster,
   createSession,
   ensureAuthSchema,
   ensureSharedAccount,
   isSharedLogin,
   isValidEmail,
-  lockRemainingMs,
   logActivity,
   normalizeEmail,
   pruneExpired,
@@ -101,7 +99,7 @@ export async function onRequest(context) {
 
   const row = await env.DB.prepare(
     `SELECT id, email, name, role, password_hash, active, must_change, failed_count,
-            locked_until, last_login_at, created_by, created_at, updated_at
+            last_login_at, created_by, created_at, updated_at
      FROM users WHERE email = ?`
   )
     .bind(email)
@@ -133,24 +131,8 @@ export async function onRequest(context) {
     );
   }
 
-  const lockedFor = lockRemainingMs(row);
-  if (lockedFor > 0) {
-    await logActivity(env, {
-      action: "login_blocked",
-      entity: "auth",
-      user: publicUser(row),
-      status: 429,
-      detail: "Locked after repeated failures",
-      request,
-    });
-    return json(
-      { ok: false, error: `Too many failed attempts. Try again in ${Math.ceil(lockedFor / 60000)} minute(s).` },
-      429
-    );
-  }
-
   if (!(await verifyPassword(password, row.password_hash))) {
-    const { failed, lockedUntil } = await recordFailedLogin(env, row);
+    const { failed } = await recordFailedLogin(env, row);
     await logActivity(env, {
       action: "login_failed",
       entity: "auth",
@@ -159,9 +141,6 @@ export async function onRequest(context) {
       detail: `Wrong password (attempt ${failed})`,
       request,
     });
-    if (lockedUntil) {
-      return json({ ok: false, error: "Too many failed attempts. This account is locked for 15 minutes." }, 429);
-    }
     return json({ ok: false, error: GENERIC_FAILURE }, 401);
   }
 
@@ -221,24 +200,8 @@ async function sharedLogin(context, password) {
 
   const row = await ensureSharedAccount(env);
 
-  const lockedFor = lockRemainingMs(row);
-  if (lockedFor > 0) {
-    await logActivity(env, {
-      action: "login_blocked",
-      entity: "auth",
-      user: publicUser(row),
-      status: 429,
-      detail: "Shared login locked after repeated failures",
-      request,
-    });
-    return json(
-      { ok: false, error: `Too many failed attempts. Try again in ${Math.ceil(lockedFor / 60000)} minute(s).` },
-      429
-    );
-  }
-
   if (!safeEqual(password, env.FOUNDER_PASSWORD)) {
-    const { failed, lockedUntil } = await recordFailedLogin(env, row, SHARED_LOCK_LIMIT);
+    const { failed } = await recordFailedLogin(env, row);
     await logActivity(env, {
       action: "login_failed",
       entity: "auth",
@@ -247,9 +210,6 @@ async function sharedLogin(context, password) {
       detail: `Wrong shared password (attempt ${failed})`,
       request,
     });
-    if (lockedUntil) {
-      return json({ ok: false, error: "Too many failed attempts. Shared login is locked for 15 minutes." }, 429);
-    }
     return json({ ok: false, error: SHARED_FAILURE }, 401);
   }
 

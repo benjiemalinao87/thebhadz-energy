@@ -204,10 +204,13 @@ shared one for the workshop tablet, a phone with no account yet, or an urgent ha
   it does not bypass sessions, revocation, or the audit trail. Two switches turn it off: disable
   the shared login on Team & access (instant, and signs out everyone using it), or remove the
   `FOUNDER_PASSWORD` secret entirely.
-- Repeated failures: 8 wrong passwords locks a personal account for 15 minutes (the master can
-  unlock it from Team & access). The shared login locks after 20 instead — it's the whole team's
-  way in, so one guesser must not be able to shut everybody out. An unknown email and a wrong
-  password return the same message, so the form can't be used to discover who has an account.
+- Repeated failures: **no account lockout.** Wrong passwords are counted and written to the
+  activity log as `login_failed` (with the attempt number), but they never lock anyone out — a
+  founder who mistypes their password can keep trying. An unknown email and a wrong password
+  return the same message, so the form can't be used to discover who has an account. If you
+  ever need brute-force protection back, put it in front of the endpoint (a Cloudflare WAF
+  rate-limiting rule on `/api/founder-login`) rather than on the account, so a guesser still
+  can't shut the team out of their own tools.
 - Note authorship and "who sent this email" now come from the session, not the request body —
   which is exactly why shared-login work reads as "Shared team login" everywhere.
 
