@@ -282,6 +282,7 @@ p{margin:0}
   font-family:var(--display);font-size:1.32rem;font-weight:800;letter-spacing:.02em;
   background:linear-gradient(155deg,var(--navy-700),var(--navy-900));color:var(--sun);
   border:2px solid var(--navy-700)}
+.fdr-avatar--photo{display:block;object-fit:cover;padding:0;font-size:0;background:none}
 .fdr-avatar.is-empty{background:var(--line-soft);color:var(--ink-faint);border:2px dashed #BFCEDB}
 .fdr-avatar.is-empty svg{width:28px;height:28px}
 .fdr-name{font-family:var(--display);font-weight:800;font-size:1.12rem;letter-spacing:-.02em;line-height:1.2}
@@ -419,11 +420,6 @@ a.foot-row:hover,a.foot-row:hover svg{color:var(--sun)}
 .btn-msgr svg{width:20px;height:20px}
 .foot-base{border-top:1px solid rgba(234,242,250,.16);padding-block:16px;font-size:12.8px;
   color:rgba(234,242,250,.7);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
-
-/* ---------- preview banner (v2 only) ---------- */
-.v2-flag{background:#332609;color:var(--sun);font-family:var(--mono);font-size:12px;
-  text-align:center;padding:8px 16px;letter-spacing:.04em}
-.v2-flag a{color:#fff}
 
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
