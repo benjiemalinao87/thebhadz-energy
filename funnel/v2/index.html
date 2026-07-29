@@ -28,6 +28,7 @@
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="#calc">Savings</a>
       <a href="#packages">Packages</a>
+      <a href="#systems">System types</a>
       <a href="#how">How it works</a>
       <a href="#founders">Founders</a>
       <a href="#faq">FAQ</a>
@@ -196,6 +197,158 @@
         </article>
 
       </div>
+    </div>
+  </section>
+
+  <!-- ===== system types =====
+       The technical explainer behind the three packages. Deliberately carries no
+       prices (v2 quotes from the estimate, not a list), no net-metering promise
+       (unbacked — see the FAQ answer), and no popularity claims. -->
+  <section class="section" id="systems" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">How each one actually works</span>
+        <h2>On-grid, off-grid, or hybrid?</h2>
+        <p>All three put panels on your roof. What differs is where the power goes when the sun sets and when BILECO goes down — which is the whole basis for choosing between them. Here is the wiring, in plain terms.</p>
+      </div>
+
+      <div class="sys">
+
+        <article class="sys-row">
+          <div class="sys-head">
+            <h3 class="sys-name">LIWANAG</h3>
+            <span class="sys-type">On-grid / grid-tie</span>
+          </div>
+          <p class="sys-sub">The simplest and cheapest way to cut your bill. No battery.</p>
+          <div class="sys-body">
+            <figure class="sys-fig">
+              <div class="sys-scroll"><img src="assets/img/sys-on-grid.svg" alt="On-grid diagram: solar panels feed a grid-tie inverter, which powers the house and connects through the meter to the BILECO line. A dashed box marks the absence of a battery." width="720" height="420" loading="lazy" decoding="async"></div>
+              <p class="sys-swipe">Swipe the diagram to see it all</p>
+              <figcaption>Panels → inverter → your house, with BILECO still connected. No battery anywhere in the loop.</figcaption>
+            </figure>
+            <div class="sys-explain">
+              <p>Your panels feed a grid-tie inverter that powers whatever your house is using at that moment. Daytime consumption comes off your roof instead of off your bill. At night there is nothing stored, so you draw from BILECO exactly as you do now.</p>
+              <p>Fewest components, fewest things to fail, <b>lowest upfront cost of the three</b> — the battery is most of the price difference.</p>
+              <div class="sys-brownout is-no">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.6v5M12 16.2h.01"/></svg>
+                <span><b>In a brownout: it goes dark too.</b> Anti-islanding shuts the inverter off the instant the grid drops — a safety rule that stops your roof energising a line someone is working on. On-grid solar cannot back up your house. Anyone who tells you otherwise is selling you something.</span>
+              </div>
+            </div>
+          </div>
+          <div class="sys-cols">
+            <div>
+              <h4 class="up">Where it wins</h4>
+              <ul class="sys-list up">
+                <li>Lowest upfront cost of the three packages</li>
+                <li>Simplest wiring, so fewer failure points and simpler service</li>
+                <li>Best peso-for-peso bill reduction if your heavy use is daytime</li>
+                <li>No battery to replace later</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="down">What you give up</h4>
+              <ul class="sys-list down">
+                <li>No backup at all — it shuts off with the grid</li>
+                <li>Night-time use still bills at the full BILECO rate</li>
+                <li>Little value if your barangay browns out often</li>
+                <li>Ask us about exporting surplus back to BILECO — we will tell you exactly where that stands rather than promise it</li>
+              </ul>
+            </div>
+          </div>
+          <p class="sys-fit"><b>Fits you if:</b> your power is reasonably steady, your bill is the thing that hurts, and you would rather put every peso into cutting it than into batteries.</p>
+        </article>
+
+        <article class="sys-row">
+          <div class="sys-head">
+            <h3 class="sys-name">SANDIGAN</h3>
+            <span class="sys-type">Hybrid — on-grid and off-grid</span>
+          </div>
+          <p class="sys-sub">Cuts the bill and rides through brownouts. One inverter does both.</p>
+          <div class="sys-body">
+            <figure class="sys-fig">
+              <div class="sys-scroll"><img src="assets/img/sys-hybrid.svg" alt="Hybrid diagram: solar panels feed a hybrid inverter that charges a battery, powers the house, and stays connected through the meter to the BILECO line. Backed-up circuits run from the battery." width="720" height="420" loading="lazy" decoding="async"></div>
+              <p class="sys-swipe">Swipe the diagram to see it all</p>
+              <figcaption>One inverter managing three things at once: roof, battery, and the BILECO connection.</figcaption>
+            </figure>
+            <div class="sys-explain">
+              <p>A hybrid inverter runs your house off the roof during the day and puts the surplus into a battery instead of wasting it. In the evening the house draws the battery down. BILECO stays connected underneath as a fallback for the nights the battery runs out.</p>
+              <p>You choose which circuits sit on the backed-up side — typically lights, fans, the router and the fridge. <b>Heavy loads like aircon usually stay on the grid side</b>, because backing them up multiplies the battery you need.</p>
+              <div class="sys-brownout is-yes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.2A8.6 8.6 0 1 1 12 3.4"/><path d="M20.4 4.6v6.6h-6.6"/></svg>
+                <span><b>In a brownout: it switches over by itself.</b> The backed-up circuits keep running off the battery, then hand back to the grid when power returns. You do not go outside and start anything.</span>
+              </div>
+            </div>
+          </div>
+          <div class="sys-cols">
+            <div>
+              <h4 class="up">Where it wins</h4>
+              <ul class="sys-list up">
+                <li>Lower bill <em>and</em> backup — the only package that does both</li>
+                <li>Switches to battery automatically, no genset, no fumes, no pull cord</li>
+                <li>Grid stays underneath as a fallback, so a flat battery is not a blackout</li>
+                <li>Smaller battery than off-grid, because you only back up what matters</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="down">What you give up</h4>
+              <ul class="sys-list down">
+                <li>Costs more upfront than LIWANAG — the battery is the difference</li>
+                <li>The battery is a wear item and will need replacing eventually</li>
+                <li>More to commission and set up than a plain grid-tie system</li>
+                <li>Backed-up circuits are a fixed set chosen at design time, not everything in the house</li>
+              </ul>
+            </div>
+          </div>
+          <p class="sys-fit"><b>Fits you if:</b> BILECO drops often enough to be a real problem, you want the bill down as well, and losing the fridge or the workday costs you money.</p>
+        </article>
+
+        <article class="sys-row">
+          <div class="sys-head">
+            <h3 class="sys-name">ILAW</h3>
+            <span class="sys-type">Off-grid — fully independent</span>
+          </div>
+          <p class="sys-sub">No utility connection at all. Your roof and your battery are the whole supply.</p>
+          <div class="sys-body">
+            <figure class="sys-fig">
+              <div class="sys-scroll"><img src="assets/img/sys-off-grid.svg" alt="Off-grid diagram: solar panels feed an off-grid inverter and a required battery bank that runs the whole house. The BILECO distribution line is crossed out — there is no connection." width="720" height="420" loading="lazy" decoding="async"></div>
+              <p class="sys-swipe">Swipe the diagram to see it all</p>
+              <figcaption>Nothing runs back to the pole. Every watt the house uses came off the roof or out of the battery.</figcaption>
+            </figure>
+            <div class="sys-explain">
+              <p>Panels, a battery bank and an inverter, with no wire to BILECO. The battery has to carry the whole house overnight and through cloudy stretches, so it is sized for every load you own rather than a chosen few — which is why the battery, not the panels, drives the cost.</p>
+              <p>Built for places where the grid is unreliable, absurdly expensive to reach, or simply not there. <b>If a pole run to your lot would cost more than a system, this is the cheaper answer.</b></p>
+              <div class="sys-brownout is-yes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-5"/></svg>
+                <span><b>In a brownout: you never notice one.</b> You are not connected to the grid, so what happens on the BILECO line stops being your problem. The flip side is that a long run of grey days is your problem alone.</span>
+              </div>
+            </div>
+          </div>
+          <div class="sys-cols">
+            <div>
+              <h4 class="up">Where it wins</h4>
+              <ul class="sys-list up">
+                <li>No electricity bill at all, and no exposure to future rate hikes</li>
+                <li>Grid outages stop being relevant to your house</li>
+                <li>Works on lots where extending the line is the expensive part</li>
+                <li>No utility paperwork or connection approvals to wait on</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="down">What you give up</h4>
+              <ul class="sys-list down">
+                <li>Biggest battery of the three, so upfront cost can match or beat hybrid</li>
+                <li>No fallback — if the battery empties, the house is dark</li>
+                <li>You have to think about load: running everything at once has a limit</li>
+                <li>Adding a big appliance later can mean resizing the battery too</li>
+              </ul>
+            </div>
+          </div>
+          <p class="sys-fit"><b>Fits you if:</b> there is no service at the lot, connecting would cost more than the system, or independence from BILECO is the point rather than a side effect.</p>
+        </article>
+
+      </div>
+
+      <p class="sys-fit" style="margin-top:clamp(18px,2.2vw,26px)">Not sure which one your roof and your bill point to? <a href="#quote">Send the form</a> — the free site survey and written estimate exist to answer exactly that, and nothing is due until you approve the design.</p>
     </div>
   </section>
 

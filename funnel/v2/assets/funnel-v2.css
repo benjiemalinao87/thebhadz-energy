@@ -226,6 +226,71 @@ p{margin:0}
   .step:nth-child(2)::after{display:none}
 }
 
+/* ---------- system types ---------- */
+.sys{display:flex;flex-direction:column;gap:clamp(16px,2vw,26px)}
+.sys-row{background:var(--card);border:1px solid var(--line);border-radius:15px;
+  padding:clamp(20px,2.4vw,30px);box-shadow:var(--shadow-sm)}
+.sys-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 14px;margin-bottom:6px}
+.sys-name{font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,2.4vw,1.7rem);
+  letter-spacing:.01em;color:var(--amber-deep);line-height:1.1}
+.sys-type{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-faint)}
+.sys-sub{color:var(--ink-soft);font-size:16px;margin-bottom:clamp(16px,2vw,22px);max-width:62ch}
+.sys-body{display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(18px,2.4vw,32px);align-items:start}
+/* Grid items default to min-width:auto, which would let the wide diagram push the
+   column past the viewport instead of scrolling inside .sys-scroll. */
+.sys-body > *{min-width:0}
+@media (max-width:900px){ .sys-body{grid-template-columns:1fr} }
+
+/* Diagrams are hand-built SVG on a tinted plate — the plate keeps the navy
+   linework from floating on the white card at small sizes. */
+.sys-fig{margin:0;background:var(--paper);border:1px solid var(--line-soft);
+  border-radius:11px;padding:clamp(10px,1.4vw,18px)}
+.sys-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sys-fig img{display:block;width:100%;height:auto}
+.sys-fig figcaption{margin-top:10px;font-size:12.5px;color:var(--ink-faint);
+  text-align:center;line-height:1.45}
+.sys-swipe{display:none}
+/* Squeezed to phone width these diagrams put their smallest labels near 5px, so
+   below this breakpoint they hold a legible width and scroll sideways instead. */
+@media (max-width:620px){
+  .sys-scroll img{min-width:500px}
+  .sys-swipe{display:block;margin-top:8px;font-family:var(--mono);font-size:10.5px;
+    font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink-faint);text-align:center}
+}
+.sys-explain p{color:var(--ink-soft);font-size:15.4px;line-height:1.62}
+.sys-explain p + p{margin-top:12px}
+.sys-explain b{color:var(--ink)}
+
+/* The brownout answer is the row buyers actually need, so it gets its own
+   block rather than being one bullet among many. Tinted by outcome. */
+.sys-brownout{margin-top:16px;display:flex;gap:11px;align-items:flex-start;
+  border-radius:10px;padding:13px 15px;font-size:14.2px;line-height:1.5}
+.sys-brownout svg{width:19px;height:19px;flex:0 0 auto;margin-top:1px}
+.sys-brownout b{display:block}
+.sys-brownout.is-no{background:#FDF1EC;border:1px solid #F3C9BB;color:#8C3A22}
+.sys-brownout.is-no b{color:var(--bad)}
+.sys-brownout.is-yes{background:#EEF8F2;border:1px solid #BFE3CE;color:#265E42}
+.sys-brownout.is-yes b{color:var(--good)}
+
+.sys-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,1.8vw,24px);
+  margin-top:clamp(18px,2.2vw,26px);padding-top:clamp(16px,2vw,22px);
+  border-top:1px solid var(--line-soft)}
+@media (max-width:680px){ .sys-cols{grid-template-columns:1fr} }
+.sys-cols h4{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;margin-bottom:11px}
+.sys-cols .up{color:var(--amber-deep)}
+.sys-cols .down{color:var(--ink-faint)}
+.sys-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.sys-list li{position:relative;padding-left:22px;font-size:14.2px;line-height:1.5;color:var(--ink-soft)}
+.sys-list.up li::before{content:"";position:absolute;left:2px;top:.36em;width:10px;height:5.5px;
+  border-left:2.2px solid var(--amber);border-bottom:2.2px solid var(--amber);transform:rotate(-45deg)}
+.sys-list.down li::before{content:"×";position:absolute;left:2px;top:-.06em;
+  font-size:16px;font-weight:700;color:var(--ink-faint);line-height:1.5}
+.sys-fit{margin-top:14px;font-size:14px;color:var(--ink-soft);line-height:1.55}
+.sys-fit b{color:var(--ink);font-weight:750}
+
 /* ---------- mission + founders ---------- */
 .mission{background:var(--navy-900);color:#fff;border-radius:15px;overflow:hidden;position:relative;
   padding:clamp(26px,4vw,46px) clamp(22px,4vw,52px);margin-bottom:clamp(26px,3.4vw,40px)}
