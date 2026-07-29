@@ -501,11 +501,15 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 
 - Never mention `CLAUDE.md` (or other internal AI/instruction filenames) in any rendered frontend HTML; cite Founder OS rules by section number only.
 - On founder/Command Center tools, keep primary actions (especially recording upload) obvious and top-level — not buried under long meeting notes.
+- When implementing UI from a reference image or mockup, match the visual design closely before adding extras — the user has reverted work that diverged from the reference.
 
 ## Learned Workspace Facts
 
 - Local funnel + Command Center must be run from inside `funnel/` (`cd funnel && npx wrangler pages dev . --port 8000`); starting Wrangler from the repo root can shim Functions and break `/api/*` with 405.
 - Cloudflare Pages serves `funnel/` as the site root; the repo-root engineering docs are a separate static site.
+- Customer-facing Funnel v2 lives at `funnel/v2/` (own assets and `wrangler.toml`), separate from the original `funnel/index.html` landing page.
+- Public funnel package cards hide list prices and use free-estimate CTAs; internal ops and quote tools may still reference ₱99,500.
 - One brand across both site trees: **MACC Systems & Engineering Inc.** (the BADJJ Energy Systems trading name was retired 2026-07-27). "Solar City" now names the engineering file and the SC-xx codes, not the company.
-- Recent founder collaborators named in meeting notes include Ace Denver Corpin, Jundhel Cabradilla, and Jethro Abatias (alongside Benjie Malinao).
+- Founder team titles: Benjie Malinao — sales & marketing head; Jundhel Cabradilla — president, operations & engineering head; Ace Denver Corpin — administration head; Jethro Abatias — finance & accounting head.
+- Funnel v2's founder cards deliberately title Jethro "Support & systems" rather than finance & accounting — his supplied bio is IT/network/support and answers "who picks up when it breaks", which no other card did. Pending his sign-off; revert the card or supply finance evidence if he keeps the finance title.
 - Corporate legal name per the logo supplied by the founders: **MACC Systems & Engineering Inc.** (note "Systems", plural).
