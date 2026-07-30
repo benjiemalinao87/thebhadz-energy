@@ -1,5 +1,13 @@
 # Lesson Learn
 
+## Funnel v2 hero: model reference without fabricating proof
+
+**Fixed:** 2026-07-30
+
+**What worked:** Match the Solar Matrix layout (sky backdrop, two-column copy/visual, floating cards on dashed spokes, yellow pill CTAs, white trust strip) while swapping fake "12k+ Reviews" / SaaS partner logos for honest MACC signals (on-island Biliran chip + real table-stakes trust items). Keep headline on bill savings — not brownout backup — so LIWANAG §1.6 stays clean.
+
+**Do not:** Copy fabricated review counts, avatar stacks, or unrelated brand logos from a mockup into a live funnel. Do not lead the hero with brownout/backup language that applies only to ILAW/SANDIGAN. Do not drop the calculator CTA or phone number when restyling — those are conversion spine, not chrome.
+
 ## Funnel packages: price behind free estimate
 
 **Fixed:** 2026-07-27

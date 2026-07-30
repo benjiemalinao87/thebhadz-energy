@@ -20,18 +20,17 @@
 </head>
 <body>
 
-<header class="topbar">
+<header class="topbar topbar-sky">
   <div class="wrap nav-wrap">
     <a class="logo" href="#top" aria-label="MACC Systems &amp; Engineering Inc. home">
       <img src="assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc." width="391" height="144">
     </a>
     <nav class="nav-links" aria-label="Primary navigation">
+      <a class="is-active" href="#top">Home</a>
       <a href="#calc">Savings</a>
       <a href="#packages">Packages</a>
-      <a href="#systems">System types</a>
       <a href="#how">How it works</a>
       <a href="#founders">Founders</a>
-      <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-actions">
       <a class="phone" href="tel:+639557235093" aria-label="Call MACC Systems &amp; Engineering Inc.">
@@ -40,7 +39,7 @@
         </span>
         <span>Call us<br><b>0955 723 5093</b></span>
       </a>
-      <a class="btn btn-primary btn-nav" href="#quote">Get my free estimate</a>
+      <a class="btn btn-sun btn-nav btn-pill" href="#quote">Free estimate <span class="btn-arrow" aria-hidden="true">↗</span></a>
     </div>
   </div>
 </header>
@@ -48,27 +47,57 @@
 <a id="top"></a>
 <main>
 
-  <section class="hero">
-    <div class="hero-photo" role="img" aria-label="A two-storey Philippine home with rooftop solar panels at golden hour"></div>
-    <div class="hero-veil"></div>
-    <div class="wrap hero-in">
-      <h1>Power your Biliran home with <em>clean solar</em></h1>
-      <p class="hero-sub">Lower your BILECO bill. Typhoon-ready installs by an on-island engineering team, at one fixed price.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary btn-lg" href="#calc">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
-          See what you'd save
-        </a>
-        <a class="btn btn-ghost btn-lg" href="#packages">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
-          View packages
-        </a>
+  <section class="hero hero-sky hero-hybrid" aria-label="Home solar for Biliran">
+    <div class="hero-sky-bg" role="img" aria-label="Bright blue sky with soft clouds"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="hero-chip">
+          <span class="hero-chip-mark" aria-hidden="true"></span>
+          <span class="hero-chip-stars" aria-hidden="true">★★★★★</span>
+          <span>On-island Biliran team</span>
+        </div>
+        <h1>Lower your BILECO bill.<br>Save more every month.</h1>
+        <p class="hero-sub">Fixed-price home solar for Biliran — installed, permitted, and typhoon-rated by an on-island engineering team. See your estimate in seconds, then get a free same-day quote.</p>
+        <div class="hero-cta">
+          <a class="btn btn-sun btn-lg btn-pill" href="#calc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            See what you'd save
+          </a>
+          <a class="btn btn-sky btn-lg btn-pill" href="#quote">Get a free estimate <span class="btn-arrow" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-sun"></div>
+        <img class="hero-hub hero-hub-photo" src="assets/img/hero.jpg" alt="" width="720" height="900">
+        <svg class="hero-spokes" viewBox="0 0 560 640" preserveAspectRatio="xMidYMid meet">
+          <path d="M280 300 C 210 250, 150 180, 120 110" fill="none" stroke="rgba(18,90,160,.5)" stroke-width="1.75" stroke-dasharray="3 6"/>
+          <path d="M280 300 C 350 250, 410 180, 440 110" fill="none" stroke="rgba(18,90,160,.5)" stroke-width="1.75" stroke-dasharray="3 6"/>
+          <path d="M280 300 C 200 360, 150 450, 120 530" fill="none" stroke="rgba(18,90,160,.5)" stroke-width="1.75" stroke-dasharray="3 6"/>
+          <path d="M280 300 C 360 360, 410 450, 440 530" fill="none" stroke="rgba(18,90,160,.5)" stroke-width="1.75" stroke-dasharray="3 6"/>
+          <circle cx="280" cy="300" r="6" fill="#FFD54A" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <article class="float-card float-tl">
+          <img src="assets/img/card-power-array.jpg" alt="" width="320" height="240">
+          <span>Bill savings</span>
+        </article>
+        <article class="float-card float-tr">
+          <img src="assets/img/slide-3-battery.jpg" alt="" width="320" height="240">
+          <span>Backup power</span>
+        </article>
+        <article class="float-card float-bl">
+          <img src="assets/img/card-solar-home.jpg" alt="" width="320" height="240">
+          <span>Typhoon-ready</span>
+        </article>
+        <article class="float-card float-br">
+          <img src="assets/img/card-install.jpg" alt="" width="320" height="240">
+          <span>On-island install</span>
+        </article>
       </div>
     </div>
   </section>
-  <hr class="horizon">
 
-  <section class="trust-strip" aria-label="What every install includes">
+  <section class="trust-strip trust-strip-sky" aria-label="What every install includes">
     <div class="wrap trust-in">
       <div class="trust-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.4v9.2M14.4 9.6a2.6 2.6 0 0 0-2.4-1.4c-1.5 0-2.5.8-2.5 1.9 0 2.6 5 1.5 5 4.1 0 1.2-1.1 2-2.6 2a2.7 2.7 0 0 1-2.5-1.5"/></svg>
@@ -81,6 +110,10 @@
       <div class="trust-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.1"/><path d="M12 9.9c0-3.4 1.6-6 4.6-6 2.3 0 3.9 1.7 3.9 3.7 0 3.4-3.6 4.3-8.5 4.3"/><path d="M12 14.1c0 3.4-1.6 6-4.6 6-2.3 0-3.9-1.7-3.9-3.7 0-3.4 3.6-4.3 8.5-4.3"/></svg>
         <span>Typhoon-rated mounting</span>
+      </div>
+      <div class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11.5 12 4.5l8.5 7"/><path d="M5.5 13v7.5h13V13"/><path d="M12 13.5v4"/></svg>
+        <span>Permits handled</span>
       </div>
     </div>
   </section>

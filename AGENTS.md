@@ -502,6 +502,9 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 - Never mention `CLAUDE.md` (or other internal AI/instruction filenames) in any rendered frontend HTML; cite Founder OS rules by section number only.
 - On founder/Command Center tools, keep primary actions (especially recording upload) obvious and top-level — not buried under long meeting notes.
 - When implementing UI from a reference image or mockup, match the visual design closely before adding extras — the user has reverted work that diverged from the reference.
+- Do not push or deploy Funnel / customer-facing changes until the user has reviewed or tested locally and says to push.
+- Public Funnel founder bios: professional plain English (homeowner job first, then one proof line) — not résumé lists, LinkedIn fluff, or overly casual neighbour-chat tone.
+- On Benjie's public Funnel bio: omit that he is in Australia; also do not claim he is based in Biliran or on-island.
 
 ## Learned Workspace Facts
 
@@ -513,3 +516,4 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 - Founder team titles: Benjie Malinao — sales & marketing head; Jundhel Cabradilla — president, operations & engineering head; Ace Denver Corpin — administration head; Jethro Abatias — finance & accounting head.
 - Funnel v2's founder cards deliberately title Jethro "Support & systems" rather than finance & accounting — his supplied bio is IT/network/support and answers "who picks up when it breaks", which no other card did. Pending his sign-off; revert the card or supply finance evidence if he keeps the finance title.
 - Corporate legal name per the logo supplied by the founders: **MACC Systems & Engineering Inc.** (note "Systems", plural).
+- Founders share Biliran roots; on-island founders (Jundhel, Ace, Jethro) may use "From Biliran" on public cards — Benjie's card should not.

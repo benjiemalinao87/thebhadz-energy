@@ -1,5 +1,11 @@
 # Progress
 
+## Funnel v2 Solar Matrix-style hero (2026-07-30) — hybrid (local review, not pushed)
+- Hybrid: sky chrome + conversion spine (calc CTA, phone, real rooftop hub)
+- Primary CTA → `#calc`; secondary → `#quote`; phone restored in header
+- Hub uses `hero.jpg` (PH home), not wind turbine
+- Files: `funnel/v2/index.html`, `funnel/v2/assets/funnel-v2.css`, generated card/sky assets
+
 ## Funnel packages: hide list price (2026-07-27) — done
 - Package cards no longer show FROM ₱99,500; show "Free estimate" + system meta
 - CTA on each card: "Request free estimate" → `#quote`
