@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BILECO bill savings calculator — MACC Systems &amp; Engineering Inc.</title>
+<meta name="description" content="Enter last month's BILECO bill. See an estimated monthly saving and which MACC package fits — free, same-day estimate for Biliran homes.">
+<meta name="theme-color" content="#FFFFFF">
+<meta property="og:title" content="See what solar could take off your BILECO bill">
+<meta property="og:description" content="Free instant estimate for Biliran homeowners. On-island team. No obligation.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/macc-mark.png">
+<meta name="lead-endpoint" content="https://thebhadz-energy.pages.dev/api/lead">
+<link rel="stylesheet" href="assets/calc-ad.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <a class="brand" href="index.html" aria-label="MACC home">
+      <img src="assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc." width="200" height="74">
+    </a>
+    <a class="btn-expert" href="tel:+639557235093">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.7 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7A2 2 0 0 1 22 16.9z"/></svg>
+      Talk to us
+    </a>
+  </header>
+
+  <section class="panel" id="calc" aria-label="Savings calculator">
+    <div class="panel-photo" role="img" aria-label="Philippine home with rooftop solar panels"></div>
+    <div class="panel-body">
+      <p class="panel-lede">Enter last month’s <em>BILECO bill</em> — see an estimate of what solar could take off it:</p>
+
+      <div class="field">
+        <label for="calc-area">Barangay / town (Biliran)</label>
+        <div class="field-box">
+          <input id="calc-area" type="text" name="address" autocomplete="address-level2" placeholder="e.g. Naval, Biliran" enterkeyhint="next">
+          <svg class="field-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-5.3 7-11a7 7 0 1 0-14 0c0 5.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="calc-bill">Avg monthly electricity bill</label>
+        <div class="field-box">
+          <span class="field-prefix">₱</span>
+          <input id="calc-bill" type="number" inputmode="numeric" min="0" step="500" placeholder="8000" enterkeyhint="done">
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="prio-label">What matters most?</label>
+        <div class="prio" id="calc-pills" role="group" aria-labelledby="prio-label">
+          <button type="button" class="prio-btn sel" data-prio="save">Lower bill</button>
+          <button type="button" class="prio-btn" data-prio="backup">Backup</button>
+          <button type="button" class="prio-btn" data-prio="both">Both</button>
+        </div>
+      </div>
+
+        <div class="calc-row">
+          <div>
+            <button type="button" class="calc-go" id="calc-go">
+              See my estimate
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+            </button>
+          </div>
+          <div class="result" id="calc-result" aria-live="polite">
+            <div class="result-cap">You could save about</div>
+            <div class="result-figure">
+              <span class="result-n" id="calc-save">—</span>
+              <span class="result-u">/ month</span>
+            </div>
+            <div class="result-range" id="calc-range" hidden></div>
+            <div class="result-divider"></div>
+            <p class="result-pkg" id="calc-pkg">Enter your bill to see an estimate.</p>
+            <p class="result-note" id="calc-backup-note" hidden>Backup packages keep lights, fans &amp; WiFi through a brownout. On-grid alone does not.</p>
+            <a class="result-cta" id="calc-next" href="#lead" hidden>Confirm this estimate — free →</a>
+          </div>
+        </div>
+
+      <p class="disclaimer">Estimate only — uses conservative Biliran sun hours. Your written free estimate confirms the real number after a site survey. On-grid (LIWANAG) shuts off with the grid in a brownout.</p>
+    </div>
+  </section>
+
+  <section class="pitch" id="packages">
+    <h1>Lower your BILECO bill with fixed-price solar.</h1>
+    <p class="pitch-sub">On-island install for Biliran homes — permitted, typhoon-rated, and quoted as one clear package. See your savings first, then request a free estimate.</p>
+    <a class="btn-main" href="#lead">
+      <span>Get my free estimate</span>
+      <span class="btn-main-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </span>
+    </a>
+    <div class="trust" aria-label="What you get">
+      <span class="trust-chip">On-island Biliran team</span>
+      <span class="trust-chip">REE-supervised installs</span>
+      <span class="trust-chip">Typhoon-rated mounting</span>
+      <span class="trust-chip">Permits handled</span>
+    </div>
+  </section>
+
+  <section class="lead" id="lead" aria-label="Free estimate request">
+    <div class="wrap">
+      <h2>Get this estimate confirmed — free</h2>
+      <p class="lead-sub">We’ll reply with a written estimate and survey dates. Nothing due until you approve the design.</p>
+
+      <form class="lead-form" id="lead-form" novalidate>
+        <input type="hidden" name="source" value="fb-calc-ad">
+        <input type="hidden" name="package" id="f-package" value="">
+        <input type="hidden" name="goal" id="f-goal" value="">
+        <input type="hidden" name="monthly_bill" id="f-bill" value="">
+        <!-- Honeypot — bots fill this; humans never see it. Same as main funnel. -->
+        <div class="hp" aria-hidden="true">
+          <label for="f-company">Company</label>
+          <input id="f-company" type="text" name="company" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="f-name">Full name</label>
+          <div class="field-box">
+            <input id="f-name" name="name" type="text" autocomplete="name" required placeholder="Your name">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-phone">Mobile number</label>
+          <div class="field-box">
+            <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="09XX XXX XXXX">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-address">Site address</label>
+          <div class="field-box">
+            <input id="f-address" name="address" type="text" autocomplete="street-address" placeholder="Barangay, town">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-current">What do you do about brownouts / the bill now?</label>
+          <div class="field-box">
+            <select id="f-current" name="current_solution">
+              <option value="">Select one</option>
+              <option>Nothing yet - just paying the bill</option>
+              <option>Running a generator</option>
+              <option>Using a UPS or battery backup</option>
+              <option>Got a solar quote before and didn't push through</option>
+              <option>Cutting back on appliance use</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="lead-go" type="submit" id="submit-btn">Send my estimate request</button>
+        <p class="lead-fail" id="send-fail" role="alert">Couldn’t send — check your signal and try again, or call 0955 723 5093.</p>
+      </form>
+
+      <div class="lead-ok" role="status">
+        <strong>Got it.</strong> We’ll reply today with your written estimate and the next survey dates.
+      </div>
+      <p class="lead-foot">MACC Systems &amp; Engineering Inc. · Biliran · Estimates only until survey.</p>
+    </div>
+  </section>
+
+</div>
+<script src="assets/calc-ad.js"></script>
+</body>
+</html>

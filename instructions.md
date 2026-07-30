@@ -1,23 +1,22 @@
-# Instructions — Funnel v2 Solar Matrix-style hero
+# Instructions — FB-ad solar calculator landing page
 
 ## 1. Project Overview
-Rebuild `funnel/v2` hero to match the provided Solar Matrix reference: bright sky backdrop, left copy/CTAs, right visual with floating feature cards on dotted connectors, yellow pill buttons, white trust strip — adapted for MACC / Biliran Founder OS copy (no fabricated reviews, ratings, or partner logos).
+Standalone, phone-optimized savings calculator landing page for Facebook ads. Layout modeled on the lime/teal split reference; copy and proof adapted for MACC / Biliran (Founder OS).
 
 ## 2. Core Functionalities
-- Sky-gradient hero with two-column layout (copy left, visual right)
-- Floating glass cards linked to a central hub image via dashed SVG paths
-- Primary/secondary pill CTAs → `#quote` / `#packages`
-- Honest trust chip (on-island team) instead of fake review counts
-- White trust bar reusing real table-stakes (fixed price, licensed, typhoon-rated)
-- Generated local images under `funnel/v2/assets/img/` (no CDN)
+- Mobile-first stack: header → roof photo + calc → headline/CTA → lead capture
+- Live BILECO bill → estimated ₱/mo savings + package fit (same math as funnel v2)
+- Priority pills: lower bill / backup / both (LIWANAG brownout rule preserved)
+- Mini lead form with UTM passthrough → existing `/api/lead` cross-origin endpoint
+- Honest trust chips only — no fabricated testimonials, ratings, or foreign cert seals
 
 ## 3. Docs and Libraries
 - Plain HTML/CSS/JS, self-contained under `funnel/v2/`
-- Styles: `funnel/v2/assets/funnel-v2.css`
-- Positioning: `ops/positioning.md` (copy downstream)
-- Founder OS §1.6 / §7: no fabricated proof
+- Reuses v2 lead endpoint meta pattern and BILECO calc assumptions
+- Positioning: `ops/positioning.md`; Founder OS §1.6 / §4 / §7
 
 ## 4. Current File Structure
-- `funnel/v2/index.html` — hero markup
-- `funnel/v2/assets/funnel-v2.css` — hero + button styles
-- `funnel/v2/assets/img/hero-sky.jpg`, `hero-turbine.png`, `card-*.jpg`
+- `funnel/v2/calc.html` — page
+- `funnel/v2/assets/calc-ad.css` — styles
+- `funnel/v2/assets/calc-ad.js` — calc + lead submit
+- Images: `funnel/v2/assets/img/hero.jpg`, `macc-logo.png`, `macc-mark.png`

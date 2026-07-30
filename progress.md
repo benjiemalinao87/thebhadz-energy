@@ -1,5 +1,11 @@
 # Progress
 
+## FB-ad solar calculator landing (2026-07-30) — local, not pushed
+- Standalone phone-first page: `funnel/v2/calc.html` + `calc-ad.css` / `calc-ad.js`
+- Lime/teal layout from reference; Biliran/BILECO copy; no fake testimonials/certs
+- Same savings math as v2; leads post to existing API with `source=fb-calc-ad` + UTMs
+- Preview: `http://127.0.0.1:8766/calc.html`
+
 ## Funnel v2 Solar Matrix-style hero (2026-07-30) — hybrid (local review, not pushed)
 - Hybrid: sky chrome + conversion spine (calc CTA, phone, real rooftop hub)
 - Primary CTA → `#calc`; secondary → `#quote`; phone restored in header

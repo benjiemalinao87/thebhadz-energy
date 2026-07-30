@@ -1,5 +1,13 @@
 # Lesson Learn
 
+## FB-ad calculator page: layout yes, fabricated proof no
+
+**Fixed:** 2026-07-30
+
+**What worked:** Clone the lime/teal split + phone-first stack (calc panel with roof photo first on mobile), but replace "Robin saved $100k" / Trustpilot / NABCEP with honest Biliran trust chips and live BILECO estimate math. Tag leads `fb-calc-ad` + UTM query params. Keep LIWANAG brownout disclaimer on the page.
+
+**Do not:** Ship fabricated named savings or cert seals on an ad landing. Do not boost FB traffic until lead delivery + UTMs are verified end-to-end (§4).
+
 ## Funnel v2 hero: model reference without fabricating proof
 
 **Fixed:** 2026-07-30
