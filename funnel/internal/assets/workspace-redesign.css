@@ -436,8 +436,23 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
 .workspace-page .ops-subpanel > .ops-form { flex: 1; margin-bottom: 0; }
 .workspace-page .ops-subpanel > .ops-form .ops-form-actions { margin-top: auto; }
 
-.workspace-page .ops-alert { color: var(--ws-copy); border-radius: 0 8px 8px 0; }
+/* Background must come from theme tokens — ops-tools hardcodes cream (#fff8e6),
+   and dark mode alone flips text to --ws-copy (near-white) → unreadable light-on-light. */
+.workspace-page .ops-alert {
+  color: var(--ws-copy);
+  background: var(--ws-amber-soft);
+  border-left-color: var(--ws-amber);
+  border-radius: 0 8px 8px 0;
+}
 .workspace-page .ops-alert strong { color: var(--ws-ink); }
+.workspace-page .ops-alert.good {
+  background: var(--ws-green-soft);
+  border-left-color: var(--ws-green);
+}
+.workspace-page .ops-alert.danger {
+  background: var(--ws-red-soft);
+  border-left-color: var(--ws-red);
+}
 .workspace-page .lab-savebar,
 .workspace-page .ops-topbar {
   color: var(--ws-copy);
@@ -743,6 +758,21 @@ html[data-theme="dark"] .frame:has(> main.workspace-page) {
 
 html[data-theme="dark"] .workspace-page code { color: #a6d7d4; background: #152a2c; }
 html[data-theme="dark"] .workspace-page .callout.warn { background: #302816; }
+/* Beat ops-tools' dark .ops-alert fallback so workspace tokens stay in charge. */
+html[data-theme="dark"] .workspace-page .ops-alert {
+  color: var(--ws-copy);
+  background: var(--ws-amber-soft);
+  border-left-color: var(--ws-amber);
+}
+html[data-theme="dark"] .workspace-page .ops-alert strong { color: var(--ws-ink); }
+html[data-theme="dark"] .workspace-page .ops-alert.good {
+  background: var(--ws-green-soft);
+  border-left-color: var(--ws-green);
+}
+html[data-theme="dark"] .workspace-page .ops-alert.danger {
+  background: var(--ws-red-soft);
+  border-left-color: var(--ws-red);
+}
 html[data-theme="dark"] .workspace-page .lab-decision {
   color: var(--ws-copy);
   background: #2a2312;

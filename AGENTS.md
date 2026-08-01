@@ -63,6 +63,11 @@ account. Two ways in: a founder's own email + password, or the shared team passw
 still apply, and its activity reads as "Shared team login" rather than a person. Details in
 `funnel/README.md` → "Founder access"; the shape:
 
+- **Local testing:** when you need to sign into `/login.html` or hit auth-gated `/internal/*`
+  and `/api/*` against a local Wrangler session, use the founder test account in the
+  repo-root `.env` (`EMAIL` + `PASSWORD`). That file is gitignored — read it at test time;
+  never commit it, paste the values into docs/chat/HTML, or hard-code them into source.
+
 - `funnel/functions/_auth.js` — accounts, PBKDF2 password hashing, database-backed sessions
   (cookie = signed session id, so revocation is immediate), `currentUser(context)`, `logActivity`.
 - `funnel/functions/api/_middleware.js` — authenticates all `/api/*` and writes an `activity_log`
@@ -505,15 +510,19 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 - Do not push or deploy Funnel / customer-facing changes until the user has reviewed or tested locally and says to push.
 - Public Funnel founder bios: professional plain English (homeowner job first, then one proof line) — not résumé lists, LinkedIn fluff, or overly casual neighbour-chat tone.
 - On Benjie's public Funnel bio: omit that he is in Australia; also do not claim he is based in Biliran or on-island.
+- Single-purpose ad landing pages (e.g. FB calc): keep the header minimal — logo + one contact CTA; no secondary nav pills or duplicate contact buttons on the hero photo.
 
 ## Learned Workspace Facts
 
 - Local funnel + Command Center must be run from inside `funnel/` (`cd funnel && npx wrangler pages dev . --port 8000`); starting Wrangler from the repo root can shim Functions and break `/api/*` with 405.
+- Local founder-auth testing: use the test account in repo-root `.env` (`EMAIL` / `PASSWORD`) at `/login.html`; never commit `.env` or copy those values into source or docs.
 - Cloudflare Pages serves `funnel/` as the site root; the repo-root engineering docs are a separate static site.
 - Customer-facing Funnel v2 lives at `funnel/v2/` (own assets and `wrangler.toml`), separate from the original `funnel/index.html` landing page.
+- Standalone phone-first Facebook-ad calculator is `funnel/v2/calc.html` (live at `https://www.macc-inc.com/calc.html`); submits to the same `/api/lead` pipeline with `source=fb-calc-ad` so leads appear in Contacts.
 - Public funnel package cards hide list prices and use free-estimate CTAs; internal ops and quote tools may still reference ₱99,500.
 - One brand across both site trees: **MACC Systems & Engineering Inc.** (the BADJJ Energy Systems trading name was retired 2026-07-27). "Solar City" now names the engineering file and the SC-xx codes, not the company.
 - Founder team titles: Benjie Malinao — sales & marketing head; Jundhel Cabradilla — president, operations & engineering head; Ace Denver Corpin — administration head; Jethro Abatias — finance & accounting head.
 - Funnel v2's founder cards deliberately title Jethro "Support & systems" rather than finance & accounting — his supplied bio is IT/network/support and answers "who picks up when it breaks", which no other card did. Pending his sign-off; revert the card or supply finance evidence if he keeps the finance title.
 - Corporate legal name per the logo supplied by the founders: **MACC Systems & Engineering Inc.** (note "Systems", plural).
 - Founders share Biliran roots; on-island founders (Jundhel, Ace, Jethro) may use "From Biliran" on public cards — Benjie's card should not.
+- Command Center dark mode: hard-coded light washes (cream/amber alert backgrounds) must pin dark ink or use theme tokens — flipping only text color produces unreadable light-on-light.

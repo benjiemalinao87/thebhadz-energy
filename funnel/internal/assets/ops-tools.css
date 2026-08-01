@@ -12,10 +12,16 @@
 .ops-button.danger, .ops-content button.danger { background: #fff; border-color: #b42318; color: #b42318; }
 .ops-file { position: relative; display: inline-block; }
 .ops-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.ops-alert { padding: 15px 18px; border-left: 5px solid var(--sun); background: #fff8e6; margin: 18px 0; font-size: 14px; }
+.ops-alert { padding: 15px 18px; border-left: 5px solid var(--sun); background: #fff8e6; margin: 18px 0; font-size: 14px; color: #4a3a12; }
 .ops-alert strong { display: block; margin-bottom: 3px; }
-.ops-alert.good { border-color: var(--ok); background: #edf8f1; }
-.ops-alert.danger { border-color: #b42318; background: #fff2f0; }
+.ops-alert.good { border-color: var(--ok); background: #edf8f1; color: #1a3d28; }
+.ops-alert.danger { border-color: #b42318; background: #fff2f0; color: #5c1a14; }
+
+/* Fallback when a page inherits dark ink but still uses these light washes.
+   Workspace / finance / team pages override further with their own tokens. */
+html[data-theme="dark"] .ops-alert { color: #f3e3c0; background: #2c2413; }
+html[data-theme="dark"] .ops-alert.good { color: #c8ebd4; background: #123326; }
+html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #391c19; }
 
 .ops-metrics { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); margin: 22px 0; }
 .ops-metric { background: var(--sheet); padding: 14px; min-width: 0; }

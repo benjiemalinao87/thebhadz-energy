@@ -63,6 +63,11 @@ account. Two ways in: a founder's own email + password, or the shared team passw
 still apply, and its activity reads as "Shared team login" rather than a person. Details in
 `funnel/README.md` → "Founder access"; the shape:
 
+- **Local testing:** when you need to sign into `/login.html` or hit auth-gated `/internal/*`
+  and `/api/*` against a local Wrangler session, use the founder test account in the
+  repo-root `.env` (`EMAIL` + `PASSWORD`). That file is gitignored — read it at test time;
+  never commit it, paste the values into docs/chat/HTML, or hard-code them into source.
+
 - `funnel/functions/_auth.js` — accounts, PBKDF2 password hashing, database-backed sessions
   (cookie = signed session id, so revocation is immediate), `currentUser(context)`, `logActivity`.
 - `funnel/functions/api/_middleware.js` — authenticates all `/api/*` and writes an `activity_log`

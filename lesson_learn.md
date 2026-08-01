@@ -162,3 +162,15 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Scrape public FB page intros for follower counts (no login), sample post hooks from indexed URLs, then add dedicated sheets (`FB_Pages`, `FB_Post_Patterns`, `FB_Sample_Posts`, `FB_Groups`, `FB_Playbook_SolarCity`) rather than cramming into Companies. Separated "copy mechanics" from "copy claims" so brownout-hybrid stories stay off LIWANAG.
 
 **Do not:** Treat follower counts or video views as traction evidence (Mom Test). Do not boost until Biliran FB group slice list + funnel instrumentation are done. Login walls block some pages — mark PARTIAL and move on.
+
+## Command Center dark mode: `.ops-alert` light-on-light
+
+**Fixed:** 2026-08-02
+
+**Problem:** Next Actions (and any page using `.ops-alert` from `ops-tools.css`) kept a hardcoded cream background (`#fff8e6`) while dark theme flipped text to near-white via `--ws-copy` / inherited ink — unreadable.
+
+**What worked:**
+1. Pin dark ink on the light washes in `ops-tools.css`, plus a dark-theme background/text pair as a global fallback.
+2. On workspace pages, drive `.ops-alert` (and `.good` / `.danger`) from `--ws-*-soft` tokens so both themes stay coherent; add an `html[data-theme="dark"] .workspace-page .ops-alert` rule so it out-specifies the ops-tools fallback.
+
+**Do not:** Restyle only the text color for dark mode and leave a hardcoded light wash, or set workspace text to `--ws-copy` without also theming the alert background. Finance/Team already had page-scoped fixes — don't re-break those by removing their overrides without checking specificity.

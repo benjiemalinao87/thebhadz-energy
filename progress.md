@@ -1,5 +1,11 @@
 # Progress
 
+## Next Actions dark-mode alert contrast (2026-08-02) — done
+- `.ops-alert` no longer light-on-cream in dark theme
+- `ops-tools.css`: pinned dark ink on light washes + dark fallback
+- `workspace-redesign.css`: alert bg/text from `--ws-*-soft` tokens (both themes)
+- Verified: dark alert = `#352b0d` ground + light copy
+
 ## FB-ad solar calculator landing (2026-07-30) — local, not pushed
 - Standalone phone-first page: `funnel/v2/calc.html` + `calc-ad.css` / `calc-ad.js`
 - Lime/teal layout from reference; Biliran/BILECO copy; no fake testimonials/certs
