@@ -31,7 +31,7 @@
   // Pages whose <main> is an ops workspace (.ops-content) rather than a document:
   // the shell swaps to the light "operations" ground for these, which their styling
   // assumes. Miss one and its text renders dark-on-dark in light mode.
-  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "projects", "finance", "team", "captures"];
+  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "docs", "projects", "finance", "team", "captures"];
 
   // Every internal page has two spellings: the file that actually exists
   // (/internal/leads.html) and the canonical address we show (/internal/leads).

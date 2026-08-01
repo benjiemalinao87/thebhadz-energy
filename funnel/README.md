@@ -294,6 +294,26 @@ same feed. Use it for site-survey findings, supplier call notes, install photos,
 - Provisioning (already done once): `npx wrangler r2 bucket create solar-city-notes` and
   the `schema.sql` apply above. Local dev gets its own simulated bucket + DB automatically.
 
+### Document library (D1 + R2-backed)
+
+**`/internal/docs.html`** (SC section key `documents`) — one library for every company
+document, in two flavors: docs **written in the in-app editor** (bold, italics, underline,
+bullet/numbered lists, H1–H5 headings) and **uploaded files** (images, PDF, Office, CSV,
+TXT — ≤ 25 MB each). Create, view, edit, rename, search, delete; every founder sees the
+same library.
+
+- **Rich-text docs** live in D1 (`documents` table, `schema.sql`). The HTML body is
+  sanitized server-side (HTMLRewriter allowlist) on every write — scripts, event handlers,
+  iframes and `javascript:` links never reach the database.
+- **Uploaded files** live in the same private R2 bucket as note attachments
+  (`solar-city-notes`), under the `docs/` prefix, streamed through the founder-gated
+  `GET /api/document-file?key=…`. Deleting a document also deletes its R2 file.
+- Endpoints: `/api/documents` (CRUD) + `/api/document-file` (upload/serve), both
+  founder-gated and audit-logged by the API middleware; the section can be hidden
+  per-account like any other tool.
+- The `documents` table is created on demand by the endpoint, so a deploy that beats the
+  `schema.sql` apply degrades to an empty library, never an error.
+
 ### Meeting recordings (D1 + R2-backed)
 
 **`/internal/meetings.html`** — every meeting entry has a **Recordings** section. Upload the

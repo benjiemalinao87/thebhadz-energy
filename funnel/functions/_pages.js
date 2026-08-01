@@ -56,6 +56,13 @@ export const SECTIONS = [
     apis: ["/api/notes", "/api/note-image"],
   },
   {
+    key: "documents",
+    label: "Documents (library)",
+    group: "Operations",
+    pages: ["docs"],
+    apis: ["/api/documents", "/api/document-file"],
+  },
+  {
     key: "projects",
     label: "Project board",
     group: "Operations",

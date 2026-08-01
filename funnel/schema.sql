@@ -51,6 +51,29 @@ CREATE TABLE IF NOT EXISTS notes (
 
 CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at);
 
+-- Founder document library (/internal/docs.html). One row per document: either a
+-- rich-text doc written in the in-app editor (kind='doc', body_html holds
+-- server-sanitized HTML) or an uploaded file (kind='file', the bytes live in the
+-- NOTES_R2 bucket under docs/ and file_* describe them). The table is also created
+-- on demand by functions/api/documents.js, so a forgotten schema apply can't 500
+-- the page; kept here so the schema stays readable in one place.
+CREATE TABLE IF NOT EXISTS documents (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind        TEXT NOT NULL DEFAULT 'doc' CHECK (kind IN ('doc', 'file')),
+  title       TEXT NOT NULL,
+  body_html   TEXT NOT NULL DEFAULT '',   -- sanitized rich text; empty for kind='file'
+  file_key    TEXT,                       -- R2 key under docs/ (kind='file' only)
+  file_name   TEXT,
+  file_type   TEXT,
+  file_size   INTEGER NOT NULL DEFAULT 0, -- bytes
+  author      TEXT NOT NULL DEFAULT '',   -- founder name from the session, never the body
+  updated_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL,              -- ISO timestamp
+  updated_at  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_documents_updated ON documents(updated_at);
+
 -- Internal project board tasks
 CREATE TABLE IF NOT EXISTS project_tasks (
   id          TEXT PRIMARY KEY,

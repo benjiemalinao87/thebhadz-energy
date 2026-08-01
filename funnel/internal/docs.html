@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documents — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="icon" href="/assets/img/macc-mark.png">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* ============================================================
+     MACC Documents — shared founder document library
+     Theme-aware: every surface/ink below rides on the --ops-*
+     variables from operations-redesign.css, which flip with
+     html[data-theme]. The fallbacks only matter standalone
+     before that stylesheet loads (one un-themed frame at worst).
+     Backed by /api/documents (D1) + /api/document-file (R2).
+     ============================================================ */
+  :root{
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
+    --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --z-800:#deddd6; --z-500:#687e84; --red:#b8452f;
+  }
+  .ops-docs{
+    /* light-theme values; the --ops-* vars flip to dark automatically */
+    --docs-surface:var(--ops-surface,#ffffff);
+    --docs-surface-2:var(--ops-surface-2,#f2f1ec);
+    --docs-field:var(--ops-surface,#ffffff);
+    --docs-line:var(--ops-line,#deddd6);
+    --docs-line-strong:var(--ops-line-strong,#c7c9c4);
+    --docs-ink:var(--ops-ink,#0d3037);
+    --docs-muted:var(--ops-muted,#526970);
+    --docs-subtle:var(--ops-subtle,#71858a);
+    --docs-blue:var(--ops-blue,#235f8c);
+    --docs-amber:var(--ops-amber,#f5b51b);
+    --docs-red:var(--ops-rust,#b8452f);
+    --docs-file-accent:#9b6900;          /* readable amber-ink on white */
+    --docs-hover:rgba(13,48,55,0.06);
+    --docs-veil:rgba(247,246,242,0.72);
+  }
+  html[data-theme="dark"] .ops-docs{
+    --docs-field:#0a181b;
+    --docs-file-accent:#f5bd36;
+    --docs-hover:rgba(255,255,255,0.06);
+    --docs-veil:rgba(2,10,12,0.72);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{max-width:900px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+
+  /* ---- top bar (standalone loads only — the SPA shell strips it) ---- */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px dashed var(--docs-line-strong);}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--docs-muted);
+    border:1px solid var(--docs-line-strong);border-radius:999px;padding:8px 14px;transition:border-color .15s,color .15s;}
+  .back:hover{border-color:var(--docs-subtle);color:var(--docs-ink);}
+  .titles{display:flex;flex-direction:column;gap:3px;}
+  .titles .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:var(--docs-subtle);}
+  .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--docs-ink);letter-spacing:0.01em;}
+  .bar .sp{flex:1;}
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:10px;text-transform:uppercase;letter-spacing:0.24em;
+    border:1px solid var(--docs-blue);background:transparent;color:var(--docs-blue);}
+  .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--docs-red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
+  .logout:hover{background:rgba(184,69,47,0.10);}
+
+  /* ---- panel base ---- */
+  .panel{position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--docs-line);
+    background:var(--docs-surface);
+    box-shadow:var(--ops-shadow,0 1px 2px rgba(13,48,55,.04),0 10px 30px -22px rgba(13,48,55,.25));}
+  .panel>*{position:relative;z-index:1;}
+
+  /* ---- action row ---- */
+  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:22px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;
+    border-radius:10px;padding:11px 18px;cursor:pointer;transition:filter .14s,border-color .14s,color .14s;border:0;}
+  .btn.primary{color:#172b30;background:var(--docs-amber);}
+  .btn.primary:hover{filter:brightness(1.06);}
+  .btn.ghost{color:var(--docs-ink);background:var(--docs-field);border:1px dashed var(--docs-line-strong);}
+  .btn.ghost:hover{border-color:var(--docs-amber);}
+  .btn:disabled{opacity:0.5;cursor:default;filter:none;}
+  .actions .hint{font-size:10.5px;color:var(--docs-subtle);}
+  .actions .sp{flex:1;}
+
+  input[type="text"]{
+    background:var(--docs-field);border:1px solid var(--docs-line-strong);border-radius:10px;color:var(--docs-ink);
+    font-size:13.5px;padding:10px 12px;width:100%;
+  }
+  input[type="text"]::placeholder{color:var(--docs-subtle);}
+  input[type="text"]:focus{outline:none;border-color:var(--docs-blue);}
+
+  /* ---- library list ---- */
+  .feed-head{display:flex;align-items:center;gap:14px;margin:30px 0 14px;}
+  .feed-head .tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3em;color:var(--docs-muted);white-space:nowrap;}
+  .feed-head .rule{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--docs-line-strong) 0 6px,transparent 6px 12px);}
+  .feed-head .count{font-size:11px;color:var(--docs-subtle);letter-spacing:0.1em;font-variant-numeric:tabular-nums;}
+  .search{position:relative;margin-bottom:14px;}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--docs-subtle);}
+  .search input{padding-left:34px;}
+
+  .row{display:flex;align-items:center;gap:14px;padding:15px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+  .row:hover{border-color:var(--docs-blue);}
+  .row .doc-icon{width:38px;height:44px;flex:0 0 38px;display:grid;place-items:center;border:1px solid var(--docs-line);border-radius:8px;}
+  .row .doc-icon.kind-doc{color:var(--docs-blue);background:rgba(96,165,250,0.10);}
+  .row .doc-icon.kind-file{color:var(--docs-file-accent);background:rgba(245,158,11,0.10);}
+  .row .doc-copy{min-width:0;flex:1;}
+  .row .doc-copy strong{display:block;font-family:var(--display);font-size:14.5px;font-weight:650;color:var(--docs-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .row .doc-copy small{display:block;margin-top:3px;color:var(--docs-subtle);font-size:11px;letter-spacing:.04em;}
+  .row .doc-copy small .who{color:var(--docs-blue);}
+  .row .acts{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end;}
+  .row .act{background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;color:var(--docs-subtle);padding:5px 8px;border-radius:6px;}
+  .row .act:hover{color:var(--docs-ink);background:var(--docs-hover);}
+  .row .act.del:hover{color:var(--docs-red);background:rgba(184,69,47,0.10);}
+  .kind-pill{font-size:9px;font-weight:700;letter-spacing:.14em;padding:2px 7px;border-radius:999px;text-transform:uppercase;}
+  .kind-pill.doc{color:var(--docs-blue);border:1px solid var(--docs-blue);}
+  .kind-pill.file{color:var(--docs-file-accent);border:1px solid var(--docs-file-accent);}
+
+  .empty{padding:48px 20px;text-align:center;color:var(--docs-subtle);font-size:13px;}
+  .empty svg{opacity:0.4;margin-bottom:10px;}
+
+  /* ---- editor ---- */
+  .workspace{margin-top:22px;padding:20px;display:none;}
+  .workspace.open{display:block;}
+  .workspace .kicker{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.28em;color:var(--docs-blue);margin-bottom:14px;}
+  .toolbar{display:flex;gap:4px;flex-wrap:wrap;margin:12px 0 0;padding:8px;border:1px solid var(--docs-line-strong);border-radius:10px 10px 0 0;background:var(--docs-surface-2);}
+  .toolbar .tb{min-width:34px;height:32px;padding:0 9px;display:grid;place-items:center;border:1px solid transparent;border-radius:7px;background:none;cursor:pointer;
+    font-family:var(--mono);font-size:12px;font-weight:700;color:var(--docs-muted);transition:all .12s;}
+  .toolbar .tb:hover{background:var(--docs-hover);color:var(--docs-ink);}
+  .toolbar .tb.on{color:#172b30;background:var(--docs-amber);border-color:var(--docs-amber);}
+  .toolbar .sep{width:1px;align-self:stretch;margin:2px 5px;background:var(--docs-line-strong);}
+  .editor{
+    min-height:320px;max-height:62vh;overflow-y:auto;padding:18px 20px;border:1px solid var(--docs-line-strong);border-top:0;border-radius:0 0 10px 10px;
+    background:var(--docs-field);font-size:14.5px;color:var(--docs-ink);line-height:1.75;outline:none;
+  }
+  .editor:focus{border-color:var(--docs-blue);}
+  .editor:empty::before{content:attr(data-placeholder);color:var(--docs-subtle);pointer-events:none;display:block;}
+  .edit-actions{display:flex;gap:10px;margin-top:14px;align-items:center;}
+  .edit-actions .cancel,.viewer .cancel{background:none;border:1px solid var(--docs-line-strong);color:var(--docs-ink);border-radius:10px;padding:10px 18px;cursor:pointer;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.16em;}
+  .edit-actions .cancel:hover,.viewer .cancel:hover{border-color:var(--docs-subtle);}
+
+  /* ---- viewer + editor doc typography ---- */
+  .viewer{margin-top:22px;padding:26px clamp(18px,4vw,40px) 34px;display:none;}
+  .viewer.open{display:block;}
+  .viewer .vh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:18px;border-bottom:1px dashed var(--docs-line-strong);}
+  .viewer .vh .meta{font-size:11.5px;color:var(--docs-subtle);}
+  .viewer .vh .meta .who{color:var(--docs-blue);}
+  .viewer .vh .sp{flex:1;}
+  .viewer h2.vtitle{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--docs-ink);margin:0 0 4px;}
+  .doc-body{font-size:14.5px;color:var(--docs-ink);line-height:1.8;word-wrap:break-word;}
+  .doc-body h1,.editor h1{font-family:var(--display);font-size:1.7rem;font-weight:700;color:var(--docs-ink);margin:1.1em 0 .4em;line-height:1.25;}
+  .doc-body h2,.editor h2{font-family:var(--display);font-size:1.4rem;font-weight:700;color:var(--docs-ink);margin:1.1em 0 .4em;line-height:1.3;}
+  .doc-body h3,.editor h3{font-family:var(--display);font-size:1.2rem;font-weight:650;color:var(--docs-ink);margin:1em 0 .35em;}
+  .doc-body h4,.editor h4{font-family:var(--display);font-size:1.05rem;font-weight:650;color:var(--docs-ink);margin:1em 0 .3em;}
+  .doc-body h5,.editor h5{font-family:var(--display);font-size:.95rem;font-weight:650;color:var(--docs-muted);text-transform:uppercase;letter-spacing:.08em;margin:1em 0 .3em;}
+  .doc-body h1:first-child,.doc-body h2:first-child,.doc-body h3:first-child,
+  .editor h1:first-child,.editor h2:first-child,.editor h3:first-child{margin-top:0;}
+  .doc-body p,.editor p{margin:.5em 0;}
+  .doc-body ul,.doc-body ol,.editor ul,.editor ol{margin:.5em 0;padding-left:1.6em;}
+  .doc-body li,.editor li{margin:.25em 0;}
+  .doc-body a{color:var(--docs-blue);text-decoration:underline;text-underline-offset:3px;}
+  .doc-body blockquote,.editor blockquote{margin:.8em 0;padding:.2em 0 .2em 1em;border-left:2px solid var(--docs-line-strong);color:var(--docs-muted);}
+
+  /* ---- toast / loading ---- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:130;opacity:0;pointer-events:none;
+    background:var(--docs-surface);border:1px solid var(--docs-line-strong);border-radius:999px;padding:10px 20px;font-size:12px;color:var(--docs-ink);
+    box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(13,48,55,.25));transition:opacity .2s,transform .2s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--docs-veil);z-index:70;color:var(--docs-muted);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;}
+
+  @media (max-width:620px){
+    .titles h1{font-size:1.2rem;}
+    .row{flex-wrap:wrap;}
+    .row .acts{width:100%;justify-content:flex-start;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
+</head>
+<body class="ops-standalone ops-docs">
+<div class="wrap">
+
+  <div class="bar">
+    <a class="back" href="/internal/">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Founder home
+    </a>
+    <div class="titles">
+      <span class="eyebrow">MACC · Founders · Confidential</span>
+      <h1>Documents</h1>
+    </div>
+    <div class="sp"></div>
+    <span class="badge">Document library</span>
+    <a class="logout" href="/api/founder-logout">Log out</a>
+  </div>
+
+  <header class="ops-page-head">
+    <div>
+      <p class="ops-eyebrow">FOUNDERS / DOCUMENTS</p>
+      <h1>One library for every company document.</h1>
+      <p class="ops-lede">Write docs in the editor or upload the files the team keeps losing in chat — pricing sheets, permits, supplier quotes — viewable and editable by every founder.</p>
+    </div>
+  </header>
+
+  <!-- ---- actions ---- -->
+  <div class="actions" id="dl-actions">
+    <button type="button" class="btn primary" id="dl-new">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      New document
+    </button>
+    <input type="file" id="dl-files" accept="image/png,image/jpeg,image/webp,image/gif,image/heic,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt" multiple hidden>
+    <button type="button" class="btn ghost" id="dl-upload">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+      Upload files
+    </button>
+    <span class="hint">Images, PDF, Office, CSV, TXT · max 25 MB each</span>
+  </div>
+
+  <!-- ---- editor ---- -->
+  <section class="panel workspace" id="dl-editor-panel" aria-label="Document editor">
+    <div class="kicker" id="dl-editor-kicker">New document</div>
+    <label class="ops-sr-only" for="dl-title">Document title</label>
+    <input type="text" id="dl-title" placeholder="Document title" maxlength="200">
+    <div class="toolbar" role="toolbar" aria-label="Formatting">
+      <button type="button" class="tb" data-block="p" title="Normal text">¶</button>
+      <button type="button" class="tb" data-block="h1" title="Heading 1">H1</button>
+      <button type="button" class="tb" data-block="h2" title="Heading 2">H2</button>
+      <button type="button" class="tb" data-block="h3" title="Heading 3">H3</button>
+      <button type="button" class="tb" data-block="h4" title="Heading 4">H4</button>
+      <button type="button" class="tb" data-block="h5" title="Heading 5">H5</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="tb" data-cmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+      <button type="button" class="tb" data-cmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+      <button type="button" class="tb" data-cmd="underline" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="tb" data-cmd="insertUnorderedList" title="Bullet list">•≡</button>
+      <button type="button" class="tb" data-cmd="insertOrderedList" title="Numbered list">1≡</button>
+    </div>
+    <div class="editor" id="dl-editor" contenteditable="true" data-placeholder="Write here — headings, bold, italics, bullet and numbered lists all live in the toolbar above." aria-label="Document body"></div>
+    <div class="edit-actions">
+      <button type="button" class="btn primary" id="dl-save">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        Save document
+      </button>
+      <button type="button" class="cancel" id="dl-cancel">Cancel</button>
+    </div>
+  </section>
+
+  <!-- ---- viewer ---- -->
+  <section class="panel viewer" id="dl-viewer" aria-label="Document viewer">
+    <div class="vh">
+      <div>
+        <h2 class="vtitle" id="dl-view-title"></h2>
+        <span class="meta" id="dl-view-meta"></span>
+      </div>
+      <span class="sp"></span>
+      <button type="button" class="btn ghost" id="dl-view-edit">Edit</button>
+      <button type="button" class="cancel" id="dl-view-close">Close</button>
+    </div>
+    <div class="doc-body" id="dl-view-body"></div>
+  </section>
+
+  <!-- ---- library ---- -->
+  <div class="feed-head">
+    <span class="tag">Library</span>
+    <span class="rule" aria-hidden="true"></span>
+    <span class="count" id="dl-count">—</span>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="dl-search" placeholder="Search documents…" aria-label="Search documents">
+  </div>
+  <div id="dl-feed"></div>
+
+</div>
+
+<div class="toast" id="dl-toast" role="status"></div>
+<div class="loading" id="dl-loading">Loading documents…</div>
+
+<script>
+(function(){
+  if(!document.getElementById("dl-feed"))return; // SPA guard: anchor element must exist
+  function el(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function fileUrl(key){return "/api/document-file?key="+encodeURIComponent(key);}
+  function extension(name){var m=String(name||"").toLowerCase().match(/\.([a-z0-9]+)$/);return m?m[1]:"file";}
+  function formatSize(bytes){
+    var n=Number(bytes)||0;if(!n)return "";
+    if(n<1024)return n+" B";if(n<1024*1024)return (n/1024).toFixed(1)+" KB";
+    return (n/(1024*1024)).toFixed(1)+" MB";
+  }
+  function fmtDate(iso){
+    if(!iso)return "—";
+    var d=new Date(iso); if(isNaN(d))return "—";
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+
+           d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  }
+  var toastTimer=null;
+  function toast(msg){
+    var t=el("dl-toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2400);
+  }
+  function docIcon(){return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>';}
+  function fileIcon(){return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m15 15-3 3-3-3"/></svg>';}
+
+  var docs=[], filter="", editingId=null;
+
+  // ---------- load ----------
+  function load(){
+    fetch("/api/documents")
+      .then(function(r){
+        if(r.status===401){location.href="/login.html?next="+encodeURIComponent("/internal/docs.html");throw new Error("auth");}
+        return r.json();
+      })
+      .then(function(d){
+        el("dl-loading").style.display="none";
+        if(!d.ok){toast(d.error||"Couldn't load documents");return;}
+        docs=d.documents||[]; render();
+      })
+      .catch(function(e){ if(e.message!=="auth"){el("dl-loading").style.display="none";toast("Network error loading documents");} });
+  }
+
+  // ---------- editor ----------
+  var editor=el("dl-editor");
+  try{document.execCommand("defaultParagraphSeparator",false,"p");}catch(e){}
+
+  function exec(cmd,value){
+    editor.focus();
+    document.execCommand(cmd,false,value===undefined?null:value);
+    refreshToolbar();
+  }
+  function setBlock(tag){
+    // Browsers disagree on formatBlock's value syntax — try bracketed, then bare.
+    editor.focus();
+    if(!document.execCommand("formatBlock",false,"<"+tag+">")){
+      document.execCommand("formatBlock",false,tag);
+    }
+    refreshToolbar();
+  }
+  function refreshToolbar(){
+    var block="";
+    try{block=String(document.queryCommandValue("formatBlock")||"").toLowerCase();}catch(e){}
+    Array.prototype.forEach.call(document.querySelectorAll(".toolbar .tb[data-block]"),function(b){
+      var tag=b.getAttribute("data-block");
+      b.classList.toggle("on",tag==="p"?(block===""||block==="p"||block==="div"):block===tag);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".toolbar .tb[data-cmd]"),function(b){
+      var on=false;
+      try{on=document.queryCommandState(b.getAttribute("data-cmd"));}catch(e){}
+      b.classList.toggle("on",on);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".toolbar .tb"),function(b){
+    b.addEventListener("mousedown",function(e){e.preventDefault();}); // keep the text selection
+    b.addEventListener("click",function(){
+      var block=b.getAttribute("data-block"), cmd=b.getAttribute("data-cmd");
+      if(block)setBlock(block); else if(cmd)exec(cmd);
+    });
+  });
+  document.addEventListener("selectionchange",function(){
+    if(el("dl-editor-panel").classList.contains("open"))refreshToolbar();
+  });
+
+  function openEditor(doc){
+    closeViewer();
+    editingId=doc?doc.id:null;
+    el("dl-editor-kicker").textContent=doc?"Edit document":"New document";
+    el("dl-title").value=doc?doc.title:"";
+    editor.innerHTML=doc?(doc.body_html||""):"";
+    el("dl-editor-panel").classList.add("open");
+    el("dl-actions").style.display="none";
+    el("dl-title").focus();
+    refreshToolbar();
+  }
+  function closeEditor(){
+    editingId=null;
+    el("dl-editor-panel").classList.remove("open");
+    el("dl-actions").style.display="";
+    el("dl-title").value=""; editor.innerHTML="";
+  }
+  el("dl-new").onclick=function(){openEditor(null);};
+  el("dl-cancel").onclick=closeEditor;
+
+  el("dl-save").onclick=function(){
+    var title=el("dl-title").value.trim();
+    var body=editor.innerHTML;
+    if(!title){toast("Give the document a title");el("dl-title").focus();return;}
+    if(!editor.textContent.trim()&&editor.querySelectorAll("li").length===0){toast("The document is empty");return;}
+    var btn=el("dl-save"); btn.disabled=true;
+    var isEdit=editingId!==null;
+    fetch("/api/documents",{
+      method:isEdit?"PATCH":"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(isEdit?{id:editingId,title:title,body_html:body}:{title:title,body_html:body})
+    })
+      .then(function(r){return r.json();})
+      .then(function(d){
+        btn.disabled=false;
+        if(!d.ok){toast(d.error||"Save failed");return;}
+        if(isEdit){docs=docs.map(function(x){return x.id===d.document.id?d.document:x;});}
+        else{docs.unshift(d.document);}
+        closeEditor(); render(); toast(isEdit?"Document updated ✓":"Document saved ✓");
+      })
+      .catch(function(){btn.disabled=false;toast("Network error — not saved");});
+  };
+
+  // ---------- uploads ----------
+  el("dl-upload").onclick=function(){el("dl-files").click();};
+  el("dl-files").addEventListener("change",function(){
+    var files=Array.prototype.slice.call(this.files);
+    this.value="";
+    if(!files.length)return;
+    var remaining=files.length;
+    el("dl-upload").disabled=true;
+    files.forEach(function(f){
+      if(f.size>25*1024*1024){toast(f.name+" is over 25 MB — skipped");if(!--remaining)done();return;}
+      var fd=new FormData(); fd.append("file",f);
+      fetch("/api/document-file",{method:"POST",body:fd})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(!d.ok)throw new Error(d.error||"Upload failed");
+          return fetch("/api/documents",{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({title:d.file.name,file:d.file})}).then(function(r){return r.json();});
+        })
+        .then(function(d){
+          if(!d.ok)throw new Error(d.error||"Save failed");
+          docs.unshift(d.document); render(); toast(d.document.title+" uploaded ✓");
+        })
+        .catch(function(err){toast(err.message||"Upload failed");})
+        .finally(function(){if(!--remaining)done();});
+    });
+    function done(){el("dl-upload").disabled=false;}
+  });
+
+  // ---------- viewer ----------
+  function openViewer(doc){
+    closeEditor();
+    el("dl-view-title").textContent=doc.title;
+    var meta="by "+(doc.author||"—")+" · "+fmtDate(doc.created_at);
+    if(doc.updated_at&&doc.updated_at!==doc.created_at)meta+=" · edited "+fmtDate(doc.updated_at)+(doc.updated_by?" by "+doc.updated_by:"");
+    el("dl-view-meta").innerHTML=esc(meta).replace(esc(doc.author||"—"),'<span class="who">'+esc(doc.author||"—")+'</span>');
+    el("dl-view-body").innerHTML=doc.body_html||""; // server-sanitized on every write
+    el("dl-viewer").classList.add("open");
+    el("dl-view-edit").onclick=function(){openEditor(doc);};
+    el("dl-viewer").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function closeViewer(){el("dl-viewer").classList.remove("open");el("dl-view-body").innerHTML="";}
+  el("dl-view-close").onclick=closeViewer;
+
+  function fetchFull(id,then){
+    fetch("/api/documents?id="+encodeURIComponent(id))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.ok){toast(d.error||"Couldn't open document");return;}
+        then(d.document);
+      })
+      .catch(function(){toast("Network error");});
+  }
+
+  // ---------- library ----------
+  function visible(){
+    if(!filter)return docs;
+    return docs.filter(function(d){
+      return ((d.title||"")+" "+(d.author||"")+" "+(d.file_name||"")).toLowerCase().indexOf(filter)>-1;
+    });
+  }
+
+  function render(){
+    var rows=visible();
+    el("dl-count").textContent=rows.length+(rows.length===1?" document":" documents");
+    var feed=el("dl-feed"); feed.innerHTML="";
+
+    if(!rows.length){
+      feed.innerHTML='<div class="panel empty">'+
+        '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>'+
+        '<div>'+(docs.length?"No documents match this search.":"No documents yet — write one or upload a file above.")+'</div></div>';
+      return;
+    }
+
+    rows.forEach(function(d){
+      var isFile=d.kind==="file";
+      var card=document.createElement("article");
+      card.className="panel row"; card.dataset.id=d.id;
+      var sub=(isFile?extension(d.file_name).toUpperCase()+(d.file_size?" · "+formatSize(d.file_size):"")+" · ":"")+
+              'by <span class="who">'+esc(d.author||"—")+"</span> · "+esc(fmtDate(d.updated_at||d.created_at));
+      card.innerHTML=
+        '<span class="doc-icon '+(isFile?"kind-file":"kind-doc")+'">'+(isFile?fileIcon():docIcon())+'</span>'+
+        '<span class="doc-copy"><strong>'+esc(d.title)+'</strong><small>'+sub+'</small></span>'+
+        '<span class="kind-pill '+(isFile?"file":"doc")+'">'+(isFile?"File":"Doc")+'</span>'+
+        '<span class="acts">'+
+          (isFile
+            ? '<button class="act dl" type="button">Download</button><button class="act rn" type="button">Rename</button>'
+            : '<button class="act vw" type="button">View</button><button class="act ed" type="button">Edit</button>')+
+          '<button class="act del" type="button">Delete</button>'+
+        '</span>';
+
+      function openPrimary(){
+        if(isFile){location.href=fileUrl(d.file_key);}
+        else{fetchFull(d.id,openViewer);}
+      }
+      card.addEventListener("click",function(e){
+        if(e.target.closest(".act"))return;
+        openPrimary();
+      });
+      if(isFile){
+        card.querySelector(".dl").onclick=openPrimary;
+        card.querySelector(".rn").onclick=function(){
+          var name=prompt("Rename document:",d.title);
+          if(name===null)return;
+          name=name.trim();
+          if(!name){toast("The title cannot be empty");return;}
+          fetch("/api/documents",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.id,title:name})})
+            .then(function(r){return r.json();})
+            .then(function(x){
+              if(!x.ok){toast(x.error||"Rename failed");return;}
+              docs=docs.map(function(y){return y.id===x.document.id?x.document:y;});
+              render(); toast("Renamed ✓");
+            })
+            .catch(function(){toast("Network error");});
+        };
+      }else{
+        card.querySelector(".vw").onclick=openPrimary;
+        card.querySelector(".ed").onclick=function(){fetchFull(d.id,openEditor);};
+      }
+      card.querySelector(".del").onclick=function(){
+        if(!confirm('Delete "'+d.title+'"'+(isFile?" and its file":"")+" permanently?"))return;
+        fetch("/api/documents",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.id})})
+          .then(function(r){return r.json();})
+          .then(function(x){
+            if(x.ok){docs=docs.filter(function(y){return y.id!=d.id;});render();toast("Document deleted");}
+            else toast(x.error||"Delete failed");
+          })
+          .catch(function(){toast("Network error");});
+      };
+      feed.appendChild(card);
+    });
+  }
+
+  el("dl-search").addEventListener("input",function(){filter=this.value.trim().toLowerCase();render();});
+
+  load();
+})();
+</script>
+</body>
+</html>
