@@ -4,7 +4,7 @@
  * Founder enters a customer's BILECO bill range; the tool sizes a system, builds an
  * itemised bill of materials, prices it, and renders a printable quote sheet.
  *
- * Three things this file deliberately refuses to do, because the Founder Operating
+ * Four things this file deliberately refuses to do, because the Founder Operating
  * System (CLAUDE.md) makes them non-negotiable:
  *
  *  1. It will not let a LIWANAG (on-grid) quote leave without the brownout truth on
@@ -15,6 +15,11 @@
  *  3. It will not present an unquoted supplier price as a confirmed one. Every catalog
  *     line carries a `quoted` flag; anything false is badged on screen AND on paper,
  *     and the sheet is stamped INDICATIVE until the numbers come back from suppliers.
+ *  4. It will not SEND a CUSTOM (above-ladder) quote whose price nobody set: with no
+ *     explicit contract price the sheet falls back to its own total, which is cost-plus
+ *     (§3). The corridor helper (benchmark ₱/kW × size × (1 − undercut)) computes the
+ *     compliant price; margin is then checked against the founders' floor, and TRUE NET
+ *     (margin − referral − warranty reserve − tax set-aside) is shown beside it.
  *
  * On pricing: the price ladder comes first and the sheet second. Cost-plus is banned
  * (§3) — materials pass through at supplier cost, our margin sits in the fabrication +
@@ -380,6 +385,23 @@
     var margin = customerPrice - ourCost;
     var marginPct = customerPrice > 0 ? (margin / customerPrice) * 100 : 0;
 
+    /* ----- corridor helper, margin floor and true net (founder-only — never printed)
+     * Above the ladder the price is an input FROM the market: benchmark ₱/kW × size ×
+     * (1 − undercut), rounded to a clean hundred (§3 — corridor first, cost-plus banned).
+     * True net is what actually lands after the deductions the gross margin ignores. */
+    var bench = num("qb-bench", 70000);
+    var undercutPct = num("qb-undercut", 5);
+    var corridorPrice = bench > 0 && kwp > 0
+      ? Math.round((kwp * bench * (1 - undercutPct / 100)) / 100) * 100
+      : 0;
+
+    var floorPct = num("qb-floor", 20);
+    var referral = num("qb-referral", 1000) * kwp;           // ₱/kW flat, meeting #7
+    var warrantyReserve = customerPrice * num("qb-warranty", 2) / 100;
+    var taxAside = customerPrice * num("qb-taxaside", 0) / 100;
+    var trueNet = margin - referral - warrantyReserve - taxAside;
+    var belowFloor = margin > 0 && marginPct < floorPct;
+
     /* ----- generation and savings (all EST) */
     var generation = kwp * yieldPerKwp * 30;
     // On-grid without storage only banks what is consumed during daylight; export is
@@ -398,6 +420,8 @@
       groups: groups, materials: materials, vat: vat, vatOn: vatOn, fee: fee, feeAuto: feeAuto,
       total: total, pack: pack, customerPrice: customerPrice, priceIsOverride: priceOverride >= 0,
       deliveryCost: deliveryCost, ourCost: ourCost, margin: margin, marginPct: marginPct,
+      corridorPrice: corridorPrice, floorPct: floorPct, belowFloor: belowFloor,
+      referral: referral, warrantyReserve: warrantyReserve, taxAside: taxAside, trueNet: trueNet,
       generation: generation, offsetKwh: offsetKwh, savedPerMonth: savedPerMonth,
       paybackYears: paybackYears, unquoted: unquoted
     };
@@ -406,7 +430,9 @@
   /* ------------------------------------------------------------------ rendering */
 
   function renderReadout(m) {
-    var marginTone = m.margin <= 0 ? "bad" : (m.marginPct < 12 ? "" : "good");
+    // Green means "clears the founders' floor", not merely "positive" — a margin that
+    // is positive but under the floor renders neutral so it reads as a decision to make.
+    var marginTone = m.margin <= 0 ? "bad" : (m.belowFloor ? "" : "good");
     el("qb-readout").innerHTML =
       '<div><span>System size</span><strong>' + m.kwp.toFixed(2) + ' kWp</strong></div>' +
       '<div><span>Target / rounding</span><strong>' + m.targetKwp.toFixed(2) + ' kWp · ' +
@@ -420,7 +446,8 @@
       '<div><span>Quote total</span><strong>' + peso(m.total) + '</strong></div>' +
       '<div><span>Customer price</span><strong>' + peso(m.customerPrice) + '</strong></div>' +
       '<div><span>Our cost</span><strong>' + peso(m.ourCost) + '</strong></div>' +
-      '<div class="' + marginTone + '"><span>Gross margin</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(0) + '%</strong></div>';
+      '<div class="' + marginTone + '"><span>Gross margin · floor ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(0) + '%</strong></div>' +
+      '<div class="' + (m.trueNet <= 0 ? "bad" : "") + '"><span>True net · after referral + reserves</span><strong>' + peso(m.trueNet) + '</strong></div>';
   }
 
   /** The advisory rail. Each flag names the rule it enforces so nobody has to guess. */
@@ -434,6 +461,11 @@
     }
 
     if (m.pack.tier === "CUSTOM") {
+      if (!m.priceIsOverride) {
+        out.push('<div class="qb-flag stop"><strong>No contract price set — the sheet is showing its own total, which is cost-plus (§3).</strong>' +
+          'Outside the ladder the price comes from the corridor. The helper in Money suggests <b>' + peso(m.corridorPrice) +
+          '</b> at the current benchmark and undercut — click “Use as contract price”, or type a price justified from what this customer already pays.</div>');
+      }
       out.push('<div class="qb-flag"><strong>Outside the ₱80–100k corridor (§3).</strong>' + esc(m.pack.note) +
         ' Cost-plus pricing off this sheet is banned — set the price from what this household already pays for BILECO, a genset and a UPS, then check the margin here.</div>');
     } else {
@@ -457,6 +489,9 @@
     if (m.margin <= 0) {
       out.push('<div class="qb-flag stop"><strong>This quote loses money.</strong>Cost ' + peso(m.ourCost) +
         ' against a price of ' + peso(m.customerPrice) + '. Re-spec before sending — the battery is almost always what broke it.</div>');
+    } else if (m.belowFloor) {
+      out.push('<div class="qb-flag"><strong>Margin ' + m.marginPct.toFixed(1) + '% is under the ' + m.floorPct.toFixed(0) + '% floor.</strong>' +
+        'Raise the price inside the corridor, trim cost, or accept it knowingly. The floor is a placeholder until the founders log a house default in <span class="mono">ops/status.md</span>.</div>');
     } else if (m.batteryKwh > 3 && m.pack.tier === "FLAGSHIP") {
       out.push('<div class="qb-flag"><strong>Battery above the flagship limit.</strong>SC-06 holds the base package at 2.5–3 kWh. ' +
         'A bigger battery is an upsell line, not a flagship inclusion.</div>');
@@ -665,11 +700,27 @@
           ". Drop the battery tier or move up the ladder. Do not send it and hope."
       };
     }
+    if (m.pack.tier === "CUSTOM" && !m.priceIsOverride) {
+      return {
+        state: "blocked",
+        action: "Set the contract price from the corridor — suggested " + peso(m.corridorPrice) + ".",
+        why: "This build is outside the ladder and no price has been set, so the sheet is showing its own total — " +
+          "cost-plus, which is banned (§3). Use the corridor helper in Money, then sanity-check the margin against the floor."
+      };
+    }
     if (m.spec.battery && m.batteryKwh === 0) {
       return {
         state: "blocked",
         action: "Add a battery or switch this to LIWANAG.",
         why: m.spec.label + " is sold on backup and this configuration has no storage. Sending it as-is is the value gap (§1.6)."
+      };
+    }
+    if (m.belowFloor) {
+      return {
+        state: "caution",
+        action: "Margin " + m.marginPct.toFixed(1) + "% is under the " + m.floorPct.toFixed(0) + "% floor — decide before sending.",
+        why: "Raise the price inside the corridor, trim cost, or accept it and say why in Friday's T5T. " +
+          "Send is not blocked: the floor is a placeholder until the founders log a house default."
       };
     }
     if (m.unquoted > 0) {
@@ -745,6 +796,8 @@
     if (priceField && priceField.value === "") {
       priceField.placeholder = current.pack.price != null ? String(current.pack.price) : String(Math.round(current.total));
     }
+    var corridorOut = el("qb-corridor-price");
+    if (corridorOut) corridorOut.textContent = peso(current.corridorPrice);
   }
 
   function syncInverterOptions() {
@@ -788,6 +841,14 @@
   root.addEventListener("change", refresh);
 
   el("qb-print").addEventListener("click", function () { window.print(); });
+
+  // One click moves the corridor suggestion into the contract-price field. The price
+  // stays an editable input after that — the helper suggests, the founder decides.
+  el("qb-corridor-use").addEventListener("click", function () {
+    var m = current || compute();
+    el("qb-price").value = m.corridorPrice;
+    refresh();
+  });
 
   el("qb-new-no").addEventListener("click", function () {
     el("qb-quote-no").value = nextQuoteNo();
@@ -1243,14 +1304,18 @@
     el("qbc-price").textContent = "₱" + Math.round(m.customerPrice).toLocaleString("en-PH");
 
     var flag = el("qbc-flag");
+    var warnings = [];
     if (payload.quote.indicative) {
-      flag.innerHTML = "<b>Stamped INDICATIVE.</b> " + m.unquoted + " line item" +
+      warnings.push("<b>Stamped INDICATIVE.</b> " + m.unquoted + " line item" +
         (m.unquoted === 1 ? " is" : "s are") + " still on a market estimate, so the sheet says so " +
-        "and no deposit can be taken until the numbers are firm.";
-      flag.hidden = false;
-    } else {
-      flag.hidden = true;
+        "and no deposit can be taken until the numbers are firm.");
     }
+    if (m.belowFloor) {
+      warnings.push("<b>Below the margin floor.</b> Gross margin " + m.marginPct.toFixed(1) +
+        "% is under the " + m.floorPct.toFixed(0) + "% floor. Sending anyway is a decision — own it in Friday's T5T.");
+    }
+    flag.innerHTML = warnings.join("<br><br>");
+    flag.hidden = warnings.length === 0;
 
     // Browsers without <dialog> fall back to the native prompt rather than sending
     // unconfirmed — a missing dialog must never become a silent send.
@@ -1288,6 +1353,10 @@
     if (!payload.customer.email) return say("bad", "Add the customer's email address — that is where the quote goes.");
     if (!payload.customer.phone) return say("bad", "Add a phone number — it is how an existing contact is matched.");
     if (!payload.quote.preparedBy) return say("bad", "Put your name in “Prepared by” — a quote goes out attributable to a person.");
+    if (m.pack.tier === "CUSTOM" && !m.priceIsOverride) {
+      return say("bad", "Set the contract price first — this build is outside the ladder, and with no price set the sheet " +
+        "total (cost-plus, banned §3) would be quoted. The corridor helper suggests " + peso(m.corridorPrice) + ".");
+    }
 
     // Sending is not undoable from the customer's side, so it is confirmed once.
     confirmSend(payload, m).then(function (ok) { if (ok) send(); });

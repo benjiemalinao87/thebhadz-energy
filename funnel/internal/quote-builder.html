@@ -122,12 +122,42 @@
             <label>Fabrication, delivery &amp; installation fee (₱)<input id="qb-fee" type="number" min="0" step="500" placeholder="Auto"></label>
             <label>Our delivery cost — crew, transport, permits (₱)<input id="qb-delivery-cost" type="number" min="0" step="500" placeholder="Auto"></label>
             <label>Contract price to the customer (₱)<input id="qb-price" type="number" min="0" step="500" placeholder="From the ladder"></label>
+
+            <div class="qb-corridor">
+              <div class="qb-corridor-head">Corridor price helper</div>
+              <div class="qb-fields two" style="display:grid">
+                <label>Benchmark (₱ per kW)<input id="qb-bench" type="number" min="0" step="500" value="70000"></label>
+                <label>Undercut (%)<input id="qb-undercut" type="number" min="0" max="50" step="0.5" value="5"></label>
+              </div>
+              <div class="qb-corridor-out">
+                <span>Suggested price<strong id="qb-corridor-price">₱—</strong></span>
+                <button type="button" class="secondary" id="qb-corridor-use">Use as contract price</button>
+              </div>
+              <p class="qb-note">Benchmark ≈ what an established installer charges per kW (Lacosta ≈₱70,000/kW, seen 2026-07 —
+                reverify before sending). Above the ladder this is how the price is set: from the market, never from the sheet.</p>
+            </div>
+
+            <details class="qb-truenet">
+              <summary>Margin floor &amp; true-net assumptions</summary>
+              <div class="qb-fields two" style="display:grid;margin-top:10px">
+                <label>Margin floor (%)<input id="qb-floor" type="number" min="0" max="90" step="1" value="20"></label>
+                <label>Referral fee (₱ per kW)<input id="qb-referral" type="number" min="0" step="100" value="1000"></label>
+                <label>Warranty reserve (%)<input id="qb-warranty" type="number" min="0" max="20" step="0.5" value="2"></label>
+                <label>Tax set-aside (%)<input id="qb-taxaside" type="number" min="0" max="20" step="0.5" value="0"></label>
+              </div>
+              <p class="qb-note">True net = gross margin − referral (₱1,000/kW, meeting #7) − warranty reserve − tax set-aside.
+                Leave tax at 0 while the 12% VAT box above is ticked; if MACC registers non-VAT, untick VAT and set ~3% here —
+                confirm with the accountant. The 20% floor is a placeholder until the founders log a house default in
+                <span class="mono">ops/status.md</span>.</p>
+            </details>
+
             <div class="qb-actions">
               <button type="button" class="secondary" id="qb-reset-fee">Reset to auto</button>
             </div>
           </div>
           <p class="qb-note">Materials pass through at supplier cost; the margin sits in the fee line. The contract price
-            defaults to the SC-06 ladder, not to the sheet total — pricing runs corridor-first, never cost-plus.</p>
+            defaults to the SC-06 ladder — and outside the ladder it comes from the corridor helper above, never from the
+            sheet total. Cost-plus is banned (§3).</p>
         </div>
 
         <div class="qb-box">
