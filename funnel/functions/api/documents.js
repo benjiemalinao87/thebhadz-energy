@@ -5,9 +5,12 @@
  *   GET                                    → { ok, documents: [...] }  (no body_html, newest first)
  *   GET    ?id=N                           → { ok, document }          (full row incl. body_html)
  *   POST   { title, body_html }            → create a rich-text doc (kind='doc')
- *   POST   { title?, file: {key,name,type,size} } → register an uploaded file (kind='file')
+ *   POST   { title?, file: {key,name,type,size,thumbKey?} } → register an uploaded file (kind='file')
  *   PATCH  { id, title?, body_html? }      → update (body_html only for kind='doc')
- *   DELETE { id }                          → remove a document + its R2 file if any
+ *   DELETE { id }                          → remove a document + its R2 file/thumbnail if any
+ *
+ * thumb_key points at the small preview /api/document-file stored next to an image
+ * upload (docs/….thumb.jpg) — the library list renders it instead of the generic icon.
  *
  * body_html is sanitized server-side with HTMLRewriter against a small allowlist
  * (headings, paragraphs, bold/italic/underline, lists, links) — whatever the editor
@@ -102,6 +105,9 @@ async function migrate(env) {
   try {
     await env.DB.prepare(`ALTER TABLE documents ADD COLUMN category TEXT NOT NULL DEFAULT 'general'`).run();
   } catch { /* already present */ }
+  try {
+    await env.DB.prepare(`ALTER TABLE documents ADD COLUMN thumb_key TEXT`).run();
+  } catch { /* already present */ }
 }
 
 /** Allowlist sanitizer. Runs on every write, so stored HTML is safe to render as-is. */
@@ -146,11 +152,12 @@ function cleanFile(file) {
     name: String(file.name || "document").replace(/[\r\n]/g, "").slice(0, 200) || "document",
     type: String(file.type || "application/octet-stream").slice(0, 160),
     size: Math.max(0, Math.min(Number(file.size) || 0, MAX_FILE_BYTES)),
+    thumbKey: validFileKey(file.thumbKey) ? file.thumbKey : null,
   };
 }
 
 const LIST_COLUMNS =
-  "id, kind, title, file_key, file_name, file_type, file_size, category, author, updated_by, created_at, updated_at";
+  "id, kind, title, file_key, file_name, file_type, file_size, thumb_key, category, author, updated_by, created_at, updated_at";
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -196,14 +203,14 @@ export async function onRequest(context) {
       if (!file) return json({ ok: false, error: "Invalid file metadata — upload via /api/document-file first." }, 422);
       const title = String(b.title || file.name).slice(0, MAX_TITLE).trim() || file.name;
       const r = await env.DB.prepare(
-        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, category, author, updated_by, created_at, updated_at)
-         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(title, file.key, file.name, file.type, file.size, category, author, author, now, now).run();
+        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, thumb_key, category, author, updated_by, created_at, updated_at)
+         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(title, file.key, file.name, file.type, file.size, file.thumbKey, category, author, author, now, now).run();
       return json({
         ok: true,
         document: {
           id: r.meta.last_row_id, kind: "file", title, category,
-          file_key: file.key, file_name: file.name, file_type: file.type, file_size: file.size,
+          file_key: file.key, file_name: file.name, file_type: file.type, file_size: file.size, thumb_key: file.thumbKey,
           author, updated_by: author, created_at: now, updated_at: now,
         },
       });
@@ -223,7 +230,7 @@ export async function onRequest(context) {
       ok: true,
       document: {
         id: r.meta.last_row_id, kind: "doc", title, body_html: bodyHtml, category,
-        file_key: null, file_name: null, file_type: null, file_size: 0,
+        file_key: null, file_name: null, file_type: null, file_size: 0, thumb_key: null,
         author, updated_by: author, created_at: now, updated_at: now,
       },
     });
@@ -271,14 +278,16 @@ export async function onRequest(context) {
     const id = parseInt(b.id, 10);
     if (!Number.isInteger(id)) return json({ ok: false, error: "A valid id is required." }, 422);
 
-    const row = await env.DB.prepare(`SELECT file_key FROM documents WHERE id = ?`).bind(id).first();
+    const row = await env.DB.prepare(`SELECT file_key, thumb_key FROM documents WHERE id = ?`).bind(id).first();
     if (!row) return json({ ok: false, error: "Document not found." }, 404);
 
     await env.DB.prepare(`DELETE FROM documents WHERE id = ?`).bind(id).run();
 
-    if (env.NOTES_R2 && validFileKey(row.file_key)) {
-      try { await env.NOTES_R2.delete(row.file_key); }
-      catch { /* best effort — the row itself is already gone */ }
+    for (const key of [row.file_key, row.thumb_key]) {
+      if (env.NOTES_R2 && validFileKey(key)) {
+        try { await env.NOTES_R2.delete(key); }
+        catch { /* best effort — the row itself is already gone */ }
+      }
     }
     return json({ ok: true });
   }

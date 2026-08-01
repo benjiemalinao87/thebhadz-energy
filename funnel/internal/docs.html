@@ -143,6 +143,8 @@
   .row .doc-icon{width:38px;height:44px;flex:0 0 38px;display:grid;place-items:center;border:1px solid var(--docs-line);border-radius:8px;}
   .row .doc-icon.kind-doc{color:var(--docs-blue);background:rgba(96,165,250,0.10);}
   .row .doc-icon.kind-file{color:var(--docs-file-accent);background:rgba(245,158,11,0.10);}
+  .row .doc-icon.thumb{padding:0;overflow:hidden;background:var(--docs-surface-2);}
+  .row .doc-icon.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
   .row .doc-copy{min-width:0;flex:1;}
   .row .doc-copy strong{display:block;font-family:var(--display);font-size:14.5px;font-weight:650;color:var(--docs-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .row .doc-copy small{display:block;margin-top:3px;color:var(--docs-subtle);font-size:11px;letter-spacing:.04em;}
@@ -587,6 +589,35 @@
   };
 
   // ---------- uploads ----------
+  // Small library thumbnail (longest edge ≤256px, JPEG ~10–30 KB) rendered in the
+  // browser before upload, so the list never has to pull multi-MB originals just to
+  // show a preview. Resolves null when the browser can't decode the file (HEIC,
+  // corrupt bytes) — the row then falls back to the generic icon, never an error.
+  function makeThumb(file){
+    return new Promise(function(resolve){
+      if(String(file.type||"").indexOf("image/")!==0){resolve(null);return;}
+      var url=URL.createObjectURL(file);
+      var img=new Image();
+      function fail(){URL.revokeObjectURL(url);resolve(null);}
+      img.onload=function(){
+        try{
+          var MAX=256,w=img.naturalWidth,h=img.naturalHeight;
+          if(!w||!h){fail();return;}
+          var scale=Math.min(1,MAX/Math.max(w,h));
+          var c=document.createElement("canvas");
+          c.width=Math.max(1,Math.round(w*scale));
+          c.height=Math.max(1,Math.round(h*scale));
+          var ctx=c.getContext("2d");
+          ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height); // JPEG has no alpha — flatten transparency on white
+          ctx.drawImage(img,0,0,c.width,c.height);
+          c.toBlob(function(b){URL.revokeObjectURL(url);resolve(b||null);},"image/jpeg",0.82);
+        }catch(e){fail();}
+      };
+      img.onerror=fail;
+      img.src=url;
+    });
+  }
+
   el("dl-upload").onclick=function(){el("dl-files").click();};
   el("dl-files").addEventListener("change",function(){
     var files=Array.prototype.slice.call(this.files);
@@ -596,8 +627,12 @@
     el("dl-upload").disabled=true;
     files.forEach(function(f){
       if(f.size>25*1024*1024){toast(f.name+" is over 25 MB — skipped");if(!--remaining)done();return;}
-      var fd=new FormData(); fd.append("file",f);
-      fetch("/api/document-file",{method:"POST",body:fd})
+      makeThumb(f)
+        .then(function(thumb){
+          var fd=new FormData(); fd.append("file",f);
+          if(thumb)fd.append("thumb",thumb,"thumb.jpg");
+          return fetch("/api/document-file",{method:"POST",body:fd});
+        })
         .then(function(r){return r.json();})
         .then(function(d){
           if(!d.ok)throw new Error(d.error||"Upload failed");
@@ -717,8 +752,16 @@
       var image=isImage(d);
       var sub=(isFile?extension(d.file_name).toUpperCase()+(d.file_size?" · "+formatSize(d.file_size):"")+" · ":"")+
               'by <span class="who">'+esc(d.author||"—")+"</span> · "+esc(fmtDate(d.updated_at||d.created_at));
+      // Images show a real thumbnail: the small preview stored at upload when there is
+      // one, else the original (lazy-loaded, so only rows scrolled into view fetch —
+      // covers files uploaded before thumbnails existed).
+      var thumbSrc=image?fileUrl(d.thumb_key||d.file_key):null;
       card.innerHTML=
-        '<span class="doc-icon '+(isFile?"kind-file":"kind-doc")+'">'+(isFile?fileIcon():docIcon())+'</span>'+
+        '<span class="doc-icon '+(isFile?"kind-file":"kind-doc")+(thumbSrc?" thumb":"")+'">'+
+          (thumbSrc
+            ?'<img src="'+esc(thumbSrc)+'" alt="" loading="lazy" decoding="async">'
+            :(isFile?fileIcon():docIcon()))+
+        '</span>'+
         '<span class="doc-copy"><strong>'+esc(d.title)+'</strong><small>'+sub+'</small></span>'+
         '<span class="cat-pill" style="--chip-color:'+esc(cat.color)+'"><span class="swatch" aria-hidden="true"></span>'+esc(cat.label)+'</span>'+
         '<span class="kind-pill '+(isFile?"file":"doc")+'">'+(isFile?"File":"Doc")+'</span>'+
@@ -730,6 +773,16 @@
             : '<button class="act vw" type="button">View</button><button class="act ed" type="button">Edit</button>')+
           '<button class="act del" type="button">Delete</button>'+
         '</span>';
+
+      // A thumbnail the browser can't render (HEIC original, purged object) swaps
+      // back to the generic file icon instead of showing a broken image.
+      if(thumbSrc){
+        card.querySelector(".doc-icon img").onerror=function(){
+          var slot=card.querySelector(".doc-icon");
+          slot.classList.remove("thumb");
+          slot.innerHTML=fileIcon();
+        };
+      }
 
       // Clicking the row previews an image in the modal and opens a doc in the reader.
       // A non-image file is the only case that leaves the page, and only to download.

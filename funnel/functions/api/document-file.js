@@ -3,8 +3,13 @@
  * (/internal/docs.html). Same shape as /api/note-image, with its own docs/ prefix
  * and a larger cap: pricing spreadsheets and slide decks routinely clear 8 MB.
  *
- *   POST multipart {file}   → { ok, file: {key,name,type,size} }  (then register via /api/documents)
- *   GET  ?key=docs/…        → streams the file (images inline, everything else as a download)
+ *   POST multipart {file, thumb?} → { ok, file: {key,name,type,size,thumbKey} }  (then register via /api/documents)
+ *   GET  ?key=docs/…              → streams the file (images inline, everything else as a download)
+ *
+ * `thumb` is an optional small preview image (≤256 KB, jpeg/webp/png) the client renders
+ * from an image upload; it lands next to the original as `<key>.thumb.<ext>` and its key
+ * comes back as thumbKey. Invalid or oversized thumbs are ignored, never fatal — a library
+ * row without a thumbnail just falls back to the generic icon client-side.
  *
  * The bucket is private — bytes only move through this endpoint, behind the same
  * founder session as every other /internal tool.
@@ -12,6 +17,8 @@
 import { currentUser } from "../_auth.js";
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_THUMB_BYTES = 256 * 1024; // client emits ~10–30 KB; anything bigger is not a thumbnail
+const THUMB_TYPES = { "image/jpeg": "jpg", "image/webp": "webp", "image/png": "png" };
 const TYPES = {
   "image/png": { ext: "png", kind: "image" },
   "image/jpeg": { ext: "jpg", kind: "image" },
@@ -100,7 +107,7 @@ export async function onRequest(context) {
   // ---- Upload ----
   if (request.method === "POST") {
     const declaredSize = Number(request.headers.get("Content-Length") || 0);
-    if (declaredSize > MAX_BYTES + 256 * 1024) {
+    if (declaredSize > MAX_BYTES + MAX_THUMB_BYTES + 256 * 1024) {
       return json({ ok: false, error: "File too large (max 25 MB)." }, 413);
     }
     let form;
@@ -123,9 +130,26 @@ export async function onRequest(context) {
       httpMetadata: { contentType: file.type || "application/octet-stream" },
       customMetadata: { originalName, kind: classification.kind },
     });
+
+    // Optional client-rendered thumbnail — images only, best effort by design.
+    let thumbKey = null;
+    const thumb = form.get("thumb");
+    if (classification.kind === "image" && thumb && typeof thumb !== "string") {
+      const ext = THUMB_TYPES[thumb.type];
+      if (ext && thumb.size > 0 && thumb.size <= MAX_THUMB_BYTES) {
+        thumbKey = `${key}.thumb.${ext}`;
+        try {
+          await env.NOTES_R2.put(thumbKey, thumb.stream(), {
+            httpMetadata: { contentType: thumb.type },
+            customMetadata: { originalName: `thumb of ${originalName}`, kind: "image" },
+          });
+        } catch { thumbKey = null; /* the original upload already succeeded */ }
+      }
+    }
+
     return json({
       ok: true,
-      file: { key, name: originalName, type: file.type || "application/octet-stream", size: file.size, kind: classification.kind },
+      file: { key, name: originalName, type: file.type || "application/octet-stream", size: file.size, kind: classification.kind, thumbKey },
     });
   }
 
