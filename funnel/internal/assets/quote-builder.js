@@ -601,7 +601,7 @@
         '<div class="qs-brand">' +
           '<img class="qs-logo" src="/assets/img/macc-logo.png" alt="MACC Systems &amp; Engineering Inc.">' +
           'MACC Systems &amp; Engineering Inc.' +
-          '<small>Biliran Province, Philippines<br>Solar supply, fabrication and installation</small>' +
+          '<small>Talustusan, Naval, Biliran, Philippines<br>0955 723 5093 · official@macc-inc.com<br>Solar supply, fabrication and installation</small>' +
         '</div>' +
         '<div class="qs-meta">' +
           '<b>QUOTATION</b><br>No. ' + esc(quoteNo) + '<br>Date: ' + esc(date) + '<br>Valid until: ' + esc(addDays(date, validity)) +

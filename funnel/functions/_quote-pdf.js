@@ -71,14 +71,15 @@ export function renderQuotePdf(q) {
   // ---- letterhead ----------------------------------------------------------
   page.text("MACC", M, y + 20, { size: 22, bold: true });
   page.text("SYSTEMS & ENGINEERING INC.", M, y + 32, { size: 8, bold: true, gray: 0.25 });
-  page.text("Biliran Province, Philippines", M, y + 44, { size: 8, gray: MUTED });
-  page.text("Solar supply, fabrication and installation", M, y + 54, { size: 8, gray: MUTED });
+  page.text("Talustusan, Naval, Biliran, Philippines", M, y + 44, { size: 8, gray: MUTED });
+  page.text("0955 723 5093 · official@macc-inc.com", M, y + 54, { size: 8, gray: MUTED });
+  page.text("Solar supply, fabrication and installation", M, y + 64, { size: 8, gray: MUTED });
 
   page.text("QUOTATION", RIGHT, y + 12, { size: 11, bold: true, align: "right" });
   page.text("No. " + q.quoteNo, RIGHT, y + 26, { size: 8.5, align: "right" });
   page.text("Date: " + q.date, RIGHT, y + 37, { size: 8.5, align: "right" });
   page.text("Valid until: " + q.validUntil, RIGHT, y + 48, { size: 8.5, align: "right" });
-  y += 62;
+  y += 72;
   page.line(M, y, RIGHT, y, { lineWidth: 1.2 });
   y += 16;
 
