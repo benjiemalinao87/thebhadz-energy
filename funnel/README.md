@@ -302,6 +302,15 @@ bullet/numbered lists, H1–H5 headings) and **uploaded files** (images, PDF, Of
 TXT — ≤ 25 MB each). Create, view, edit, rename, search, delete; every founder sees the
 same library.
 
+- **Categories, not folders.** Every document is filed under one of seven categories —
+  General, Pricing & Quotes, SOPs & Install, Legal & Permits, Suppliers & BOM, Marketing,
+  Meetings — shown as a sticky filter rail with live counts. Filtering to a category and
+  then creating or uploading files them there automatically; a file can be re-filed with
+  **Move**, a doc by changing its category in the editor. Adding a category is a one-line
+  change in two lists (`CATEGORIES` in `functions/api/documents.js` and in `docs.html`) —
+  the column is plain TEXT so no migration is needed. Unknown values fall back to
+  `general`, so a stale client can never orphan a document.
+
 - **Rich-text docs** live in D1 (`documents` table, `schema.sql`). The HTML body is
   sanitized server-side (HTMLRewriter allowlist) on every write — scripts, event handlers,
   iframes and `javascript:` links never reach the database.
@@ -311,8 +320,16 @@ same library.
 - Endpoints: `/api/documents` (CRUD) + `/api/document-file` (upload/serve), both
   founder-gated and audit-logged by the API middleware; the section can be hidden
   per-account like any other tool.
+- **Images preview in a modal** on the page (Escape or a backdrop click closes it) rather
+  than opening in the tab, which would leave the Command Center and cost a full reload on
+  the way back. Non-image files download.
 - The `documents` table is created on demand by the endpoint, so a deploy that beats the
-  `schema.sql` apply degrades to an empty library, never an error.
+  `schema.sql` apply degrades to an empty library, never an error. That schema check is
+  **memoized per isolate** — running `CREATE TABLE IF NOT EXISTS` + `ALTER TABLE` on every
+  call cost two extra D1 round trips per request, which is what made the page feel slow
+  against the remote database. The page itself paints from a `sessionStorage` copy of the
+  last list (bodies are not in the list payload) and revalidates in the background, so
+  opening Documents is instant instead of sitting behind a full-screen spinner.
 
 ### Meeting recordings (D1 + R2-backed)
 

@@ -66,6 +66,10 @@ CREATE TABLE IF NOT EXISTS documents (
   file_name   TEXT,
   file_type   TEXT,
   file_size   INTEGER NOT NULL DEFAULT 0, -- bytes
+  -- Filing category, shown as filter chips: general | pricing | sops | legal |
+  -- suppliers | marketing | meetings (validated in functions/api/documents.js —
+  -- kept a plain TEXT here so adding a category is a one-list code change).
+  category    TEXT NOT NULL DEFAULT 'general',
   author      TEXT NOT NULL DEFAULT '',   -- founder name from the session, never the body
   updated_by  TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL,              -- ISO timestamp
@@ -73,6 +77,7 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 
 CREATE INDEX IF NOT EXISTS idx_documents_updated ON documents(updated_at);
+CREATE INDEX IF NOT EXISTS idx_documents_category ON documents(category);
 
 -- Internal project board tasks
 CREATE TABLE IF NOT EXISTS project_tasks (

@@ -20,6 +20,20 @@ const MAX_TITLE = 200;
 const MAX_BODY_HTML = 400 * 1024; // 400 KB of markup is a very long doc
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // must match /api/document-file
 
+/**
+ * Filing categories, in the order the chips appear. Adding one is a change here
+ * plus the matching CATEGORIES list in internal/docs.html — the column is plain
+ * TEXT precisely so a new category needs no migration. `general` is the default
+ * and the fallback for any value this list doesn't recognise.
+ */
+export const CATEGORIES = ["general", "pricing", "sops", "legal", "suppliers", "marketing", "meetings"];
+const DEFAULT_CATEGORY = "general";
+
+function cleanCategory(value) {
+  const key = String(value || "").trim().toLowerCase();
+  return CATEGORIES.indexOf(key) !== -1 ? key : DEFAULT_CATEGORY;
+}
+
 // Tags the editor can produce (plus harmless equivalents pasted content may carry).
 // Anything else is unwrapped; containers that hide payloads are dropped entirely.
 const ALLOWED_TAGS = new Set([
@@ -48,7 +62,23 @@ function requireFounder(context) {
 
 // Created on demand for the same reason as the auth tables (_auth.js): a deploy
 // that beats the schema.sql apply must degrade to "empty library", never a 500.
-async function ensureTable(env) {
+//
+// Memoized per isolate: CREATE TABLE IF NOT EXISTS + ALTER TABLE are two D1 round
+// trips, and paying them on every list/create/patch made the page feel slow for no
+// benefit — the schema cannot change under a running isolate. A failure is NOT
+// cached, so a transient error just retries on the next request.
+let schemaReady = null;
+function ensureTable(env) {
+  if (!schemaReady) {
+    schemaReady = migrate(env).catch((err) => {
+      schemaReady = null;
+      throw err;
+    });
+  }
+  return schemaReady;
+}
+
+async function migrate(env) {
   await env.DB.prepare(
     `CREATE TABLE IF NOT EXISTS documents (
        id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,12 +89,19 @@ async function ensureTable(env) {
        file_name   TEXT,
        file_type   TEXT,
        file_size   INTEGER NOT NULL DEFAULT 0,
+       category    TEXT NOT NULL DEFAULT 'general',
        author      TEXT NOT NULL DEFAULT '',
        updated_by  TEXT NOT NULL DEFAULT '',
        created_at  TEXT NOT NULL,
        updated_at  TEXT NOT NULL
      )`
   ).run();
+  // Tables created before categories existed need the column added. ALTER TABLE
+  // has no IF NOT EXISTS in SQLite, so a duplicate-column error is the success
+  // case on every run after the first.
+  try {
+    await env.DB.prepare(`ALTER TABLE documents ADD COLUMN category TEXT NOT NULL DEFAULT 'general'`).run();
+  } catch { /* already present */ }
 }
 
 /** Allowlist sanitizer. Runs on every write, so stored HTML is safe to render as-is. */
@@ -113,7 +150,7 @@ function cleanFile(file) {
 }
 
 const LIST_COLUMNS =
-  "id, kind, title, file_key, file_name, file_type, file_size, author, updated_by, created_at, updated_at";
+  "id, kind, title, file_key, file_name, file_type, file_size, category, author, updated_by, created_at, updated_at";
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -142,7 +179,7 @@ export async function onRequest(context) {
     const { results } = await env.DB.prepare(
       `SELECT ${LIST_COLUMNS} FROM documents ORDER BY datetime(updated_at) DESC`
     ).all();
-    return json({ ok: true, documents: results || [] });
+    return json({ ok: true, documents: results || [], categories: CATEGORIES });
   }
 
   // ---- Create ----
@@ -150,6 +187,7 @@ export async function onRequest(context) {
     let b;
     try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
     const author = String(founder.name || "").slice(0, 80).trim();
+    const category = cleanCategory(b.category);
     const now = new Date().toISOString();
 
     // Uploaded file → one library row pointing at the R2 object.
@@ -158,13 +196,13 @@ export async function onRequest(context) {
       if (!file) return json({ ok: false, error: "Invalid file metadata — upload via /api/document-file first." }, 422);
       const title = String(b.title || file.name).slice(0, MAX_TITLE).trim() || file.name;
       const r = await env.DB.prepare(
-        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, author, updated_by, created_at, updated_at)
-         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(title, file.key, file.name, file.type, file.size, author, author, now, now).run();
+        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, category, author, updated_by, created_at, updated_at)
+         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(title, file.key, file.name, file.type, file.size, category, author, author, now, now).run();
       return json({
         ok: true,
         document: {
-          id: r.meta.last_row_id, kind: "file", title,
+          id: r.meta.last_row_id, kind: "file", title, category,
           file_key: file.key, file_name: file.name, file_type: file.type, file_size: file.size,
           author, updated_by: author, created_at: now, updated_at: now,
         },
@@ -178,13 +216,13 @@ export async function onRequest(context) {
     if (rawBody.length > MAX_BODY_HTML) return json({ ok: false, error: "Document is too long." }, 413);
     const bodyHtml = await sanitizeHtml(rawBody);
     const r = await env.DB.prepare(
-      `INSERT INTO documents (kind, title, body_html, author, updated_by, created_at, updated_at)
-       VALUES ('doc', ?, ?, ?, ?, ?, ?)`
-    ).bind(title, bodyHtml, author, author, now, now).run();
+      `INSERT INTO documents (kind, title, body_html, category, author, updated_by, created_at, updated_at)
+       VALUES ('doc', ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(title, bodyHtml, category, author, author, now, now).run();
     return json({
       ok: true,
       document: {
-        id: r.meta.last_row_id, kind: "doc", title, body_html: bodyHtml,
+        id: r.meta.last_row_id, kind: "doc", title, body_html: bodyHtml, category,
         file_key: null, file_name: null, file_type: null, file_size: 0,
         author, updated_by: author, created_at: now, updated_at: now,
       },
@@ -213,7 +251,10 @@ export async function onRequest(context) {
       if (b.body_html.length > MAX_BODY_HTML) return json({ ok: false, error: "Document is too long." }, 413);
       sets.push("body_html = ?"); binds.push(await sanitizeHtml(b.body_html));
     }
-    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title or body_html)." }, 422);
+    if (b.category !== undefined) {
+      sets.push("category = ?"); binds.push(cleanCategory(b.category));
+    }
+    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title, body_html, or category)." }, 422);
 
     sets.push("updated_by = ?"); binds.push(String(founder.name || "").slice(0, 80).trim());
     sets.push("updated_at = ?"); binds.push(new Date().toISOString());

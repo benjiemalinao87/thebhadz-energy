@@ -61,7 +61,33 @@
   body{margin:0;min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;}
   a{color:inherit;text-decoration:none;}
 
-  .wrap{max-width:900px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+  /* Full-width workspace like Contacts / Finance / Install Ops: a sticky category
+     rail on the left, the library on the right. Inside the Command Center shell the
+     shell supplies the padding, so .wrap goes edge to edge (see the .cc-operation-view
+     rule below). Reading width is capped on the doc body only — a 1400px line of prose
+     is unreadable, a 1400px list of files is not. */
+  .wrap{max-width:1500px;margin:0 auto;padding:clamp(16px,3vw,32px);}
+  .cc-operation-view .ops-docs .wrap,
+  .ops-docs.ops-page .wrap{max-width:none;padding:0;}
+  .cc-operation-view .ops-docs .bar{display:none;}
+
+  .layout{display:grid;grid-template-columns:216px minmax(0,1fr);gap:26px;align-items:start;margin-top:24px;}
+  .rail{position:sticky;top:18px;display:flex;flex-direction:column;gap:6px;}
+  .rail .rail-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.26em;color:var(--docs-subtle);margin:0 0 6px 2px;}
+  .chip{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border:1px solid transparent;border-radius:9px;background:none;cursor:pointer;
+    font:650 12.5px/1.2 var(--display);color:var(--docs-muted);text-align:left;transition:background .12s,color .12s,border-color .12s;}
+  .chip:hover{background:var(--docs-hover);color:var(--docs-ink);}
+  .chip .swatch{width:9px;height:9px;flex:0 0 9px;border-radius:3px;background:var(--chip-color,var(--docs-subtle));}
+  .chip .n{margin-left:auto;font:600 11px var(--mono);color:var(--docs-subtle);font-variant-numeric:tabular-nums;}
+  .chip.on{background:var(--docs-surface);border-color:var(--docs-line-strong);color:var(--docs-ink);box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(13,48,55,.25));}
+  .chip.on .n{color:var(--docs-ink);}
+  @media (max-width:900px){
+    .layout{grid-template-columns:minmax(0,1fr);gap:16px;}
+    .rail{position:static;flex-direction:row;flex-wrap:wrap;gap:8px;}
+    .rail .rail-label{width:100%;margin-bottom:0;}
+    .chip{width:auto;border-color:var(--docs-line);border-radius:999px;}
+    .chip .n{margin-left:4px;}
+  }
 
   /* ---- top bar (standalone loads only — the SPA shell strips it) ---- */
   .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px dashed var(--docs-line-strong);}
@@ -95,12 +121,13 @@
   .actions .hint{font-size:10.5px;color:var(--docs-subtle);}
   .actions .sp{flex:1;}
 
-  input[type="text"]{
+  input[type="text"],select{
     background:var(--docs-field);border:1px solid var(--docs-line-strong);border-radius:10px;color:var(--docs-ink);
     font-size:13.5px;padding:10px 12px;width:100%;
   }
   input[type="text"]::placeholder{color:var(--docs-subtle);}
-  input[type="text"]:focus{outline:none;border-color:var(--docs-blue);}
+  input[type="text"]:focus,select:focus{outline:none;border-color:var(--docs-blue);}
+  select{cursor:pointer;}
 
   /* ---- library list ---- */
   .feed-head{display:flex;align-items:center;gap:14px;margin:30px 0 14px;}
@@ -127,6 +154,9 @@
   .kind-pill{font-size:9px;font-weight:700;letter-spacing:.14em;padding:2px 7px;border-radius:999px;text-transform:uppercase;}
   .kind-pill.doc{color:var(--docs-blue);border:1px solid var(--docs-blue);}
   .kind-pill.file{color:var(--docs-file-accent);border:1px solid var(--docs-file-accent);}
+  .cat-pill{display:inline-flex;align-items:center;gap:6px;font:650 10.5px var(--display);letter-spacing:.02em;
+    padding:3px 9px;border-radius:999px;border:1px solid var(--docs-line-strong);color:var(--docs-muted);white-space:nowrap;}
+  .cat-pill .swatch{width:7px;height:7px;border-radius:2px;background:var(--chip-color,var(--docs-subtle));}
 
   .empty{padding:48px 20px;text-align:center;color:var(--docs-subtle);font-size:13px;}
   .empty svg{opacity:0.4;margin-bottom:10px;}
@@ -151,9 +181,15 @@
   .edit-actions .cancel,.viewer .cancel{background:none;border:1px solid var(--docs-line-strong);color:var(--docs-ink);border-radius:10px;padding:10px 18px;cursor:pointer;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.16em;}
   .edit-actions .cancel:hover,.viewer .cancel:hover{border-color:var(--docs-subtle);}
 
+  /* ---- editor meta row (title + category side by side) ---- */
+  .meta-row{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px;}
+  @media (max-width:640px){.meta-row{grid-template-columns:minmax(0,1fr);}}
+
   /* ---- viewer + editor doc typography ---- */
   .viewer{margin-top:22px;padding:26px clamp(18px,4vw,40px) 34px;display:none;}
   .viewer.open{display:block;}
+  /* Prose gets a reading measure even though the page is full width. */
+  .viewer .doc-body,.viewer .vh{max-width:860px;}
   .viewer .vh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:18px;border-bottom:1px dashed var(--docs-line-strong);}
   .viewer .vh .meta{font-size:11.5px;color:var(--docs-subtle);}
   .viewer .vh .meta .who{color:var(--docs-blue);}
@@ -173,12 +209,33 @@
   .doc-body a{color:var(--docs-blue);text-decoration:underline;text-underline-offset:3px;}
   .doc-body blockquote,.editor blockquote{margin:.8em 0;padding:.2em 0 .2em 1em;border-left:2px solid var(--docs-line-strong);color:var(--docs-muted);}
 
-  /* ---- toast / loading ---- */
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:130;opacity:0;pointer-events:none;
+  /* ---- skeleton (first paint, no blocking spinner) ---- */
+  .row.skel{height:74px;cursor:default;border-style:dashed;opacity:.55;}
+  .row.skel:hover{border-color:var(--docs-line);}
+
+  /* ---- image preview modal ---- */
+  .modal{position:fixed;inset:0;z-index:140;display:none;align-items:center;justify-content:center;padding:clamp(14px,3vw,40px);
+    background:rgba(4,14,16,0.78);backdrop-filter:blur(3px);}
+  .modal.open{display:flex;}
+  .modal-card{position:relative;display:flex;flex-direction:column;max-width:min(1100px,100%);max-height:100%;
+    border:1px solid var(--docs-line-strong);border-radius:14px;background:var(--docs-surface);overflow:hidden;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.6);}
+  .modal-head{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--docs-line);}
+  .modal-head strong{font:650 14px var(--display);color:var(--docs-ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .modal-head small{color:var(--docs-subtle);font-size:11px;white-space:nowrap;}
+  .modal-head .sp{flex:1;}
+  .modal-head .act{background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--docs-muted);padding:6px 9px;border-radius:7px;}
+  .modal-head .act:hover{color:var(--docs-ink);background:var(--docs-hover);}
+  .modal-head .close{font-size:18px;line-height:1;padding:2px 9px 5px;}
+  .modal-body{min-height:0;overflow:auto;display:grid;place-items:center;background:var(--docs-surface-2);padding:10px;}
+  .modal-body img{max-width:100%;max-height:min(74vh,900px);height:auto;display:block;border-radius:8px;}
+
+  /* ---- toast ---- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:150;opacity:0;pointer-events:none;
     background:var(--docs-surface);border:1px solid var(--docs-line-strong);border-radius:999px;padding:10px 20px;font-size:12px;color:var(--docs-ink);
     box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(13,48,55,.25));transition:opacity .2s,transform .2s;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--docs-veil);z-index:70;color:var(--docs-muted);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;}
 
   @media (max-width:620px){
     .titles h1{font-size:1.2rem;}
@@ -231,8 +288,16 @@
   <!-- ---- editor ---- -->
   <section class="panel workspace" id="dl-editor-panel" aria-label="Document editor">
     <div class="kicker" id="dl-editor-kicker">New document</div>
-    <label class="ops-sr-only" for="dl-title">Document title</label>
-    <input type="text" id="dl-title" placeholder="Document title" maxlength="200">
+    <div class="meta-row">
+      <div>
+        <label class="ops-sr-only" for="dl-title">Document title</label>
+        <input type="text" id="dl-title" placeholder="Document title" maxlength="200">
+      </div>
+      <div>
+        <label class="ops-sr-only" for="dl-category">Category</label>
+        <select id="dl-category"></select>
+      </div>
+    </div>
     <div class="toolbar" role="toolbar" aria-label="Formatting">
       <button type="button" class="tb" data-block="p" title="Normal text">¶</button>
       <button type="button" class="tb" data-block="h1" title="Heading 1">H1</button>
@@ -272,22 +337,42 @@
     <div class="doc-body" id="dl-view-body"></div>
   </section>
 
-  <!-- ---- library ---- -->
-  <div class="feed-head">
-    <span class="tag">Library</span>
-    <span class="rule" aria-hidden="true"></span>
-    <span class="count" id="dl-count">—</span>
+  <!-- ---- library: category rail + list ---- -->
+  <div class="layout">
+    <nav class="rail" id="dl-rail" aria-label="Filter by category">
+      <p class="rail-label">Categories</p>
+    </nav>
+    <div>
+      <div class="feed-head">
+        <span class="tag" id="dl-scope">Library</span>
+        <span class="rule" aria-hidden="true"></span>
+        <span class="count" id="dl-count">—</span>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="dl-search" placeholder="Search documents…" aria-label="Search documents">
+      </div>
+      <div id="dl-feed"></div>
+    </div>
   </div>
-  <div class="search">
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <input type="text" id="dl-search" placeholder="Search documents…" aria-label="Search documents">
-  </div>
-  <div id="dl-feed"></div>
 
 </div>
 
+<!-- Image preview stays on the page: opening a JPEG in the tab would leave the
+     Command Center, and coming "back" costs a full reload. -->
+<div class="modal" id="dl-modal" role="dialog" aria-modal="true" aria-labelledby="dl-modal-title" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <strong id="dl-modal-title"></strong>
+      <small id="dl-modal-meta"></small>
+      <span class="sp"></span>
+      <a class="act" id="dl-modal-download" download>Download</a>
+      <button type="button" class="act close" id="dl-modal-close" aria-label="Close preview">×</button>
+    </div>
+    <div class="modal-body"><img id="dl-modal-img" alt=""></div>
+  </div>
+</div>
 <div class="toast" id="dl-toast" role="status"></div>
-<div class="loading" id="dl-loading">Loading documents…</div>
 
 <script>
 (function(){
@@ -315,25 +400,104 @@
   function docIcon(){return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>';}
   function fileIcon(){return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m15 15-3 3-3-3"/></svg>';}
 
-  var docs=[], filter="", editingId=null;
+  // Filing categories. Keep the keys in step with CATEGORIES in
+  // functions/api/documents.js — the server is the authority, this is the labelling.
+  var CATEGORIES=[
+    {key:"general",   label:"General",          color:"#8fa5a3"},
+    {key:"pricing",   label:"Pricing & Quotes", color:"#f5b51b"},
+    {key:"sops",      label:"SOPs & Install",   color:"#147a4b"},
+    {key:"legal",     label:"Legal & Permits",  color:"#b8452f"},
+    {key:"suppliers", label:"Suppliers & BOM",  color:"#235f8c"},
+    {key:"marketing", label:"Marketing",        color:"#8b5cf6"},
+    {key:"meetings",  label:"Meetings",         color:"#0f7f86"}
+  ];
+  function category(key){
+    for(var i=0;i<CATEGORIES.length;i++)if(CATEGORIES[i].key===key)return CATEGORIES[i];
+    return CATEGORIES[0];
+  }
+
+  var docs=[], filter="", activeCategory="", editingId=null;
 
   // ---------- load ----------
+  // Paint whatever this browser saw last, immediately, then revalidate over the
+  // network. The list carries no document bodies, so the cached copy is small and
+  // the page is interactive on the first frame instead of behind a modal spinner.
+  var CACHE_KEY="macc_docs_list_v1";
+  function readCache(){
+    try{
+      var raw=sessionStorage.getItem(CACHE_KEY);
+      var parsed=raw?JSON.parse(raw):null;
+      return Array.isArray(parsed)?parsed:null;
+    }catch(e){return null;}
+  }
+  function writeCache(list){
+    try{sessionStorage.setItem(CACHE_KEY,JSON.stringify(list));}catch(e){/* private mode / quota */}
+  }
+
   function load(){
+    var cached=readCache();
+    if(cached&&cached.length){
+      docs=cached; renderRail(); render();
+      el("dl-feed").setAttribute("aria-busy","true");
+    }else{
+      skeleton();
+    }
     fetch("/api/documents")
       .then(function(r){
         if(r.status===401){location.href="/login.html?next="+encodeURIComponent("/internal/docs.html");throw new Error("auth");}
         return r.json();
       })
       .then(function(d){
-        el("dl-loading").style.display="none";
-        if(!d.ok){toast(d.error||"Couldn't load documents");return;}
-        docs=d.documents||[]; render();
+        el("dl-feed").setAttribute("aria-busy","false");
+        if(!d.ok){toast(d.error||"Couldn't load documents");if(!docs.length)render();return;}
+        docs=d.documents||[]; writeCache(docs); renderRail(); render();
       })
-      .catch(function(e){ if(e.message!=="auth"){el("dl-loading").style.display="none";toast("Network error loading documents");} });
+      .catch(function(e){
+        el("dl-feed").setAttribute("aria-busy","false");
+        if(e.message!=="auth"){
+          toast("Network error loading documents");
+          if(!docs.length)render(); // fall through to the empty state rather than a stuck skeleton
+        }
+      });
+  }
+
+  /** Placeholder rows so the first paint has the shape of the list, not a spinner. */
+  function skeleton(){
+    var feed=el("dl-feed");
+    feed.setAttribute("aria-busy","true");
+    feed.innerHTML='<article class="panel row skel"></article>'.repeat(3);
+  }
+
+  // ---------- category rail ----------
+  function countIn(key){
+    var n=0;
+    for(var i=0;i<docs.length;i++)if((docs[i].category||"general")===key)n++;
+    return n;
+  }
+  function renderRail(){
+    var rail=el("dl-rail");
+    // Keep the label, replace the chips.
+    Array.prototype.forEach.call(rail.querySelectorAll(".chip"),function(c){c.remove();});
+    var entries=[{key:"",label:"All documents",color:"var(--docs-blue)",n:docs.length}].concat(
+      CATEGORIES.map(function(c){return {key:c.key,label:c.label,color:c.color,n:countIn(c.key)};})
+    );
+    entries.forEach(function(e){
+      var b=document.createElement("button");
+      b.type="button"; b.className="chip"+(activeCategory===e.key?" on":"");
+      b.setAttribute("aria-pressed",String(activeCategory===e.key));
+      b.style.setProperty("--chip-color",e.color);
+      b.innerHTML='<span class="swatch" aria-hidden="true"></span><span>'+esc(e.label)+'</span><span class="n">'+e.n+'</span>';
+      b.onclick=function(){activeCategory=e.key;renderRail();render();};
+      rail.appendChild(b);
+    });
   }
 
   // ---------- editor ----------
   var editor=el("dl-editor");
+  // Populate the category picker once.
+  el("dl-category").innerHTML=CATEGORIES.map(function(c){
+    return '<option value="'+esc(c.key)+'">'+esc(c.label)+'</option>';
+  }).join("");
   try{document.execCommand("defaultParagraphSeparator",false,"p");}catch(e){}
 
   function exec(cmd,value){
@@ -378,6 +542,9 @@
     editingId=doc?doc.id:null;
     el("dl-editor-kicker").textContent=doc?"Edit document":"New document";
     el("dl-title").value=doc?doc.title:"";
+    // A new doc lands in whichever category the rail is filtered to — the common case
+    // is "I'm looking at Pricing and want to add a pricing doc".
+    el("dl-category").value=doc?category(doc.category||"general").key:(activeCategory||"general");
     editor.innerHTML=doc?(doc.body_html||""):"";
     el("dl-editor-panel").classList.add("open");
     el("dl-actions").style.display="none";
@@ -395,6 +562,7 @@
 
   el("dl-save").onclick=function(){
     var title=el("dl-title").value.trim();
+    var cat=el("dl-category").value;
     var body=editor.innerHTML;
     if(!title){toast("Give the document a title");el("dl-title").focus();return;}
     if(!editor.textContent.trim()&&editor.querySelectorAll("li").length===0){toast("The document is empty");return;}
@@ -403,7 +571,9 @@
     fetch("/api/documents",{
       method:isEdit?"PATCH":"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(isEdit?{id:editingId,title:title,body_html:body}:{title:title,body_html:body})
+      body:JSON.stringify(isEdit
+        ?{id:editingId,title:title,body_html:body,category:cat}
+        :{title:title,body_html:body,category:cat})
     })
       .then(function(r){return r.json();})
       .then(function(d){
@@ -411,7 +581,7 @@
         if(!d.ok){toast(d.error||"Save failed");return;}
         if(isEdit){docs=docs.map(function(x){return x.id===d.document.id?d.document:x;});}
         else{docs.unshift(d.document);}
-        closeEditor(); render(); toast(isEdit?"Document updated ✓":"Document saved ✓");
+        closeEditor(); renderRail(); render(); toast(isEdit?"Document updated ✓":"Document saved ✓");
       })
       .catch(function(){btn.disabled=false;toast("Network error — not saved");});
   };
@@ -431,12 +601,14 @@
         .then(function(r){return r.json();})
         .then(function(d){
           if(!d.ok)throw new Error(d.error||"Upload failed");
+          // Files land in the category currently filtered to, so "filter to Pricing,
+          // drop three quotes in" files them correctly with no extra step.
           return fetch("/api/documents",{method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({title:d.file.name,file:d.file})}).then(function(r){return r.json();});
+            body:JSON.stringify({title:d.file.name,file:d.file,category:activeCategory||"general"})}).then(function(r){return r.json();});
         })
         .then(function(d){
           if(!d.ok)throw new Error(d.error||"Save failed");
-          docs.unshift(d.document); render(); toast(d.document.title+" uploaded ✓");
+          docs.unshift(d.document); renderRail(); render(); toast(d.document.title+" uploaded ✓");
         })
         .catch(function(err){toast(err.message||"Upload failed");})
         .finally(function(){if(!--remaining)done();});
@@ -444,11 +616,50 @@
     function done(){el("dl-upload").disabled=false;}
   });
 
+  // ---------- image preview modal ----------
+  var IMAGE_EXT=["png","jpg","jpeg","webp","gif","heic","avif"];
+  function isImage(doc){
+    if(!doc||doc.kind!=="file")return false;
+    if(String(doc.file_type||"").indexOf("image/")===0)return true;
+    return IMAGE_EXT.indexOf(extension(doc.file_name||doc.title))>-1;
+  }
+  var modalReturnFocus=null;
+  function openModal(doc){
+    var m=el("dl-modal");
+    el("dl-modal-title").textContent=doc.title;
+    el("dl-modal-meta").textContent=extension(doc.file_name||doc.title).toUpperCase()+
+      (doc.file_size?" · "+formatSize(doc.file_size):"");
+    el("dl-modal-img").src=fileUrl(doc.file_key);
+    el("dl-modal-img").alt=doc.title;
+    var dl=el("dl-modal-download");
+    dl.href=fileUrl(doc.file_key);
+    dl.setAttribute("download",doc.file_name||doc.title);
+    modalReturnFocus=document.activeElement;
+    m.hidden=false; m.classList.add("open");
+    el("dl-modal-close").focus();
+  }
+  function closeModal(){
+    var m=el("dl-modal");
+    if(!m.classList.contains("open"))return;
+    m.classList.remove("open"); m.hidden=true;
+    el("dl-modal-img").src="";
+    if(modalReturnFocus&&modalReturnFocus.focus)modalReturnFocus.focus();
+    modalReturnFocus=null;
+  }
+  el("dl-modal-close").onclick=closeModal;
+  el("dl-modal").addEventListener("click",function(e){
+    if(e.target===this)closeModal(); // click the backdrop, not the card
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape")closeModal();
+  });
+
   // ---------- viewer ----------
   function openViewer(doc){
     closeEditor();
     el("dl-view-title").textContent=doc.title;
-    var meta="by "+(doc.author||"—")+" · "+fmtDate(doc.created_at);
+    var cat=category(doc.category||"general");
+    var meta=cat.label+" · by "+(doc.author||"—")+" · "+fmtDate(doc.created_at);
     if(doc.updated_at&&doc.updated_at!==doc.created_at)meta+=" · edited "+fmtDate(doc.updated_at)+(doc.updated_by?" by "+doc.updated_by:"");
     el("dl-view-meta").innerHTML=esc(meta).replace(esc(doc.author||"—"),'<span class="who">'+esc(doc.author||"—")+'</span>');
     el("dl-view-body").innerHTML=doc.body_html||""; // server-sanitized on every write
@@ -471,21 +682,30 @@
 
   // ---------- library ----------
   function visible(){
-    if(!filter)return docs;
     return docs.filter(function(d){
-      return ((d.title||"")+" "+(d.author||"")+" "+(d.file_name||"")).toLowerCase().indexOf(filter)>-1;
+      if(activeCategory&&(d.category||"general")!==activeCategory)return false;
+      if(!filter)return true;
+      return ((d.title||"")+" "+(d.author||"")+" "+(d.file_name||"")+" "+category(d.category||"general").label)
+        .toLowerCase().indexOf(filter)>-1;
     });
   }
 
   function render(){
     var rows=visible();
+    writeCache(docs); // every mutation lands here, so the cache never goes stale
+    el("dl-scope").textContent=activeCategory?category(activeCategory).label:"Library";
     el("dl-count").textContent=rows.length+(rows.length===1?" document":" documents");
     var feed=el("dl-feed"); feed.innerHTML="";
 
     if(!rows.length){
+      var why=docs.length
+        ? (activeCategory&&!filter
+            ? "Nothing filed under "+category(activeCategory).label+" yet."
+            : "No documents match this search.")
+        : "No documents yet — write one or upload a file above.";
       feed.innerHTML='<div class="panel empty">'+
         '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>'+
-        '<div>'+(docs.length?"No documents match this search.":"No documents yet — write one or upload a file above.")+'</div></div>';
+        '<div>'+esc(why)+'</div></div>';
       return;
     }
 
@@ -493,42 +713,63 @@
       var isFile=d.kind==="file";
       var card=document.createElement("article");
       card.className="panel row"; card.dataset.id=d.id;
+      var cat=category(d.category||"general");
+      var image=isImage(d);
       var sub=(isFile?extension(d.file_name).toUpperCase()+(d.file_size?" · "+formatSize(d.file_size):"")+" · ":"")+
               'by <span class="who">'+esc(d.author||"—")+"</span> · "+esc(fmtDate(d.updated_at||d.created_at));
       card.innerHTML=
         '<span class="doc-icon '+(isFile?"kind-file":"kind-doc")+'">'+(isFile?fileIcon():docIcon())+'</span>'+
         '<span class="doc-copy"><strong>'+esc(d.title)+'</strong><small>'+sub+'</small></span>'+
+        '<span class="cat-pill" style="--chip-color:'+esc(cat.color)+'"><span class="swatch" aria-hidden="true"></span>'+esc(cat.label)+'</span>'+
         '<span class="kind-pill '+(isFile?"file":"doc")+'">'+(isFile?"File":"Doc")+'</span>'+
         '<span class="acts">'+
           (isFile
-            ? '<button class="act dl" type="button">Download</button><button class="act rn" type="button">Rename</button>'
+            ? (image?'<button class="act pv" type="button">Preview</button>':'')+
+              '<a class="act dl" href="'+esc(fileUrl(d.file_key))+'" download="'+esc(d.file_name||d.title)+'">Download</a>'+
+              '<button class="act rn" type="button">Rename</button><button class="act mv" type="button">Move</button>'
             : '<button class="act vw" type="button">View</button><button class="act ed" type="button">Edit</button>')+
           '<button class="act del" type="button">Delete</button>'+
         '</span>';
 
+      // Clicking the row previews an image in the modal and opens a doc in the reader.
+      // A non-image file is the only case that leaves the page, and only to download.
       function openPrimary(){
-        if(isFile){location.href=fileUrl(d.file_key);}
+        if(image){openModal(d);}
+        else if(isFile){location.href=fileUrl(d.file_key);}
         else{fetchFull(d.id,openViewer);}
       }
       card.addEventListener("click",function(e){
         if(e.target.closest(".act"))return;
         openPrimary();
       });
+      function patch(body,okMsg,failMsg){
+        fetch("/api/documents",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+          .then(function(r){return r.json();})
+          .then(function(x){
+            if(!x.ok){toast(x.error||failMsg);return;}
+            docs=docs.map(function(y){return y.id===x.document.id?x.document:y;});
+            renderRail(); render(); toast(okMsg);
+          })
+          .catch(function(){toast("Network error");});
+      }
+
       if(isFile){
-        card.querySelector(".dl").onclick=openPrimary;
+        if(image)card.querySelector(".pv").onclick=function(){openModal(d);};
         card.querySelector(".rn").onclick=function(){
           var name=prompt("Rename document:",d.title);
           if(name===null)return;
           name=name.trim();
           if(!name){toast("The title cannot be empty");return;}
-          fetch("/api/documents",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.id,title:name})})
-            .then(function(r){return r.json();})
-            .then(function(x){
-              if(!x.ok){toast(x.error||"Rename failed");return;}
-              docs=docs.map(function(y){return y.id===x.document.id?x.document:y;});
-              render(); toast("Renamed ✓");
-            })
-            .catch(function(){toast("Network error");});
+          patch({id:d.id,title:name},"Renamed ✓","Rename failed");
+        };
+        card.querySelector(".mv").onclick=function(){
+          var list=CATEGORIES.map(function(c,i){return (i+1)+" = "+c.label;}).join("\n");
+          var pick=prompt("Move \""+d.title+"\" to which category?\n\n"+list,
+            String(CATEGORIES.indexOf(cat)+1));
+          if(pick===null)return;
+          var idx=parseInt(pick,10)-1;
+          if(!(idx>=0&&idx<CATEGORIES.length)){toast("Enter a number from the list");return;}
+          patch({id:d.id,category:CATEGORIES[idx].key},"Moved to "+CATEGORIES[idx].label+" ✓","Move failed");
         };
       }else{
         card.querySelector(".vw").onclick=openPrimary;
@@ -539,7 +780,7 @@
         fetch("/api/documents",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.id})})
           .then(function(r){return r.json();})
           .then(function(x){
-            if(x.ok){docs=docs.filter(function(y){return y.id!=d.id;});render();toast("Document deleted");}
+            if(x.ok){docs=docs.filter(function(y){return y.id!=d.id;});renderRail();render();toast("Document deleted");}
             else toast(x.error||"Delete failed");
           })
           .catch(function(){toast("Network error");});
