@@ -171,7 +171,21 @@
   var CATALOG = {};        // item_key → saved row
   var CUSTOM_LINES = [];   // founder-added balance-of-system lines
 
+  // Founder-added equipment (another inverter/panel/battery brand) lives in the same
+  // saved price list, kind-tagged, with `spec` carrying the rating the sizing math
+  // needs — watts per panel, kW for an inverter, kWh for a battery.
+  var EQUIPMENT_SLOTS = [
+    { arr: INVERTERS, kind: "inverter" },
+    { arr: PANELS, kind: "panel" },
+    { arr: BATTERIES, kind: "battery" },
+  ];
+
   function applyCatalog() {
+    // Custom equipment is rebuilt from the saved list on every apply, so start clean.
+    EQUIPMENT_SLOTS.forEach(function (slot) {
+      for (var i = slot.arr.length - 1; i >= 0; i--) if (slot.arr[i].custom) slot.arr.splice(i, 1);
+    });
+
     var all = [INVERTERS, PANELS, BATTERIES].concat(BOS_GROUPS.map(function (g) { return g.defs; }));
     all.forEach(function (arr) {
       arr.forEach(function (it) {
@@ -187,6 +201,23 @@
         it.hidden = row.active === 0;
       });
     });
+
+    EQUIPMENT_SLOTS.forEach(function (slot) {
+      Object.keys(CATALOG).forEach(function (key) {
+        var row = CATALOG[key];
+        if (row.custom !== 1 || row.kind !== slot.kind) return;
+        var it = {
+          id: row.item_key, key: row.item_key, custom: true,
+          label: row.label, price: row.price,
+          quoted: row.confirmed === 1, hidden: row.active === 0,
+        };
+        if (slot.kind === "inverter") { it.kw = row.spec || 0; it.types = ["liwanag", "ilaw", "sandigan"]; }
+        if (slot.kind === "panel") it.watts = row.spec || 0;
+        if (slot.kind === "battery") it.kwh = row.spec || 0;
+        slot.arr.push(it);
+      });
+    });
+
     CUSTOM_LINES = Object.keys(CATALOG)
       .map(function (k) { return CATALOG[k]; })
       .filter(function (r) { return r.custom === 1 && r.kind === "bos" && r.active !== 0; });
@@ -208,7 +239,7 @@
   // The price ladder from SC-06 §3. The corridor sets the price; the BOM never does.
   function packageFor(kwp, batteryKwh) {
     if (kwp <= 2.4 && batteryKwh <= 3) {
-      return { tier: "FLAGSHIP", price: 99500, note: "Inside the ₱80–100k corridor — the fixed flagship price." };
+      return { tier: "FLAGSHIP", price: 99500, note: "Inside the ₱80–100k window — the fixed flagship price." };
     }
     if (kwp <= 4.0 && batteryKwh <= 5.2) {
       return {
@@ -217,7 +248,7 @@
         note: "PLUS tier of the SC-06 ladder."
       };
     }
-    return { tier: "CUSTOM", price: null, note: "Outside the published ladder — price must be justified from the corridor (what the customer already pays for gensets, UPS and BILECO), never from this sheet." };
+    return { tier: "CUSTOM", price: null, note: "Bigger than our published packages — the selling price is set from the market (what this customer already pays an installer, a genset, or BILECO), never from this cost sheet." };
   }
 
   /* ------------------------------------------------------------------- helpers */
@@ -442,12 +473,12 @@
       '<div><span>Est. offset</span><strong>' + Math.round(m.offsetKwh) + ' kWh/mo</strong></div>' +
       '<div><span>Est. saving</span><strong>' + peso(m.savedPerMonth) + '/mo</strong></div>' +
       '<div><span>Simple payback</span><strong>' + m.paybackYears.toFixed(1) + ' yrs</strong></div>' +
-      '<div><span>Ladder tier</span><strong>' + m.pack.tier + '</strong></div>' +
+      '<div><span>Price tier</span><strong>' + m.pack.tier + '</strong></div>' +
       '<div><span>Quote total</span><strong>' + peso(m.total) + '</strong></div>' +
       '<div><span>Customer price</span><strong>' + peso(m.customerPrice) + '</strong></div>' +
       '<div><span>Our cost</span><strong>' + peso(m.ourCost) + '</strong></div>' +
-      '<div class="' + marginTone + '"><span>Gross margin · floor ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(0) + '%</strong></div>' +
-      '<div class="' + (m.trueNet <= 0 ? "bad" : "") + '"><span>True net · after referral + reserves</span><strong>' + peso(m.trueNet) + '</strong></div>';
+      '<div class="' + marginTone + '"><span>Profit · minimum ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(0) + '%</strong></div>' +
+      '<div class="' + (m.trueNet <= 0 ? "bad" : "") + '"><span>Take-home · after referral &amp; funds</span><strong>' + peso(m.trueNet) + '</strong></div>';
   }
 
   /** The advisory rail. Each flag names the rule it enforces so nobody has to guess. */
@@ -462,12 +493,12 @@
 
     if (m.pack.tier === "CUSTOM") {
       if (!m.priceIsOverride) {
-        out.push('<div class="qb-flag stop"><strong>No contract price set — the sheet is showing its own total, which is cost-plus (§3).</strong>' +
-          'Outside the ladder the price comes from the corridor. The helper in Money suggests <b>' + peso(m.corridorPrice) +
-          '</b> at the current benchmark and undercut — click “Use as contract price”, or type a price justified from what this customer already pays.</div>');
+        out.push('<div class="qb-flag stop"><strong>No selling price set — the sheet is showing our own cost total (§3).</strong>' +
+          'For a system this size the price comes from the market, not from our costs. The helper in Money suggests <b>' + peso(m.corridorPrice) +
+          '</b> from the competitor price and our discount — click “Use as contract price”, or type a price you can defend from what this customer already pays.</div>');
       }
-      out.push('<div class="qb-flag"><strong>Outside the ₱80–100k corridor (§3).</strong>' + esc(m.pack.note) +
-        ' Cost-plus pricing off this sheet is banned — set the price from what this household already pays for BILECO, a genset and a UPS, then check the margin here.</div>');
+      out.push('<div class="qb-flag"><strong>Bigger than our fixed packages (§3).</strong>' + esc(m.pack.note) +
+        ' Then check the profit here — never work backwards from this sheet plus a markup.</div>');
     } else {
       out.push('<div class="qb-flag ok"><strong>' + m.pack.tier + ' — ' + peso(m.pack.price) + '.</strong>' + esc(m.pack.note) + '</div>');
     }
@@ -490,8 +521,8 @@
       out.push('<div class="qb-flag stop"><strong>This quote loses money.</strong>Cost ' + peso(m.ourCost) +
         ' against a price of ' + peso(m.customerPrice) + '. Re-spec before sending — the battery is almost always what broke it.</div>');
     } else if (m.belowFloor) {
-      out.push('<div class="qb-flag"><strong>Margin ' + m.marginPct.toFixed(1) + '% is under the ' + m.floorPct.toFixed(0) + '% floor.</strong>' +
-        'Raise the price inside the corridor, trim cost, or accept it knowingly. The floor is a placeholder until the founders log a house default in <span class="mono">ops/status.md</span>.</div>');
+      out.push('<div class="qb-flag"><strong>Profit ' + m.marginPct.toFixed(1) + '% is under our ' + m.floorPct.toFixed(0) + '% minimum.</strong>' +
+        'Raise the price (stay below the competitor), trim cost, or accept it knowingly. The minimum is a placeholder until the founders agree a house number in <span class="mono">ops/status.md</span>.</div>');
     } else if (m.batteryKwh > 3 && m.pack.tier === "FLAGSHIP") {
       out.push('<div class="qb-flag"><strong>Battery above the flagship limit.</strong>SC-06 holds the base package at 2.5–3 kWh. ' +
         'A bigger battery is an upsell line, not a flagship inclusion.</div>');
@@ -703,9 +734,9 @@
     if (m.pack.tier === "CUSTOM" && !m.priceIsOverride) {
       return {
         state: "blocked",
-        action: "Set the contract price from the corridor — suggested " + peso(m.corridorPrice) + ".",
-        why: "This build is outside the ladder and no price has been set, so the sheet is showing its own total — " +
-          "cost-plus, which is banned (§3). Use the corridor helper in Money, then sanity-check the margin against the floor."
+        action: "Set the selling price from the market — suggested " + peso(m.corridorPrice) + ".",
+        why: "This system is bigger than our fixed packages and no price has been set, so the sheet is showing our own " +
+          "cost total. Pricing from cost + a markup is banned (§3). Use the market price helper in Money, then check the profit."
       };
     }
     if (m.spec.battery && m.batteryKwh === 0) {
@@ -718,9 +749,9 @@
     if (m.belowFloor) {
       return {
         state: "caution",
-        action: "Margin " + m.marginPct.toFixed(1) + "% is under the " + m.floorPct.toFixed(0) + "% floor — decide before sending.",
-        why: "Raise the price inside the corridor, trim cost, or accept it and say why in Friday's T5T. " +
-          "Send is not blocked: the floor is a placeholder until the founders log a house default."
+        action: "Profit " + m.marginPct.toFixed(1) + "% is under our " + m.floorPct.toFixed(0) + "% minimum — decide before sending.",
+        why: "Raise the price (stay below the competitor), trim cost, or accept it and say why in Friday's T5T. " +
+          "Send is not blocked: the minimum is a placeholder until the founders agree a house number."
       };
     }
     if (m.unquoted > 0) {
@@ -805,13 +836,37 @@
     var select = el("qb-inverter");
     if (!select || select.dataset.forType === type) return;
     var keep = select.value;
-    var options = INVERTERS.filter(function (i) { return i.types.indexOf(type) !== -1; });
+    var options = INVERTERS.filter(function (i) { return i.types.indexOf(type) !== -1 && !i.hidden; });
+    if (!options.length) options = INVERTERS.filter(function (i) { return i.types.indexOf(type) !== -1; });
     select.innerHTML = options.map(function (i) {
       return '<option value="' + i.id + '">' + esc(i.label) + " · " + peso(i.price) + (i.quoted ? "" : " (est)") + "</option>";
     }).join("");
     var stillThere = options.some(function (i) { return i.id === keep; });
     select.value = stillThere ? keep : options[0].id;
     select.dataset.forType = type;
+  }
+
+  /** (Re)build the panel and battery pickers, and force the inverter picker to
+   *  rebuild on the next refresh — called at start-up and whenever the saved
+   *  price list changes, so a brand a founder just added is immediately choosable. */
+  function populateEquipmentSelects() {
+    function fill(id, list, format) {
+      var select = el(id);
+      if (!select) return;
+      var keep = select.value;
+      var options = list.filter(function (it) { return !it.hidden; });
+      if (!options.length) options = list;
+      select.innerHTML = options.map(format).join("");
+      if (options.some(function (it) { return it.id === keep; })) select.value = keep;
+    }
+    fill("qb-panel", PANELS, function (p) {
+      return '<option value="' + p.id + '">' + esc(p.label) + " · " + peso(p.price) + (p.quoted ? "" : " (est)") + "</option>";
+    });
+    fill("qb-battery", BATTERIES, function (b) {
+      return '<option value="' + b.id + '">' + esc(b.label) + (b.price ? " · " + peso(b.price) : "") + (b.quoted ? "" : " (est)") + "</option>";
+    });
+    var inv = el("qb-inverter");
+    if (inv) inv.dataset.forType = "";   // syncInverterOptions rebuilds on next refresh
   }
 
   function syncBatteryVisibility() {
@@ -1011,6 +1066,7 @@
         }
         CATALOG[res.data.item.item_key] = res.data.item;
         applyCatalog();
+        populateEquipmentSelects();
         refresh();
         plSay("good", "Saved.");
         return true;
@@ -1062,6 +1118,7 @@
         price: Number(price.value) || 0, group_name: groupName || null,
         custom: saved ? saved.custom : 0,
         qty_fixed: saved ? saved.qty_fixed : null,
+        spec: saved ? saved.spec : null,   // keep a custom panel's watts (etc.) through price edits
         confirmed: firm ? 1 : 0,
         source_note: saved ? saved.source_note : "",
         active: item.hidden ? 0 : 1,
@@ -1136,8 +1193,15 @@
       body.appendChild(head);
       g.arr().forEach(function (it) {
         if (it.id === "none") return;               // "No battery" has no price to edit
+        if (it.custom) return;                      // founder-added: rendered below with a real delete
         if (it.quoted === false) estimates++;
         body.appendChild(plRow(it, g.kind, null));
+      });
+      Object.keys(CATALOG).forEach(function (k) {
+        var r = CATALOG[k];
+        if (r.custom !== 1 || r.kind !== g.kind) return;
+        if (r.confirmed !== 1) estimates++;
+        body.appendChild(plCustomRow(r, g.kind));
       });
     });
 
@@ -1170,13 +1234,15 @@
       : "Every price is supplier-confirmed.";
   }
 
-  /** A founder-added line: label and quantity are editable too, and it can be deleted. */
-  function plCustomRow(row) {
+  /** A founder-added line — a BOS extra or another equipment brand. Editable like
+   *  any row, and deletable for real (built-ins only deactivate). */
+  function plCustomRow(row, kind) {
+    kind = kind || "bos";
     var shim = {
       key: row.item_key, label: row.label, price: row.price,
       quoted: row.confirmed === 1, hidden: row.active === 0,
     };
-    var node = plRow(shim, "bos", row.group_name);
+    var node = plRow(shim, kind, row.group_name);
     var drop = node.querySelector(".drop");
     drop.textContent = "×";
     drop.title = "Delete this line";
@@ -1203,15 +1269,21 @@
         }).then(function () {
           delete CATALOG[row.item_key];
           applyCatalog();
+          populateEquipmentSelects();
           refresh();
           paint();
           plSay("good", "Deleted.");
         });
       });
     });
-    var qty = document.createElement("small");
-    qty.textContent = "Custom line · qty " + row.qty_fixed;
-    node.querySelector(".name").appendChild(qty);
+    var detail = document.createElement("small");
+    if (kind !== "bos") {
+      var unit = { inverter: " kW", panel: " W", battery: " kWh" }[kind] || "";
+      detail.textContent = "Added by a founder" + (row.spec ? " · " + row.spec + unit : "");
+    } else {
+      detail.textContent = "Custom line · qty " + row.qty_fixed;
+    }
+    node.querySelector(".name").appendChild(detail);
     return node;
   }
 
@@ -1239,27 +1311,72 @@
     else plNewReset();
   });
 
+  /** "Section" doubles as the what-is-this picker: a BOS group name, or `kind:x`
+   *  when the founder is adding another equipment brand (inverter/panel/battery). */
+  function plNewKind() {
+    var v = el("qb-pl-new-group").value;
+    return v.indexOf("kind:") === 0 ? v.slice(5) : "bos";
+  }
+
+  var SPEC_LABELS = {
+    inverter: { label: "kW rating", hint: "6" },
+    panel: { label: "Watts each", hint: "615" },
+    battery: { label: "kWh each", hint: "5.12" },
+  };
+
+  function plNewSyncFields() {
+    var kind = plNewKind();
+    var isEquipment = kind !== "bos";
+    el("qb-pl-new-qty-wrap").hidden = isEquipment;
+    el("qb-pl-new-spec-wrap").hidden = !isEquipment;
+    if (isEquipment) {
+      el("qb-pl-new-spec-label").textContent = SPEC_LABELS[kind].label;
+      el("qb-pl-new-spec").placeholder = SPEC_LABELS[kind].hint;
+    }
+  }
+  el("qb-pl-new-group").addEventListener("change", plNewSyncFields);
+
   function plNewReset() {
     el("qb-pl-new-label").value = "";
     el("qb-pl-new-qty").value = "1";
+    el("qb-pl-new-spec").value = "";
     el("qb-pl-new-price").value = "";
     el("qb-pl-new-group").selectedIndex = 0;
+    plNewSyncFields();
   }
 
   function plNewSubmit() {
     var label = el("qb-pl-new-label").value.trim();
-    var qty = Number(el("qb-pl-new-qty").value);
     var price = Number(el("qb-pl-new-price").value);
+    var kind = plNewKind();
     if (!label) { plSay("bad", "Give the line a name."); el("qb-pl-new-label").focus(); return; }
-    if (!(qty > 0)) { plSay("bad", "Quantity has to be more than zero."); el("qb-pl-new-qty").focus(); return; }
     if (!(price >= 0)) { plSay("bad", "Enter a unit price."); el("qb-pl-new-price").focus(); return; }
 
-    plSave({
+    var row = {
       item_key: "custom-" + Date.now().toString(36),
-      kind: "bos", label: label, price: price, qty_fixed: qty,
-      group_name: el("qb-pl-new-group").value || null,
+      kind: kind, label: label, price: price,
+      qty_fixed: null, group_name: null,
       custom: 1, confirmed: 0, source_note: "", active: 1,
-    }).then(function (ok) {
+    };
+
+    if (kind === "bos") {
+      var qty = Number(el("qb-pl-new-qty").value);
+      if (!(qty > 0)) { plSay("bad", "Quantity has to be more than zero."); el("qb-pl-new-qty").focus(); return; }
+      row.qty_fixed = qty;
+      row.group_name = el("qb-pl-new-group").value || null;
+    } else {
+      var spec = Number(el("qb-pl-new-spec").value);
+      if ((kind === "panel" || kind === "battery") && !(spec > 0)) {
+        plSay("bad", kind === "panel"
+          ? "Enter the watts per panel (e.g. 615) — the sizing math needs it."
+          : "Enter the battery's kWh (e.g. 5.12) — the sizing math needs it.");
+        el("qb-pl-new-spec").focus();
+        return;
+      }
+      row.spec = isFinite(spec) && spec > 0 ? spec : null;
+    }
+
+    plSave(row).then(function (ok) {
       if (!ok) return;
       plNewReset();
       el("qb-pl-new").hidden = true;
@@ -1311,8 +1428,8 @@
         "and no deposit can be taken until the numbers are firm.");
     }
     if (m.belowFloor) {
-      warnings.push("<b>Below the margin floor.</b> Gross margin " + m.marginPct.toFixed(1) +
-        "% is under the " + m.floorPct.toFixed(0) + "% floor. Sending anyway is a decision — own it in Friday's T5T.");
+      warnings.push("<b>Below our minimum profit.</b> Profit " + m.marginPct.toFixed(1) +
+        "% is under the " + m.floorPct.toFixed(0) + "% minimum. Sending anyway is a decision — own it in Friday's T5T.");
     }
     flag.innerHTML = warnings.join("<br><br>");
     flag.hidden = warnings.length === 0;
@@ -1354,8 +1471,8 @@
     if (!payload.customer.phone) return say("bad", "Add a phone number — it is how an existing contact is matched.");
     if (!payload.quote.preparedBy) return say("bad", "Put your name in “Prepared by” — a quote goes out attributable to a person.");
     if (m.pack.tier === "CUSTOM" && !m.priceIsOverride) {
-      return say("bad", "Set the contract price first — this build is outside the ladder, and with no price set the sheet " +
-        "total (cost-plus, banned §3) would be quoted. The corridor helper suggests " + peso(m.corridorPrice) + ".");
+      return say("bad", "Set the selling price first — this system is bigger than our fixed packages, and with no price set " +
+        "our own cost total (cost + markup, banned §3) would be quoted. The market price helper suggests " + peso(m.corridorPrice) + ".");
     }
 
     // Sending is not undoable from the customer's side, so it is confirmed once.
@@ -1404,12 +1521,7 @@
   el("qb-bill-band").innerHTML = BILL_BANDS.map(function (b) {
     return '<option value="' + b.id + '"' + (b.id === "b4" ? " selected" : "") + ">" + esc(b.label) + "</option>";
   }).join("");
-  el("qb-panel").innerHTML = PANELS.map(function (p) {
-    return '<option value="' + p.id + '">' + esc(p.label) + " · " + peso(p.price) + (p.quoted ? "" : " (est)") + "</option>";
-  }).join("");
-  el("qb-battery").innerHTML = BATTERIES.map(function (b) {
-    return '<option value="' + b.id + '">' + esc(b.label) + (b.price ? " · " + peso(b.price) : "") + (b.quoted ? "" : " (est)") + "</option>";
-  }).join("");
+  populateEquipmentSelects();
 
   el("qb-tariff").value = DEFAULT_TARIFF;
   el("qb-yield").value = DEFAULT_YIELD;
@@ -1421,5 +1533,5 @@
   // Paint immediately from the shipped catalogue, then again once the saved price
   // list arrives. A slow or failed fetch leaves a working quote on screen rather
   // than an empty one — the built-in prices are still real prices.
-  loadCatalog().then(function (loaded) { if (loaded) refresh(); });
+  loadCatalog().then(function (loaded) { if (loaded) { populateEquipmentSelects(); refresh(); } });
 })();

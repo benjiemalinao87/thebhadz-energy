@@ -54,6 +54,7 @@ async function ensureSchema(env) {
        confirmed_by TEXT,
        custom       INTEGER NOT NULL DEFAULT 0,
        active       INTEGER NOT NULL DEFAULT 1,
+       spec         REAL,
        updated_at   TEXT NOT NULL,
        updated_by   TEXT
      )`
@@ -61,6 +62,12 @@ async function ensureSchema(env) {
   try {
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_price_items_kind ON price_items(kind)`).run();
   } catch (_) { /* an index is an optimisation, not a requirement */ }
+  // Tables created before founder-added equipment existed need the rating column.
+  // ALTER TABLE has no IF NOT EXISTS in SQLite — the duplicate-column error is the
+  // success case on every run after the first.
+  try {
+    await env.DB.prepare(`ALTER TABLE price_items ADD COLUMN spec REAL`).run();
+  } catch (_) { /* already present */ }
   schemaChecked = true;
 }
 
@@ -118,6 +125,20 @@ export async function onRequestPut(context) {
     return json({ ok: false, error: "A custom line needs a quantity." }, 422);
   }
 
+  // `spec` is the equipment rating: watts per panel, kW for an inverter, kWh for a
+  // battery. Panels and batteries feed the sizing math, so a founder-added one
+  // without a rating would silently produce a 0 kWp array or a 0 kWh bank.
+  const spec = b.spec == null || b.spec === "" ? null : Number(b.spec);
+  if (spec != null && (!Number.isFinite(spec) || spec < 0 || spec > 100000)) {
+    return json({ ok: false, error: "The rating must be a positive number." }, 422);
+  }
+  if (custom && kind === "panel" && !(spec > 0)) {
+    return json({ ok: false, error: "A panel needs its watts (e.g. 615)." }, 422);
+  }
+  if (custom && kind === "battery" && !(spec > 0)) {
+    return json({ ok: false, error: "A battery needs its kWh capacity (e.g. 5.12)." }, 422);
+  }
+
   const now = new Date().toISOString();
   const by = clean(founder.name || founder.email, 80);
   const existing = await env.DB.prepare(`SELECT confirmed FROM price_items WHERE item_key = ?`)
@@ -132,23 +153,23 @@ export async function onRequestPut(context) {
     await env.DB.prepare(
       `UPDATE price_items SET kind = ?, label = ?, price = ?, qty_fixed = ?, group_name = ?,
          confirmed = ?, source_note = ?, ${confirmedAt === undefined ? "" : "confirmed_at = ?,"}
-         confirmed_by = ?, custom = ?, active = ?, updated_at = ?, updated_by = ?
+         confirmed_by = ?, custom = ?, active = ?, spec = ?, updated_at = ?, updated_by = ?
        WHERE item_key = ?`
     ).bind(
       ...[kind, label, price, qtyFixed, clean(b.group_name, 60) || null, confirmed, sourceNote || null],
       ...(confirmedAt === undefined ? [] : [confirmedAt]),
-      confirmed ? by : null, custom, b.active === 0 ? 0 : 1, now, by, itemKey
+      confirmed ? by : null, custom, b.active === 0 ? 0 : 1, spec, now, by, itemKey
     ).run();
   } else {
     await env.DB.prepare(
       `INSERT INTO price_items
          (kind, item_key, label, price, qty_fixed, group_name, confirmed, source_note,
-          confirmed_at, confirmed_by, custom, active, updated_at, updated_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          confirmed_at, confirmed_by, custom, active, spec, updated_at, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       kind, itemKey, label, price, qtyFixed, clean(b.group_name, 60) || null,
       confirmed, sourceNote || null, confirmed ? now : null, confirmed ? by : null,
-      custom, b.active === 0 ? 0 : 1, now, by
+      custom, b.active === 0 ? 0 : 1, spec, now, by
     ).run();
   }
 

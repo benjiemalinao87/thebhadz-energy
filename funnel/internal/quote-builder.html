@@ -124,30 +124,31 @@
             <label>Contract price to the customer (₱)<input id="qb-price" type="number" min="0" step="500" placeholder="From the ladder"></label>
 
             <div class="qb-corridor">
-              <div class="qb-corridor-head">Corridor price helper</div>
+              <div class="qb-corridor-head">Market price helper</div>
               <div class="qb-fields two" style="display:grid">
-                <label>Benchmark (₱ per kW)<input id="qb-bench" type="number" min="0" step="500" value="70000"></label>
-                <label>Undercut (%)<input id="qb-undercut" type="number" min="0" max="50" step="0.5" value="5"></label>
+                <label>Competitor price (₱ per kW)<input id="qb-bench" type="number" min="0" step="500" value="70000"></label>
+                <label>Our discount vs them (%)<input id="qb-undercut" type="number" min="0" max="50" step="0.5" value="5"></label>
               </div>
               <div class="qb-corridor-out">
-                <span>Suggested price<strong id="qb-corridor-price">₱—</strong></span>
+                <span>Suggested selling price<strong id="qb-corridor-price">₱—</strong></span>
                 <button type="button" class="secondary" id="qb-corridor-use">Use as contract price</button>
               </div>
-              <p class="qb-note">Benchmark ≈ what an established installer charges per kW (Lacosta ≈₱70,000/kW, seen 2026-07 —
-                reverify before sending). Above the ladder this is how the price is set: from the market, never from the sheet.</p>
+              <p class="qb-note">Competitor price = what an established installer charges per kW, all-in (Lacosta ≈₱70,000/kW,
+                seen 2026-07 — reverify before sending). For systems bigger than our fixed packages, this is how the selling
+                price is set: from what the market already charges, never from our own costs.</p>
             </div>
 
             <details class="qb-truenet">
-              <summary>Margin floor &amp; true-net assumptions</summary>
+              <summary>Profit floor &amp; take-home settings</summary>
               <div class="qb-fields two" style="display:grid;margin-top:10px">
-                <label>Margin floor (%)<input id="qb-floor" type="number" min="0" max="90" step="1" value="20"></label>
+                <label>Minimum profit (%)<input id="qb-floor" type="number" min="0" max="90" step="1" value="20"></label>
                 <label>Referral fee (₱ per kW)<input id="qb-referral" type="number" min="0" step="100" value="1000"></label>
-                <label>Warranty reserve (%)<input id="qb-warranty" type="number" min="0" max="20" step="0.5" value="2"></label>
+                <label>Warranty fund (%)<input id="qb-warranty" type="number" min="0" max="20" step="0.5" value="2"></label>
                 <label>Tax set-aside (%)<input id="qb-taxaside" type="number" min="0" max="20" step="0.5" value="0"></label>
               </div>
-              <p class="qb-note">True net = gross margin − referral (₱1,000/kW, meeting #7) − warranty reserve − tax set-aside.
+              <p class="qb-note">Take-home = profit − referral fee (₱1,000/kW, meeting #7) − warranty fund − tax set-aside.
                 Leave tax at 0 while the 12% VAT box above is ticked; if MACC registers non-VAT, untick VAT and set ~3% here —
-                confirm with the accountant. The 20% floor is a placeholder until the founders log a house default in
+                confirm with the accountant. The 20% minimum is a placeholder until the founders agree a house number in
                 <span class="mono">ops/status.md</span>.</p>
             </details>
 
@@ -155,9 +156,9 @@
               <button type="button" class="secondary" id="qb-reset-fee">Reset to auto</button>
             </div>
           </div>
-          <p class="qb-note">Materials pass through at supplier cost; the margin sits in the fee line. The contract price
-            defaults to the SC-06 ladder — and outside the ladder it comes from the corridor helper above, never from the
-            sheet total. Cost-plus is banned (§3).</p>
+          <p class="qb-note">Materials pass through at supplier cost; our profit sits in the fee line. The contract price
+            defaults to the fixed package prices — and for bigger custom systems it comes from the market price helper above,
+            never from the sheet total. Pricing from our cost + a markup is banned (§3).</p>
         </div>
 
         <div class="qb-box">
@@ -200,13 +201,17 @@
             <div class="qb-pl-body" id="qb-pl-body"></div>
             <div class="qb-pl-new" id="qb-pl-new" hidden>
               <label>Line<input type="text" id="qb-pl-new-label" maxlength="120" placeholder="Extra conduit run, 6m"></label>
-              <label>Qty<input type="number" id="qb-pl-new-qty" min="0" step="1" value="1"></label>
+              <label id="qb-pl-new-qty-wrap">Qty<input type="number" id="qb-pl-new-qty" min="0" step="1" value="1"></label>
+              <label id="qb-pl-new-spec-wrap" hidden><span id="qb-pl-new-spec-label">Rating</span><input type="number" id="qb-pl-new-spec" min="0" step="0.01" placeholder="615"></label>
               <label>Unit price<input type="number" id="qb-pl-new-price" min="0" step="50" placeholder="0"></label>
               <label>Section<select id="qb-pl-new-group">
                 <option value="">Additional items</option>
                 <option value="RAILING SETS">Railing sets</option>
                 <option value="SURGE / BREAKER SET">Surge / breaker set</option>
                 <option value="CABLES">Cables</option>
+                <option value="kind:inverter">Inverters — new brand/model</option>
+                <option value="kind:panel">Panels — new brand/model</option>
+                <option value="kind:battery">Batteries — new brand/model</option>
               </select></label>
               <div class="qb-pl-new-go">
                 <span class="qb-pl-new-total" id="qb-pl-new-total"></span>

@@ -147,6 +147,9 @@
   display: flex; flex-direction: column; gap: 4px; min-width: 0;
   font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint);
 }
+/* Qty and Rating share one grid slot — only one is visible at a time, and the
+   flex display above would otherwise override the [hidden] attribute. */
+.qb-pl-new label[hidden] { display: none; }
 .qb-pl-new input, .qb-pl-new select {
   width: 100%; border: 1px solid var(--hairline); background: var(--sheet); color: var(--ink);
   padding: 7px 8px; font: 13px var(--sans); border-radius: 0;
