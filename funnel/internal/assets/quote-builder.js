@@ -38,16 +38,52 @@
 
   /* ---------------------------------------------------------------- constants */
 
-  // BILECO residential rate, from SC-08 competitors research. Marked EST there and
-  // still EST here — it is the single number every savings figure hangs off, so it
-  // stays editable and stays labelled.
-  var DEFAULT_TARIFF = 12.9458;
+  /* --------------------------------------------------------------- the config
+   * Every number the quote hangs off — the price ladder, the sizing assumptions,
+   * the fee and delivery formulas — is DATA, loaded from /api/quote-settings and
+   * editable by a master in "Packages & pricing". None of it is settled: the
+   * packages are still moving, and a price that moves must not be a deploy.
+   *
+   * The block below is the offline fallback, not the source of truth. It has to
+   * match the server's DEFAULT_CONFIG (functions/api/quote-settings.js) so a founder
+   * on a dead connection still gets the quotes the team is used to rather than a
+   * sheet full of NaN.
+   */
+  var CONFIG = {
+    tiers: [
+      { name: "FLAGSHIP", maxKwp: 2.4, maxKwh: 3, price: 99500, priceBattery: null,
+        note: "Inside the ₱80–100k window — the fixed flagship price." },
+      { name: "PLUS", maxKwp: 4.0, maxKwh: 5.2, price: 149500, priceBattery: 189500,
+        note: "PLUS tier of the SC-06 ladder." },
+    ],
+    tariff: 12.9458,          // BILECO residential rate, SC-08. Still EST.
+    yieldPerKwp: 4.0,         // kWh per kWp per day, Biliran. EST until a metered install.
+    daysPerMonth: 30,
+    coverageLiwanag: 70, coverageIlaw: 85, coverageSandigan: 75,
+    selfConsumption: 85, selfConsumptionBattery: 100,
+    panelsPerRow: 7, panelsPerString: 14,
+    vatRate: 12,
+    feeBase: 12000, feePerPanel: 3000,
+    deliveryBase: 12000, deliveryPerPanel: 1500,
+    benchPerKw: 70000, undercutPct: 5, floorPct: 20,
+    referralPerKw: 1000, warrantyPct: 2, taxPct: 0,
+  };
+  var CONFIG_META = { updatedAt: null, updatedBy: null, canEdit: false, loaded: false };
 
-  // Specific yield for Biliran, kWh per kWp per day. EST — replace with metered output
-  // from the first reference install.
-  var DEFAULT_YIELD = 4.0;
-
-  var VAT_RATE = 0.12;
+  function loadSettings() {
+    return fetch("/api/quote-settings", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : { ok: false }; })
+      .then(function (d) {
+        if (!d.ok || !d.config) return false;
+        Object.keys(d.config).forEach(function (k) { CONFIG[k] = d.config[k]; });
+        CONFIG_META = {
+          updatedAt: d.updatedAt, updatedBy: d.updatedBy,
+          canEdit: !!d.canEdit, loaded: true,
+        };
+        return true;
+      })
+      .catch(function () { return false; });   // offline: the fallback above still quotes
+  }
 
   // Bill bands, as a homeowner actually answers the question. `mid` drives the sizing;
   // the founder can type an exact figure instead.
@@ -61,14 +97,19 @@
     { id: "b7", label: "Over ₱20,000", mid: 25000 }
   ];
 
-  // coverage = the share of the customer's consumption we design to cover. On-grid is
-  // sized for daytime self-consumption first (export is credited below retail), so it
-  // is deliberately not 100%.
+  // What each package IS. The share of consumption we design to cover lives in the
+  // config, not here: on-grid is sized for daytime self-consumption first (export is
+  // credited below retail) and that ratio is a judgement call the founders adjust.
   var SYSTEM_TYPES = {
-    liwanag: { label: "LIWANAG — on-grid", coverage: 0.70, battery: false, gridTied: true },
-    ilaw: { label: "ILAW — off-grid", coverage: 0.85, battery: true, gridTied: false },
-    sandigan: { label: "SANDIGAN — hybrid", coverage: 0.75, battery: true, gridTied: true }
+    liwanag: { label: "LIWANAG — on-grid", coverageKey: "coverageLiwanag", battery: false, gridTied: true },
+    ilaw: { label: "ILAW — off-grid", coverageKey: "coverageIlaw", battery: true, gridTied: false },
+    sandigan: { label: "SANDIGAN — hybrid", coverageKey: "coverageSandigan", battery: true, gridTied: true }
   };
+
+  function coverageFor(type) {
+    var pct = Number(CONFIG[(SYSTEM_TYPES[type] || SYSTEM_TYPES.liwanag).coverageKey]);
+    return isFinite(pct) ? pct / 100 : 0.7;
+  }
 
   /*
    * Catalog. `quoted: true` means a real price from a real source, dated below.
@@ -236,19 +277,142 @@
       .catch(function () { return false; });   // offline: the shipped catalogue still works
   }
 
-  // The price ladder from SC-06 §3. The corridor sets the price; the BOM never does.
+  // The price ladder. The corridor sets the price; the BOM never does (§3). Tiers
+  // are matched smallest first — the server sorts them on save so a tier can never
+  // be shadowed by a larger one above it.
   function packageFor(kwp, batteryKwh) {
-    if (kwp <= 2.4 && batteryKwh <= 3) {
-      return { tier: "FLAGSHIP", price: 99500, note: "Inside the ₱80–100k window — the fixed flagship price." };
-    }
-    if (kwp <= 4.0 && batteryKwh <= 5.2) {
-      return {
-        tier: "PLUS",
-        price: batteryKwh > 0 ? 189500 : 149500,
-        note: "PLUS tier of the SC-06 ladder."
-      };
+    var tiers = CONFIG.tiers || [];
+    for (var i = 0; i < tiers.length; i++) {
+      var t = tiers[i];
+      if (kwp <= t.maxKwp && batteryKwh <= t.maxKwh) {
+        var price = batteryKwh > 0 && t.priceBattery ? t.priceBattery : t.price;
+        return { tier: t.name, price: price, note: t.note || (t.name + " tier of the price ladder.") };
+      }
     }
     return { tier: "CUSTOM", price: null, note: "Bigger than our published packages — the selling price is set from the market (what this customer already pays an installer, a genset, or BILECO), never from this cost sheet." };
+  }
+
+  /* ------------------------------------------------------- the customer's copy
+   * Two documents come out of one model. The INTERNAL sheet is the itemised bill
+   * of materials with unit prices — the crew's pick list and our cost record. The
+   * CUSTOMER copy collapses that into scope: what lands on their roof, named by
+   * brand and quantity where the brand is the warranty, and one fixed price.
+   *
+   * Why the customer copy is not the itemised one: a priced BOM invites the
+   * Shopee-kit comparison — the homeowner prices our clamps against Lazada and
+   * reads the fee line as padding. We sell a fixed-price installed package (§3),
+   * so the document has to argue that, not hand over a shopping list. What it may
+   * never do is hide the honesty blocks: the brownout truth (§1.6), the compliance
+   * checklist and the INDICATIVE stamp (§7) print on the customer copy regardless
+   * of anything set here.
+   *
+   * `auto` is what the model says. The founder can rename a line, rewrite its
+   * detail, or switch it off entirely — every job has something the last one did
+   * not. `needs` names the BOM group a line describes: no railings on the sheet,
+   * no mounting line on the quote.
+   */
+  var SCOPE_DEFS = [
+    {
+      id: "panels", label: "Solar panels",
+      auto: function (m) { return m.panels + " × " + m.panel.label + " · " + m.kwp.toFixed(2) + " kWp"; }
+    },
+    {
+      id: "inverter", label: "Inverter",
+      auto: function (m) { return m.inverter.label; }
+    },
+    {
+      id: "battery", label: "Battery storage",
+      auto: function (m) {
+        return m.batteryKwh > 0
+          ? m.batteryKwh.toFixed(1) + " kWh · " + m.battery.label
+          : "Not included in this package";
+      }
+    },
+    {
+      id: "mounting", label: "Mounting", needs: "RAILING SETS",
+      auto: function () { return "Typhoon-rated aluminium rail system, fabricated and fitted to your roof"; }
+    },
+    {
+      id: "protection", label: "Protection", needs: "SURGE / BREAKER SET",
+      auto: function () { return "DC and AC breakers, surge protection, weatherproof enclosure and safety isolator"; }
+    },
+    {
+      id: "wiring", label: "Wiring", needs: "CABLES",
+      auto: function () { return "Solar-rated cable, conduit, cable tray and connectors throughout"; }
+    },
+    {
+      id: "extras", label: "Additional items", needs: "ADDITIONAL ITEMS",
+      auto: function (m) {
+        var g = groupNamed(m, "ADDITIONAL ITEMS");
+        return g ? g.items.map(function (it) { return it.label; }).join(" · ") : "";
+      }
+    },
+    {
+      id: "labour", label: "Labour",
+      auto: function () { return "Delivery, fabrication, installation, testing and commissioning"; }
+    },
+    {
+      id: "paperwork", label: "Paperwork",
+      auto: function (m) {
+        return m.spec.gridTied
+          ? "LGU electrical permit and BILECO net-metering application, filed and tracked by us"
+          : "LGU electrical permit filed by us, plus commissioning and owner training";
+      }
+    }
+  ];
+
+  var SCOPE_KEY = "sc16-scope-prefs";
+  var SCOPE_PREFS = {};        // id → { off, label, detail } — the founder's overrides
+
+  function loadScopePrefs() {
+    try { return JSON.parse(localStorage.getItem(SCOPE_KEY) || "{}") || {}; }
+    catch (_) { return {}; }
+  }
+  function saveScopePrefs() {
+    try { localStorage.setItem(SCOPE_KEY, JSON.stringify(SCOPE_PREFS)); } catch (_) { /* private mode */ }
+  }
+
+  function groupNamed(m, name) {
+    for (var i = 0; i < m.groups.length; i++) if (m.groups[i].name === name) return m.groups[i];
+    return null;
+  }
+
+  /**
+   * The customer copy's scope list, overrides applied.
+   *
+   * A field is either FOLLOWING THE MODEL or OWNED BY THE FOUNDER, and the flag
+   * that decides which is "has this field ever been edited", not "is it empty".
+   * An untouched field tracks the configuration — change the panel count and the
+   * panels line follows. A touched field prints exactly what is in it, INCLUDING
+   * nothing: renaming a line to "Supply and installation of a 6 kW solar setup"
+   * and clearing its detail has to give a heading with no sentence under it, not
+   * the sentence that belonged to the heading you replaced.
+   *
+   * `on:false` lines stay in the list so the editor can still show them; the sheet
+   * filters them out.
+   */
+  function clientScope(m) {
+    return SCOPE_DEFS
+      .filter(function (d) { return !d.needs || groupNamed(m, d.needs); })
+      .map(function (d) {
+        var pref = SCOPE_PREFS[d.id] || {};
+        var autoLabel = d.label;
+        var autoDetail = d.auto(m);
+        return {
+          id: d.id,
+          autoLabel: autoLabel,
+          autoDetail: autoDetail,
+          label: pref.labelSet ? String(pref.label || "").trim() : autoLabel,
+          detail: pref.detailSet ? String(pref.detail || "").trim() : autoDetail,
+          custom: !!(pref.labelSet || pref.detailSet),
+          on: pref.off !== true
+        };
+      });
+  }
+
+  /** A scope line reaches the paper if it is switched on and has something to say. */
+  function scopePrinted(m) {
+    return clientScope(m).filter(function (s) { return s.on && (s.label || s.detail); });
   }
 
   /* ------------------------------------------------------------------- helpers */
@@ -303,8 +467,9 @@
   function compute() {
     var type = val("qb-type") || "liwanag";
     var spec = SYSTEM_TYPES[type];
-    var tariff = num("qb-tariff", DEFAULT_TARIFF);
-    var yieldPerKwp = num("qb-yield", DEFAULT_YIELD);
+    var tariff = num("qb-tariff", CONFIG.tariff);
+    var yieldPerKwp = num("qb-yield", CONFIG.yieldPerKwp);
+    var days = CONFIG.daysPerMonth || 30;
 
     // Bill: an exact figure wins over the band when the founder has the actual bill in
     // hand (they usually will — §2 says ask to see last month's bill).
@@ -315,10 +480,10 @@
     var bill = exact > 0 ? exact : band.mid;
 
     var monthlyKwh = tariff > 0 ? bill / tariff : 0;
-    var coverage = num("qb-coverage", spec.coverage * 100) / 100;
+    var coverage = num("qb-coverage", coverageFor(type) * 100) / 100;
 
     var panel = byId(PANELS, val("qb-panel"));
-    var targetKwp = (monthlyKwh * coverage) / (yieldPerKwp * 30);
+    var targetKwp = (monthlyKwh * coverage) / (yieldPerKwp * days);
 
     // Panel count: auto unless the founder has overridden it (roof survey usually wins).
     var override = parseInt(val("qb-panels-override"), 10);
@@ -330,8 +495,8 @@
     // Whole panels rarely land exactly on the target, and the overshoot is what pushes a
     // job from FLAGSHIP into PLUS — so it is shown, not buried.
     var overshootPct = targetKwp > 0 ? ((kwp - targetKwp) / targetKwp) * 100 : 0;
-    var rows = Math.max(1, Math.ceil(panels / 7));
-    var strings = Math.max(1, Math.ceil(panels / 14));
+    var rows = Math.max(1, Math.ceil(panels / (CONFIG.panelsPerRow || 7)));
+    var strings = Math.max(1, Math.ceil(panels / (CONFIG.panelsPerString || 14)));
 
     var inverter = byId(INVERTERS, val("qb-inverter"));
     var battery = byId(BATTERIES, val("qb-battery"));
@@ -392,11 +557,12 @@
     groups.forEach(function (g) { g.items.forEach(function (it) { materials += it.total; }); });
 
     var vatOn = el("qb-vat") ? el("qb-vat").checked : true;
-    var vat = vatOn ? materials * VAT_RATE : 0;
+    var vatRate = (CONFIG.vatRate == null ? 12 : CONFIG.vatRate) / 100;
+    var vat = vatOn ? materials * vatRate : 0;
 
     // Where our margin lives. Materials pass through at supplier cost; this line carries
     // fabrication, delivery, crew, transport and the permit/net-metering work.
-    var feeAuto = 12000 + panels * 3000;
+    var feeAuto = CONFIG.feeBase + panels * CONFIG.feePerPanel;
     var feeInput = num("qb-fee", -1);
     var fee = feeInput >= 0 ? feeInput : feeAuto;
 
@@ -410,7 +576,8 @@
     // Our own delivery cost for the fee line — crew, transport, permits, fabrication
     // materials. Default from the SC-05 §4 cost stack; editable.
     var deliveryCost = num("qb-delivery-cost", -1);
-    if (deliveryCost < 0) deliveryCost = 12000 + panels * 1500;
+    var deliveryAuto = CONFIG.deliveryBase + panels * CONFIG.deliveryPerPanel;
+    if (deliveryCost < 0) deliveryCost = deliveryAuto;
 
     var ourCost = materials + vat + deliveryCost;
     var margin = customerPrice - ourCost;
@@ -420,24 +587,26 @@
      * Above the ladder the price is an input FROM the market: benchmark ₱/kW × size ×
      * (1 − undercut), rounded to a clean hundred (§3 — corridor first, cost-plus banned).
      * True net is what actually lands after the deductions the gross margin ignores. */
-    var bench = num("qb-bench", 70000);
-    var undercutPct = num("qb-undercut", 5);
+    var bench = num("qb-bench", CONFIG.benchPerKw);
+    var undercutPct = num("qb-undercut", CONFIG.undercutPct);
     var corridorPrice = bench > 0 && kwp > 0
       ? Math.round((kwp * bench * (1 - undercutPct / 100)) / 100) * 100
       : 0;
 
-    var floorPct = num("qb-floor", 20);
-    var referral = num("qb-referral", 1000) * kwp;           // ₱/kW flat, meeting #7
-    var warrantyReserve = customerPrice * num("qb-warranty", 2) / 100;
-    var taxAside = customerPrice * num("qb-taxaside", 0) / 100;
+    var floorPct = num("qb-floor", CONFIG.floorPct);
+    var referral = num("qb-referral", CONFIG.referralPerKw) * kwp;   // ₱/kW flat, meeting #7
+    var warrantyReserve = customerPrice * num("qb-warranty", CONFIG.warrantyPct) / 100;
+    var taxAside = customerPrice * num("qb-taxaside", CONFIG.taxPct) / 100;
     var trueNet = margin - referral - warrantyReserve - taxAside;
     var belowFloor = margin > 0 && marginPct < floorPct;
 
     /* ----- generation and savings (all EST) */
-    var generation = kwp * yieldPerKwp * 30;
+    var generation = kwp * yieldPerKwp * days;
     // On-grid without storage only banks what is consumed during daylight; export is
-    // credited below retail, so we do not count it as a peso-for-peso saving.
-    var usableShare = batteryKwh > 0 ? 1.0 : 0.85;
+    // credited below retail, so we do not count it as a peso-for-peso saving. This
+    // share is the biggest single lever on the saving the customer is promised, so it
+    // is a setting a founder can see and change, never a constant buried in here.
+    var usableShare = (batteryKwh > 0 ? CONFIG.selfConsumptionBattery : CONFIG.selfConsumption) / 100;
     var offsetKwh = Math.min(generation * usableShare, monthlyKwh);
     var savedPerMonth = offsetKwh * tariff;
     var paybackYears = savedPerMonth > 0 ? customerPrice / (savedPerMonth * 12) : 0;
@@ -448,7 +617,8 @@
       coverage: coverage, panel: panel, panels: panels, kwp: kwp, targetKwp: targetKwp,
       overshootPct: overshootPct, rows: rows, strings: strings,
       inverter: inverter, battery: battery, batteryQty: batteryQty, batteryKwh: batteryKwh,
-      groups: groups, materials: materials, vat: vat, vatOn: vatOn, fee: fee, feeAuto: feeAuto,
+      groups: groups, materials: materials, vat: vat, vatOn: vatOn, vatRate: vatRate,
+      fee: fee, feeAuto: feeAuto, deliveryAuto: deliveryAuto,
       total: total, pack: pack, customerPrice: customerPrice, priceIsOverride: priceOverride >= 0,
       deliveryCost: deliveryCost, ourCost: ourCost, margin: margin, marginPct: marginPct,
       corridorPrice: corridorPrice, floorPct: floorPct, belowFloor: belowFloor,
@@ -543,7 +713,100 @@
     out.push('<div class="qb-flag"><strong>Permit / electrician / net-metering checklist (§7).</strong>' +
       'Printed on every quote. A deposit cannot be accepted until all three are signed off.</div>');
 
+    // Blanked and switched off amount to the same thing on paper, so they are
+    // reported together and named by what the line IS, not by whatever heading
+    // the founder left in the field.
+    var hidden = clientScope(m).filter(function (s) { return !s.on || !(s.label || s.detail); });
+    if (hidden.length) {
+      out.push('<div class="qb-flag"><strong>' + hidden.length + ' line' + (hidden.length === 1 ? "" : "s") +
+        ' will not appear on the customer copy.</strong>Left off: ' +
+        esc(hidden.map(function (s) { return s.autoLabel; }).join(", ")) +
+        '. The customer sees a fixed price for a scope that does not mention ' +
+        (hidden.length === 1 ? "it" : "them") + ' — fine when it genuinely is not in the job, a dispute waiting to happen when it is.</div>');
+    }
+
     el("qb-flags").innerHTML = out.join("");
+  }
+
+  /**
+   * The customer-copy editor: one row per scope line — a switch, an editable
+   * heading, editable detail, and a revert.
+   *
+   * Rows are rebuilt only when the SET of lines changes (a BOM group appearing or
+   * disappearing). Every other refresh touches placeholders alone: rewriting an
+   * input's value while a founder is typing in it would throw their caret to the
+   * end of the field on every keystroke.
+   *
+   * The placeholder says what will happen if the field is left as it is — the
+   * automatic text while the field is untouched, and an explicit "nothing prints"
+   * once it has been edited and cleared. That is the whole difference between
+   * "I haven't filled this in" and "I want this blank".
+   */
+  function renderScopeEditor(m) {
+    var box = el("qb-scope");
+    if (!box) return;
+    var scope = clientScope(m);
+    var sig = scope.map(function (s) { return s.id; }).join("|");
+
+    if (box.dataset.sig !== sig) {
+      box.dataset.sig = sig;
+      box.innerHTML = scope.map(function (s) {
+        var pref = SCOPE_PREFS[s.id] || {};
+        return '<div class="qb-scope-row" data-scope="' + esc(s.id) + '">' +
+          '<input type="checkbox" class="scope-on"' + (pref.off ? "" : " checked") +
+            ' aria-label="Show ' + esc(s.autoLabel) + ' on the customer copy">' +
+          '<input type="text" class="scope-label" maxlength="60" value="' + esc(pref.label || "") + '"' +
+            (pref.labelSet ? ' data-set="1"' : "") + ' aria-label="Heading for ' + esc(s.autoLabel) + '">' +
+          '<button type="button" class="scope-revert" title="Back to the automatic text"' +
+            ' aria-label="Reset ' + esc(s.autoLabel) + ' to the automatic text">↺</button>' +
+          '<input type="text" class="scope-detail" maxlength="180" value="' + esc(pref.detail || "") + '"' +
+            (pref.detailSet ? ' data-set="1"' : "") + ' aria-label="Detail for ' + esc(s.autoLabel) + '">' +
+        '</div>';
+      }).join("");
+    }
+
+    scope.forEach(function (s) {
+      var row = box.querySelector('[data-scope="' + s.id + '"]');
+      if (!row) return;
+      var labelField = row.querySelector(".scope-label");
+      var detailField = row.querySelector(".scope-detail");
+      row.classList.toggle("is-off", !s.on);
+      row.classList.toggle("is-custom", s.custom);
+      labelField.placeholder = labelField.dataset.set ? "(no heading)" : s.autoLabel;
+      detailField.placeholder = detailField.dataset.set
+        ? "(no detail — the heading fills the row)"
+        : s.autoDetail;
+      row.querySelector(".scope-revert").disabled = !s.custom;
+    });
+  }
+
+  /** The editor inputs are the source of truth; this copies them into SCOPE_PREFS. */
+  function readScopeEditor() {
+    var box = el("qb-scope");
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll("[data-scope]"), function (row) {
+      var labelField = row.querySelector(".scope-label");
+      var detailField = row.querySelector(".scope-detail");
+      SCOPE_PREFS[row.getAttribute("data-scope")] = {
+        off: !row.querySelector(".scope-on").checked,
+        label: labelField.value.trim(),
+        detail: detailField.value.trim(),
+        labelSet: !!labelField.dataset.set,
+        detailSet: !!detailField.dataset.set
+      };
+    });
+  }
+
+  /** Hand one line back to the model — both fields, and their "edited" flags. */
+  function revertScopeRow(row) {
+    ["scope-label", "scope-detail"].forEach(function (cls) {
+      var field = row.querySelector("." + cls);
+      field.value = "";
+      delete field.dataset.set;
+    });
+    readScopeEditor();
+    saveScopePrefs();
+    refresh();
   }
 
   function bomRowsHtml(m) {
@@ -565,7 +828,51 @@
     return html;
   }
 
+  /**
+   * The customer copy's scope table. Switched-off lines never reach the paper, and
+   * a line with only one half filled in spans the whole row rather than printing an
+   * empty cell beside itself — "SUPPLY AND INSTALLATION OF A 6 KW SOLAR SETUP" is a
+   * perfectly good scope line with nothing to add underneath it.
+   */
+  function scopeRowsHtml(m) {
+    return scopePrinted(m)
+      .map(function (s) {
+        if (!s.detail) return '<tr><td class="qs-scope-k" colspan="2">' + esc(s.label) + '</td></tr>';
+        if (!s.label) return '<tr><td colspan="2">' + esc(s.detail) + '</td></tr>';
+        return '<tr><td class="qs-scope-k">' + esc(s.label) + '</td><td>' + esc(s.detail) + '</td></tr>';
+      })
+      .join("");
+  }
+
+  /**
+   * The one-line reason the price is what it is (§3: every quote carries its
+   * "reason why"). With the itemised build-up gone from the customer copy, this
+   * sentence is the only explanation they get for a number below what established
+   * installers charge — so it is required copy, not decoration. It claims nothing
+   * about a competitor's price: we cannot hold theirs to §1.6.
+   */
+  function priceNote(m) {
+    return "Fixed all-in price" + (m.vatOn ? ", VAT included" : "") + ". Everything listed above is part of the " +
+      "package — no staged extras and no add-on charges on the day. We can hold this price because the package is " +
+      "standardised, the parts list is fixed, and we carry no showroom.";
+  }
+
+  /**
+   * Two documents, one model.
+   *
+   * Both are rendered on every refresh and both stay in the DOM — the inactive one
+   * is hidden, not discarded. That is what lets the payload builder keep reading the
+   * Founder-OS sentences off the customer copy (below) no matter which view the
+   * founder happens to be looking at, and lets print output follow the view.
+   */
   function renderSheet(m) {
+    renderScopeEditor(m);
+    el("qs-client").innerHTML = clientSheetHtml(m);
+    el("qs-internal").innerHTML = internalSheetHtml(m);
+  }
+
+  /** What the homeowner receives: scope, one price, and every honesty block. */
+  function clientSheetHtml(m) {
     var customer = val("qb-customer") || "—";
     var address = val("qb-address") || "—";
     var phone = val("qb-phone") || "";
@@ -584,8 +891,11 @@
         'SANDIGAN hybrid quote with battery storage.</div>'
       : "";
 
+    // Worded for a sheet with no price column: the per-line INDICATIVE badges live
+    // on the internal copy, so this callout is the customer's ONLY warning that a
+    // price is not yet firm (§7). It never disappears while `unquoted` is non-zero.
     var indicative = m.unquoted > 0
-      ? '<div class="qs-brownout"><strong>Indicative quotation</strong>' + m.unquoted + ' item' + (m.unquoted === 1 ? " on this sheet is" : "s on this sheet are") +
+      ? '<div class="qs-brownout"><strong>Indicative quotation</strong>' + m.unquoted + ' item' + (m.unquoted === 1 ? " in this quotation is" : "s in this quotation are") +
         ' priced on current market estimates and not yet confirmed supplier quotations. ' +
         'Final pricing will be confirmed in writing before any deposit is accepted.</div>'
       : "";
@@ -594,7 +904,7 @@
       ? '<div><span>Battery storage</span><strong>' + m.batteryKwh.toFixed(1) + ' kWh</strong><small>' + esc(m.battery.label) + '</small></div>'
       : '<div><span>Battery storage</span><strong>None</strong><small>Daytime self-consumption</small></div>';
 
-    el("qb-sheet").innerHTML =
+    return '' +
       '<div class="qs-head">' +
         // Logo plus the legal name as real text: the name must survive the image
         // failing to load, and a quotation should stay selectable and searchable.
@@ -608,7 +918,7 @@
         '</div>' +
       '</div>' +
 
-      '<div class="qs-title">SOLAR POWER SYSTEM — QUOTATION &amp; BILL OF MATERIALS</div>' +
+      '<div class="qs-title">SOLAR POWER SYSTEM — QUOTATION</div>' +
 
       '<div class="qs-party">' +
         '<div><span>Prepared for</span><p><b>' + esc(customer) + '</b><br>' + esc(address) + (phone ? '<br>' + esc(phone) : '') + '</p></div>' +
@@ -623,20 +933,14 @@
         batteryLine +
       '</div>' +
 
-      '<table><thead><tr>' +
-        '<th style="width:52%">Item</th><th style="width:10%">Qty</th><th class="num" style="width:19%">Price/Unit</th><th class="num" style="width:19%">Total Price</th>' +
-      '</tr></thead><tbody>' +
-        bomRowsHtml(m) +
-        '<tr class="qs-sub"><td colspan="3">MATERIALS SUBTOTAL</td><td class="num">' + money(m.materials) + '</td></tr>' +
-        (m.vatOn ? '<tr class="qs-group"><td>TAX</td><td></td><td></td><td class="num">-</td></tr>' +
-          '<tr><td class="qs-indent">VAT 12%</td><td class="qty">1</td><td class="num">' + money(m.vat) + '</td><td class="num">' + money(m.vat) + '</td></tr>' : "") +
-        '<tr class="qs-group"><td>OTHER COSTS</td><td></td><td></td><td class="num">-</td></tr>' +
-        '<tr><td class="qs-indent">Fabrication, Delivery and Installation Fee</td><td class="qty">1</td><td class="num">' + money(m.fee) + '</td><td class="num">' + money(m.fee) + '</td></tr>' +
-        '<tr class="qs-total"><td colspan="3">TOTAL</td><td class="num">' + money(m.total) + '</td></tr>' +
-        (Math.round(m.customerPrice) !== Math.round(m.total)
-          ? '<tr class="qs-total"><td colspan="3">CONTRACT PRICE (fixed package)</td><td class="num">' + money(m.customerPrice) + '</td></tr>'
-          : "") +
+      // Scope, not a shopping list. The customer reads what lands on their roof and
+      // one price; the unit prices behind it are on the internal sheet.
+      '<div class="qs-sectionhead">What&rsquo;s included in this price</div>' +
+      '<table class="qs-scope"><tbody>' +
+        scopeRowsHtml(m) +
+        '<tr class="qs-total"><td>Contract price</td><td class="num">' + money(m.customerPrice) + '</td></tr>' +
       '</tbody></table>' +
+      '<p class="qs-why">' + esc(priceNote(m)) + '</p>' +
 
       brownout + indicative +
 
@@ -704,8 +1008,96 @@
         '<div>For MACC Systems &amp; Engineering Inc. — ' + esc(prepared) + ' / Date</div>' +
       '</div>' +
 
-      '<div class="qs-foot">This quotation is confidential and prepared solely for the named customer. Equipment prices marked ' +
-        '"indicative" are market estimates pending supplier confirmation.</div>';
+      '<div class="qs-foot">This quotation is confidential and prepared solely for the named customer. Where this ' +
+        'quotation is marked indicative, equipment prices are market estimates pending supplier confirmation.</div>';
+  }
+
+  /**
+   * What we keep: the itemised build, the pick list, and the margin arithmetic.
+   *
+   * Everything the customer copy deliberately leaves out lives here — unit prices,
+   * the VAT and fee build-up, our own delivery cost, profit against the floor, and
+   * take-home after the referral fee and the two reserves. It is the crew's pick
+   * list and the bookkeeping record in one, and it is never emailed: the send path
+   * attaches the customer copy only.
+   */
+  function internalSheetHtml(m) {
+    var quoteNo = val("qb-quote-no") || "—";
+    var date = val("qb-date") || todayISO();
+    var prepared = val("qb-prepared") || "—";
+    var customer = val("qb-customer") || "—";
+    var marginTone = m.margin <= 0 ? " class=\"qs-bad\"" : (m.belowFloor ? "" : " class=\"qs-ok\"");
+
+    return '' +
+      '<div class="qs-stripe">INTERNAL COST SHEET · NOT FOR CUSTOMER RELEASE</div>' +
+
+      '<div class="qs-head">' +
+        '<div class="qs-brand">MACC Systems &amp; Engineering Inc.' +
+          '<small>Job cost sheet for quotation ' + esc(quoteNo) + '<br>Prepared by ' + esc(prepared) + '</small>' +
+        '</div>' +
+        '<div class="qs-meta">' +
+          '<b>INTERNAL</b><br>No. ' + esc(quoteNo) + '<br>Date: ' + esc(date) + '<br>Customer: ' + esc(customer) +
+        '</div>' +
+      '</div>' +
+
+      '<div class="qs-title">BILL OF MATERIALS &amp; COST SHEET</div>' +
+
+      '<div class="qs-headline">' +
+        '<div class="lead"><span>Contract price</span><strong>' + peso(m.customerPrice) + '</strong><small>' +
+          esc(m.pack.tier) + (m.priceIsOverride ? " · set by hand" : " · from the ladder") + '</small></div>' +
+        '<div><span>Our cost</span><strong>' + peso(m.ourCost) + '</strong><small>Materials + VAT + delivery</small></div>' +
+        '<div><span>Profit · min ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + '</strong><small>' +
+          m.marginPct.toFixed(1) + '% of the contract price</small></div>' +
+        '<div><span>Take-home</span><strong>' + peso(m.trueNet) + '</strong><small>After referral &amp; reserves</small></div>' +
+      '</div>' +
+
+      '<table><thead><tr>' +
+        '<th style="width:52%">Item</th><th style="width:10%">Qty</th><th class="num" style="width:19%">Price/Unit</th><th class="num" style="width:19%">Total Price</th>' +
+      '</tr></thead><tbody>' +
+        bomRowsHtml(m) +
+        '<tr class="qs-sub"><td colspan="3">MATERIALS SUBTOTAL</td><td class="num">' + money(m.materials) + '</td></tr>' +
+        (m.vatOn ? '<tr class="qs-group"><td>TAX</td><td></td><td></td><td class="num">-</td></tr>' +
+          '<tr><td class="qs-indent">VAT ' + (m.vatRate * 100).toFixed(m.vatRate * 100 % 1 ? 1 : 0) + '%</td><td class="qty">1</td><td class="num">' + money(m.vat) + '</td><td class="num">' + money(m.vat) + '</td></tr>' : "") +
+        '<tr class="qs-group"><td>OTHER COSTS</td><td></td><td></td><td class="num">-</td></tr>' +
+        '<tr><td class="qs-indent">Fabrication, Delivery and Installation Fee</td><td class="qty">1</td><td class="num">' + money(m.fee) + '</td><td class="num">' + money(m.fee) + '</td></tr>' +
+        '<tr class="qs-total"><td colspan="3">BUILT-UP TOTAL</td><td class="num">' + money(m.total) + '</td></tr>' +
+        '<tr class="qs-total"><td colspan="3">CONTRACT PRICE (what the customer is quoted)</td><td class="num">' + money(m.customerPrice) + '</td></tr>' +
+      '</tbody></table>' +
+
+      // The build-up above is not the margin. Materials pass through at supplier
+      // cost and our profit sits in the fee, so what we actually keep is only
+      // visible once our own delivery cost replaces the fee line.
+      '<div class="qs-sectionhead">Where the money actually goes</div>' +
+      '<table class="qs-cost"><tbody>' +
+        '<tr><td>Materials + VAT</td><td class="num">' + money(m.materials + m.vat) + '</td></tr>' +
+        '<tr><td>Our delivery cost — crew, transport, permits, fabrication</td><td class="num">' + money(m.deliveryCost) + '</td></tr>' +
+        '<tr class="qs-sub"><td>OUR COST</td><td class="num">' + money(m.ourCost) + '</td></tr>' +
+        '<tr><td>Contract price</td><td class="num">' + money(m.customerPrice) + '</td></tr>' +
+        '<tr' + marginTone + '><td>Profit · minimum ' + m.floorPct.toFixed(0) + '%</td><td class="num">' +
+          money(m.margin) + '  ·  ' + m.marginPct.toFixed(1) + '%</td></tr>' +
+        '<tr><td>Less referral fee (₱' + Math.round(m.referral / (m.kwp || 1)).toLocaleString("en-PH") + '/kW × ' +
+          m.kwp.toFixed(2) + ' kWp)</td><td class="num">' + money(m.referral) + '</td></tr>' +
+        '<tr><td>Less warranty fund</td><td class="num">' + money(m.warrantyReserve) + '</td></tr>' +
+        '<tr><td>Less tax set-aside</td><td class="num">' + money(m.taxAside) + '</td></tr>' +
+        '<tr class="qs-total"><td>TAKE-HOME</td><td class="num">' + money(m.trueNet) + '</td></tr>' +
+      '</tbody></table>' +
+
+      '<div class="qs-sectionhead">Checks before this goes out</div>' +
+      '<table class="qs-cost"><tbody>' +
+        '<tr><td>Market price helper — competitor rate × size, less our discount</td><td class="num">' + peso(m.corridorPrice) + '</td></tr>' +
+        '<tr><td>Prices not yet supplier-confirmed</td><td class="num">' +
+          (m.unquoted > 0 ? m.unquoted + " — quote prints INDICATIVE" : "none") + '</td></tr>' +
+        '<tr><td>Array geometry for the crew</td><td class="num">' + m.panels + ' panels · ' + m.rows +
+          ' row' + (m.rows === 1 ? "" : "s") + ' · ' + m.strings + ' string' + (m.strings === 1 ? "" : "s") + '</td></tr>' +
+        '<tr><td>Scope lines left off the customer copy</td><td class="num">' +
+          (function () {
+            var off = clientScope(m).filter(function (s) { return !s.on || !(s.label || s.detail); });
+            return off.length ? esc(off.map(function (s) { return s.autoLabel; }).join(", ")) : "none";
+          })() + '</td></tr>' +
+      '</tbody></table>' +
+
+      '<div class="qs-foot">Internal document. Not to be sent to a customer, printed for a customer, or left on a ' +
+        'site. The customer copy carries scope and one fixed price; this carries what it cost us and what we keep.</div>';
   }
 
   /*
@@ -869,6 +1261,34 @@
     if (inv) inv.dataset.forType = "";   // syncInverterOptions rebuilds on next refresh
   }
 
+  /*
+   * Fields whose starting value is a config number rather than a fixed one. Seeded
+   * at start-up and again when the saved config arrives — but never over a value the
+   * founder has typed. A slow fetch that overwrites someone mid-quote is worse than
+   * a field that briefly shows the built-in default.
+   */
+  var CONFIG_SEEDED = [
+    ["qb-tariff", "tariff"],
+    ["qb-yield", "yieldPerKwp"],
+    ["qb-bench", "benchPerKw"],
+    ["qb-undercut", "undercutPct"],
+    ["qb-floor", "floorPct"],
+    ["qb-referral", "referralPerKw"],
+    ["qb-warranty", "warrantyPct"],
+    ["qb-taxaside", "taxPct"],
+  ];
+
+  function seedFieldsFromConfig() {
+    CONFIG_SEEDED.forEach(function (pair) {
+      var node = el(pair[0]);
+      if (!node || node.dataset.touched) return;
+      var v = CONFIG[pair[1]];
+      node.value = v == null ? "" : v;
+    });
+    var cov = el("qb-coverage");
+    if (cov && !cov.dataset.touched) cov.value = Math.round(coverageFor(val("qb-type") || "liwanag") * 100);
+  }
+
   function syncBatteryVisibility() {
     var type = val("qb-type") || "liwanag";
     var spec = SYSTEM_TYPES[type];
@@ -886,16 +1306,69 @@
     }
     var cov = el("qb-coverage");
     // Follow the type's default coverage until the founder touches the field themselves.
-    if (cov && !cov.dataset.touched) cov.value = Math.round(spec.coverage * 100);
+    if (cov && !cov.dataset.touched) cov.value = Math.round(coverageFor(type) * 100);
   }
 
   root.addEventListener("input", function (e) {
-    if (e.target && e.target.id === "qb-coverage") e.target.dataset.touched = "1";
+    // Anything typed into is the founder's own from then on, so a config re-seed
+    // (start-up, or a colleague's ladder edit arriving) leaves it alone.
+    if (e.target && e.target.tagName === "INPUT") e.target.dataset.touched = "1";
     refresh();
   });
   root.addEventListener("change", refresh);
 
   el("qb-print").addEventListener("click", function () { window.print(); });
+
+  /* -------------------------------------------- which document is on screen
+   * Both sheets are always rendered; this only decides which one is visible —
+   * and because @media print never overrides `hidden`, the visible one is also
+   * the one that prints. The customer copy is the default deliberately: the
+   * founder should be proof-reading what the customer will actually receive.
+   */
+  function setSheetView(view) {
+    var internal = view === "internal";
+    el("qs-client").hidden = internal;
+    el("qs-internal").hidden = !internal;
+    [["qb-view-client", !internal], ["qb-view-internal", internal]].forEach(function (pair) {
+      var b = el(pair[0]);
+      if (!b) return;
+      b.classList.toggle("is-on", pair[1]);
+      b.setAttribute("aria-pressed", pair[1] ? "true" : "false");
+    });
+  }
+  el("qb-view-client").addEventListener("click", function () { setSheetView("client"); });
+  el("qb-view-internal").addEventListener("click", function () { setSheetView("internal"); });
+
+  /* ------------------------------------------------- the customer-copy editor
+   * These listeners sit on the editor rather than on #qb-root so they run FIRST:
+   * events bubble inward-out, so SCOPE_PREFS is up to date by the time the root
+   * handler repaints the sheet. Saving happens on `change` (commit) rather than
+   * `input` (keystroke) — the sheet follows every keystroke, localStorage does not.
+   */
+  var scopeBox = el("qb-scope");
+  if (scopeBox) {
+    // The keystroke that marks a field as the founder's own. It is set here rather
+    // than derived from emptiness, because "cleared on purpose" and "never filled
+    // in" have to mean different things on the paper.
+    scopeBox.addEventListener("input", function (e) {
+      var t = e.target;
+      if (t && (t.classList.contains("scope-label") || t.classList.contains("scope-detail"))) {
+        t.dataset.set = "1";
+      }
+      readScopeEditor();
+    });
+    scopeBox.addEventListener("change", function () { readScopeEditor(); saveScopePrefs(); });
+    scopeBox.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".scope-revert") : null;
+      if (btn) revertScopeRow(btn.closest(".qb-scope-row"));
+    });
+  }
+  el("qb-scope-reset").addEventListener("click", function () {
+    SCOPE_PREFS = {};
+    saveScopePrefs();
+    if (scopeBox) scopeBox.dataset.sig = "";      // force a rebuild: values must clear
+    refresh();
+  });
 
   // One click moves the corridor suggestion into the contract-price field. The price
   // stays an editable input after that — the helper suggests, the founder decides.
@@ -939,7 +1412,7 @@
    * with the one the founder proof-read on screen.
    */
   function quotePayload(m) {
-    var sheet = el("qb-sheet");
+    var sheet = el("qs-client");        // the customer copy — never the internal sheet
     var textOf = function (node) { return node ? node.innerText.replace(/\s+/g, " ").trim() : ""; };
     var listOf = function (sel) {
       return Array.prototype.map.call(sheet.querySelectorAll(sel), textOf).filter(Boolean);
@@ -974,26 +1447,11 @@
       return out;
     };
 
-    // The bill of materials, flattened to the rows the PDF draws. Same order and
-    // the same figures as bomRowsHtml — this is a shape change, not a recount.
-    var rows = [];
-    m.groups.forEach(function (g) {
-      if (g.name) rows.push({ kind: "group", label: g.name });
-      g.items.forEach(function (it) {
-        rows.push({
-          kind: "item", indent: !!g.name, label: it.label,
-          qty: it.qty, price: it.price, total: it.total, quoted: it.quoted,
-        });
-      });
-    });
-    rows.push({ kind: "subtotal", label: "MATERIALS SUBTOTAL", total: m.materials });
-    if (m.vatOn) {
-      rows.push({ kind: "group", label: "TAX" });
-      rows.push({ kind: "item", indent: true, label: "VAT 12%", qty: 1, price: m.vat, total: m.vat });
-    }
-    rows.push({ kind: "group", label: "OTHER COSTS" });
-    rows.push({ kind: "item", indent: true, label: "Fabrication, Delivery and Installation Fee", qty: 1, price: m.fee, total: m.fee });
-    rows.push({ kind: "total", label: "TOTAL", total: m.total });
+    // The scope table exactly as it stands on the customer copy — switched-off
+    // lines already removed, founder edits already applied. The itemised bill of
+    // materials is deliberately NOT sent: it belongs to the internal sheet, and
+    // an endpoint that never receives it cannot accidentally print it.
+    var scope = scopePrinted(m).map(function (s) { return { label: s.label, detail: s.detail }; });
 
     var validity = parseInt(val("qb-validity"), 10) || 14;
     var date = val("qb-date") || todayISO();
@@ -1024,7 +1482,8 @@
         batteryNote: m.batteryKwh > 0 ? m.battery.label : "Daytime self-consumption",
         hasBattery: m.batteryKwh > 0,
         unquoted: m.unquoted,
-        rows: rows,
+        scope: scope,
+        priceNote: textOf(sheet.querySelector(".qs-why")),
         brownout: callout("what happens during a brownout"),
         indicative: callout("indicative quotation"),
         checklist: listOf(".qs-gate li"),
@@ -1405,6 +1864,173 @@
     });
   });
 
+  /* ------------------------------------------------ packages & pricing editor
+   * The ladder and the assumptions, as a form. Everything here used to be a
+   * JavaScript constant; none of it is settled, so all of it is data now.
+   */
+
+  var SETTING_FIELDS = {
+    sizing: [
+      ["tariff", "BILECO rate (₱/kWh)", "0.0001"],
+      ["yieldPerKwp", "Yield (kWh/kWp/day)", "0.1"],
+      ["daysPerMonth", "Days per month", "1"],
+      ["selfConsumption", "Self-consumption, no battery (%)", "1"],
+      ["selfConsumptionBattery", "Self-consumption, with battery (%)", "1"],
+      ["coverageLiwanag", "LIWANAG coverage (%)", "5"],
+      ["coverageIlaw", "ILAW coverage (%)", "5"],
+      ["coverageSandigan", "SANDIGAN coverage (%)", "5"],
+      ["panelsPerRow", "Panels per roof row", "1"],
+      ["panelsPerString", "Panels per string", "1"],
+    ],
+    money: [
+      ["vatRate", "VAT (%)", "0.5"],
+      ["feeBase", "Fee — base (₱)", "500"],
+      ["feePerPanel", "Fee — per panel (₱)", "500"],
+      ["deliveryBase", "Our delivery cost — base (₱)", "500"],
+      ["deliveryPerPanel", "Our delivery cost — per panel (₱)", "500"],
+      ["benchPerKw", "Competitor price (₱ per kW)", "500"],
+      ["undercutPct", "Our discount vs them (%)", "0.5"],
+      ["floorPct", "Minimum profit (%)", "1"],
+      ["referralPerKw", "Referral fee (₱ per kW)", "100"],
+      ["warrantyPct", "Warranty fund (%)", "0.5"],
+      ["taxPct", "Tax set-aside (%)", "0.5"],
+    ],
+  };
+
+  var settingTiers = [];        // working copy — the dialog edits this, not CONFIG
+
+  function setSay(kind, message) {
+    var s = el("qb-set-status");
+    if (!s) return;
+    s.className = "qb-pl-status " + (kind || "");
+    s.textContent = message || "";
+  }
+
+  function settingsNumberHtml(field) {
+    return '<label>' + esc(field[1]) +
+      '<input type="number" step="' + field[2] + '" data-cfg="' + field[0] + '"></label>';
+  }
+
+  /** One ladder tier. The note is the sentence the flag rail shows for this tier. */
+  function settingsTierHtml(tier, i) {
+    return '<div class="qb-set-tier" data-tier="' + i + '">' +
+      '<label>Name<input type="text" maxlength="40" class="t-name" value="' + esc(tier.name || "") + '"></label>' +
+      '<label>Max kWp<input type="number" step="0.1" min="0" class="t-kwp" value="' + esc(tier.maxKwp) + '"></label>' +
+      '<label>Max kWh<input type="number" step="0.1" min="0" class="t-kwh" value="' + esc(tier.maxKwh) + '"></label>' +
+      '<label>Price (₱)<input type="number" step="500" min="0" class="t-price" value="' + esc(tier.price) + '"></label>' +
+      '<label>With battery (₱)<input type="number" step="500" min="0" class="t-priceb" placeholder="same" value="' +
+        esc(tier.priceBattery == null ? "" : tier.priceBattery) + '"></label>' +
+      '<button type="button" class="t-drop" title="Remove this tier" aria-label="Remove tier ' + esc(tier.name || "") + '">×</button>' +
+      '<label class="note">What the flag rail says about this tier' +
+        '<input type="text" maxlength="200" class="t-note" value="' + esc(tier.note || "") + '"></label>' +
+    '</div>';
+  }
+
+  function settingsPaint() {
+    settingTiers = (CONFIG.tiers || []).map(function (t) { return Object.assign({}, t); });
+
+    el("qb-set-tiers").innerHTML = settingTiers.map(settingsTierHtml).join("");
+    el("qb-set-sizing").innerHTML = SETTING_FIELDS.sizing.map(settingsNumberHtml).join("");
+    el("qb-set-money").innerHTML = SETTING_FIELDS.money.map(settingsNumberHtml).join("");
+
+    Array.prototype.forEach.call(el("qb-settings").querySelectorAll("[data-cfg]"), function (node) {
+      var v = CONFIG[node.getAttribute("data-cfg")];
+      node.value = v == null ? "" : v;
+    });
+
+    el("qb-set-who").textContent = CONFIG_META.updatedAt
+      ? "Last changed by " + (CONFIG_META.updatedBy || "someone") + " on " + CONFIG_META.updatedAt.slice(0, 10) + "."
+      : "Never changed — these are the values SC-16 shipped with.";
+
+    // Every founder can move the ladder, so this normally stays unlocked; the form
+    // follows the server's own answer rather than assuming one, and a locked form
+    // with the reason on it beats a Save button that 403s when pressed.
+    var locked = CONFIG_META.loaded && !CONFIG_META.canEdit;
+    Array.prototype.forEach.call(
+      el("qb-settings").querySelectorAll("input, #qb-set-save, #qb-set-add, .t-drop"),
+      function (node) { node.disabled = locked; }
+    );
+    if (locked) setSay("", "Read-only for this account.");
+  }
+
+  function settingsCollect() {
+    var out = {};
+    Array.prototype.forEach.call(el("qb-settings").querySelectorAll("[data-cfg]"), function (node) {
+      out[node.getAttribute("data-cfg")] = node.value === "" ? null : Number(node.value);
+    });
+    out.tiers = Array.prototype.map.call(el("qb-set-tiers").querySelectorAll("[data-tier]"), function (row) {
+      var v = function (cls) { return row.querySelector("." + cls).value; };
+      return {
+        name: v("t-name"),
+        maxKwp: Number(v("t-kwp")),
+        maxKwh: Number(v("t-kwh")),
+        price: Number(v("t-price")),
+        priceBattery: v("t-priceb") === "" ? null : Number(v("t-priceb")),
+        note: v("t-note"),
+      };
+    });
+    return out;
+  }
+
+  el("qb-settings-open").addEventListener("click", function () {
+    // Re-read first: another founder may have moved the ladder since this tab opened,
+    // and the sheet behind the dialog has to agree with what the form shows.
+    loadSettings().then(function () {
+      seedFieldsFromConfig();
+      refresh();
+      settingsPaint();
+      setSay("", CONFIG_META.loaded ? "" : "Offline — showing the built-in defaults. Saving will not work.");
+      el("qb-settings").showModal();
+    });
+  });
+  el("qb-set-close").addEventListener("click", function () { el("qb-settings").close(); });
+
+  el("qb-set-add").addEventListener("click", function () {
+    settingTiers = settingsCollect().tiers;
+    settingTiers.push({ name: "", maxKwp: 0, maxKwh: 0, price: 0, priceBattery: null, note: "" });
+    el("qb-set-tiers").innerHTML = settingTiers.map(settingsTierHtml).join("");
+    var last = el("qb-set-tiers").lastElementChild;
+    if (last) last.querySelector(".t-name").focus();
+  });
+
+  el("qb-set-tiers").addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest(".t-drop") : null;
+    if (!btn) return;
+    var rows = el("qb-set-tiers").querySelectorAll("[data-tier]");
+    if (rows.length <= 1) { setSay("bad", "The ladder needs at least one tier."); return; }
+    settingTiers = settingsCollect().tiers;
+    settingTiers.splice(Number(btn.closest("[data-tier]").getAttribute("data-tier")), 1);
+    el("qb-set-tiers").innerHTML = settingTiers.map(settingsTierHtml).join("");
+    setSay("", "");
+  });
+
+  el("qb-set-save").addEventListener("click", function () {
+    var btn = el("qb-set-save");
+    btn.disabled = true;
+    setSay("", "Saving…");
+    fetch("/api/quote-settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: settingsCollect() }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.data.ok) {
+          setSay("bad", (res.data && res.data.error) || "Could not save.");
+          return;
+        }
+        Object.keys(res.data.config).forEach(function (k) { CONFIG[k] = res.data.config[k]; });
+        CONFIG_META.updatedAt = res.data.updatedAt;
+        CONFIG_META.updatedBy = res.data.updatedBy;
+        seedFieldsFromConfig();
+        refresh();
+        settingsPaint();
+        setSay("good", "Saved. Every new quote uses these numbers.");
+      })
+      .catch(function (err) { setSay("bad", String(err && err.message)); })
+      .then(function () { btn.disabled = false; });
+  });
+
   /**
    * Confirm the send, showing the three things a founder would actually regret
    * getting wrong: the recipient, the price on the document, and whether that
@@ -1470,6 +2096,10 @@
     if (!payload.customer.email) return say("bad", "Add the customer's email address — that is where the quote goes.");
     if (!payload.customer.phone) return say("bad", "Add a phone number — it is how an existing contact is matched.");
     if (!payload.quote.preparedBy) return say("bad", "Put your name in “Prepared by” — a quote goes out attributable to a person.");
+    if (!payload.quote.scope.length) {
+      return say("bad", "Every line in Customer copy is switched off — the quotation would carry a price with nothing " +
+        "attached to it. Switch at least one line back on.");
+    }
     if (m.pack.tier === "CUSTOM" && !m.priceIsOverride) {
       return say("bad", "Set the selling price first — this system is bigger than our fixed packages, and with no price set " +
         "our own cost total (cost + markup, banned §3) would be quoted. The market price helper suggests " + peso(m.corridorPrice) + ".");
@@ -1523,15 +2153,21 @@
   }).join("");
   populateEquipmentSelects();
 
-  el("qb-tariff").value = DEFAULT_TARIFF;
-  el("qb-yield").value = DEFAULT_YIELD;
+  SCOPE_PREFS = loadScopePrefs();     // the founder's own defaults, from last time
+
+  seedFieldsFromConfig();
   el("qb-date").value = todayISO();
   el("qb-quote-no").value = nextQuoteNo();
 
   refresh();
 
-  // Paint immediately from the shipped catalogue, then again once the saved price
-  // list arrives. A slow or failed fetch leaves a working quote on screen rather
-  // than an empty one — the built-in prices are still real prices.
-  loadCatalog().then(function (loaded) { if (loaded) { populateEquipmentSelects(); refresh(); } });
+  // Paint immediately from the built-in catalogue and config, then again once the
+  // saved ones arrive. A slow or failed fetch leaves a working quote on screen
+  // rather than an empty one — the shipped prices are still real prices, and the
+  // fallback ladder is the one the team has been quoting from.
+  Promise.all([loadCatalog(), loadSettings()]).then(function (loaded) {
+    if (loaded[0]) populateEquipmentSelects();
+    if (loaded[1]) seedFieldsFromConfig();
+    if (loaded[0] || loaded[1]) refresh();
+  });
 })();

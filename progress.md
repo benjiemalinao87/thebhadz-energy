@@ -1,5 +1,18 @@
 # Progress
 
+## Quote builder: customer copy vs internal cost sheet (2026-08-02) — done
+- SC-16 now renders two sheets from one model; view tabs above the preview, both always in the DOM
+- Customer copy = scope + one fixed price (no unit prices, no VAT/fee build-up); internal = the itemised BOM plus cost, profit and take-home
+- `/api/quote` receives `scope[]` instead of `rows[]` — the build-up never reaches the endpoint, so it cannot be emailed
+- Customer copy panel: per-line switch, editable heading and detail, ↺ revert; untouched fields follow the model, edited fields print literally including blank
+- Price ladder + sizing assumptions + fee formulas moved out of code into `quote_settings` (`/api/quote-settings`, "Packages & pricing" dialog, any founder can edit, audited)
+- Fixed: `.qb-dialog-wide` never won the cascade (all wide dialogs rendered at 420px); `.workspace-page h2` leaked a section border into every dialog title
+- SOP: `docs/sop-quote-builder.md`
+
+## Client quote companion (2026-08-02) — done
+- Homeowner-facing MD to attach with quotes: `docs/client-quote-companion.md`
+- Covers packages, savings, PH/Biliran incentives (honest: net metering, no local cash rebate), brownout honesty (LIWANAG), permits/BILECO, next steps, FAQs
+
 ## Next Actions dark-mode alert contrast (2026-08-02) — done
 - `.ops-alert` no longer light-on-cream in dark theme
 - `ops-tools.css`: pinned dark ink on light washes + dark fallback

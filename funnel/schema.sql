@@ -437,6 +437,23 @@ CREATE TABLE IF NOT EXISTS price_items (
 
 CREATE INDEX IF NOT EXISTS idx_price_items_kind ON price_items(kind);
 
+-- The numbers behind a quote that are not unit prices: the SC-06 price ladder,
+-- the sizing assumptions, and the fee / delivery-cost formulas (→ /api/quote-settings).
+--
+-- One JSON blob under a single key rather than a row per number, because the
+-- ladder is a list whose length changes whenever a tier is added or dropped —
+-- and needing a migration to add a package is exactly the problem this solves.
+-- The packages are not settled; a price that is still moving must not be a deploy.
+--
+-- Any founder may write it, same as the price list. The control is the record:
+-- api/_middleware.js audits every write and the dialog names who changed it last.
+CREATE TABLE IF NOT EXISTS quote_settings (
+  key         TEXT PRIMARY KEY,           -- only "config" today
+  value       TEXT NOT NULL,              -- JSON; see DEFAULT_CONFIG in api/quote-settings.js
+  updated_at  TEXT NOT NULL,
+  updated_by  TEXT
+);
+
 -- Product/supplier captures clipped from the web by the MACC Product Capture
 -- browser extension (tools/product-scraper-extension → POST /api/captures).
 -- Free-text columns on purpose: a capture is field evidence ("US $28.50 - 32.00

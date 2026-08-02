@@ -465,6 +465,47 @@ statement, the checklist, the milestones, the warranties and the terms are lifte
 DOM rather than written a second time, so the customer's PDF cannot drift from the sheet the
 founder proof-read. Only the numbers come from the model.
 
+### Two documents, one model (SC-16)
+
+Team usage SOP: `docs/sop-quote-builder.md` in the repo root — what to click, what the gates
+are, and who owns the ladder. What follows is how it is built.
+
+The builder renders **two** sheets from the same computed model, both always in the DOM with
+one hidden behind the view tabs:
+
+- **Customer copy** (`#qs-client`) — scope, not a shopping list: what lands on the roof, named
+  by brand and quantity, and one fixed price. This is the ONLY document `/api/quote` can
+  render, and the only one ever emailed. The itemised build-up is never posted to the endpoint,
+  so it cannot accidentally be printed on a customer's quotation.
+- **Internal cost sheet** (`#qs-internal`) — the itemised bill of materials with unit prices,
+  our own delivery cost, profit against the floor, and take-home. Screen and print only.
+
+Each scope line on the customer copy has a switch, an editable heading and editable detail
+(*Customer copy* panel, saved in the founder's browser). A field that has never been edited
+follows the model; an edited field prints exactly what is in it, **including blank** — a
+heading with no detail spans the row. The Founder-OS blocks have no switch: the brownout
+statement (§1.6), the compliance checklist and the INDICATIVE stamp (§7) print regardless.
+
+### The numbers behind a quote (`/api/quote-settings`)
+
+**The price ladder is not settled, so it is data, not code.** Tiers (name, kWp and kWh
+ceilings, price, with-battery price, and the sentence the flag rail shows), the sizing
+assumptions, and the fee/delivery formulas all live in a `quote_settings` row and are edited
+from **Packages & pricing** in the builder. `funnel/internal/assets/quote-builder.js` carries a
+matching fallback block for offline use — if you change `DEFAULT_CONFIG` in
+`functions/api/quote-settings.js`, change that block too.
+
+**Any signed-in founder can read and write it**, exactly as with the price list — the founders
+are equals, and whoever is on the phone to a customer is the person who knows the ladder needs
+to move. The control is the record, not the lock: every write is audited by
+`api/_middleware.js`, and the dialog names who last changed it and when. Tiers are matched
+smallest-first and sorted on save, so a tier can never be shadowed by a larger one above it;
+nothing matching falls through to CUSTOM, where the founder sets the price from the market (§3).
+
+Worth knowing: **self-consumption %** is in there. It is the share of generation that actually
+comes off the bill (85% without storage, since the rest exports below retail), and it moves the
+saving figure the customer is promised more than any other single number.
+
 ### Deploy note
 
 Because Functions + the D1 binding must be detected, **always deploy from inside `funnel/`**:

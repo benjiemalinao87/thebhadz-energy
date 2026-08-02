@@ -41,10 +41,11 @@
 
   <main class="content ops-content workspace-page">
     <p class="doc-eyebrow">SC-16 · QUOTE BUILDER <span class="rev">· REV A · 2026-07-26</span></p>
-    <h1>Bill range in. Printable, itemised quote out.</h1>
+    <h1>Bill range in. Two quotes out.</h1>
     <p class="lede">Enter the homeowner's BILECO bill, pick the package, and the tool sizes the array, builds the bill of
-      materials, prices it against the SC-06 ladder, and prints a customer-ready quotation with the compliance
-      checklist already attached.</p>
+      materials and prices it against the SC-06 ladder — then splits the result in two. The <b>customer copy</b> carries
+      scope, one fixed price and the compliance checklist; the <b>internal cost sheet</b> keeps the itemised build, our
+      cost and our margin. Only the customer copy is ever emailed.</p>
 
     <div class="ops-topbar">
       <span class="ops-status">Sizing assumptions are editable · every figure on the sheet is an estimate until suppliers confirm</span>
@@ -161,6 +162,28 @@
             never from the sheet total. Pricing from our cost + a markup is banned (§3).</p>
         </div>
 
+        <!--
+          What the customer's copy says. The itemised bill of materials stays on the
+          internal sheet; this is the scope list the homeowner reads, and every line
+          of it is the founder's to rename, rewrite or switch off. The blocks that
+          are NOT here are the point: brownout truth, compliance checklist and the
+          indicative stamp are Founder-OS gates and have no switch.
+        -->
+        <div class="qb-box">
+          <h3>Customer copy</h3>
+          <p class="qb-note" style="margin:0 0 12px">Untouched fields follow the system as configured — that is what the
+            grey text is. Edit one and it becomes yours, including when you clear it: a heading on its own prints as a
+            heading with nothing under it. <b>↺</b> hands a line back to the system. The tick decides whether the line
+            appears on the customer's quotation at all — none of it changes the price, and none of it touches the
+            brownout statement, the compliance checklist or the indicative stamp.</p>
+          <div class="qb-scope" id="qb-scope"></div>
+          <div class="qb-actions" style="margin-top:12px">
+            <button type="button" class="secondary" id="qb-scope-reset">Reset to auto</button>
+          </div>
+          <p class="qb-note">Saved in this browser and reused on your next quote. A line you switch off is flagged in
+            the rail on the right — a customer who was quoted for something the sheet never mentions is a dispute.</p>
+        </div>
+
         <div class="qb-box">
           <h3>Quote document</h3>
           <div class="qb-fields two">
@@ -170,6 +193,7 @@
           </div>
           <div class="qb-actions" style="margin-top:12px">
             <button type="button" class="secondary" id="qb-prices">Price list</button>
+            <button type="button" class="secondary" id="qb-settings-open">Packages &amp; pricing</button>
             <button type="button" id="qb-send">Email quote to customer</button>
             <button type="button" class="secondary" id="qb-print">Print / save as PDF</button>
             <button type="button" class="secondary" id="qb-copy">Copy summary</button>
@@ -225,6 +249,51 @@
             </div>
           </dialog>
 
+          <!--
+            Packages & pricing. Every number the quote hangs off, held as data: the
+            ladder is not settled, and a price that is still moving must not be a
+            deploy. Open to every founder, like the price list — the control is the
+            audit record and the "last changed by" line, not a lock.
+          -->
+          <dialog class="qb-dialog qb-dialog-wide" id="qb-settings" aria-labelledby="qb-set-title">
+            <div class="qb-pl-head">
+              <div>
+                <h2 id="qb-set-title">Packages &amp; pricing</h2>
+                <p class="qb-dialog-lede">The ladder and the assumptions behind every quote. Shared by
+                  every founder; changes apply to new quotes immediately. <b id="qb-set-who"></b></p>
+              </div>
+              <button type="button" class="secondary" id="qb-set-close" aria-label="Close packages and pricing">Close</button>
+            </div>
+
+            <div class="qb-pl-body">
+              <div class="qb-pl-group">Price ladder</div>
+              <p class="qb-note" style="margin:0 0 10px">A quote takes the first tier it fits inside — both
+                ceilings, size and storage. Anything bigger falls through to CUSTOM, where the price is set
+                from the market rather than from our costs (§3). Tiers are sorted smallest-first on save.</p>
+              <div id="qb-set-tiers"></div>
+              <div class="qb-actions" style="margin:10px 0 6px">
+                <button type="button" class="secondary" id="qb-set-add">Add a tier</button>
+              </div>
+
+              <div class="qb-pl-group">Sizing assumptions</div>
+              <p class="qb-note" style="margin:0 0 10px">These decide what the customer is told they will save.
+                Self-consumption is the share of what the panels make that actually comes off the bill — without
+                storage the rest exports below retail, so counting it in full would overstate the saving (§1.6).</p>
+              <div class="qb-set-grid" id="qb-set-sizing"></div>
+
+              <div class="qb-pl-group">Money</div>
+              <p class="qb-note" style="margin:0 0 10px">The fee is what the customer is charged for labour;
+                our delivery cost is what that labour actually costs us. The gap between them is the profit,
+                so they are two separate numbers on purpose.</p>
+              <div class="qb-set-grid" id="qb-set-money"></div>
+            </div>
+
+            <div class="qb-pl-foot">
+              <button type="button" id="qb-set-save">Save</button>
+              <span class="qb-pl-status" id="qb-set-status"></span>
+            </div>
+          </dialog>
+
           <dialog class="qb-dialog" id="qb-confirm" aria-labelledby="qb-confirm-title">
             <form method="dialog">
               <h2 id="qb-confirm-title">Send this quotation?</h2>
@@ -259,12 +328,19 @@
           <div class="qb-readout" id="qb-readout"></div>
           <div id="qb-next" class="qb-next"></div>
           <div id="qb-flags"></div>
-          <p class="qb-note" style="margin-top:12px">The sheet below is exactly what prints. Everything else on this page
-            is founder-only and disappears at print time.</p>
+
+          <div class="qb-viewtabs" role="group" aria-label="Which document to show">
+            <button type="button" id="qb-view-client" class="is-on" aria-pressed="true">Customer copy</button>
+            <button type="button" id="qb-view-internal" aria-pressed="false">Internal cost sheet</button>
+          </div>
+          <p class="qb-note" style="margin-top:10px">Whichever sheet is showing is what prints, and the
+            <b>customer copy is what gets emailed</b> — the internal one carries our unit prices, cost and margin and
+            never leaves this screen. Everything else on this page is founder-only and disappears at print time.</p>
         </div>
 
         <div class="qs-wrap">
-          <div class="qs" id="qb-sheet"></div>
+          <div class="qs" id="qs-client"></div>
+          <div class="qs qs-internal" id="qs-internal" hidden></div>
         </div>
       </div>
     </div>

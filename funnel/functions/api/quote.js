@@ -117,8 +117,18 @@ export async function onRequestPost(context) {
   if (!name) return json({ ok: false, error: "Customer name is required before a quote can be sent." }, 422);
   if (!validEmail(email)) return json({ ok: false, error: "A valid customer email address is required." }, 422);
   if (!phone) return json({ ok: false, error: "Customer phone is required — it is how the contact is matched." }, 422);
-  if (!quote.quoteNo || !Array.isArray(quote.rows) || !quote.rows.length) {
-    return json({ ok: false, error: "The quote is incomplete." }, 422);
+  // The customer copy carries scope, not the itemised build-up — a quotation with
+  // no scope lines is a price with nothing attached to it, which is not a quote.
+  if (!quote.quoteNo || !Array.isArray(quote.scope) || !quote.scope.length) {
+    return json({ ok: false, error: "The quote is incomplete — it needs at least one line describing what is included." }, 422);
+  }
+  // A line needs a heading OR a detail, not both: "Supply and installation of a
+  // 6 kW solar setup" with nothing under it is a scope line, and it spans the row.
+  const scope = quote.scope
+    .map((row) => ({ label: clean(row && row.label, 60), detail: clean(row && row.detail, 200) }))
+    .filter((row) => row.label || row.detail);
+  if (!scope.length) {
+    return json({ ok: false, error: "Every line on the customer copy is blank — check the Customer copy panel." }, 422);
   }
 
   // Founder OS invariants. The tool that builds the quote already enforces these
@@ -139,7 +149,11 @@ export async function onRequestPost(context) {
   // --- 1. the document ------------------------------------------------------
   let pdf;
   try {
-    pdf = renderQuotePdf({ ...quote, customer: { name, email, phone, address: clean(customer.address, 200) } });
+    pdf = renderQuotePdf({
+      ...quote,
+      scope,
+      customer: { name, email, phone, address: clean(customer.address, 200) },
+    });
   } catch (err) {
     return json({ ok: false, error: "Could not render the quote PDF: " + String(err && err.message) }, 500);
   }

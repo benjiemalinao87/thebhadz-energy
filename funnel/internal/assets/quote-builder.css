@@ -62,12 +62,21 @@
 .qb-send-status.bad { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
 
 /* Price list. A dense editable table, so it gets its own wider dialog. */
-.qb-dialog-wide { width: min(760px, calc(100vw - 32px)); }
+/* Both classes on purpose. The base .qb-dialog width is declared further down this
+   file, so a single-class selector here loses the cascade on equal specificity and
+   the wide dialogs silently render at the narrow 420px. */
+.qb-dialog.qb-dialog-wide { width: min(880px, calc(100vw - 32px)); }
 .qb-pl-head {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
   padding: 20px 22px 14px; border-bottom: 1px solid var(--hairline);
 }
-.qb-pl-head h2 { margin: 0 0 4px; font: 600 17px var(--sans); color: var(--ink); }
+/* .workspace-page h2 is a PAGE-SECTION heading: it carries a top border and 54px of
+   margin to separate sections. Inside a dialog that lands as a stray rule above the
+   title, so the section framing is reset here as well as the margin. */
+.qb-pl-head h2 {
+  margin: 0 0 4px; padding-top: 0; border-top: 0;
+  font: 600 17px var(--sans); color: var(--ink);
+}
 .qb-pl-body { max-height: min(62vh, 560px); overflow-y: auto; padding: 4px 22px 8px; }
 
 .qb-pl-group {
@@ -240,6 +249,83 @@
 /* A price we have not confirmed with a supplier must never look like one we have. */
 .qb-unquoted { color: var(--ws-warn-ink, #8a5b00); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
 
+/* ---------- the customer-copy editor ----------
+   One row per scope line: switch, heading, detail, revert. Heading and detail sit
+   in one column so the switch reads as governing both. An UNTOUCHED field shows the
+   automatic text as its placeholder and keeps following the configuration; once a
+   field has been edited it prints exactly what is in it, including nothing — the
+   revert hands the line back to the model. */
+.qb-scope { display: grid; gap: 2px; }
+.qb-scope-row {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr) 24px; gap: 4px 8px;
+  align-items: center; padding: 7px 0; border-bottom: 1px solid var(--hairline);
+}
+.qb-scope-row:last-child { border-bottom: 0; }
+.qb-scope-row .scope-on { grid-row: 1 / span 2; align-self: start; margin-top: 6px; width: auto; }
+.qb-scope-row .scope-revert {
+  grid-column: 3; grid-row: 1 / span 2; align-self: start; margin-top: 3px;
+  width: 24px; height: 24px; padding: 0; border: 0; background: none;
+  color: var(--faint); font-size: 14px; line-height: 1; cursor: pointer;
+}
+.qb-scope-row .scope-revert:hover:not(:disabled) { color: var(--ink); }
+.qb-scope-row .scope-revert:disabled { opacity: .25; cursor: default; }
+.qb-scope-row .scope-revert:focus-visible { outline: 2px solid var(--sun); outline-offset: 1px; }
+/* An edited line is marked, so "this is mine now" is visible without reading it. */
+.qb-scope-row.is-custom .scope-revert { color: var(--copper); }
+.qb-scope-row.is-custom input[type="text"] { border-color: var(--copper); }
+.qb-scope-row input[type="text"] {
+  width: 100%; min-width: 0; padding: 5px 7px; border: 1px solid var(--hairline);
+  background: var(--paper); color: var(--ink); font: 12.5px var(--sans); border-radius: 2px;
+}
+.qb-scope-row .scope-label { font-weight: 600; }
+.qb-scope-row .scope-detail { font-size: 12px; color: var(--ink); }
+.qb-scope-row input::placeholder { color: var(--faint); opacity: 1; }
+.qb-scope-row input:focus { outline: 2px solid var(--sun); outline-offset: 1px; }
+.qb-scope-row.is-off input[type="text"] { opacity: .45; text-decoration: line-through; }
+
+/* ---------- packages & pricing dialog ----------
+   The ladder is a variable-length list, so a tier is a row of its own inputs with a
+   full-width note underneath. Everything else is a plain grid of numbers. */
+.qb-set-tier {
+  display: grid; grid-template-columns: 1.5fr .8fr .8fr 1fr 1fr 26px;
+  gap: 6px 8px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--hairline);
+}
+.qb-set-tier:first-child { padding-top: 0; }
+.qb-set-tier .note { grid-column: 1 / -1; }
+.qb-set-tier label, .qb-set-grid label {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  color: var(--faint); font: 600 10px var(--mono); letter-spacing: .03em;
+}
+.qb-set-tier input, .qb-set-grid input {
+  width: 100%; min-width: 0; padding: 6px 8px; border: 1px solid var(--hairline);
+  background: var(--paper); color: var(--ink); font: 13px var(--sans); border-radius: 2px;
+}
+.qb-set-tier input[type="number"], .qb-set-grid input[type="number"] {
+  font-family: var(--mono); text-align: right;
+}
+.qb-set-tier input:focus, .qb-set-grid input:focus { outline: 2px solid var(--sun); outline-offset: 1px; }
+.qb-set-tier input:disabled, .qb-set-grid input:disabled { opacity: .5; }
+.qb-set-tier .t-drop {
+  border: 0; background: none; color: var(--faint); font-size: 17px; line-height: 1;
+  padding: 0 0 6px; cursor: pointer;
+}
+.qb-set-tier .t-drop:hover:not(:disabled) { color: var(--ws-red, #b42318); }
+.qb-set-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 6px; }
+@media (max-width: 700px) {
+  .qb-set-tier { grid-template-columns: 1fr 1fr; }
+  .qb-set-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- customer copy / internal cost sheet ---------- */
+.qb-viewtabs { display: flex; gap: 0; margin-top: 16px; border: 1px solid var(--hairline); width: fit-content; max-width: 100%; }
+.qb-viewtabs button {
+  padding: 8px 15px; border: 0; background: transparent; color: var(--faint);
+  font: 600 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
+}
+.qb-viewtabs button + button { border-left: 1px solid var(--hairline); }
+.qb-viewtabs button.is-on { background: var(--ink); color: var(--paper); }
+.qb-viewtabs button:focus-visible { outline: 2px solid var(--sun); outline-offset: -2px; }
+
 /* ---------- the quote sheet (screen preview = print output) ---------- */
 
 .qs-wrap { background: #6b6b6b; padding: 20px; overflow-x: auto; }
@@ -282,6 +368,16 @@
 /* An unconfirmed price must stay visibly flagged on the printout, so the badge
    keeps the light-ground amber rather than the theme's (pale, dark-ground) one. */
 .qs .qb-unquoted { color: #8a5b00 !important; }
+/* Internal-sheet inks. Two classes each, so they out-specify the `.qs *` blanket
+   above rather than relying on order. */
+.qs .qs-stripe { background: #b42318 !important; }
+.qs .qs-stripe, .qs .qs-stripe * { color: #fff !important; }
+.qs tr.qs-ok td { color: #14603a !important; }
+.qs tr.qs-bad td { color: #b42318 !important; }
+.qs .qs-why { color: #444 !important; }
+
+/* Only one of the two documents is on screen, and only one prints. */
+.qs[hidden] { display: none !important; }
 
 .qs-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 2px solid #111; padding-bottom: 9px; }
 .qs-brand { font: 700 17px/1.15 "Helvetica Neue", Arial, sans-serif; letter-spacing: .02em; }
@@ -318,6 +414,32 @@
 .qs tr.qs-sub td { background: #f5f5f5; font-weight: 700; }
 .qs tr.qs-total td { background: #fdf0cf; font-weight: 700; font-size: 11.5px; }
 .qs td.qs-indent { padding-left: 20px; }
+
+/* A heading that introduces a table without pretending to be a table row. */
+.qs-sectionhead {
+  margin: 14px 0 5px; font: 700 10.5px Arial, sans-serif;
+  letter-spacing: .07em; text-transform: uppercase;
+}
+
+/* The customer copy's scope table: what lands on the roof, and one price. Wider
+   key column than the internal BOM because these are sentences, not part numbers. */
+.qs table.qs-scope td { padding: 5px 7px; font-size: 10.5px; line-height: 1.4; }
+.qs table.qs-scope td.qs-scope-k { width: 27%; font-weight: 700; }
+.qs table.qs-scope tr.qs-total td { font-size: 11.5px; }
+
+/* The "reason why" under the price (§3). Quieter than body copy, never absent. */
+.qs-why { margin: 6px 0 0; font-size: 9.5px; line-height: 1.5; color: #444; }
+
+/* ---- internal cost sheet ---- */
+.qs-stripe {
+  margin: -4px 0 12px; padding: 6px 11px; background: #b42318; color: #fff;
+  font: 700 9.5px "Helvetica Neue", Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase;
+}
+.qs table.qs-cost { margin-bottom: 4px; }
+.qs table.qs-cost td { font-size: 10.5px; }
+.qs table.qs-cost td:last-child { width: 32%; text-align: right; font-family: "Courier New", monospace; }
+.qs tr.qs-ok td { color: #14603a; }
+.qs tr.qs-bad td { color: #b42318; }
 
 .qs-legal { margin-top: 12px; }
 .qs-legal h3 { margin: 11px 0 4px; font: 700 10.5px Arial, sans-serif; letter-spacing: .07em; text-transform: uppercase; }
@@ -397,8 +519,10 @@
   .qs-gate, .qs-brownout, .qs-sign, .qs-steps { page-break-inside: avoid; }
   .qs-legal { page-break-before: auto; }
 
-  /* Group/total shading must survive the printer's default of dropping backgrounds. */
-  .qs tr.qs-group td, .qs tr.qs-sub td, .qs tr.qs-total td, .qs thead th, .qs-headline .lead {
+  /* Group/total shading must survive the printer's default of dropping backgrounds.
+     The internal stripe most of all: a cost sheet that prints without the red band
+     across the top is a cost sheet somebody hands to a customer. */
+  .qs tr.qs-group td, .qs tr.qs-sub td, .qs tr.qs-total td, .qs thead th, .qs-headline .lead, .qs-stripe {
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
 }

@@ -1,5 +1,25 @@
 # Lesson Learn
 
+## Editable defaults: "blank means auto" is two intentions, not one
+
+**Fixed:** 2026-08-02
+
+**What went wrong:** The customer-copy editor treated an empty field as "use the automatic text". A founder renamed a scope line and cleared its detail, and the tool printed the *old* line's sentence under the new heading — it could not tell "I haven't filled this in" from "I want this blank".
+
+**What worked:** Track whether a field has ever been *edited*, not whether it is empty. Untouched fields follow the model and show it as a placeholder; edited fields print literally, including blank. Add a per-row revert so there is a way back, and mark edited rows visually.
+
+**Do not:** Infer intent from emptiness in any field that has a computed default. And when a field can be deliberately blank, check the whole path — the row was also being silently dropped by three separate `label && detail` filters.
+
+**Also:** Numbers that are still being negotiated do not belong in code. The price ladder moved to `quote_settings` the same day, for the same reason.
+
+## Client quote companion: incentives without overclaim
+
+**Fixed:** 2026-08-02
+
+**What worked:** Attach a short homeowner MD with the quote covering (1) package vs brownout honesty, (2) self-use vs export-credit savings, (3) national RA 9513 net metering via BILECO, (4) explicit “no Biliran cash rebate.” Keep FIT/ITH/developer perks out of the homeowner promise list.
+
+**Do not:** Promise government refunds, cash from the co-op, or LIWANAG brownout backup. Do not cite unverified competitor prices or install counts in client collateral.
+
 ## FB-ad calculator page: layout yes, fabricated proof no
 
 **Fixed:** 2026-07-30

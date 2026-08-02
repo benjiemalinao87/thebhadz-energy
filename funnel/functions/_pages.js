@@ -84,7 +84,7 @@ export const SECTIONS = [
     // sets the price a customer sees, so it can be granted to whoever sells and
     // withheld from whoever only installs.
     pages: ["quote-builder"],
-    apis: ["/api/quote", "/api/price-items"],
+    apis: ["/api/quote", "/api/price-items", "/api/quote-settings"],
   },
   {
     key: "finance",

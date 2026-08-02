@@ -1,5 +1,5 @@
 /**
- * The quotation, laid out on paper.
+ * The customer's quotation, laid out on paper.
  *
  * This is the second renderer of the same quote — the first is the on-screen
  * sheet in internal/assets/quote-builder.js. They deliberately share the MODEL
@@ -7,12 +7,19 @@
  * numbers cannot disagree. Only the layout is written twice, because a browser
  * laying out HTML and a PDF placing glyphs are not the same machine.
  *
+ * This renders the CUSTOMER copy only, and it is the only quote document that
+ * leaves the building. It carries scope — what lands on the roof, named by brand
+ * and quantity where the brand is the warranty — and one fixed price. The itemised
+ * bill of materials with unit prices, our cost and our margin is the internal cost
+ * sheet, which lives on screen in the quote builder and is never posted here: an
+ * endpoint that never receives the build-up cannot accidentally email it.
+ *
  * What must never diverge, and is asserted by /api/quote before this runs:
  *   - the compliance checklist prints on every quote (Founder OS §7)
  *   - a system with no battery prints the brownout truth (Founder OS §1.6)
  *   - unconfirmed prices stamp the sheet INDICATIVE (Founder OS §7)
  */
-import { A4, Page, buildPdf, textWidth, wrap } from "./_pdf.js";
+import { A4, Page, buildPdf, wrap } from "./_pdf.js";
 
 const M = 42;                       // page margin
 const RIGHT = A4.width - M;
@@ -24,14 +31,14 @@ const peso = (n) => "PHP " + Number(n || 0).toLocaleString("en-PH", {
 });
 const pesoShort = (n) => "PHP " + Math.round(Number(n || 0)).toLocaleString("en-PH");
 
-/** Column geometry for the bill-of-materials table. */
+/** Column geometry for the scope table: a heading column and a detail column. */
 const COL = {
   item: M + 6,
-  qty: M + 330,
-  unit: M + 405,
+  detail: M + 146,          // where the detail column starts
   total: RIGHT - 6,
 };
 const ROW_H = 13;
+const LINE_H = 11;          // leading inside a wrapped detail cell
 
 export function renderQuotePdf(q) {
   const pages = [];
@@ -124,54 +131,61 @@ export function renderQuotePdf(q) {
   });
   y += bandH + 16;
 
-  // ---- bill of materials ---------------------------------------------------
+  // ---- what the price includes ---------------------------------------------
+  // Scope, not a shopping list. Each row is a heading and a sentence; the detail
+  // wraps, so a row is as tall as its text rather than a fixed 13pt.
   const tableHead = () => {
     page.rect(M, y, RIGHT - M, ROW_H + 2, { gray: 0.93 });
     page.stroke(M, y, RIGHT - M, ROW_H + 2, { gray: 0.55 });
-    page.text("Item", COL.item, y + 10, { size: 8, bold: true });
-    page.text("Qty", COL.qty, y + 10, { size: 8, bold: true });
-    page.text("Price/Unit", COL.unit, y + 10, { size: 8, bold: true });
-    page.text("Total Price", COL.total, y + 10, { size: 8, bold: true, align: "right" });
+    page.text("WHAT'S INCLUDED IN THIS PRICE", COL.item, y + 10, { size: 8, bold: true });
     y += ROW_H + 2;
   };
   tableHead();
 
-  for (const row of q.rows) {
-    if (y + ROW_H > A4.height - M - 40) {
+  for (const row of q.scope || []) {
+    const label = String(row.label || "").trim();
+    const detail = String(row.detail || "").trim();
+    // A line with only one half filled in spans the whole row. Printing an empty
+    // cell next to a heading reads as something the quote forgot to say.
+    const full = !label || !detail;
+    const text = full ? (label || detail) : detail;
+    const lines = wrap(text, (full ? RIGHT - COL.item : RIGHT - COL.detail) - 12, 8.5, full && !!label);
+    // The heading wraps rather than being clipped: the browser sheet wraps it, and
+    // a founder who proof-read a two-line heading on screen must get one on paper.
+    const keyLines = full ? [] : wrap(label, COL.detail - COL.item - 16, 8.5, true);
+    const h = Math.max(ROW_H + 3, Math.max(lines.length, keyLines.length) * LINE_H + 6);
+    if (y + h > A4.height - M - 40) {
       need(999);          // force the page break, then repeat the header
       tableHead();
     }
-    const isGroup = row.kind === "group";
-    const isSub = row.kind === "subtotal";
-    const isTotal = row.kind === "total";
-    if (isGroup) page.rect(M, y, RIGHT - M, ROW_H, { rgb: [0.874, 0.918, 0.855] });
-    else if (isSub) page.rect(M, y, RIGHT - M, ROW_H, { gray: 0.96 });
-    else if (isTotal) page.rect(M, y, RIGHT - M, ROW_H, { rgb: [0.992, 0.941, 0.812] });
-    page.stroke(M, y, RIGHT - M, ROW_H, { gray: 0.6 });
+    page.stroke(M, y, RIGHT - M, h, { gray: 0.6 });
 
-    const bold = isGroup || isSub || isTotal;
-    const indent = row.kind === "item" && row.indent ? 12 : 0;
-    let label = row.label;
-    // The badge is part of the label so it cannot be separated from its price.
-    if (row.quoted === false) label += "  (INDICATIVE)";
-    const maxLabel = COL.qty - COL.item - 10 - indent;
-    while (label && textWidth(label, 8, bold) > maxLabel) label = label.slice(0, -2);
-    page.text(label, COL.item + indent, y + 9.5, { size: 8, bold });
-
-    if (row.qty != null) page.text(String(row.qty), COL.qty + 10, y + 9.5, { size: 8, bold, align: "center" });
-    if (row.price != null) page.text(row.price.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), COL.unit + 55, y + 9.5, { size: 8, bold, align: "right" });
-    if (row.total != null) page.text(row.total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), COL.total, y + 9.5, { size: 8, bold, align: "right" });
-    else if (isGroup) page.text("-", COL.total, y + 9.5, { size: 8, bold, align: "right" });
-    y += ROW_H;
+    if (full) {
+      lines.forEach((line, i) => page.text(line, COL.item, y + 11 + i * LINE_H, { size: 8.5, bold: !!label }));
+    } else {
+      page.line(COL.detail - 8, y, COL.detail - 8, y + h, { gray: 0.6 });
+      keyLines.forEach((line, i) => page.text(line, COL.item, y + 11 + i * LINE_H, { size: 8.5, bold: true }));
+      lines.forEach((line, i) => page.text(line, COL.detail, y + 11 + i * LINE_H, { size: 8.5 }));
+    }
+    y += h;
   }
 
-  // Contract price, set apart from the materials arithmetic above it: the price
-  // comes off the SC-06 ladder, not off this table.
+  // One price, set apart from the scope above it. It comes off the SC-06 ladder,
+  // and there is no arithmetic on this document for a customer to reverse-engineer.
   page.rect(M, y, RIGHT - M, ROW_H + 4, { rgb: [0.992, 0.941, 0.812] });
   page.stroke(M, y, RIGHT - M, ROW_H + 4, { gray: 0, lineWidth: 1 });
   page.text("CONTRACT PRICE (fixed package)", COL.item, y + 11, { size: 9, bold: true });
   page.text(peso(q.customerPrice), COL.total, y + 11, { size: 9, bold: true, align: "right" });
-  y += ROW_H + 4 + 16;
+  y += ROW_H + 4 + 8;
+
+  // The reason the price is what it is (§3). With no itemised build-up on this
+  // document, this sentence is the customer's only explanation for a number below
+  // what established installers charge — so it prints whenever the sheet carries it.
+  if (q.priceNote) {
+    para(q.priceNote, { size: 7.5, gray: 0.4, gap: 10 });
+  } else {
+    y += 8;
+  }
 
   // ---- brownout truth ------------------------------------------------------
   // Triggered by the ABSENCE OF A BATTERY, never by the package name: a hybrid
