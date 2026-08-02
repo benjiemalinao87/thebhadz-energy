@@ -678,7 +678,10 @@
       '<div><span>Quote total</span><strong>' + peso(m.total) + '</strong></div>' +
       '<div><span>Customer price</span><strong>' + peso(m.customerPrice) + '</strong></div>' +
       '<div><span>Our cost</span><strong>' + peso(m.ourCost) + '</strong></div>' +
-      '<div class="' + marginTone + '"><span>Profit · minimum ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(0) + '%</strong></div>' +
+      // One decimal, matching the flag rail. Rounded to whole percent this tile read
+      // "16%" while the flag underneath said "15.6% is under our 20% minimum" — the
+      // same number contradicting itself at exactly the moment it matters.
+      '<div class="' + marginTone + '"><span>Profit · minimum ' + m.floorPct.toFixed(0) + '%</span><strong>' + peso(m.margin) + ' · ' + m.marginPct.toFixed(1) + '%</strong></div>' +
       '<div class="' + (m.trueNet <= 0 ? "bad" : "") + '"><span>Take-home · after referral &amp; funds</span><strong>' + peso(m.trueNet) + '</strong></div>';
   }
 
@@ -1252,6 +1255,10 @@
     renderSheet(current);
     var feeField = el("qb-fee");
     if (feeField && feeField.value === "") feeField.placeholder = String(current.feeAuto);
+    // The fee field showed its computed default while this one said "Auto", so the
+    // number the profit is actually being calculated from was invisible.
+    var deliveryField = el("qb-delivery-cost");
+    if (deliveryField && deliveryField.value === "") deliveryField.placeholder = String(current.deliveryAuto);
     var priceField = el("qb-price");
     if (priceField && priceField.value === "") {
       priceField.placeholder = current.pack.price != null ? String(current.pack.price) : String(Math.round(current.total));
@@ -1332,7 +1339,16 @@
       node.value = v == null ? "" : v;
     });
     var cov = el("qb-coverage");
-    if (cov && !cov.dataset.touched) cov.value = Math.round(coverageFor(val("qb-type") || "liwanag") * 100);
+    if (cov && !cov.dataset.touched) cov.value = Math.round(coverageFor(val("qb-type")) * 100);
+
+    // The checkbox used to say "Add 12% VAT" in markup. With the rate editable that
+    // is a control lying about what it does — and it would disagree with the VAT line
+    // the sheet prints.
+    var vatLabel = el("qb-vat-label");
+    if (vatLabel) {
+      var rate = CONFIG.vatRate == null ? 12 : Number(CONFIG.vatRate);
+      vatLabel.textContent = "Add " + (rate % 1 ? rate.toFixed(1) : rate.toFixed(0)) + "% VAT on materials";
+    }
   }
 
   function syncBatteryVisibility() {

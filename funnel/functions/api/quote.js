@@ -502,7 +502,7 @@ ${pad(
     `style="border:1px solid ${C.rule};border-radius:8px"><tr>` +
     `<td style="padding:13px 16px;font-family:${FACE};font-size:13.5px;line-height:1.5;color:${C.ink2}" class="m-ink2">` +
       `<b style="color:${C.ink};font-weight:600">Your full quotation is attached as a PDF.</b><br>` +
-      `Complete bill of materials, warranties and terms.</td>` +
+      `Everything included in the price, the warranties and the terms.</td>` +
   `</tr></table>`
 )}
 
@@ -550,8 +550,8 @@ ${gap(36)}
     "",
     "Reply to this email to confirm your free site survey.",
     "",
-    "Your full quotation is attached as a PDF - complete bill of materials,",
-    "warranties and terms.",
+    "Your full quotation is attached as a PDF - everything included in the",
+    "price, the warranties and the terms.",
     "",
     "No deposit is due until the permit, licensed-electrician sign-off and",
     "net-metering checklist on your quotation are complete.",

@@ -1,5 +1,13 @@
 # Progress
 
+## Quote builder bug sweep (2026-08-03) — done
+- `/api/quote-settings` PUT merged from `DEFAULT_CONFIG`, so a partial save wiped every other setting; now merges over the saved row
+- Covering email told the customer the PDF was a "complete bill of materials" — it hasn't been since the split; reworded in both HTML and plain-text bodies
+- VAT checkbox hardcoded "Add 12% VAT" while the rate is editable; now written from the config and agrees with the sheet's VAT line
+- Profit tile rounded to whole percent while the flag rail showed one decimal — same number reading 16% and 15.6% at once
+- Delivery-cost field now shows its computed default as a placeholder, like the fee field
+- Verified not bugs: payload is complete when sent from the internal view (`innerText` falls back to `textContent` when hidden); `wrap()` cannot loop on a long word; the endpoint renders label-only and detail-only scope rows inside workerd
+
 ## Quote builder: packages are editable too (2026-08-02) — done
 - LIWANAG / ILAW / SANDIGAN moved out of code into `quote_settings.packages`; add, rename, remove from "Packages & pricing"
 - Each package carries name, dropdown hint, coverage %, grid-tied and needs-battery — the last two drive net-metering copy, the storage picker and the inverter list

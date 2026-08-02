@@ -1,5 +1,17 @@
 # Lesson Learn
 
+## Moving a number into the database leaves its label behind in the markup
+
+**Fixed:** 2026-08-03
+
+**What went wrong:** After the VAT rate, coverage and referral fee became editable settings, the UI still asserted the old values in hard-coded copy — the checkbox read "Add 12% VAT on materials" while the sheet printed "VAT 8%". A control that names a number it no longer controls is worse than one that names none.
+
+**Also:** `/api/quote-settings` PUT built its new config from `DEFAULT_CONFIG` rather than from the currently saved row, so any partial save silently reset every other setting — a founder saving a margin floor would have reverted a renamed package and the whole ladder. Merge over the CURRENT value, never over the defaults.
+
+**And:** the covering email still told the customer the attachment was a "complete bill of materials" a day after the customer copy stopped being one.
+
+**Do not:** treat "make it configurable" as done when the storage and the form work. Grep the surrounding copy for the old value, and check every downstream document that describes the thing.
+
 ## Editable defaults: "blank means auto" is two intentions, not one
 
 **Fixed:** 2026-08-02

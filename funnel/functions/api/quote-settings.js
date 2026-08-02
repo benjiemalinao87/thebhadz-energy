@@ -211,7 +211,12 @@ export async function onRequestPut(context) {
     return json({ ok: false, error: "Expected a config object." }, 422);
   }
 
-  const config = { ...DEFAULT_CONFIG };
+  // Start from what is SAVED, not from the shipped defaults. A PUT that omits a
+  // field means "leave it alone" — starting from DEFAULT_CONFIG instead meant any
+  // partial save silently reset every other setting, so one founder saving a
+  // margin floor could quietly revert a renamed package and the whole ladder.
+  const { config: current } = await readConfig(env);
+  const config = { ...current };
 
   for (const [field, [min, max]] of Object.entries(NUMBERS)) {
     if (incoming[field] === undefined || incoming[field] === null || incoming[field] === "") continue;

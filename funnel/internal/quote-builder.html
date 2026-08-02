@@ -107,15 +107,18 @@
               <label>Panel count override<input id="qb-panels-override" type="number" min="1" step="1" placeholder="Auto"></label>
             </div>
           </div>
-          <p class="qb-note">On-grid defaults to 70% coverage because export is credited below the retail rate — size for
-            daytime self-consumption first. Use the panel override once the roof survey gives you the real usable area.</p>
+          <p class="qb-note">Coverage starts at whatever the chosen package is set to in <b>Packages &amp; pricing</b>. On-grid
+            is deliberately under 100% because export is credited below the retail rate — size for daytime
+            self-consumption first. Use the panel override once the roof survey gives you the real usable area.</p>
         </div>
 
         <div class="qb-box">
           <h3>Money</h3>
           <div class="qb-fields">
             <label style="flex-direction:row;align-items:center;gap:8px">
-              <input id="qb-vat" type="checkbox" checked style="width:auto"> Add 12% VAT on materials
+              <!-- The rate is editable in Packages & pricing, so the label is written
+                   from the config rather than asserting a number the sheet may not use. -->
+              <input id="qb-vat" type="checkbox" checked style="width:auto"> <span id="qb-vat-label">Add VAT on materials</span>
             </label>
             <label>Fabrication, delivery &amp; installation fee (₱)<input id="qb-fee" type="number" min="0" step="500" placeholder="Auto"></label>
             <label>Our delivery cost — crew, transport, permits (₱)<input id="qb-delivery-cost" type="number" min="0" step="500" placeholder="Auto"></label>
@@ -144,9 +147,10 @@
                 <label>Warranty fund (%)<input id="qb-warranty" type="number" min="0" max="20" step="0.5" value="2"></label>
                 <label>Tax set-aside (%)<input id="qb-taxaside" type="number" min="0" max="20" step="0.5" value="0"></label>
               </div>
-              <p class="qb-note">Take-home = profit − referral fee (₱1,000/kW, meeting #7) − warranty fund − tax set-aside.
-                Leave tax at 0 while the 12% VAT box above is ticked; if MACC registers non-VAT, untick VAT and set ~3% here —
-                confirm with the accountant. The 20% minimum is a placeholder until the founders agree a house number in
+              <p class="qb-note">Take-home = profit − referral fee (₱/kW, per meeting #7) − warranty fund − tax set-aside.
+                These four start from <b>Packages &amp; pricing</b> and can be overridden for one quote here. Leave tax at 0
+                while the VAT box above is ticked; if MACC registers non-VAT, untick VAT and set ~3% here — confirm with the
+                accountant. The minimum profit is a placeholder until the founders agree a house number in
                 <span class="mono">ops/status.md</span>.</p>
             </details>
 
