@@ -42,13 +42,14 @@
   <main class="content ops-content workspace-page">
     <p class="doc-eyebrow">SC-16 · QUOTE BUILDER <span class="rev">· REV A · 2026-07-26</span></p>
     <h1>Bill range in. Two quotes out.</h1>
-    <p class="lede">Enter the homeowner's BILECO bill, pick the package, and the tool sizes the array, builds the bill of
-      materials and prices it against the SC-06 ladder — then splits the result in two. The <b>customer copy</b> carries
-      scope, one fixed price and the compliance checklist; the <b>internal cost sheet</b> keeps the itemised build, our
-      cost and our margin. Only the customer copy is ever emailed.</p>
+    <p class="lede">Bill and package in; the tool sizes the array, builds the materials list and prices it. The
+      <b>customer copy</b> carries scope, one fixed price and the compliance checklist — it is the only one ever emailed.
+      The <b>internal cost sheet</b> keeps our unit prices, cost and profit.</p>
 
     <div class="ops-topbar">
-      <span class="ops-status">Sizing assumptions are editable · every figure on the sheet is an estimate until suppliers confirm</span>
+      <span class="ops-status">Every figure is an estimate until suppliers confirm</span>
+      <button type="button" class="ops-button secondary" id="qb-prices">Price list</button>
+      <button type="button" class="ops-button secondary" id="qb-settings-open">Packages &amp; pricing</button>
       <a class="ops-button secondary" href="install-ops.html">Install operations →</a>
     </div>
 
@@ -155,7 +156,7 @@
             </details>
 
             <div class="qb-actions">
-              <button type="button" class="secondary" id="qb-reset-fee">Reset to auto</button>
+              <button type="button" class="secondary" id="qb-reset-fee">Reset money to auto</button>
             </div>
           </div>
           <p class="qb-note">Materials pass through at supplier cost; our profit sits in the fee line. The contract price
@@ -170,20 +171,24 @@
           are NOT here are the point: brownout truth, compliance checklist and the
           indicative stamp are Founder-OS gates and have no switch.
         -->
-        <div class="qb-box">
-          <h3>Customer copy</h3>
-          <p class="qb-note" style="margin:0 0 12px">Untouched fields follow the system as configured — that is what the
-            grey text is. Edit one and it becomes yours, including when you clear it: a heading on its own prints as a
-            heading with nothing under it. <b>↺</b> hands a line back to the system. The tick decides whether the line
-            appears on the customer's quotation at all — none of it changes the price, and none of it touches the
-            brownout statement, the compliance checklist or the indicative stamp.</p>
-          <div class="qb-scope" id="qb-scope"></div>
-          <div class="qb-actions" style="margin-top:12px">
-            <button type="button" class="secondary" id="qb-scope-reset">Reset to auto</button>
+        <!-- Collapsed by default: the automatic scope is right for most quotes, and
+             expanded it pushed the Send button a screen further down. -->
+        <details class="qb-box qb-box-fold" id="qb-scope-fold">
+          <summary><h3>Customer copy — what the quote says</h3><span class="qb-fold-hint">Edit scope lines</span></summary>
+          <div class="qb-fold-body">
+            <p class="qb-note" style="margin:0 0 12px">Untouched fields follow the system as configured — that is what the
+              grey text is. Edit one and it becomes yours, including when you clear it: a heading on its own prints as a
+              heading with nothing under it. <b>↺</b> hands a line back to the system. The tick decides whether the line
+              appears on the customer's quotation at all — none of it changes the price, and none of it touches the
+              brownout statement, the compliance checklist or the indicative stamp.</p>
+            <div class="qb-scope" id="qb-scope"></div>
+            <div class="qb-actions" style="margin-top:12px">
+              <button type="button" class="secondary" id="qb-scope-reset">Reset scope to auto</button>
+            </div>
+            <p class="qb-note">Saved in this browser and reused on your next quote. A line you switch off is flagged in
+              the rail on the right — a customer who was quoted for something the sheet never mentions is a dispute.</p>
           </div>
-          <p class="qb-note">Saved in this browser and reused on your next quote. A line you switch off is flagged in
-            the rail on the right — a customer who was quoted for something the sheet never mentions is a dispute.</p>
-        </div>
+        </details>
 
         <div class="qb-box">
           <h3>Quote document</h3>
@@ -193,8 +198,6 @@
             <label>Valid for (days)<input id="qb-validity" type="number" min="1" step="1" value="14"></label>
           </div>
           <div class="qb-actions" style="margin-top:12px">
-            <button type="button" class="secondary" id="qb-prices">Price list</button>
-            <button type="button" class="secondary" id="qb-settings-open">Packages &amp; pricing</button>
             <button type="button" id="qb-send">Email quote to customer</button>
             <button type="button" class="secondary" id="qb-print">Print / save as PDF</button>
             <button type="button" class="secondary" id="qb-copy">Copy summary</button>
@@ -360,6 +363,22 @@
           <div class="qs" id="qs-client"></div>
           <div class="qs qs-internal" id="qs-internal" hidden></div>
         </div>
+      </div>
+
+      <!--
+        The four numbers that decide whether a quote may go out, pinned to the bottom of
+        the viewport for the whole page. The controls that change them are a screen or
+        more away from the readout at the top, so without this the founder edits the fee
+        or the price with the profit off-screen. It sits inside .qb-grid (sticky, not
+        fixed) so it spans the content columns and never covers the shell's sidebar.
+      -->
+      <div class="qb-pulse qb-screen-only" id="qb-pulse" aria-label="Quote at a glance">
+        <span class="qb-pulse-cell"><small>Price</small><b id="qbp-price">—</b></span>
+        <span class="qb-pulse-cell"><small>Profit</small><b id="qbp-profit">—</b></span>
+        <span class="qb-pulse-cell"><small>Take-home</small><b id="qbp-net">—</b></span>
+        <span class="qb-pulse-cell qb-pulse-tier"><small>Tier</small><b id="qbp-tier">—</b></span>
+        <span class="qb-pulse-state" id="qbp-state"></span>
+        <button type="button" id="qbp-send">Email quote</button>
       </div>
     </div>
   </main>

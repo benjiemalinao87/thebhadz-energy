@@ -38,6 +38,57 @@
 
 .qb-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* A .qb-box that folds. The summary keeps the box heading, so a collapsed panel
+   still reads as the same section it was when open. */
+.qb-box-fold > summary {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  cursor: pointer; list-style: none;
+}
+.qb-box-fold > summary::-webkit-details-marker { display: none; }
+.qb-box-fold > summary > h3 { margin: 0; }
+.qb-fold-hint { font: 600 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.qb-box-fold > summary:hover .qb-fold-hint { color: var(--ink); }
+.qb-fold-hint::after { content: " ▸"; }
+.qb-box-fold[open] .qb-fold-hint::after { content: " ▾"; }
+.qb-fold-body { margin-top: 14px; }
+
+/* ---------- the pulse bar ----------
+   Sticky, not fixed: as the last grid item its natural position is below the fold,
+   so it stays pinned to the viewport bottom for the whole scroll — and being inside
+   the grid it can never overlap the Command Center sidebar. */
+.qb-pulse {
+  position: sticky; bottom: 0; z-index: 20; grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  margin-top: 18px; padding: 10px 16px;
+  border: 1px solid var(--hairline); border-bottom: 0;
+  background: var(--sheet);
+  box-shadow: 0 -6px 20px -14px rgba(0, 0, 0, .45);
+}
+.qb-pulse-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.qb-pulse-cell small {
+  font: 600 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint);
+}
+.qb-pulse-cell b { font: 700 15px var(--mono); color: var(--ink); white-space: nowrap; }
+.qb-pulse-cell.good b { color: var(--ok); }
+.qb-pulse-cell.bad b { color: var(--ws-red, #b42318); }
+.qb-pulse-state {
+  flex: 1 1 200px; min-width: 0; padding-left: 16px; border-left: 1px solid var(--hairline);
+  font-size: 12px; line-height: 1.35; color: var(--faint);
+}
+.qb-pulse-state b { color: var(--ink); font-weight: 600; }
+.qb-pulse-state.stop b { color: var(--ws-red, #b42318); }
+.qb-pulse-state.go b { color: var(--ok); }
+.qb-pulse > button { flex: 0 0 auto; }
+@media (max-width: 900px) {
+  /* Phone: the numbers and the send button are the reason this bar exists — the
+     prose state line is the first thing to go. */
+  .qb-pulse { gap: 12px; padding: 9px 12px; }
+  .qb-pulse-state { display: none; }
+  .qb-pulse-tier { display: none; }
+  .qb-pulse-cell b { font-size: 13.5px; }
+}
+@media print { .qb-pulse { display: none !important; } }
+
 /* Corridor helper + true-net assumptions — founder-only money controls. Dashed
    hairline sets them apart as "assumptions", not more required fields. */
 .qb-corridor, .qb-truenet { border: 1px dashed var(--hairline); padding: 12px; }
@@ -241,6 +292,27 @@
 .qb-flag strong { display: block; margin-bottom: 2px; color: var(--ink); }
 .qb-flag.stop { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
 .qb-flag.ok { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
+
+/* Standing facts — "the checklist prints", "the brownout line prints" — are true on
+   every quote. Shown as one tight line each and folded away, so the flags that are
+   actually about THIS quote are the only ones competing for attention. */
+.qb-notes { margin-top: 8px; border: 1px dashed var(--hairline); }
+.qb-notes > summary {
+  cursor: pointer; list-style: none; padding: 8px 12px;
+  font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint);
+}
+.qb-notes > summary::-webkit-details-marker { display: none; }
+.qb-notes > summary:hover { color: var(--ink); }
+.qb-notes > summary::after { content: " ▸"; }
+.qb-notes[open] > summary::after { content: " ▾"; }
+.qb-notes-body { padding: 0 12px 10px; }
+.qb-notes-body .qb-flag {
+  padding: 7px 10px; border-left-width: 3px; font-size: 12px; background: var(--paper);
+  border-color: var(--hairline);
+}
+.qb-notes-body .qb-flag + .qb-flag { margin-top: 6px; }
+.qb-notes-body .qb-flag strong { display: inline; margin: 0; }
+.qb-notes-body .qb-flag strong::after { content: " "; }
 
 /* The single next action, given its own weight above the flag rail — one thing to do,
    not a list to interpret. */

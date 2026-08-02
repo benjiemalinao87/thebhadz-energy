@@ -685,81 +685,107 @@
       '<div class="' + (m.trueNet <= 0 ? "bad" : "") + '"><span>Take-home · after referral &amp; funds</span><strong>' + peso(m.trueNet) + '</strong></div>';
   }
 
-  /** The advisory rail. Each flag names the rule it enforces so nobody has to guess. */
+  /**
+   * The advisory rail. Each flag names the rule it enforces so nobody has to guess.
+   *
+   * Three tiers, because a rail where everything shouts is a rail nobody reads:
+   *   "stop" — this quote is wrong or unsendable as configured. Always visible, loud.
+   *   "warn" — a live decision about THIS quote (thin profit, a scope line left off).
+   *            Always visible, quieter.
+   *   "note" — standing facts, true of every quote we ever send (the checklist prints,
+   *            the brownout line prints, which tier this landed in). Folded away behind
+   *            a count, because after the first read they are furniture.
+   */
   function renderFlags(m) {
-    var out = [];
+    var flags = [];
+    var add = function (tier, title, body) { flags.push({ tier: tier, title: title, body: body }); };
 
     if (m.unquoted > 0) {
-      out.push('<div class="qb-flag stop"><strong>' + m.unquoted + ' line item' + (m.unquoted === 1 ? "" : "s") +
-        ' not supplier-confirmed.</strong>The sheet prints stamped <b>INDICATIVE</b> until every price is a real quote. ' +
-        'Work the call list in <span class="mono">docs/inverter-battery-brand-research.md §9</span> before this goes to a customer.</div>');
+      add("warn", m.unquoted + " line item" + (m.unquoted === 1 ? "" : "s") + " not supplier-confirmed.",
+        'The sheet prints stamped <b>INDICATIVE</b> until every price is a real quote. ' +
+        'Work the call list in <span class="mono">docs/inverter-battery-brand-research.md §9</span> before this goes to a customer.');
     }
 
     if (m.pack.tier === "CUSTOM") {
       if (!m.priceIsOverride) {
-        out.push('<div class="qb-flag stop"><strong>No selling price set — the sheet is showing our own cost total (§3).</strong>' +
-          'For a system this size the price comes from the market, not from our costs. The helper in Money suggests <b>' + peso(m.corridorPrice) +
-          '</b> from the competitor price and our discount — click “Use as contract price”, or type a price you can defend from what this customer already pays.</div>');
+        add("stop", "No selling price set — the sheet is showing our own cost total (§3).",
+          "For a system this size the price comes from the market, not from our costs. The helper in Money suggests <b>" + peso(m.corridorPrice) +
+          "</b> from the competitor price and our discount — click “Use as contract price”, or type a price you can defend from what this customer already pays.");
       }
-      out.push('<div class="qb-flag"><strong>Bigger than our fixed packages (§3).</strong>' + esc(m.pack.note) +
-        ' Then check the profit here — never work backwards from this sheet plus a markup.</div>');
+      add("note", "Bigger than our fixed packages (§3).",
+        esc(m.pack.note) + " Then check the profit here — never work backwards from this sheet plus a markup.");
     } else {
-      out.push('<div class="qb-flag ok"><strong>' + m.pack.tier + ' — ' + peso(m.pack.price) + '.</strong>' + esc(m.pack.note) + '</div>');
+      add("note", m.pack.tier + " — " + peso(m.pack.price) + ".", esc(m.pack.note));
     }
 
     if (m.priceIsOverride && m.pack.price != null && m.customerPrice < m.pack.price) {
-      out.push('<div class="qb-flag stop"><strong>Front-end discount (§3).</strong>You are quoting below the ladder price. ' +
-        'That needs an EVIDENCED back-end path in <span class="mono">ops/canvas.md</span> and a pre-registered experiment — ' +
-        'or hold the price. Repeated stalls at the list price trigger a positioning review, not a discount.</div>');
+      add("stop", "Front-end discount (§3).",
+        'You are quoting below the ladder price. That needs an EVIDENCED back-end path in ' +
+        '<span class="mono">ops/canvas.md</span> and a pre-registered experiment — or hold the price. ' +
+        'Repeated stalls at the list price trigger a positioning review, not a discount.');
     }
 
     // Rounding to whole panels can push a genuinely flagship-sized job into PLUS. Worth
     // saying out loud, because a smaller panel usually pulls it straight back.
     if (m.pack.tier !== "FLAGSHIP" && m.targetKwp <= 2.4 && m.batteryKwh <= 3 && m.overshootPct > 5) {
-      out.push('<div class="qb-flag"><strong>Rounding pushed this out of the flagship.</strong>Target is ' +
-        m.targetKwp.toFixed(2) + ' kWp but ' + m.panels + ' × ' + m.panel.watts + 'W lands at ' + m.kwp.toFixed(2) +
-        ' kWp (+' + m.overshootPct.toFixed(0) + '%). A smaller panel would likely hold the ₱99,500 price.</div>');
+      add("warn", "Rounding pushed this out of the flagship.",
+        "Target is " + m.targetKwp.toFixed(2) + " kWp but " + m.panels + " × " + m.panel.watts + "W lands at " +
+        m.kwp.toFixed(2) + " kWp (+" + m.overshootPct.toFixed(0) + "%). A smaller panel would likely hold the flagship price.");
     }
 
     if (m.margin <= 0) {
-      out.push('<div class="qb-flag stop"><strong>This quote loses money.</strong>Cost ' + peso(m.ourCost) +
-        ' against a price of ' + peso(m.customerPrice) + '. Re-spec before sending — the battery is almost always what broke it.</div>');
+      add("stop", "This quote loses money.",
+        "Cost " + peso(m.ourCost) + " against a price of " + peso(m.customerPrice) +
+        ". Re-spec before sending — the battery is almost always what broke it.");
     } else if (m.belowFloor) {
-      out.push('<div class="qb-flag"><strong>Profit ' + m.marginPct.toFixed(1) + '% is under our ' + m.floorPct.toFixed(0) + '% minimum.</strong>' +
-        'Raise the price (stay below the competitor), trim cost, or accept it knowingly. The minimum is a placeholder until the founders agree a house number in <span class="mono">ops/status.md</span>.</div>');
+      add("warn", "Profit " + m.marginPct.toFixed(1) + "% is under our " + m.floorPct.toFixed(0) + "% minimum.",
+        'Raise the price (stay below the competitor), trim cost, or accept it knowingly. The minimum is a placeholder ' +
+        'until the founders agree a house number in <span class="mono">ops/status.md</span>.');
     } else if (m.batteryKwh > 3 && m.pack.tier === "FLAGSHIP") {
-      out.push('<div class="qb-flag"><strong>Battery above the flagship limit.</strong>SC-06 holds the base package at 2.5–3 kWh. ' +
-        'A bigger battery is an upsell line, not a flagship inclusion.</div>');
+      add("warn", "Battery above the flagship limit.",
+        "SC-06 holds the base package at 2.5–3 kWh. A bigger battery is an upsell line, not a flagship inclusion.");
     }
 
     if (m.spec.needsBattery && m.batteryKwh === 0) {
-      out.push('<div class="qb-flag stop"><strong>' + m.spec.label + ' with no battery.</strong>' +
-        'This package is sold on backup, and with no storage it provides none. Either add a battery or quote LIWANAG ' +
-        'and describe it honestly as bill reduction only (§1.6).</div>');
+      add("stop", m.spec.label + " with no battery.",
+        "This package is sold on backup, and with no storage it provides none. Either add a battery or quote the " +
+        "on-grid package and describe it honestly as bill reduction only (§1.6).");
     }
 
     if (m.spec.gridTied && m.batteryKwh === 0) {
-      out.push('<div class="qb-flag stop"><strong>Grid-tied, no storage: brownout truth is mandatory (§1.6).</strong>' +
-        'This system shuts down in an outage — anti-islanding. The printed quote carries that statement and it cannot be removed. ' +
-        'If the customer wants brownout cover, quote SANDIGAN with a battery.</div>');
+      add("note", "Grid-tied, no storage: the brownout statement prints (§1.6).",
+        "This system shuts down in an outage — anti-islanding. The printed quote carries that statement and it cannot " +
+        "be removed. If the customer wants brownout cover, quote the hybrid package with a battery.");
     }
 
-    out.push('<div class="qb-flag"><strong>Permit / electrician / net-metering checklist (§7).</strong>' +
-      'Printed on every quote. A deposit cannot be accepted until all three are signed off.</div>');
+    add("note", "Permit / electrician / net-metering checklist (§7).",
+      "Printed on every quote. A deposit cannot be accepted until all three are signed off.");
 
     // Blanked and switched off amount to the same thing on paper, so they are
     // reported together and named by what the line IS, not by whatever heading
     // the founder left in the field.
     var hidden = clientScope(m).filter(function (s) { return !s.on || !(s.label || s.detail); });
     if (hidden.length) {
-      out.push('<div class="qb-flag"><strong>' + hidden.length + ' line' + (hidden.length === 1 ? "" : "s") +
-        ' will not appear on the customer copy.</strong>Left off: ' +
-        esc(hidden.map(function (s) { return s.autoLabel; }).join(", ")) +
-        '. The customer sees a fixed price for a scope that does not mention ' +
-        (hidden.length === 1 ? "it" : "them") + ' — fine when it genuinely is not in the job, a dispute waiting to happen when it is.</div>');
+      add("warn", hidden.length + " line" + (hidden.length === 1 ? "" : "s") + " will not appear on the customer copy.",
+        "Left off: " + esc(hidden.map(function (s) { return s.autoLabel; }).join(", ")) +
+        ". The customer sees a fixed price for a scope that does not mention " +
+        (hidden.length === 1 ? "it" : "them") +
+        " — fine when it genuinely is not in the job, a dispute waiting to happen when it is.");
     }
 
-    el("qb-flags").innerHTML = out.join("");
+    var box = function (f, cls) {
+      return '<div class="qb-flag ' + cls + '"><strong>' + f.title + '</strong>' + f.body + '</div>';
+    };
+    var loud = flags.filter(function (f) { return f.tier !== "note"; });
+    var notes = flags.filter(function (f) { return f.tier === "note"; });
+
+    el("qb-flags").innerHTML =
+      loud.map(function (f) { return box(f, f.tier === "stop" ? "stop" : ""); }).join("") +
+      (notes.length
+        ? '<details class="qb-notes"><summary>' + notes.length + ' standing note' + (notes.length === 1 ? "" : "s") +
+          ' — true of every quote</summary><div class="qb-notes-body">' +
+          notes.map(function (f) { return box(f, "ok"); }).join("") + '</div></details>'
+        : "");
   }
 
   /**
@@ -1212,6 +1238,30 @@
     return na;
   }
 
+  /**
+   * The pinned bar: the four numbers that decide whether this quote can go out, plus
+   * the one-line state and the send button. The Money controls sit a screen or more
+   * below the readout, so this is what makes editing a fee or a price observable.
+   * It shows the same figures as the readout tiles — one model, two placements.
+   */
+  function renderPulse(m, na) {
+    var tone = m.margin <= 0 ? "bad" : (m.belowFloor ? "" : "good");
+    el("qbp-price").textContent = peso(m.customerPrice);
+    el("qbp-profit").textContent = peso(m.margin) + " · " + m.marginPct.toFixed(1) + "%";
+    el("qbp-net").textContent = peso(m.trueNet);
+    el("qbp-tier").textContent = m.pack.tier;
+    el("qbp-profit").parentNode.className = "qb-pulse-cell " + tone;
+    el("qbp-net").parentNode.className = "qb-pulse-cell " + (m.trueNet <= 0 ? "bad" : "");
+
+    var state = el("qbp-state");
+    state.className = "qb-pulse-state " + (na.state === "blocked" ? "stop" : (na.state === "go" ? "go" : ""));
+    state.innerHTML = "<b>" + esc(na.action) + "</b>";
+
+    // Nothing is disabled here: the send handler already refuses with a reason, and a
+    // dead button that never says why is worse than a live one that explains itself.
+    el("qbp-send").className = na.state === "blocked" ? "secondary" : "";
+  }
+
   /** Plain-text summary — the founder's Messenger follow-up, one click away. */
   function summaryText(m) {
     var lines = [
@@ -1250,7 +1300,7 @@
     syncBatteryVisibility();
     current = compute();
     renderReadout(current);
-    renderNextAction(current);
+    renderPulse(current, renderNextAction(current));
     renderFlags(current);
     renderSheet(current);
     var feeField = el("qb-fee");
@@ -2218,8 +2268,9 @@
     });
   }
 
-  el("qb-send").addEventListener("click", function () {
-    var btn = el("qb-send");
+  /** Both send buttons — the one in Quote document and the one in the pinned bar —
+   *  run this. `btn` is whichever was pressed, so it is the one that shows "Sending…". */
+  function attemptSend(btn) {
     var status = el("qb-send-status");
     var m = current || compute();
     var payload = quotePayload(m);
@@ -2228,6 +2279,12 @@
       status.hidden = false;
       status.className = "qb-send-status " + kind;
       status.textContent = message;
+      // Pressed from the pinned bar, the status panel is usually off-screen. A refusal
+      // nobody sees reads as a dead button, so bring the explanation into view.
+      var box = status.getBoundingClientRect();
+      if (box.top < 0 || box.bottom > window.innerHeight) {
+        status.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     };
 
     if (!payload.customer.name) return say("bad", "Add the customer's name first — the quote is addressed to them.");
@@ -2274,7 +2331,10 @@
         btn.textContent = was;
       });
     }
-  });
+  }
+
+  el("qb-send").addEventListener("click", function () { attemptSend(el("qb-send")); });
+  el("qbp-send").addEventListener("click", function () { attemptSend(el("qbp-send")); });
 
   el("qb-reset-fee").addEventListener("click", function () {
     el("qb-fee").value = "";
