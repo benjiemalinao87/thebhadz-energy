@@ -97,18 +97,40 @@
     { id: "b7", label: "Over ₱20,000", mid: 25000 }
   ];
 
-  // What each package IS. The share of consumption we design to cover lives in the
-  // config, not here: on-grid is sized for daytime self-consumption first (export is
-  // credited below retail) and that ratio is a judgement call the founders adjust.
-  var SYSTEM_TYPES = {
-    liwanag: { label: "LIWANAG — on-grid", coverageKey: "coverageLiwanag", battery: false, gridTied: true },
-    ilaw: { label: "ILAW — off-grid", coverageKey: "coverageIlaw", battery: true, gridTied: false },
-    sandigan: { label: "SANDIGAN — hybrid", coverageKey: "coverageSandigan", battery: true, gridTied: true }
-  };
+  /**
+   * The package being quoted, from the config. Falls back to the first package
+   * rather than to undefined: a founder who renames or deletes the package an open
+   * quote was using should see the quote re-point, not a page of NaN.
+   */
+  function packageSpec(type) {
+    var list = CONFIG.packages || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === type) return list[i];
+    return list[0] || { id: "", label: "—", gridTied: true, needsBattery: false, coveragePct: 70 };
+  }
 
   function coverageFor(type) {
-    var pct = Number(CONFIG[(SYSTEM_TYPES[type] || SYSTEM_TYPES.liwanag).coverageKey]);
+    var pct = Number(packageSpec(type).coveragePct);
     return isFinite(pct) ? pct / 100 : 0.7;
+  }
+
+  /** The founder's package picker. Rebuilt whenever the config changes. */
+  function populatePackageSelect() {
+    var select = el("qb-type");
+    if (!select) return;
+    var keep = select.value;
+    var list = CONFIG.packages || [];
+    select.innerHTML = list.map(function (p) {
+      return '<option value="' + esc(p.id) + '">' + esc(p.label) +
+        (p.hint ? " (" + esc(p.hint) + ")" : "") + "</option>";
+    }).join("");
+    if (list.some(function (p) { return p.id === keep; })) select.value = keep;
+    // The battery picker and the inverter list both key off the package, so they
+    // have to be told the selection may have moved under them.
+    select.dataset.forType = "";
+    var inv = el("qb-inverter");
+    if (inv) inv.dataset.forType = "";
+    var bat = el("qb-battery");
+    if (bat) bat.dataset.forType = "";
   }
 
   /*
@@ -121,13 +143,17 @@
    *   [est]    Estimate only. Solis / Dyness / Pylontech dealer prices are still open
    *            questions — see docs/inverter-battery-brand-research.md §9 call list.
    */
+  // `hybrid` decides which packages an inverter is offered for: a package with
+  // storage needs a hybrid, a package without one needs a string inverter. It used
+  // to be a hard-coded list of package names on each row, which meant adding a
+  // package left every inverter unaware of it and emptied the picker.
   var INVERTERS = [
-    { id: "solis-3k-og", label: "Solis 3kW on-grid string inverter", kw: 3, price: 28000, quoted: false, types: ["liwanag"] },
-    { id: "solis-5k-og", label: "Solis 5kW on-grid string inverter", kw: 5, price: 42000, quoted: false, types: ["liwanag"] },
-    { id: "solis-3k-hy", label: "Solis S6-EH1P 3kW hybrid", kw: 3, price: 38000, quoted: false, types: ["ilaw", "sandigan"] },
-    { id: "solis-5k-hy", label: "Solis S6-EH1P 5kW hybrid", kw: 5, price: 52000, quoted: false, types: ["ilaw", "sandigan"] },
-    { id: "solis-6k-hy", label: "Solis S6-EH1P 6kW hybrid", kw: 6, price: 60000, quoted: false, types: ["ilaw", "sandigan"] },
-    { id: "deye-8k-hy", label: "DEYE 8kW hybrid", kw: 8, price: 62000, quoted: true, types: ["ilaw", "sandigan"] }
+    { id: "solis-3k-og", label: "Solis 3kW on-grid string inverter", kw: 3, price: 28000, quoted: false, hybrid: false },
+    { id: "solis-5k-og", label: "Solis 5kW on-grid string inverter", kw: 5, price: 42000, quoted: false, hybrid: false },
+    { id: "solis-3k-hy", label: "Solis S6-EH1P 3kW hybrid", kw: 3, price: 38000, quoted: false, hybrid: true },
+    { id: "solis-5k-hy", label: "Solis S6-EH1P 5kW hybrid", kw: 5, price: 52000, quoted: false, hybrid: true },
+    { id: "solis-6k-hy", label: "Solis S6-EH1P 6kW hybrid", kw: 6, price: 60000, quoted: false, hybrid: true },
+    { id: "deye-8k-hy", label: "DEYE 8kW hybrid", kw: 8, price: 62000, quoted: true, hybrid: true }
   ];
 
   var PANELS = [
@@ -200,6 +226,7 @@
     arr.forEach(function (it) {
       it.key = it.id;
       it._base = { price: it.price, quoted: it.quoted, label: it.label };
+      if ("hybrid" in it) it._base.hybrid = it.hybrid;
     });
   });
   BOS_GROUPS.forEach(function (g) {
@@ -234,12 +261,16 @@
         if (!row) {
           it.price = it._base.price; it.quoted = it._base.quoted;
           it.label = it._base.label; it.hidden = false;
+          if ("hybrid" in it._base) it.hybrid = it._base.hybrid;
           return;
         }
         it.price = row.price;
         it.quoted = row.confirmed === 1;
         it.label = row.label || it._base.label;
         it.hidden = row.active === 0;
+        // Rows written before the column existed have hybrid NULL; those keep what
+        // the built-in catalogue says rather than silently becoming string inverters.
+        if ("hybrid" in it._base && row.hybrid != null) it.hybrid = row.hybrid === 1;
       });
     });
 
@@ -252,7 +283,7 @@
           label: row.label, price: row.price,
           quoted: row.confirmed === 1, hidden: row.active === 0,
         };
-        if (slot.kind === "inverter") { it.kw = row.spec || 0; it.types = ["liwanag", "ilaw", "sandigan"]; }
+        if (slot.kind === "inverter") { it.kw = row.spec || 0; it.hybrid = row.hybrid === 1; }
         if (slot.kind === "panel") it.watts = row.spec || 0;
         if (slot.kind === "battery") it.kwh = row.spec || 0;
         slot.arr.push(it);
@@ -466,7 +497,7 @@
 
   function compute() {
     var type = val("qb-type") || "liwanag";
-    var spec = SYSTEM_TYPES[type];
+    var spec = packageSpec(type);
     var tariff = num("qb-tariff", CONFIG.tariff);
     var yieldPerKwp = num("qb-yield", CONFIG.yieldPerKwp);
     var days = CONFIG.daysPerMonth || 30;
@@ -500,8 +531,8 @@
 
     var inverter = byId(INVERTERS, val("qb-inverter"));
     var battery = byId(BATTERIES, val("qb-battery"));
-    var batteryQty = spec.battery ? Math.max(1, parseInt(val("qb-battery-qty"), 10) || 1) : 0;
-    if (!spec.battery || battery.id === "none") { battery = BATTERIES[0]; batteryQty = 0; }
+    var batteryQty = spec.needsBattery ? Math.max(1, parseInt(val("qb-battery-qty"), 10) || 1) : 0;
+    if (!spec.needsBattery || battery.id === "none") { battery = BATTERIES[0]; batteryQty = 0; }
     var batteryKwh = battery.kwh * batteryQty;
 
     var geom = { panels: panels, rows: rows, strings: strings, hasBattery: batteryKwh > 0, batteryQty: batteryQty };
@@ -698,7 +729,7 @@
         'A bigger battery is an upsell line, not a flagship inclusion.</div>');
     }
 
-    if (m.spec.battery && m.batteryKwh === 0) {
+    if (m.spec.needsBattery && m.batteryKwh === 0) {
       out.push('<div class="qb-flag stop"><strong>' + m.spec.label + ' with no battery.</strong>' +
         'This package is sold on backup, and with no storage it provides none. Either add a battery or quote LIWANAG ' +
         'and describe it honestly as bill reduction only (§1.6).</div>');
@@ -881,15 +912,21 @@
     var date = val("qb-date") || todayISO();
     var validity = parseInt(val("qb-validity"), 10) || 14;
 
-    // Turns on the actual absence of storage, never on the package name: a SANDIGAN
-    // quoted with no battery backs up nothing, and the customer must read that here.
-    var brownout = m.spec.gridTied && m.batteryKwh === 0
+    // Turns on the actual ABSENCE OF STORAGE, never on the package name — a hybrid
+    // quoted with no battery backs up nothing either, and the customer must read
+    // that here (§1.6). Packages are editable, so keying this off a package flag
+    // would let a new package be created that quietly suppresses the disclosure;
+    // no battery always says something, and only the wording follows grid-tie.
+    var brownout = m.batteryKwh > 0 ? "" : (m.spec.gridTied
       ? '<div class="qs-brownout"><strong>What happens during a brownout</strong>' +
         'This is a grid-tied system with no battery. Philippine safety rules require it to switch off automatically when ' +
         'BILECO power goes out (anti-islanding), so it does <b>not</b> provide backup power during a brownout. It lowers ' +
         'your monthly bill; it does not keep your lights on in an outage. If backup is what you need, ask us for a ' +
-        'SANDIGAN hybrid quote with battery storage.</div>'
-      : "";
+        'hybrid quote with battery storage.</div>'
+      : '<div class="qs-brownout"><strong>What happens during a brownout</strong>' +
+        'This system has no battery storage, so it powers your home only while the sun is on the panels. It does ' +
+        '<b>not</b> keep your lights on at night or during a brownout. If backup is what you need, ask us for a ' +
+        'quote that includes battery storage.</div>');
 
     // Worded for a sheet with no price column: the per-line INDICATIVE badges live
     // on the internal copy, so this callout is the customer's ONLY warning that a
@@ -922,7 +959,7 @@
 
       '<div class="qs-party">' +
         '<div><span>Prepared for</span><p><b>' + esc(customer) + '</b><br>' + esc(address) + (phone ? '<br>' + esc(phone) : '') + '</p></div>' +
-        '<div><span>Prepared by</span><p><b>' + esc(prepared) + '</b><br>MACC Systems &amp; Engineering Inc.<br>' + esc(SYSTEM_TYPES[m.type].label) + ' package</p></div>' +
+        '<div><span>Prepared by</span><p><b>' + esc(prepared) + '</b><br>MACC Systems &amp; Engineering Inc.<br>' + esc(m.spec.label) + ' package</p></div>' +
       '</div>' +
 
       // Price and the outcome it buys, together. Never one without the other (§3).
@@ -1131,7 +1168,7 @@
           "cost total. Pricing from cost + a markup is banned (§3). Use the market price helper in Money, then check the profit."
       };
     }
-    if (m.spec.battery && m.batteryKwh === 0) {
+    if (m.spec.needsBattery && m.batteryKwh === 0) {
       return {
         state: "blocked",
         action: "Add a battery or switch this to LIWANAG.",
@@ -1175,7 +1212,7 @@
   /** Plain-text summary — the founder's Messenger follow-up, one click away. */
   function summaryText(m) {
     var lines = [
-      "MACC Systems & Engineering Inc. — " + SYSTEM_TYPES[m.type].label,
+      "MACC Systems & Engineering Inc. — " + m.spec.label,
       "Quote " + (val("qb-quote-no") || "—") + " · " + (val("qb-date") || todayISO()),
       "For: " + (val("qb-customer") || "—"),
       "",
@@ -1191,7 +1228,7 @@
       "",
       "Next step: a free site survey so we can confirm the roof and lock the design. Which day works — Saturday or Sunday?"
     ];
-    if (m.spec.gridTied && !m.spec.battery) {
+    if (m.spec.gridTied && !m.spec.needsBattery) {
       lines.push("", "Important: this is a grid-tied system. It switches off during a brownout (safety rule) — it lowers your bill, it is not backup power.");
     }
     if (m.unquoted > 0) {
@@ -1228,8 +1265,17 @@
     var select = el("qb-inverter");
     if (!select || select.dataset.forType === type) return;
     var keep = select.value;
-    var options = INVERTERS.filter(function (i) { return i.types.indexOf(type) !== -1 && !i.hidden; });
-    if (!options.length) options = INVERTERS.filter(function (i) { return i.types.indexOf(type) !== -1; });
+    // A package with storage needs a hybrid; one without needs a string inverter.
+    // Each fallback is one step looser than the last, and the final one is the whole
+    // list: an empty picker used to read options[0].id off undefined and throw,
+    // taking the entire sheet down with it.
+    var wantHybrid = !!packageSpec(type).needsBattery;
+    var matches = function (i) { return !!i.hybrid === wantHybrid; };
+    var options = INVERTERS.filter(function (i) { return matches(i) && !i.hidden; });
+    if (!options.length) options = INVERTERS.filter(matches);
+    if (!options.length) options = INVERTERS.filter(function (i) { return !i.hidden; });
+    if (!options.length) options = INVERTERS;
+    if (!options.length) return;
     select.innerHTML = options.map(function (i) {
       return '<option value="' + i.id + '">' + esc(i.label) + " · " + peso(i.price) + (i.quoted ? "" : " (est)") + "</option>";
     }).join("");
@@ -1291,16 +1337,16 @@
 
   function syncBatteryVisibility() {
     var type = val("qb-type") || "liwanag";
-    var spec = SYSTEM_TYPES[type];
+    var spec = packageSpec(type);
     var wrap = el("qb-battery-wrap");
     var select = el("qb-battery");
-    if (wrap) wrap.hidden = !spec.battery;
+    if (wrap) wrap.hidden = !spec.needsBattery;
 
     // Seed the battery only when the package actually changes — after that the founder's
     // choice stands, including a deliberate "none", which the flag rail then challenges
     // rather than silently undoing.
     if (select && select.dataset.forType !== type) {
-      if (!spec.battery) select.value = "none";
+      if (!spec.needsBattery) select.value = "none";
       else if (select.value === "none") select.value = "dyness-b4850";
       select.dataset.forType = type;
     }
@@ -1468,7 +1514,7 @@
         date: date,
         validUntil: addDays(date, validity),
         preparedBy: val("qb-prepared"),
-        packageLabel: SYSTEM_TYPES[m.type].label,
+        packageLabel: m.spec.label,
         kwp: m.kwp,
         panelSummary: m.panels + " x " + m.panel.watts + "W panels",
         customerPrice: m.customerPrice,
@@ -1571,6 +1617,19 @@
     drop.title = item.hidden ? "Put this line back" : "Drop this line from new quotes";
     drop.setAttribute("aria-label", drop.title);
 
+    // Inverters carry one more fact than a price: whether they work with storage.
+    // It decides which packages offer them, so it is editable next to the price.
+    var hybrid = null;
+    if (kind === "inverter") {
+      hybrid = document.createElement("button");
+      hybrid.type = "button";
+      hybrid.className = "qb-pl-flag qb-pl-hybrid" + (item.hybrid ? " is-firm" : "");
+      hybrid.textContent = item.hybrid ? "Hybrid" : "String";
+      hybrid.title = item.hybrid
+        ? "Works with a battery — offered for packages that need storage. Click to make it a string inverter."
+        : "On-grid string inverter — offered for packages without storage. Click to make it a hybrid.";
+    }
+
     var payload = function () {
       return {
         item_key: item.key, kind: kind, label: item.label,
@@ -1581,8 +1640,15 @@
         confirmed: firm ? 1 : 0,
         source_note: saved ? saved.source_note : "",
         active: item.hidden ? 0 : 1,
+        hybrid: item.hybrid ? 1 : 0,
       };
     };
+
+    if (hybrid) {
+      hybrid.addEventListener("click", function () {
+        plSave(Object.assign(payload(), { hybrid: item.hybrid ? 0 : 1 })).then(paint);
+      });
+    }
 
     price.addEventListener("change", function () { plSave(payload()); });
 
@@ -1634,9 +1700,11 @@
 
     wrap.appendChild(name);
     wrap.appendChild(price);
+    if (hybrid) wrap.appendChild(hybrid);
     wrap.appendChild(flag);
     wrap.appendChild(drop);
     wrap.appendChild(inline);
+    if (hybrid) wrap.classList.add("has-hybrid");
     return wrap;
   }
 
@@ -1701,6 +1769,7 @@
       key: row.item_key, label: row.label, price: row.price,
       quoted: row.confirmed === 1, hidden: row.active === 0,
     };
+    if (kind === "inverter") shim.hybrid = row.hybrid === 1;
     var node = plRow(shim, kind, row.group_name);
     var drop = node.querySelector(".drop");
     drop.textContent = "×";
@@ -1788,6 +1857,7 @@
     var isEquipment = kind !== "bos";
     el("qb-pl-new-qty-wrap").hidden = isEquipment;
     el("qb-pl-new-spec-wrap").hidden = !isEquipment;
+    el("qb-pl-new-hybrid-wrap").hidden = kind !== "inverter";
     if (isEquipment) {
       el("qb-pl-new-spec-label").textContent = SPEC_LABELS[kind].label;
       el("qb-pl-new-spec").placeholder = SPEC_LABELS[kind].hint;
@@ -1799,6 +1869,7 @@
     el("qb-pl-new-label").value = "";
     el("qb-pl-new-qty").value = "1";
     el("qb-pl-new-spec").value = "";
+    el("qb-pl-new-hybrid").selectedIndex = 0;
     el("qb-pl-new-price").value = "";
     el("qb-pl-new-group").selectedIndex = 0;
     plNewSyncFields();
@@ -1833,6 +1904,9 @@
         return;
       }
       row.spec = isFinite(spec) && spec > 0 ? spec : null;
+      // Without this an added inverter defaults to "string" and would never appear
+      // for a package that needs storage.
+      if (kind === "inverter") row.hybrid = el("qb-pl-new-hybrid").value === "1" ? 1 : 0;
     }
 
     plSave(row).then(function (ok) {
@@ -1911,6 +1985,23 @@
       '<input type="number" step="' + field[2] + '" data-cfg="' + field[0] + '"></label>';
   }
 
+  /**
+   * One package. `id` rides along in a data attribute so a rename keeps the id —
+   * otherwise the founder's open quote would lose its selection mid-edit.
+   */
+  function settingsPackageHtml(pkg, i) {
+    return '<div class="qb-set-pkg" data-pkg="' + i + '" data-id="' + esc(pkg.id || "") + '">' +
+      '<label>Name (prints on the quote)<input type="text" maxlength="60" class="p-label" value="' + esc(pkg.label || "") + '"></label>' +
+      '<label>Hint in the dropdown<input type="text" maxlength="60" class="p-hint" placeholder="none" value="' + esc(pkg.hint || "") + '"></label>' +
+      '<label>Coverage (%)<input type="number" step="5" min="10" max="100" class="p-cov" value="' + esc(pkg.coveragePct) + '"></label>' +
+      '<button type="button" class="p-drop" title="Remove this package" aria-label="Remove package ' + esc(pkg.label || "") + '">×</button>' +
+      '<div class="flags">' +
+        '<label class="chk"><input type="checkbox" class="p-grid"' + (pkg.gridTied ? " checked" : "") + '> Grid-tied — net-metering applies</label>' +
+        '<label class="chk"><input type="checkbox" class="p-batt"' + (pkg.needsBattery ? " checked" : "") + '> Needs battery — offers storage and a hybrid inverter</label>' +
+      '</div>' +
+    '</div>';
+  }
+
   /** One ladder tier. The note is the sentence the flag rail shows for this tier. */
   function settingsTierHtml(tier, i) {
     return '<div class="qb-set-tier" data-tier="' + i + '">' +
@@ -1929,6 +2020,7 @@
   function settingsPaint() {
     settingTiers = (CONFIG.tiers || []).map(function (t) { return Object.assign({}, t); });
 
+    el("qb-set-packages").innerHTML = (CONFIG.packages || []).map(settingsPackageHtml).join("");
     el("qb-set-tiers").innerHTML = settingTiers.map(settingsTierHtml).join("");
     el("qb-set-sizing").innerHTML = SETTING_FIELDS.sizing.map(settingsNumberHtml).join("");
     el("qb-set-money").innerHTML = SETTING_FIELDS.money.map(settingsNumberHtml).join("");
@@ -1947,7 +2039,7 @@
     // with the reason on it beats a Save button that 403s when pressed.
     var locked = CONFIG_META.loaded && !CONFIG_META.canEdit;
     Array.prototype.forEach.call(
-      el("qb-settings").querySelectorAll("input, #qb-set-save, #qb-set-add, .t-drop"),
+      el("qb-settings").querySelectorAll("input, #qb-set-save, #qb-set-add, #qb-set-add-pkg, .t-drop, .p-drop"),
       function (node) { node.disabled = locked; }
     );
     if (locked) setSay("", "Read-only for this account.");
@@ -1957,6 +2049,16 @@
     var out = {};
     Array.prototype.forEach.call(el("qb-settings").querySelectorAll("[data-cfg]"), function (node) {
       out[node.getAttribute("data-cfg")] = node.value === "" ? null : Number(node.value);
+    });
+    out.packages = Array.prototype.map.call(el("qb-set-packages").querySelectorAll("[data-pkg]"), function (row) {
+      return {
+        id: row.getAttribute("data-id") || "",
+        label: row.querySelector(".p-label").value,
+        hint: row.querySelector(".p-hint").value,
+        coveragePct: Number(row.querySelector(".p-cov").value),
+        gridTied: row.querySelector(".p-grid").checked,
+        needsBattery: row.querySelector(".p-batt").checked,
+      };
     });
     out.tiers = Array.prototype.map.call(el("qb-set-tiers").querySelectorAll("[data-tier]"), function (row) {
       var v = function (cls) { return row.querySelector("." + cls).value; };
@@ -1976,6 +2078,7 @@
     // Re-read first: another founder may have moved the ladder since this tab opened,
     // and the sheet behind the dialog has to agree with what the form shows.
     loadSettings().then(function () {
+      populatePackageSelect();
       seedFieldsFromConfig();
       refresh();
       settingsPaint();
@@ -1984,6 +2087,24 @@
     });
   });
   el("qb-set-close").addEventListener("click", function () { el("qb-settings").close(); });
+
+  el("qb-set-add-pkg").addEventListener("click", function () {
+    var list = settingsCollect().packages;
+    list.push({ id: "", label: "", hint: "", coveragePct: 70, gridTied: true, needsBattery: false });
+    el("qb-set-packages").innerHTML = list.map(settingsPackageHtml).join("");
+    var last = el("qb-set-packages").lastElementChild;
+    if (last) last.querySelector(".p-label").focus();
+  });
+
+  el("qb-set-packages").addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest(".p-drop") : null;
+    if (!btn) return;
+    var list = settingsCollect().packages;
+    if (list.length <= 1) { setSay("bad", "There has to be at least one package to quote."); return; }
+    list.splice(Number(btn.closest("[data-pkg]").getAttribute("data-pkg")), 1);
+    el("qb-set-packages").innerHTML = list.map(settingsPackageHtml).join("");
+    setSay("", "");
+  });
 
   el("qb-set-add").addEventListener("click", function () {
     settingTiers = settingsCollect().tiers;
@@ -2022,6 +2143,7 @@
         Object.keys(res.data.config).forEach(function (k) { CONFIG[k] = res.data.config[k]; });
         CONFIG_META.updatedAt = res.data.updatedAt;
         CONFIG_META.updatedBy = res.data.updatedBy;
+        populatePackageSelect();        // a renamed or new package has to appear at once
         seedFieldsFromConfig();
         refresh();
         settingsPaint();
@@ -2151,6 +2273,7 @@
   el("qb-bill-band").innerHTML = BILL_BANDS.map(function (b) {
     return '<option value="' + b.id + '"' + (b.id === "b4" ? " selected" : "") + ">" + esc(b.label) + "</option>";
   }).join("");
+  populatePackageSelect();
   populateEquipmentSelects();
 
   SCOPE_PREFS = loadScopePrefs();     // the founder's own defaults, from last time
@@ -2167,7 +2290,7 @@
   // fallback ladder is the one the team has been quoting from.
   Promise.all([loadCatalog(), loadSettings()]).then(function (loaded) {
     if (loaded[0]) populateEquipmentSelects();
-    if (loaded[1]) seedFieldsFromConfig();
+    if (loaded[1]) { populatePackageSelect(); seedFieldsFromConfig(); }
     if (loaded[0] || loaded[1]) refresh();
   });
 })();

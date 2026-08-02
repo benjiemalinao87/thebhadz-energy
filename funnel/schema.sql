@@ -431,6 +431,8 @@ CREATE TABLE IF NOT EXISTS price_items (
   confirmed_by  TEXT,
   custom        INTEGER NOT NULL DEFAULT 0, -- 0 = overrides a built-in, 1 = founder-added
   active        INTEGER NOT NULL DEFAULT 1, -- 0 hides a line from new quotes
+  spec          REAL,                       -- equipment rating: W / kW / kWh
+  hybrid        INTEGER,                    -- inverters only: 1 = works with a battery
   updated_at    TEXT NOT NULL,
   updated_by    TEXT
 );

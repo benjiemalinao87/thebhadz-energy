@@ -45,15 +45,37 @@ export const DEFAULT_CONFIG = {
     },
   ],
 
+  /*
+   * The packages a founder can quote. A package is not just a name — each flag
+   * changes what the quote is allowed to say:
+   *
+   *   gridTied     → whether BILECO net-metering appears in the checklist and the
+   *                  milestones, and how the no-battery disclosure is worded.
+   *   needsBattery → whether storage is offered, whether a hybrid inverter is
+   *                  offered instead of a string one, and whether quoting it with
+   *                  no battery is flagged as selling backup that does not exist.
+   *   coveragePct  → the share of consumption the array is sized to cover.
+   *
+   * `hint` is shown only in the founder's dropdown; `label` is what prints on the
+   * customer's quotation. `id` is what the select carries — kept stable across
+   * renames so an open quote does not lose its selection.
+   *
+   * Founder OS §3 holds the OFFER to three packages in the ₱80–100k window. This
+   * being editable is not a licence to proliferate SKUs: a new package still needs
+   * its own pre-registered threshold before it goes in front of a customer.
+   */
+  packages: [
+    { id: "liwanag", label: "LIWANAG — on-grid", hint: "bill reduction only", gridTied: true, needsBattery: false, coveragePct: 70 },
+    { id: "ilaw", label: "ILAW — off-grid", hint: "", gridTied: false, needsBattery: true, coveragePct: 85 },
+    { id: "sandigan", label: "SANDIGAN — hybrid", hint: "bill + backup", gridTied: true, needsBattery: true, coveragePct: 75 },
+  ],
+
   // Sizing. `tariff` and `yieldPerKwp` seed the two fields in "Their BILECO bill";
   // both are marked EST in SC-08 and the yield should be replaced with metered
   // output from the first reference install.
   tariff: 12.9458,
   yieldPerKwp: 4.0,
   daysPerMonth: 30,
-  coverageLiwanag: 70,
-  coverageIlaw: 85,
-  coverageSandigan: 75,
 
   // The share of what the panels make that actually lands on the bill. Without
   // storage the rest exports at below retail, so counting it peso-for-peso would
@@ -88,9 +110,6 @@ const NUMBERS = {
   tariff: [0.01, 100],
   yieldPerKwp: [0.1, 12],
   daysPerMonth: [28, 31],
-  coverageLiwanag: [10, 100],
-  coverageIlaw: [10, 100],
-  coverageSandigan: [10, 100],
   selfConsumption: [1, 100],
   selfConsumptionBattery: [1, 100],
   panelsPerRow: [1, 60],
@@ -109,6 +128,16 @@ const NUMBERS = {
 };
 
 const MAX_TIERS = 8;
+const MAX_PACKAGES = 8;
+
+/** "LIWANAG — on-grid" → "liwanag-on-grid". Only used when a new row has no id. */
+function slug(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -148,6 +177,16 @@ export async function readConfig(env) {
   try { saved = JSON.parse(row.value) || {}; } catch (_) { saved = {}; }
   const config = { ...DEFAULT_CONFIG, ...saved };
   if (!Array.isArray(config.tiers) || !config.tiers.length) config.tiers = DEFAULT_CONFIG.tiers;
+
+  // Configs written before packages were editable carried the three coverage
+  // percentages as top-level fields. Carry a founder's edit forward onto the
+  // default packages rather than silently reverting it to 70/85/75.
+  if (!Array.isArray(config.packages) || !config.packages.length) {
+    const legacy = { liwanag: saved.coverageLiwanag, ilaw: saved.coverageIlaw, sandigan: saved.coverageSandigan };
+    config.packages = DEFAULT_CONFIG.packages.map((p) => (
+      Number.isFinite(legacy[p.id]) ? { ...p, coveragePct: legacy[p.id] } : { ...p }
+    ));
+  }
   return { config, updatedAt: row.updated_at, updatedBy: row.updated_by };
 }
 
@@ -181,6 +220,41 @@ export async function onRequestPut(context) {
       return json({ ok: false, error: `${field} must be a number between ${min} and ${max}.` }, 422);
     }
     config[field] = n;
+  }
+
+  if (incoming.packages !== undefined) {
+    if (!Array.isArray(incoming.packages) || !incoming.packages.length) {
+      return json({ ok: false, error: "There has to be at least one package to quote." }, 422);
+    }
+    if (incoming.packages.length > MAX_PACKAGES) {
+      return json({ ok: false, error: `At most ${MAX_PACKAGES} packages.` }, 422);
+    }
+    const packages = [];
+    const seen = new Set();
+    for (const raw of incoming.packages) {
+      const label = clean(raw && raw.label, 60);
+      if (!label) return json({ ok: false, error: "Every package needs a name." }, 422);
+      const coveragePct = Number(raw.coveragePct);
+      if (!Number.isFinite(coveragePct) || coveragePct < 10 || coveragePct > 100) {
+        return json({ ok: false, error: `${label}: coverage must be between 10 and 100%.` }, 422);
+      }
+      // Ids are carried through renames so an open quote keeps its selection, and
+      // deduped because the id is what the founder's dropdown submits.
+      let id = slug(clean(raw.id, 40)) || slug(label);
+      if (!id) return json({ ok: false, error: `${label}: the name needs at least one letter or number.` }, 422);
+      let unique = id;
+      for (let n = 2; seen.has(unique); n++) unique = `${id}-${n}`;
+      seen.add(unique);
+      packages.push({
+        id: unique,
+        label,
+        hint: clean(raw.hint, 60),
+        gridTied: !!raw.gridTied,
+        needsBattery: !!raw.needsBattery,
+        coveragePct,
+      });
+    }
+    config.packages = packages;
   }
 
   if (incoming.tiers !== undefined) {

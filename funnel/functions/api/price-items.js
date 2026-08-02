@@ -68,6 +68,12 @@ async function ensureSchema(env) {
   try {
     await env.DB.prepare(`ALTER TABLE price_items ADD COLUMN spec REAL`).run();
   } catch (_) { /* already present */ }
+  // Inverters only: 1 = hybrid (works with storage), 0 = on-grid string inverter.
+  // Which one a package needs follows from whether that package has a battery, so
+  // this replaced hard-coded lists of package names on each inverter.
+  try {
+    await env.DB.prepare(`ALTER TABLE price_items ADD COLUMN hybrid INTEGER`).run();
+  } catch (_) { /* already present */ }
   schemaChecked = true;
 }
 
@@ -139,6 +145,9 @@ export async function onRequestPut(context) {
     return json({ ok: false, error: "A battery needs its kWh capacity (e.g. 5.12)." }, 422);
   }
 
+  // Only meaningful for inverters; NULL elsewhere so nothing else has to care.
+  const hybrid = kind === "inverter" ? (b.hybrid ? 1 : 0) : null;
+
   const now = new Date().toISOString();
   const by = clean(founder.name || founder.email, 80);
   const existing = await env.DB.prepare(`SELECT confirmed FROM price_items WHERE item_key = ?`)
@@ -153,23 +162,23 @@ export async function onRequestPut(context) {
     await env.DB.prepare(
       `UPDATE price_items SET kind = ?, label = ?, price = ?, qty_fixed = ?, group_name = ?,
          confirmed = ?, source_note = ?, ${confirmedAt === undefined ? "" : "confirmed_at = ?,"}
-         confirmed_by = ?, custom = ?, active = ?, spec = ?, updated_at = ?, updated_by = ?
+         confirmed_by = ?, custom = ?, active = ?, spec = ?, hybrid = ?, updated_at = ?, updated_by = ?
        WHERE item_key = ?`
     ).bind(
       ...[kind, label, price, qtyFixed, clean(b.group_name, 60) || null, confirmed, sourceNote || null],
       ...(confirmedAt === undefined ? [] : [confirmedAt]),
-      confirmed ? by : null, custom, b.active === 0 ? 0 : 1, spec, now, by, itemKey
+      confirmed ? by : null, custom, b.active === 0 ? 0 : 1, spec, hybrid, now, by, itemKey
     ).run();
   } else {
     await env.DB.prepare(
       `INSERT INTO price_items
          (kind, item_key, label, price, qty_fixed, group_name, confirmed, source_note,
-          confirmed_at, confirmed_by, custom, active, spec, updated_at, updated_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          confirmed_at, confirmed_by, custom, active, spec, hybrid, updated_at, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       kind, itemKey, label, price, qtyFixed, clean(b.group_name, 60) || null,
       confirmed, sourceNote || null, confirmed ? now : null, confirmed ? by : null,
-      custom, b.active === 0 ? 0 : 1, spec, now, by
+      custom, b.active === 0 ? 0 : 1, spec, hybrid, now, by
     ).run();
   }
 

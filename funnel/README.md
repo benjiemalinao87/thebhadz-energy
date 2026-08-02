@@ -488,12 +488,26 @@ statement (§1.6), the compliance checklist and the INDICATIVE stamp (§7) print
 
 ### The numbers behind a quote (`/api/quote-settings`)
 
-**The price ladder is not settled, so it is data, not code.** Tiers (name, kWp and kWh
-ceilings, price, with-battery price, and the sentence the flag rail shows), the sizing
-assumptions, and the fee/delivery formulas all live in a `quote_settings` row and are edited
-from **Packages & pricing** in the builder. `funnel/internal/assets/quote-builder.js` carries a
-matching fallback block for offline use — if you change `DEFAULT_CONFIG` in
-`functions/api/quote-settings.js`, change that block too.
+**The packages and the price ladder are not settled, so they are data, not code.** The package
+list, the tiers (name, kWp and kWh ceilings, price, with-battery price, and the sentence the
+flag rail shows), the sizing assumptions, and the fee/delivery formulas all live in a
+`quote_settings` row and are edited from **Packages & pricing** in the builder.
+`funnel/internal/assets/quote-builder.js` carries a matching fallback block for offline use —
+if you change `DEFAULT_CONFIG` in `functions/api/quote-settings.js`, change that block too.
+
+A package carries behaviour, not just a name: `gridTied` drives net-metering in the checklist
+and milestones, `needsBattery` drives the storage picker and whether the inverter list offers
+hybrids or string inverters. Two consequences worth knowing before touching this:
+
+- Inverters are tagged `hybrid` (a `price_items` column, editable in the price list) and matched
+  against the package's `needsBattery`. They used to carry hard-coded lists of package names,
+  which meant a new package left every inverter unaware of it and emptied the picker —
+  `syncInverterOptions` then read `options[0].id` off an empty array and took the sheet down.
+  It now falls back progressively and bails rather than throwing.
+- The no-battery disclosure keys off the **absence of a battery**, never off a package flag, and
+  only its wording follows `gridTied`. Keying it off the package would let someone create one
+  that quietly suppresses a §1.6 disclosure — and `/api/quote` 422s without it anyway, so the
+  two would disagree.
 
 **Any signed-in founder can read and write it**, exactly as with the price list — the founders
 are equals, and whoever is on the phone to a customer is the person who knows the ladder needs

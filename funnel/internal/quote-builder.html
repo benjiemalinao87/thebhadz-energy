@@ -92,13 +92,10 @@
         <div class="qb-box">
           <h3>System</h3>
           <div class="qb-fields">
-            <label>Package
-              <select id="qb-type">
-                <option value="liwanag">LIWANAG — on-grid (bill reduction only)</option>
-                <option value="ilaw">ILAW — off-grid</option>
-                <option value="sandigan">SANDIGAN — hybrid (bill + backup)</option>
-              </select>
-            </label>
+            <!-- Options come from the saved config (Packages & pricing), not from
+                 markup: the packages are editable, so a hard-coded list here would
+                 silently disagree with the behaviour behind each one. -->
+            <label>Package<select id="qb-type"></select></label>
             <label>Panel<select id="qb-panel"></select></label>
             <label>Inverter<select id="qb-inverter"></select></label>
             <div id="qb-battery-wrap" class="qb-fields" hidden>
@@ -227,6 +224,10 @@
               <label>Line<input type="text" id="qb-pl-new-label" maxlength="120" placeholder="Extra conduit run, 6m"></label>
               <label id="qb-pl-new-qty-wrap">Qty<input type="number" id="qb-pl-new-qty" min="0" step="1" value="1"></label>
               <label id="qb-pl-new-spec-wrap" hidden><span id="qb-pl-new-spec-label">Rating</span><input type="number" id="qb-pl-new-spec" min="0" step="0.01" placeholder="615"></label>
+              <label id="qb-pl-new-hybrid-wrap" hidden>Type<select id="qb-pl-new-hybrid">
+                <option value="0">On-grid string inverter</option>
+                <option value="1">Hybrid — works with a battery</option>
+              </select></label>
               <label>Unit price<input type="number" id="qb-pl-new-price" min="0" step="50" placeholder="0"></label>
               <label>Section<select id="qb-pl-new-group">
                 <option value="">Additional items</option>
@@ -266,6 +267,19 @@
             </div>
 
             <div class="qb-pl-body">
+              <div class="qb-pl-group">Packages</div>
+              <p class="qb-note" style="margin:0 0 10px">What the founder picks in <b>System</b>. The two switches are
+                not cosmetic: <b>grid-tied</b> decides whether BILECO net-metering appears in the checklist and the
+                milestones, and <b>needs battery</b> decides whether storage and a hybrid inverter are offered — and
+                whether quoting it without a battery is flagged as selling backup that does not exist. A system with no
+                battery always carries the brownout disclosure either way (§1.6). Founder OS §3 holds the offer to three
+                packages in the ₱80–100k window; a fourth needs its own pre-registered threshold before a customer
+                sees it.</p>
+              <div id="qb-set-packages"></div>
+              <div class="qb-actions" style="margin:10px 0 6px">
+                <button type="button" class="secondary" id="qb-set-add-pkg">Add a package</button>
+              </div>
+
               <div class="qb-pl-group">Price ladder</div>
               <p class="qb-note" style="margin:0 0 10px">A quote takes the first tier it fits inside — both
                 ceilings, size and storage. Anything bigger falls through to CUSTOM, where the price is set

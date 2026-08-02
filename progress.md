@@ -1,5 +1,13 @@
 # Progress
 
+## Quote builder: packages are editable too (2026-08-02) — done
+- LIWANAG / ILAW / SANDIGAN moved out of code into `quote_settings.packages`; add, rename, remove from "Packages & pricing"
+- Each package carries name, dropdown hint, coverage %, grid-tied and needs-battery — the last two drive net-metering copy, the storage picker and the inverter list
+- Inverters now tagged `hybrid` (new `price_items` column, toggled in the price list) and matched against the package's needs-battery, replacing hard-coded package-name lists
+- Fixed a crash the old design guaranteed: a new package matched no inverter, so `syncInverterOptions` read `options[0].id` off an empty array
+- Closed an honesty gap: the no-battery disclosure now keys off the absence of a battery, not off `gridTied`, so an off-grid package with no storage says so (and stops disagreeing with `/api/quote`, which already 422'd without it)
+- Legacy configs holding `coverageLiwanag/Ilaw/Sandigan` migrate onto the package rows rather than reverting
+
 ## Quote builder: customer copy vs internal cost sheet (2026-08-02) — done
 - SC-16 now renders two sheets from one model; view tabs above the preview, both always in the DOM
 - Customer copy = scope + one fixed price (no unit prices, no VAT/fee build-up); internal = the itemised BOM plus cost, profit and take-home

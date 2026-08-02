@@ -30,6 +30,10 @@ padding. We sell a fixed-price installed package (§3), so the document has to a
 - If a supplier has confirmed a price since your last quote, put it in **Price list** first,
   with who quoted it and when. A confirmed price without a source note is refused — that flag
   is what removes the INDICATIVE stamp from a customer's quotation.
+- Adding a panel, inverter or battery brand is the same dialog: **Price list → Add a line →**
+  Section *"Panels / Inverters / Batteries — new brand/model"*, plus its rating (watts, kW,
+  kWh). An **inverter also needs its type** — hybrid or on-grid string — because that is what
+  decides which packages offer it. Get it wrong and the inverter never appears.
 
 ## 3. Building the quote (daily use)
 
@@ -66,9 +70,20 @@ mentioned it — that is the dispute you will lose.
 
 ## 5. Packages & pricing — the ladder is not settled
 
-The ladder, the sizing assumptions and the fee formulas are **data, not code**. Any founder can
-change them; every change is audited and the dialog names who last changed it and when.
+The packages, the ladder, the sizing assumptions and the fee formulas are **data, not code**. Any
+founder can change them; every change is audited and the dialog names who last changed it and when.
 
+- **Packages** — what you pick in *System*. Name (prints on the quote), an optional dropdown
+  hint, coverage %, and two switches that are **not cosmetic**:
+  - **Grid-tied** — whether BILECO net-metering appears in the checklist and the milestones.
+  - **Needs battery** — whether storage is offered, whether the inverter list shows hybrids
+    instead of string inverters, and whether quoting it with no battery is flagged as selling
+    backup that does not exist.
+
+  A system with no battery carries the brownout disclosure either way, so no package can be
+  built that hides it. Founder OS §3 holds the offer to three packages in the ₱80–100k window —
+  a fourth needs its own pre-registered threshold before a customer sees it, so add one to test
+  something, not because it seemed tidy.
 - **Tiers** — name, kWp ceiling, kWh ceiling, price, with-battery price, and the sentence the
   flag rail shows. A quote takes the **first tier it fits inside, smallest first**. Tiers are
   sorted on save so a tier can never be shadowed by a larger one. Nothing fits → CUSTOM, and
