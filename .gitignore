@@ -26,3 +26,10 @@ yarn-error.log*
 dist/
 build/
 .gstack/
+
+# Throwaway auth-seed page used to drive a headless browser against a local Wrangler
+# session. It embeds a live session cookie, so it must never be committable even if a
+# `git add -A` runs while a screenshot is in flight — which is exactly how one reached
+# history in 280f0db.
+funnel/_ccseed.html
+_ccseed.html
