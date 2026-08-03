@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apps — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="icon" href="/assets/img/macc-mark.png">
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
+<link rel="stylesheet" href="/internal/assets/apps.css">
+</head>
+<body class="ops-standalone">
+
+<main class="content apps-page">
+
+  <header class="apps-head">
+    <h1 id="apps-greeting">Apps</h1>
+    <p class="apps-sub">Every tool in the Command Center. The dashboard is what needs a decision
+      today; this is where you go to do the work.</p>
+  </header>
+
+  <!--
+    Tiles carry data-section so assets/section-visibility.js can drop the ones this account
+    may not open — the same registry both middlewares enforce, so the grid can never offer
+    a door that will slam. Each tile has ONE primary destination plus links that genuinely
+    go somewhere else; nothing here is a decorative button.
+  -->
+  <div class="apps-grid" id="apps-grid">
+
+    <section class="apps-group">
+      <h2 class="apps-group-title">Deliver</h2>
+      <div class="apps-row">
+        <a class="app" href="/internal/projects.html" data-section="projects">
+          <span class="app-ico jobs" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Jobs</b>
+            <small>One record per installation, survey through warranty. Gates, crew, cost and history.</small>
+            <span class="app-stat" data-stat="jobs"></span>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/leads.html" data-section="leads">
+          <span class="app-ico leads" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Contacts</b>
+            <small>The leads pipeline, from first enquiry to sold. Next action and owner on every row.</small>
+            <span class="app-stat" data-stat="leads"></span>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/quote-builder.html" data-section="quotes">
+          <span class="app-ico quote" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 11v6"/><path d="M9.5 13h4"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Quote builder</b>
+            <small>The one tool that sets the price a customer sees. Packages, line items, send.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/install-ops.html" data-section="install-ops">
+          <span class="app-ico ops" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Install operations</b>
+            <small>Crew rosters, rates, safety sign-off, QC, per-job costs and payments.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/next-actions.html" data-section="next-actions">
+          <span class="app-ico next" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Next actions</b>
+            <small>Every overdue and upcoming step across contacts, jobs and the company board.</small>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="apps-group">
+      <h2 class="apps-group-title">Money</h2>
+      <div class="apps-row">
+        <a class="app" href="/internal/finance.html" data-section="finance">
+          <span class="app-ico finance" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 16 4-5 3 3 5-7"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Finance &amp; runway</b>
+            <small>The ledger: inflows, committed spend, burn and what is actually available.</small>
+            <span class="app-stat" data-stat="finance"></span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="apps-group">
+      <h2 class="apps-group-title">Record</h2>
+      <div class="apps-row">
+        <a class="app" href="/internal/mail.html" data-section="mail">
+          <span class="app-ico mail" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Mailbox</b>
+            <small>Customer and supplier threads on the company address.</small>
+            <span class="app-stat" data-stat="mail"></span>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/docs.html" data-section="documents">
+          <span class="app-ico docs" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Documents</b>
+            <small>Permits, signed quotes, SEC filings and the templates they come from.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/notes.html" data-section="notes">
+          <span class="app-ico notes" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Team notes</b>
+            <small>Shared working notes with images. Anything that is not yet a document.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/meetings.html" data-section="meetings">
+          <span class="app-ico meet" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.55-2.28A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.45.88L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Meeting log</b>
+            <small>Minutes, decisions and call recordings.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/captures.html" data-section="captures">
+          <span class="app-ico capture" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M21 15v4a2 2 0 0 1-2 2h-4"/><path d="M3 9V5a2 2 0 0 1 2-2h4"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Product captures</b>
+            <small>Supplier and product research clipped from the web by the browser extension.</small>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="apps-group">
+      <h2 class="apps-group-title">Strategy &amp; the engineering file</h2>
+      <div class="apps-row">
+        <a class="app" href="/internal/founder-lab.html" data-section="founder-lab">
+          <span class="app-ico lab" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 16 4-5 3 3 5-7"/><circle cx="7" cy="16" r="1"/><circle cx="19" cy="7" r="1"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Strategy lab</b>
+            <small>Positioning, pricing corridor and the evidence behind each claim.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/strategy.html" data-section="strategy">
+          <span class="app-ico strategy" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Strategy &amp; market</b>
+            <small>The roadmap, packages, decks and the founder charter.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/overview.html" data-section="engineering">
+          <span class="app-ico eng" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Engineering file</b>
+            <small>Panel designer, build guide, BOM, sourcing — the SC-xx manual.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/sec-registration.html" data-section="legal">
+          <span class="app-ico legal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="m5 7 -2 6h6Z"/><path d="m19 7 -2 6h6Z"/><path d="M8 21h8"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Registration &amp; legal</b>
+            <small>SEC checklist, by-laws, incorporation templates, ERC and net metering.</small>
+          </span>
+        </a>
+
+        <a class="app" href="/internal/team.html" data-section="team">
+          <span class="app-ico team" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          </span>
+          <span class="app-body">
+            <b>Team &amp; access</b>
+            <small>Founder accounts, roles, per-account visibility and the activity log.</small>
+          </span>
+        </a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="/internal/assets/section-visibility.js"></script>
+<script src="/internal/assets/apps.js"></script>
+</body>
+</html>

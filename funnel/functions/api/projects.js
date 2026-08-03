@@ -30,6 +30,41 @@ function requireFounder(context) {
   return currentUser(context);
 }
 
+/**
+ * Whether project_tasks.job_id exists yet. /api/jobs adds it on first use, so a database
+ * that has not met that code path is a real state this endpoint has to survive: without
+ * the column there are no job tasks to exclude, and the board is correct unfiltered.
+ *
+ * Probed once per isolate — the schema cannot change under a running isolate — and only
+ * a definite answer is cached, so a transient failure re-probes on the next request.
+ */
+let hasJobColumn = null;
+async function jobColumnExists(env) {
+  if (hasJobColumn === null) {
+    try {
+      await env.DB.prepare(`SELECT job_id FROM project_tasks LIMIT 1`).all();
+      hasJobColumn = true;
+    } catch (err) {
+      // "no such column" is the expected pre-migration answer. Anything else (a genuine
+      // outage) must not be remembered as "no column" for the life of the isolate.
+      if (!/no such column/i.test(String(err && err.message))) throw err;
+      hasJobColumn = false;
+    }
+  }
+  return hasJobColumn;
+}
+
+/**
+ * Company work only. Tasks with a job_id are one installation's checklist and belong to
+ * /api/jobs — listing them here would put ~30 rows per job on the Founder OS board and
+ * let the 50%-traction gauge read near-100% while nobody is selling.
+ */
+async function companyTasks(env, columns, order) {
+  const scope = (await jobColumnExists(env)) ? `WHERE job_id IS NULL` : ``;
+  const { results } = await env.DB.prepare(`SELECT ${columns} FROM project_tasks ${scope} ${order}`).all();
+  return results || [];
+}
+
 function cleanDate(value) {
   const date = String(value || "").trim();
   return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
@@ -64,10 +99,7 @@ export async function onRequest(context) {
   const method = request.method;
 
   if (method === "GET") {
-    const { results } = await env.DB.prepare(
-      `SELECT id, title, owner, type, due, status, notes, created_at, updated_at
-       FROM project_tasks
-       ORDER BY
+    const order = `ORDER BY
          CASE status
            WHEN 'This week' THEN 1
            WHEN 'Doing' THEN 2
@@ -77,9 +109,10 @@ export async function onRequest(context) {
          END,
          CASE WHEN due = '' OR due IS NULL THEN 1 ELSE 0 END,
          due ASC,
-         datetime(created_at) DESC`
-    ).all();
-    return json({ ok: true, tasks: results || [] });
+         datetime(created_at) DESC`;
+    const columns = `id, title, owner, type, due, status, notes, created_at, updated_at`;
+    const results = await companyTasks(env, columns, order);
+    return json({ ok: true, tasks: results });
   }
 
   if (method === "POST") {
@@ -134,7 +167,13 @@ export async function onRequest(context) {
     if (!Array.isArray(body.tasks)) return json({ ok: false, error: "Expected tasks array." }, 422);
     const now = new Date().toISOString();
     const tasks = body.tasks.map((task) => cleanTask(task)).filter(Boolean).slice(0, 200);
-    const statements = [env.DB.prepare(`DELETE FROM project_tasks`)];
+    // Job checklists share this table and are NOT part of a company-board export, so the
+    // replace is scoped. Unscoped, importing a board would delete every job's tasks.
+    const statements = [
+      (await jobColumnExists(env))
+        ? env.DB.prepare(`DELETE FROM project_tasks WHERE job_id IS NULL`)
+        : env.DB.prepare(`DELETE FROM project_tasks`),
+    ];
     for (const task of tasks) {
       statements.push(env.DB.prepare(
         `INSERT INTO project_tasks (id, title, owner, type, due, status, notes, created_at, updated_at)

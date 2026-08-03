@@ -267,6 +267,60 @@ Query leads directly anytime:
 npx wrangler d1 execute solar-city-leads --remote --command "SELECT name, phone, stage FROM leads ORDER BY created_at DESC;"
 ```
 
+### Jobs workspace (SC-07, D1-backed)
+
+**/internal/projects.html** is two boards in one page, served by two APIs:
+
+- **Jobs** — one record per installation, from survey to warranty. This is the *same*
+  `install_projects` row SC-10 Install Operations owns; SC-07 is a second, work-shaped view
+  of it, not a copy. `/api/jobs` adds what a board needs and SC-10 never had: a job code, a
+  stage clock, per-job tasks, stage history, and enforced gates. Costs, payments, crew and
+  assignments are still **written** in SC-10 (they sync to the SC-09 ledger there) and only
+  **read** here, so there is no second copy to drift.
+- **Company tasks** — the Founder OS Traction/Product/Ops board, still on `/api/projects`.
+
+Both live in the `projects` section of `functions/_pages.js`, so hiding that section from an
+account closes the page *and* both APIs.
+
+Five views over one load (switching costs no round trip): **Board** groups the 14 stages
+into 6 phases, **List** is the dense sortable table with forecast margin, **Schedule** is an
+8-week Gantt, **Crew** is installer × day from real assignments, **Company tasks** is the
+Founder OS board. Clicking any job opens a drawer — Overview, Tasks, Crew, Money, Files,
+History — which fetches `GET /api/jobs?id=<id>` for its detail bundle.
+
+**The gates are enforced, not decorated.** `install_projects` has always carried
+`permit_checklist`, `licensed_electrician_check` and `net_metering_check`; nothing used
+them. A job may not enter **On site** or **Energized** while any is open: `PATCH /api/jobs`
+answers **409** with the outstanding gates named, and records the refused attempt in
+`job_stage_events`. The board colours a drop target as a courtesy, but the server is the
+authority, so the rule holds however the move is attempted.
+
+Two details worth knowing:
+
+- **Off-grid records N/A, never a fake pass.** An ILAW package has no utility
+  interconnection, so `net_metering_na = 1` satisfies that gate while
+  `net_metering_check` honestly stays `0` — nothing in the record claims an application was
+  filed. Set automatically from the package name on create.
+- **A gate and its checklist task are one fact.** Ticking "File LGU permit" in the Tasks tab
+  signs off the gate on Overview, and flipping the gate settles the task. One source of
+  truth, so a crew in the field cannot unlock a stage the office believes is blocked.
+
+Creating a job from a contact copies its name, phone, address and package, then seeds the
+**30-task standard install checklist** (`TEMPLATE` in `functions/api/jobs.js`), dated
+backwards from the install date — so a job is never a blank board. Re-dating the install
+re-dates the whole plan; tasks the team added by hand keep their own dates.
+
+Job codes are `JOB-<year>-<nnn>`, allocated as one above the year's highest. Rows that
+predate them are backfilled oldest-first on first load. Deleting a job is refused once a
+payment has been received (cancel it instead) — which is also why reusing a freed code is
+safe: a deletable job never reached a customer receipt.
+
+Schema changes are additive and applied two ways: `schema.sql` for a fresh database, and an
+idempotent `migrate()` in `functions/api/jobs.js` for an existing one (duplicate-column
+errors are the success case after the first run). `/api/projects` probes for the `job_id`
+column once per isolate, so the company board keeps working either way — and its board
+import deletes only company tasks, never a job's checklist.
+
 ### Product captures (D1-backed, fed by the browser extension)
 
 Supplier/product research clipped from the web lands in the `product_captures` table via

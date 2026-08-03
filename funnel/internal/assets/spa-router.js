@@ -31,7 +31,7 @@
   // Pages whose <main> is an ops workspace (.ops-content) rather than a document:
   // the shell swaps to the light "operations" ground for these, which their styling
   // assumes. Miss one and its text renders dark-on-dark in light mode.
-  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "docs", "projects", "finance", "team", "captures"];
+  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "docs", "projects", "finance", "team", "captures", "install-ops"];
 
   // Every internal page has two spellings: the file that actually exists
   // (/internal/leads.html) and the canonical address we show (/internal/leads).
@@ -255,8 +255,9 @@
     loadStyles(pageStyles, head, baseUrl, function () {
       view.style.visibility = "";
       loadScriptsInOrder(pageScripts, view, baseUrl, function () {
-        if (isDashboard && typeof window.ccRefreshDashboardMetrics === "function") {
-          window.ccRefreshDashboardMetrics();
+        if (isDashboard) {
+          if (typeof window.ccApplyHubGreeting === "function") window.ccApplyHubGreeting();
+          if (typeof window.ccRefreshDashboardMetrics === "function") window.ccRefreshDashboardMetrics();
         }
         view.setAttribute("aria-busy", "false");
         var heading = incomingMain.querySelector("h1, h2");
@@ -270,7 +271,12 @@
       });
     });
     setActiveNav(pathname);
-    document.body.classList.toggle("cc-operation-view", OPERATION_SLUGS.indexOf(slugOf(pathname)) !== -1);
+    var onDash = isDashboardPath(pathname);
+    // The light shell ground belongs to the dashboard only; other views keep their own
+    // treatment (.cc-operation-view, or a doc page's own styles). Class renamed with
+    // assets/shell.css, which is the stylesheet that defines it.
+    document.body.classList.toggle("cc-shell", onDash);
+    document.body.classList.toggle("cc-operation-view", !onDash && OPERATION_SLUGS.indexOf(slugOf(pathname)) !== -1);
     if (typeof window.ccCloseNavigation === "function") window.ccCloseNavigation();
     else document.body.classList.remove("nav-open");
     window.scrollTo(0, 0);

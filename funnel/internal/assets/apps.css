@@ -1,0 +1,125 @@
+/* /internal/apps.html — the app grid reached from the rail's single Apps entry.
+   Built on the Operations tokens, so light and dark both come from html[data-theme].
+   Grouped by what the tool is FOR (deliver / money / record / strategy) rather than
+   presented as five equal cards, because the groups are how the work is actually divided. */
+
+.apps-page {
+  padding: clamp(18px, 3vw, 34px);
+  max-width: 1320px;
+  font-family: var(--ops-font);
+  color: var(--ops-ink);
+}
+
+.apps-page * { box-sizing: border-box; }
+.apps-page a { text-decoration: none; color: inherit; }
+
+.apps-head { margin-bottom: 26px; }
+.apps-head h1 {
+  margin: 0;
+  font: 700 clamp(1.6rem, 3vw, 2.15rem)/1.12 var(--ops-font);
+  letter-spacing: -.02em;
+  color: var(--ops-ink);
+}
+.apps-sub {
+  margin: 9px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ops-muted);
+}
+
+.apps-grid { display: flex; flex-direction: column; gap: 26px; }
+
+.apps-group-title {
+  margin: 0 0 11px;
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ops-subtle);
+}
+
+.apps-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 12px;
+}
+
+/* One tile, one destination. Nothing here is a decorative control. */
+.app {
+  display: flex;
+  gap: 13px;
+  padding: 15px 16px;
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.app:hover {
+  transform: translateY(-1px);
+  border-color: var(--ops-line-strong);
+  box-shadow: 0 2px 6px rgba(13, 48, 55, .06), 0 20px 44px -28px rgba(13, 48, 55, .35);
+}
+html[data-theme="dark"] .app:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3), 0 24px 52px -28px rgba(0, 0, 0, .9);
+}
+.app:focus-visible { outline: 2px solid var(--ops-amber); outline-offset: 2px; }
+
+.app-ico {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--ops-surface-2);
+  color: var(--ops-muted);
+}
+.app-ico svg { width: 18px; height: 18px; }
+
+/* Tone by group, drawn from the semantic palette rather than a new one. */
+.app-ico.jobs, .app-ico.ops { background: var(--ops-green-soft); color: var(--ops-green); }
+.app-ico.leads, .app-ico.next { background: var(--ops-blue-soft); color: var(--ops-blue); }
+.app-ico.finance { background: var(--ops-green-soft); color: var(--ops-green); }
+.app-ico.quote { background: var(--ops-amber); color: #2a1f00; }
+.app-ico.mail, .app-ico.docs, .app-ico.notes, .app-ico.meet, .app-ico.capture {
+  background: var(--ops-surface-2);
+  color: var(--ops-muted);
+}
+.app-ico.lab, .app-ico.strategy, .app-ico.eng, .app-ico.legal, .app-ico.team {
+  background: var(--ops-blue-soft);
+  color: var(--ops-blue);
+}
+
+.app-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.app-body b {
+  font: 650 14.5px var(--ops-font);
+  letter-spacing: -.01em;
+  color: var(--ops-ink);
+}
+.app-body small {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ops-muted);
+}
+
+/* Live counts, filled in by apps.js. Absent until the data arrives, so the tile never
+   shows a placeholder number that could be mistaken for a real one. */
+.app-stat {
+  margin-top: 3px;
+  font: 650 11px var(--ops-mono);
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ops-petrol);
+}
+html[data-theme="dark"] .app-stat { color: var(--ops-amber); }
+.app-stat:empty { display: none; }
+.app-stat.warn { color: var(--ops-rust); }
+
+@media (max-width: 680px) {
+  .apps-row { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app { transition: none; }
+  .app:hover { transform: none; }
+}

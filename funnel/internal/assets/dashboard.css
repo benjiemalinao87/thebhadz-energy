@@ -1,0 +1,303 @@
+/* MACC Command Center — the landing dashboard (SC-00).
+   Instrument panel, not a launcher: what needs a decision today, ranked by consequence.
+   Navigation lives in the rail's single Apps entry; this surface is for state.
+
+   Built on the approved Operations tokens (operations-redesign.css) so light and dark both
+   come for free — theme.js always stamps html[data-theme], which is what dark styling hangs
+   off here. Everything is prefixed .db- so it cannot collide with .cc-* or .ops-*. */
+
+:root {
+  --db-amber-soft: #fdf4da;
+  --db-amber-ink: #6b4a00;
+  --db-surface-3: #ebe9e2;
+}
+
+html[data-theme="dark"] {
+  --db-amber-soft: #33260a;
+  --db-amber-ink: #ffd884;
+  --db-surface-3: #1c3236;
+}
+
+.db {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--ops-font);
+  color: var(--ops-ink);
+}
+
+.db * { box-sizing: border-box; }
+.db a { text-decoration: none; color: inherit; }
+.db .n { font-variant-numeric: tabular-nums; }
+
+.db-eyebrow {
+  display: block;
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ops-subtle);
+}
+
+/* One bar primitive for every proportion on the page. */
+.db-bar {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--db-surface-3);
+  overflow: hidden;
+}
+.db-bar > i { display: block; height: 100%; border-radius: 999px; background: var(--ops-petrol); }
+.db-bar > i.green { background: var(--ops-green); }
+.db-bar > i.amber { background: var(--ops-amber); }
+.db-bar > i.rust { background: var(--ops-rust); }
+.db-bar.mark::after {
+  content: "";
+  position: absolute; left: 50%; top: -3px; bottom: -3px;
+  width: 1px; background: var(--ops-line-strong);
+}
+
+/* ------------------------------------------------------------- mission strip --- */
+
+.db-mission {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
+  overflow: hidden;
+}
+.db-mc {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 16px 15px;
+  border-right: 1px solid var(--ops-line);
+}
+.db-mc:last-child { border-right: 0; }
+.db-mc.alarm { background: var(--ops-rust-soft); }
+.db-mc .fig { display: flex; align-items: baseline; gap: 7px; }
+.db-mc .fig b {
+  font: 700 26px/1 var(--ops-font);
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+}
+.db-mc .fig span { font: 600 13px var(--ops-font); color: var(--ops-subtle); }
+.db-mc.alarm .fig b { color: var(--ops-rust); }
+.db-mc p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ops-muted); }
+.db-mc p b { color: var(--ops-ink); font-weight: 650; }
+
+/* ------------------------------------------------------------------ layout --- */
+
+.db-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.db-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.db-panel {
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
+  overflow: hidden;
+}
+.db-ph {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ops-line);
+}
+.db-ph h2 {
+  margin: 0;
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ops-muted);
+}
+.db-ph .r { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.db-ph .lnk { font: 600 12px var(--ops-font); color: var(--ops-petrol); }
+html[data-theme="dark"] .db-ph .lnk { color: var(--ops-amber); }
+.db-ph .lnk:hover { text-decoration: underline; }
+.db-pb { padding: 16px; }
+
+.db-count {
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .06em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--ops-rust);
+  color: #fff;
+}
+.db-count.clear { background: var(--ops-green); }
+
+/* --------------------------------------------------------------- the queue --- */
+/* Severity is the left stripe; owner and timing are plain text in their own column.
+   No chips — a row has to be scannable in one pass. */
+
+.db-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 138px 16px;
+  gap: 16px;
+  align-items: center;
+  padding: 13px 16px 13px 19px;
+  border-bottom: 1px solid var(--ops-line);
+  transition: background .12s;
+}
+.db-row:last-child { border-bottom: 0; }
+.db-row:hover { background: var(--ops-surface-2); }
+.db-row::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; }
+.db-row[data-sev="stop"]::before { background: var(--ops-rust); }
+.db-row[data-sev="soon"]::before { background: var(--ops-amber); }
+.db-row[data-sev="ok"]::before { background: var(--ops-green); }
+
+.db-row .t { display: block; font: 600 14px/1.35 var(--ops-font); }
+.db-row .w {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ops-muted);
+}
+.db-row .kind {
+  display: block;
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.db-row[data-sev="stop"] .kind { color: var(--ops-rust); }
+.db-row[data-sev="soon"] .kind { color: var(--db-amber-ink); }
+.db-row[data-sev="ok"] .kind { color: var(--ops-green); }
+.db-row .sub { display: block; margin-top: 3px; font-size: 12px; color: var(--ops-subtle); }
+.db-row .chev { color: var(--ops-line-strong); }
+.db-row:hover .chev { color: var(--ops-petrol); }
+html[data-theme="dark"] .db-row:hover .chev { color: var(--ops-amber); }
+.db-row .chev svg { display: block; width: 15px; height: 15px; }
+
+.db-quiet { padding: 26px 16px; text-align: center; color: var(--ops-subtle); font-size: 13px; }
+
+/* ------------------------------------------------------------------ money --- */
+
+.db-mrow { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; }
+.db-mrow + .db-mrow { border-top: 1px solid var(--ops-line); }
+.db-mrow .k { font-size: 13px; color: var(--ops-muted); }
+.db-mrow .v {
+  margin-left: auto;
+  font: 600 13.5px var(--ops-font);
+  font-variant-numeric: tabular-nums;
+}
+.db-mrow .v.out { color: var(--ops-rust); }
+.db-mrow.total .k { font-weight: 650; color: var(--ops-ink); }
+.db-mrow.total .v { font-size: 17px; font-weight: 700; }
+
+/* --------------------------------------------------------------- pipeline --- */
+
+.db-fun { display: flex; flex-direction: column; gap: 9px; }
+.db-fstep {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) 22px;
+  gap: 11px;
+  align-items: center;
+}
+.db-fstep .l {
+  font: 600 11px var(--ops-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ops-muted);
+}
+.db-fstep .db-bar { height: 14px; border-radius: 4px; }
+.db-fstep .db-bar > i { border-radius: 4px; }
+.db-fstep .v {
+  font: 650 12.5px var(--ops-mono);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- this week --- */
+
+.db-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
+.db-wrow + .db-wrow { border-top: 1px solid var(--ops-line); }
+.db-wrow .k { font-size: 13px; color: var(--ops-muted); }
+.db-wrow .s {
+  margin-left: auto;
+  font: 650 10px var(--ops-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: right;
+}
+.db-wrow .s.yes { color: var(--ops-green); }
+.db-wrow .s.no { color: var(--ops-rust); }
+.db-wrow .s.none { color: var(--ops-subtle); }
+
+/* ------------------------------------------------------------- workspaces --- */
+/* A quiet state strip. The rail's Apps entry is the navigation; this only reports. */
+
+.db-ws {
+  display: grid;
+  /* Reflows rather than crushing six fixed columns: the left column is ~590px in the
+     real shell, which truncated every label when this was repeat(6, 1fr). */
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+  padding: 12px 14px 14px;
+}
+.db-wcard {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--ops-line);
+  border-radius: 9px;
+  transition: background .12s;
+}
+.db-wcard:hover { background: var(--ops-surface-2); }
+.db-wtop { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.db-wtop svg { width: 15px; height: 15px; flex: none; color: var(--ops-muted); }
+.db-wtop b { font: 650 12.5px var(--ops-font); white-space: nowrap; }
+.db-wcard .stat {
+  font: 650 11px var(--ops-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ops-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ----------------------------------------------------------------- states --- */
+
+.db-skel { color: var(--ops-subtle); font-size: 13px; padding: 18px 16px; }
+.db-err {
+  display: flex;
+  gap: 11px;
+  padding: 13px 15px;
+  border: 1px solid var(--ops-rust);
+  border-radius: var(--ops-radius);
+  background: var(--ops-rust-soft);
+  font-size: 13px;
+  color: var(--ops-ink);
+}
+.db-err b { display: block; margin-bottom: 2px; }
+
+@media (max-width: 1200px) {
+  .db-mission { grid-template-columns: 1fr 1fr; }
+  .db-mc:nth-child(2) { border-right: 0; }
+  .db-mc:nth-child(-n+2) { border-bottom: 1px solid var(--ops-line); }
+  .db-cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .db-mission { grid-template-columns: 1fr; }
+  .db-mc { border-right: 0; border-bottom: 1px solid var(--ops-line); }
+  .db-row { grid-template-columns: minmax(0, 1fr) 16px; }
+  .db-row .meta { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-row, .db-wcard { transition: none; }
+}

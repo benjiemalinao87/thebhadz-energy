@@ -1,4 +1,18 @@
 -- Solar City leads pipeline schema (Cloudflare D1 / SQLite)
+--
+-- This file is applied to BOTH a fresh database and an existing one:
+--   npx wrangler d1 execute solar-city-leads --remote --file=schema.sql
+--
+-- So every statement here must be safe to re-run. That has one sharp consequence: on an
+-- existing database a CREATE TABLE IF NOT EXISTS is a no-op, so columns added to a table
+-- definition below do NOT appear on the live table, and any statement that NAMES a new
+-- column (an index, a view) would fail and abort the rest of the file.
+--
+-- SQLite has no ALTER TABLE ... ADD COLUMN IF NOT EXISTS, so upgrades to an existing table
+-- belong in the owning endpoint's memoized migrate() — the pattern in api/documents.js and
+-- api/jobs.js, where a duplicate-column error is the success case on every run after the
+-- first. Add the column here for fresh databases, add the ALTER there for existing ones,
+-- and keep indexes on new columns out of this file.
 
 CREATE TABLE IF NOT EXISTS leads (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +93,10 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS idx_documents_updated ON documents(updated_at);
 CREATE INDEX IF NOT EXISTS idx_documents_category ON documents(category);
 
--- Internal project board tasks
+-- Board tasks. A row with job_id set is work on one installation (SC-07 job drawer);
+-- a row with job_id NULL is company work (the Founder OS Traction/Product/Ops board).
+-- /api/projects serves the NULL half so the 50%-traction gauge is never diluted by the
+-- ~30 checklist rows every job carries; /api/jobs serves the other half.
 CREATE TABLE IF NOT EXISTS project_tasks (
   id          TEXT PRIMARY KEY,
   title       TEXT NOT NULL,
@@ -90,12 +107,26 @@ CREATE TABLE IF NOT EXISTS project_tasks (
   status      TEXT NOT NULL DEFAULT 'Backlog'
               CHECK (status IN ('Backlog', 'This week', 'Doing', 'Blocked', 'Done')),
   notes       TEXT,
+  -- Job linkage (NULL = company task)
+  job_id      TEXT REFERENCES install_projects(id),
+  role        TEXT,                        -- Tech / Sales / Admin / PEE / Ops / Procurement
+  phase       TEXT,                        -- board phase key: intake|won|prep|scheduled|site|live
+  is_gate     INTEGER NOT NULL DEFAULT 0 CHECK (is_gate IN (0, 1)),
+  -- When set, ticking this task flips that compliance flag on the job, and vice versa.
+  -- One source of truth, so a crew in the field cannot unlock a stage the office
+  -- believes is still blocked.
+  gate_key    TEXT,
+  sort_order  REAL NOT NULL DEFAULT 0,
+  completed_at TEXT,
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_due ON project_tasks(due);
+-- NOTE: the index on (job_id, sort_order) is created by migrate() in api/jobs.js, not here.
+-- On an existing database the CREATE TABLE above is a no-op, so job_id does not exist yet
+-- and an index naming it would abort this whole file. See the note at the top.
 
 -- Shared team checklists (e.g. the SC-13 SEC registration checklist).
 -- One row per checklist; state_json maps checkbox id → true.
@@ -147,9 +178,14 @@ CREATE INDEX IF NOT EXISTS idx_finance_txn_date ON finance_transactions(txn_date
 CREATE INDEX IF NOT EXISTS idx_finance_status ON finance_transactions(status);
 CREATE INDEX IF NOT EXISTS idx_finance_project ON finance_transactions(project_id);
 
--- SC-10 Install Operations: one operational record from survey through warranty.
+-- SC-10 Install Operations / SC-07 Jobs: one operational record from survey through
+-- warranty. This IS the job — the SC-07 workspace reads and writes these rows rather
+-- than keeping a second, drifting copy of the same installation.
 CREATE TABLE IF NOT EXISTS install_projects (
   id                         TEXT PRIMARY KEY,
+  -- Human handle (JOB-2026-014). Assigned on create and backfilled for older rows;
+  -- the id stays the key nothing outside the database ever has to read aloud.
+  job_code                   TEXT,
   lead_id                    INTEGER,
   customer_name              TEXT NOT NULL,
   phone                      TEXT,
@@ -168,10 +204,16 @@ CREATE TABLE IF NOT EXISTS install_projects (
   permit_checklist           INTEGER NOT NULL DEFAULT 0 CHECK (permit_checklist IN (0, 1)),
   licensed_electrician_check INTEGER NOT NULL DEFAULT 0 CHECK (licensed_electrician_check IN (0, 1)),
   net_metering_check         INTEGER NOT NULL DEFAULT 0 CHECK (net_metering_check IN (0, 1)),
+  -- Off-grid packages have no utility interconnection, so net metering is recorded
+  -- "not applicable" instead of being faked as a pass. The gate check treats N/A as
+  -- satisfied; nothing else in the record pretends an application was filed.
+  net_metering_na            INTEGER NOT NULL DEFAULT 0 CHECK (net_metering_na IN (0, 1)),
   safety_briefing_check      INTEGER NOT NULL DEFAULT 0 CHECK (safety_briefing_check IN (0, 1)),
   testing_check              INTEGER NOT NULL DEFAULT 0 CHECK (testing_check IN (0, 1)),
   handover_check             INTEGER NOT NULL DEFAULT 0 CHECK (handover_check IN (0, 1)),
   notes                      TEXT,
+  -- When the job entered its current stage — the clock the drawer's cycle times read.
+  stage_entered_at           TEXT,
   created_at                 TEXT NOT NULL,
   updated_at                 TEXT NOT NULL,
   FOREIGN KEY (lead_id) REFERENCES leads(id)
@@ -179,6 +221,25 @@ CREATE TABLE IF NOT EXISTS install_projects (
 
 CREATE INDEX IF NOT EXISTS idx_install_projects_stage ON install_projects(stage);
 CREATE INDEX IF NOT EXISTS idx_install_projects_install_date ON install_projects(install_date);
+-- NOTE: the job_code index is created by migrate() in api/jobs.js — same reason as the
+-- project_tasks(job_id) index above.
+
+-- One row per stage move. Cycle time per stage becomes a query instead of a guess,
+-- and a refused move (open compliance gates) is recorded as an attempt so the
+-- pattern shows up in a postmortem rather than only in someone's memory.
+CREATE TABLE IF NOT EXISTS job_stage_events (
+  id          TEXT PRIMARY KEY,
+  job_id      TEXT NOT NULL,
+  from_stage  TEXT,
+  to_stage    TEXT NOT NULL,
+  refused     INTEGER NOT NULL DEFAULT 0 CHECK (refused IN (0, 1)),
+  reason      TEXT,
+  actor       TEXT,
+  created_at  TEXT NOT NULL,
+  FOREIGN KEY (job_id) REFERENCES install_projects(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_stage_events_job ON job_stage_events(job_id, created_at);
 
 CREATE TABLE IF NOT EXISTS install_costs (
   id                     TEXT PRIMARY KEY,

@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Founder home — MACC Systems &amp; Engineering Inc.</title>
+<title>Command Center — MACC Systems &amp; Engineering Inc.</title>
 <script src="/internal/assets/theme.js"></script>
+<script src="/internal/assets/section-visibility.js"></script>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/assets/img/macc-mark.png">
 <style>
@@ -260,8 +261,13 @@
   .cc-root :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 6px; }
 </style>
 <link rel="stylesheet" href="/internal/assets/operations-redesign.css">
+<link rel="stylesheet" href="/internal/assets/shell.css">
+<link rel="stylesheet" href="/internal/assets/dashboard.css">
 </head>
-<body class="cc-body cc-root">
+<!-- cc-shell (the light dashboard ground) is applied here for the initial load and
+     then toggled per route by assets/spa-router.js, which removes it when another
+     view takes over. -->
+<body class="cc-body cc-root cc-shell">
 
 <a class="cc-skip-link" href="#cc-main">Skip to main content</a>
 <button class="cc-menu-toggle" id="cc-menu-toggle" type="button" aria-label="Open navigation" aria-controls="cc-sidebar" aria-expanded="false">
@@ -275,11 +281,11 @@
   <aside class="cc-sidebar" id="cc-sidebar">
     <div class="cc-sb-head">
       <div class="cc-sb-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.3 6.3 2.9 2.9"/><path d="M2 12h4"/><circle cx="12" cy="12" r="4"/><path d="m14.8 9.2 2.9-2.9"/><path d="M18 12h4"/><path d="m14.8 14.8 2.9 2.9"/><path d="M12 18v4"/><path d="m6.3 17.7 2.9-2.9"/></svg>
+        <img src="/assets/img/macc-mark.png" alt="" width="22" height="22">
       </div>
       <div class="cc-sb-title">
-        <span class="brand">MACC · Solar City</span>
-        <span class="sub">Founder command center</span>
+        <span class="brand">MACC</span>
+        <span class="sub">Command center</span>
       </div>
       <button class="cc-sb-pin" id="cc-sb-pin" type="button" aria-pressed="false" title="Pin open" aria-label="Pin sidebar open">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
@@ -293,184 +299,14 @@
       <span id="cc-who-label">Founder access · confidential</span>
     </a>
 
+    <!-- One entry. Navigation moved to /internal/apps.html so this rail stops competing
+         with the dashboard for attention; the Apps grid is also where per-account
+         visibility is applied, and it can show what each tool's live state is. -->
     <nav class="cc-sb-nav" aria-label="Primary">
-      <div class="cc-sb-group">
-        <div class="cc-sb-group-label">Overview</div>
-        <a class="cc-sb-item active" href="/internal/" data-nav>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-          Dashboard
-        </a>
-      </div>
-
-      <div class="cc-sb-group">
-        <div class="cc-sb-group-label">Operations</div>
-        <a class="cc-sb-item" href="/internal/next-actions.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="m3 6 1.5 1.5L7 5"/><path d="m3 12 1.5 1.5L7 11"/><path d="m3 18 1.5 1.5L7 17"/></svg>
-          Next Actions
-        </a>
-        <a class="cc-sb-item" href="/internal/leads.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Contacts
-          <span class="tail" id="cc-lead-nav">—</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/meetings.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Meeting Log
-          <span class="dot-badge" title="Open action items"></span>
-        </a>
-        <a class="cc-sb-item" href="/internal/mail.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          Mailbox
-          <span class="tail" id="cc-mail-nav">—</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/notes.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 21v-5h5"/></svg>
-          Team Notes
-        </a>
-        <a class="cc-sb-item" href="/internal/docs.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
-          Documents
-        </a>
-        <a class="cc-sb-item" href="/internal/projects.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Project Board
-        </a>
-        <a class="cc-sb-item" href="/internal/founder-lab.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 16 4-5 3 3 5-7"/><circle cx="7" cy="16" r="1"/><circle cx="11" cy="11" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="19" cy="7" r="1"/></svg>
-          Strategy Lab
-        </a>
-        <a class="cc-sb-item" href="/internal/finance.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h4"/><path d="M2 9h20"/></svg>
-          Finance &amp; Runway
-        </a>
-        <a class="cc-sb-item" href="/internal/install-ops.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
-          Install Operations
-        </a>
-        <a class="cc-sb-item" href="/internal/quote-builder.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 11v6"/><path d="M9.5 12.5h3.2a1.5 1.5 0 0 1 0 3h-2.4a1.5 1.5 0 0 0 0 3h3.2"/></svg>
-          Quote Builder
-          <span class="tail">16</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/erc-net-metering.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          ERC &amp; Net Metering
-          <span class="tail">14</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/sec-registration.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 3v2"/><path d="M16 3v2"/></svg>
-          SEC Registration
-          <span class="tail">13</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/by-laws-template.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/></svg>
-          By-laws Template
-          <span class="tail">13</span>
-        </a>
-      </div>
-
-      <div class="cc-sb-group">
-        <div class="cc-sb-group-label">Strategy &amp; Market</div>
-        <a class="cc-sb-item" href="/internal/strategy.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          Strategy
-        </a>
-        <a class="cc-sb-item" href="/internal/market.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>
-          Market &amp; Pricing
-        </a>
-        <a class="cc-sb-item" href="/internal/strategy-deck-en.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8"/><path d="M12 18v4"/><path d="m8 13 3-3 2 2 3-4"/></svg>
-          Strategy Deck
-          <span class="tail">EN/TL</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/support-moat.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z"/><circle cx="12" cy="12" r="3"/><path d="M12 10.5V12l1 1"/></svg>
-          Support Moat
-          <span class="tail">18</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/principles.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-          Vision &amp; Values
-        </a>
-        <a class="cc-sb-item" href="/internal/founder-charter.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z"/><path d="M9 12l2 2 4-4"/></svg>
-          Founder Charter
-        </a>
-        <a class="cc-sb-item" href="/internal/founders.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.4 6.4 2.8 2.8"/><path d="M2 12h4"/><path d="M9 15a5 5 0 1 1 6 0 3.5 3.5 0 0 0-1 3v1a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1a3.5 3.5 0 0 0-1-3Z"/><path d="M10 22h4"/></svg>
-          Founder Lessons
-        </a>
-      </div>
-
-      <div class="cc-sb-group">
-        <div class="cc-sb-group-label">Field Intelligence</div>
-        <a class="cc-sb-item" href="/internal/competitors.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-          Biliran Competitors
-        </a>
-        <a class="cc-sb-item" href="/internal/research-workbook.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>
-          Research Workbook
-          <span class="tail">20</span>
-        </a>
-        <a class="cc-sb-item" href="/internal/map.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3Z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
-          Biliran Map
-        </a>
-        <a class="cc-sb-item" href="/internal/roof-check.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 3l9 7"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><circle cx="12" cy="14" r="2"/></svg>
-          Roof Check
-        </a>
-        <a class="cc-sb-item" href="/internal/ad-library.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-          Ad Library
-        </a>
-        <a class="cc-sb-item" href="/internal/captures.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-          Product Captures
-          <span class="tail">19</span>
-        </a>
-      </div>
-
-      <details class="cc-sb-group cc-sb-disclosure">
-        <summary class="cc-sb-group-label">
-          <span>Engineering docs</span>
-          <span class="cc-sb-group-count">5</span>
-        </summary>
-        <div class="cc-sb-disclosure-body">
-          <a class="cc-sb-item" href="/internal/overview.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z"/></svg>
-            Overview <span class="tail">00</span>
-          </a>
-          <a class="cc-sb-item" href="/internal/designer.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M3 20h4"/><path d="M3 4h18"/><path d="M8 4v16"/><path d="M14 4v8"/></svg>
-            Panel Designer <span class="tail">01</span>
-          </a>
-          <a class="cc-sb-item" href="/internal/build-guide.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
-            Build Guide <span class="tail">02</span>
-          </a>
-          <a class="cc-sb-item" href="/internal/bom.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
-            BOM &amp; Suppliers <span class="tail">03</span>
-          </a>
-          <a class="cc-sb-item" href="/internal/sourcing.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 9 5 3h14l2 6"/><path d="M12 3v6"/></svg>
-            Source &amp; Install <span class="tail">05</span>
-          </a>
-        </div>
-      </details>
-
-      <div class="cc-sb-group">
-        <div class="cc-sb-group-label">System</div>
-        <a class="cc-sb-item" href="/internal/team.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Team &amp; Access <span class="tail">15</span>
-        </a>
-        <a class="cc-sb-item" href="https://solar-city-funnel.pages.dev/" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-          Public Funnel
+      <div class="cc-sb-group cc-sb-primary">
+        <a class="cc-sb-item" href="/internal/apps.html" title="All tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Apps
         </a>
       </div>
     </nav>
@@ -487,7 +323,21 @@
     </div>
   </aside>
 
-  <!-- ===================== MAIN ===================== -->
+  <!-- ===================== WORKSPACE ===================== -->
+  <div class="cc-workspace">
+    <header class="cc-topbar" aria-label="Command Center toolbar">
+      <a class="cc-topbar-brand" href="/internal/" title="Home">
+        <img src="/assets/img/macc-mark.png" alt="" width="28" height="28">
+        <strong>MACC Command Center</strong>
+      </a>
+      <div class="cc-topbar-actions">
+        <a class="cc-topbar-btn" href="/internal/overview.html" title="Engineering file" aria-label="Engineering file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </a>
+        <a class="cc-topbar-avatar" id="cc-topbar-avatar" href="/internal/team.html" title="Team &amp; access" aria-label="Team and access">M</a>
+      </div>
+    </header>
+
   <!-- #cc-view is the SPA router's swap target (assets/spa-router.js). Its first child is
        either .cc-main-inner (this dashboard, the "home" view) or a fetched internal page's
        own <main class="content"|"ops-content"> element, injected wholesale. -->
@@ -495,255 +345,16 @@
    <main class="cc-main-inner" id="cc-main" tabindex="-1">
     <span id="top"></span>
 
-    <header class="cc-masthead">
-      <div>
-        <div class="cc-eyebrow">
-          <span class="brand">MACC SYSTEMS &amp; ENGINEERING INC.</span>
-          <span class="dot">·</span><span>FOUNDER ACCESS</span>
-          <span class="dot">·</span><span>INTERNAL</span>
-        </div>
-        <h1>Founder Command Center</h1>
-        <p class="cc-lede">
-          The English and Taglish founder strategy decks, operating tools, Solar City
-          engineering documentation, leads pipeline, and meeting log. Confidential — founders only.
-          The public funnel lives at
-          <a href="https://solar-city-funnel.pages.dev/">solar-city-funnel.pages.dev</a>.
-        </p>
-      </div>
-      <div class="cc-head-actions">
-        <span class="cc-badge"><span class="pulse" aria-hidden="true"></span> LIVE FEED</span>
-        <span class="cc-updated">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Live D1 metrics after sign-in
-        </span>
-      </div>
-    </header>
+    <!-- The dashboard is assembled by assets/dashboard.js from the live APIs. It mounts
+         here rather than being written into this file, so the shell holds no numbers of
+         its own that could drift from the database. -->
+    <div class="db" id="db-root">
+      <p class="db-skel">Loading the week…</p>
+    </div>
 
-    <!-- STAT STRIP -->
-    <section class="cc-strip" aria-label="Key metrics">
-      <div class="cc-panel cc-stat" data-section="leads" data-tone="cyan">
-        <span class="label" style="color:var(--cyan)">Open Leads</span>
-        <span class="value tone-cyan" id="cc-open-leads">—</span>
-        <span class="sub">Live CRM count</span>
-      </div>
-      <!-- Deposits are money, so this tile follows Finance rather than Install ops:
-           hiding the books should hide the peso figures on the dashboard too. -->
-      <div class="cc-panel cc-stat" data-section="finance" data-tone="green">
-        <span class="label" style="color:var(--green)">Deposits Banked</span>
-        <span class="value tone-green" id="cc-deposits">—</span>
-        <span class="sub" id="cc-deposit-cash">Live payment records</span>
-      </div>
-      <div class="cc-panel cc-stat" data-section="finance" data-tone="yellow">
-        <span class="label" style="color:var(--yellow)">Available Cash</span>
-        <span class="value tone-yellow" id="cc-available-cash">—</span>
-        <span class="sub">After committed outflows</span>
-      </div>
-      <div class="cc-panel cc-stat" data-section="install-ops" data-tone="purple">
-        <span class="label" style="color:var(--purple)">Active Installs</span>
-        <span class="value tone-purple" id="cc-active-installs">—</span>
-        <span class="sub">Survey through energization</span>
-      </div>
-    </section>
-
-    <!-- CONSOLES -->
-    <section id="operations">
-      <div class="cc-section-head">
-        <span class="tag">Operations</span>
-        <span class="rule" aria-hidden="true"></span>
-        <span class="count">LIVE CONSOLES</span>
-      </div>
-      <div class="cc-consoles">
-        <a class="cc-panel cc-console" data-tone="yellow" href="/internal/finance.html">
-          <div class="kicker" style="color:var(--yellow)">SC-09 · Finance</div>
-          <div class="row"><span class="cc-ico" style="background:rgba(250,204,21,0.10);color:var(--yellow)" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h4"/><path d="M2 9h20"/></svg></span><h2>Finance &amp; Runway <span class="arrow" aria-hidden="true">→</span></h2></div>
-          <p>Founder funding, cash ledger, commitments, receipts, burn, runway, and accountant-ready CSV export.</p>
-          <div class="meta"><span><b>Shared</b> D1 ledger</span><span>Private receipts</span><span>Actual cash only</span></div>
-        </a>
-        <a class="cc-panel cc-console" data-tone="cyan" href="/internal/install-ops.html">
-          <div class="kicker" style="color:var(--cyan)">SC-10 · Delivery</div>
-          <div class="row"><span class="cc-ico cyan" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span><h2>Install Operations <span class="arrow" aria-hidden="true">→</span></h2></div>
-          <p>Customer projects, job costing, deposits, install stages, installer assignments, safety checks, QC, and payouts.</p>
-          <div class="meta"><span><b>Linked</b> finance entries</span><span>Mobile field view</span><span>Compliance gates</span></div>
-        </a>
-        <a class="cc-panel cc-console wide" data-tone="blue" href="/internal/strategy-deck-en.html">
-          <div class="kicker" style="color:var(--blue)">Founder alignment</div>
-          <div class="row">
-            <span class="cc-ico" style="background:rgba(96,165,250,0.10);color:var(--blue)" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8"/><path d="M12 18v4"/><path d="m8 13 3-3 2 2 3-4"/></svg></span>
-            <h2>Founder strategy deck <span class="arrow" aria-hidden="true">→</span></h2>
-          </div>
-          <p>Present the full company strategy in the browser. Switch between English and easy-to-understand Taglish, or download either PowerPoint.</p>
-          <div class="meta"><span><b>15</b> slides</span><span><b>2</b> language versions</span><span>Remote founder access</span></div>
-        </a>
-        <a class="cc-panel cc-console wide" data-tone="green" href="/internal/founder-lab.html">
-          <div class="kicker" style="color:var(--green)">Decision system</div>
-          <div class="row">
-            <span class="cc-ico" style="background:rgba(74,222,128,0.10);color:var(--green)" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 16 4-5 3 3 5-7"/></svg></span>
-            <h2>Founder strategy lab <span class="arrow" aria-hidden="true">→</span></h2>
-          </div>
-          <p>Model unit economics, build the Blue Ocean value curve, and see which evidence gates still block launch or spend.</p>
-          <div class="meta"><span><b>Shared</b> D1 state</span><span><b>3</b> connected tools</span><span>Hypotheses clearly marked</span></div>
-        </a>
-        <a class="cc-panel cc-console" data-tone="cyan" href="/internal/leads.html">
-          <div class="kicker" style="color:var(--cyan)">Operations</div>
-          <div class="row">
-            <span class="cc-ico cyan" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-            <h2>Contacts <span class="arrow" aria-hidden="true">→</span></h2>
-          </div>
-          <p>The CRM contacts table — sort, filter, and triage every funnel lead across the six sales stages.</p>
-          <div class="meta"><span>Live CRM stages</span><span>Source attribution</span><span>No placeholder counts</span></div>
-        </a>
-
-        <a class="cc-panel cc-console" data-tone="purple" href="/internal/meetings.html">
-          <div class="kicker" style="color:var(--purple)">Founders</div>
-          <div class="row">
-            <span class="cc-ico purple" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
-            <h2>Meeting log <span class="arrow" aria-hidden="true">→</span></h2>
-          </div>
-          <p>Weekly summaries with highlighted action items and owners. Updated weekly.</p>
-          <div class="meta"><span>Summaries</span><span>Action items</span><span>Updated <b>weekly</b></span></div>
-        </a>
-
-        <a class="cc-panel cc-console wide" data-tone="amber" href="/internal/principles.html" style="border-color:rgba(245,158,11,0.24)">
-          <div class="kicker" style="color:var(--amber)">Foundation</div>
-          <div class="row">
-            <span class="cc-ico amber" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
-            <h2>Vision, mission, goals &amp; values <span class="arrow" aria-hidden="true">→</span></h2>
-          </div>
-          <p>Who we are and how we work — merged from Jundhel's draft, filtered through the founder operating system (the ten-book canon). For founder review.</p>
-          <div class="meta"><span>Status <b style="color:var(--yellow)">In review</b></span><span>Source <b>Jundhel draft</b></span><span>Gates <b>7 red-flag rules</b></span></div>
-        </a>
-      </div>
-    </section>
-
-    <!-- TWO-MODEL -->
-    <section id="models">
-      <div class="cc-section-head">
-        <span class="tag">Operating Model</span>
-        <span class="rule" aria-hidden="true"></span>
-        <span class="count">TWO IN PARALLEL</span>
-      </div>
-      <div class="cc-models">
-        <div class="cc-panel cc-model" data-tone="cyan">
-          <div class="mk a">Model A — the moat</div>
-          <h4>Build our own modules</h4>
-          <p>SC-01…04. Assemble ~400W half-cut monocrystalline panels from purchased cells. Long-term defensibility.</p>
-        </div>
-        <div class="cc-panel cc-model" data-tone="green">
-          <div class="mk b">Model B — the engine</div>
-          <h4>Source &amp; install</h4>
-          <p>SC-05…06. Buy what's uneconomical to reproduce, earn as installer. Near-term revenue and Model A's sales channel.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- DOCS -->
-    <section id="documentation">
-      <div class="cc-section-head">
-        <span class="tag">Documentation</span>
-        <span class="rule" aria-hidden="true"></span>
-        <span class="count">SC-00 — SC-06 · SC-08 — SC-12 · SC-16 — SC-17</span>
-      </div>
-      <div class="cc-docs">
-        <a class="cc-panel cc-doc" data-tone="blue" href="/internal/overview.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—00</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Overview <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>The two-model plan (build vs. source &amp; install) and the ground rules that gate every decision.</p>
-          <span class="foot">Frames both models</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="cyan" href="/internal/designer.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—01</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Panel designer <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Interactive module designer — cell layout, series/parallel electricals, live IV curve and computed specs.</p>
-          <span class="foot">D3 · interactive</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="cyan" href="/internal/build-guide.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—02</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Build guide <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Hand-build process, parameters, QC gates, and the full flash / EL / hipot test sequence.</p>
-          <span class="foot">Tabbing → framing → test</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="green" href="/internal/bom.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—03</span><span class="status cc-status ready">Ready</span></div>
-          <h3>BOM &amp; suppliers <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Bill of materials, suppliers, PH / SE-Asia sourcing, China-direct import, and the cost roll-up.</p>
-          <span class="foot">Dated · research-backed</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="yellow" href="/internal/strategy.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—04</span><span class="status cc-status review">In review</span></div>
-          <h3>Manufacturing strategy <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Three-stage roadmap: DIY prototype → workshop line → factory. Capex, certs (IEC 61215/61730), freight.</p>
-          <span class="foot">DOE / BOI / PEZA angles</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="green" href="/internal/sourcing.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—05</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Source &amp; install <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Model B in depth — buy-vs-build table, install ops, unit economics. Stage-0 revenue that funds Model A.</p>
-          <span class="foot">Revenue engine</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="purple" href="/internal/market.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—06</span><span class="status cc-status wip">Drafting</span></div>
-          <h3>Market &amp; pricing <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Segments, named packages (LIWANAG / ILAW / SANDIGAN), the ₱99,500 flagship, pricing ladder, marketing plan.</p>
-          <span class="foot">₱80–100k window</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="yellow" href="/internal/competitors.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—08</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Biliran competitors <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>The island as an uncontested pond — BILECO rates, the real alternatives, named competitor set, and our wedge.</p>
-          <span class="foot">GTM · HYPOTHESIS until ground-truthed</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="green" href="/internal/map.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—09</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Biliran map <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Interactive province map — barangays, municipalities, and target slices for the first channel test.</p>
-          <span class="foot">D3 · interactive</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="cyan" href="/internal/roof-check.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—10</span><span class="status cc-status ready">Online</span></div>
-          <h3>Roof check <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Satellite roof-sizing tool — drop a pin, trace the roof, estimate usable area and panel count. Needs internet.</p>
-          <span class="foot">Leaflet · live tiles</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="blue" href="/internal/ad-library.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—11</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Ad library <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Naval Test 1 ad creatives — the pre-registered channel-test assets, ready to boost.</p>
-          <span class="foot">Channel test · creatives</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="amber" href="/internal/founders.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—12</span><span class="status cc-status ready">Ready</span></div>
-          <h3>Founder lessons <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Swipeable card deck of the founder-canon lessons that gate every decision. Star the ones that bind this week.</p>
-          <span class="foot">Decision system · interactive</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="amber" href="/internal/next-actions.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—17</span><span class="status cc-status ready">Online</span></div>
-          <h3>Next actions <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>Every lead, install and task reduced to one next step, ranked by hard gates, overdue work and leads with nothing set.</p>
-          <span class="foot">Roll-up · reads the source tools</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="green" href="/internal/quote-builder.html">
-          <div class="cc-doc-top"><span class="code" style="color:var(--amber)">SC—16</span><span class="status cc-status ready">Online</span></div>
-          <h3>Quote builder <span class="cc-doc-arrow" aria-hidden="true">→</span></h3>
-          <p>BILECO bill range in, printable itemised quotation out — sized array, full BOM, ladder pricing, permit gate attached.</p>
-          <span class="foot">Print-ready · corridor-checked</span>
-        </a>
-        <a class="cc-panel cc-doc" data-tone="cyan" href="https://solar-city-funnel.pages.dev/" target="_blank" rel="noopener">
-          <div class="cc-doc-top"><span class="code" style="color:var(--green)">FUNNEL</span><span class="status cc-status ready">Deployed</span></div>
-          <h3>Public conversion funnel <span class="cc-doc-arrow" aria-hidden="true">↗</span></h3>
-          <p>The warm, mobile-first landing page selling the three ₱99,500 homeowner packages. Cloudflare Pages.</p>
-          <span class="foot">solar-city-funnel.pages.dev</span>
-        </a>
-      </div>
-    </section>
-
-    <footer class="cc-foot-strip">
-      <span><span class="k">SYSTEM</span> MACC Founder Command Center · v4</span>
-      <span><span class="k">SCOPE</span> Founders only · confidential</span>
-      <span><span class="k">DATA</span> Shared D1 · no placeholder counts</span>
-    </footer>
    </main>
   </div>
+  </div><!-- /.cc-workspace -->
 </div>
 
 <div class="cc-route-status" id="cc-route-status" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -816,112 +427,44 @@
     }
   })();
 
-  // Load only verified counts from the authenticated APIs. Failed calls stay as em dashes.
-  // Exposed on window so the SPA router (assets/spa-router.js) can re-run it whenever the
-  // dashboard becomes the active view again — the sidebar's "cc-lead-nav" badge is always
-  // relevant regardless of which view is showing, and the dashboard's own stat cards
-  // (cc-open-leads etc.) only exist while the dashboard view itself is injected.
-  window.ccRefreshDashboardMetrics = async function () {
-    // Unread mail is fetched on its own so a mailbox hiccup can't strand the
-    // other sidebar metrics behind the all-or-nothing guard below.
-    try {
-      var mailRes = await fetch('/api/mail?box=in');
-      if (mailRes.ok) {
-        var mail = await mailRes.json();
-        var mailNav = document.getElementById('cc-mail-nav');
-        if (mailNav) mailNav.textContent = mail.unread || 0;
-      }
-    } catch (_) { /* Leave the mail badge unclaimed. */ }
+  // The dashboard's numbers are assembled by assets/dashboard.js, which also defines
+  // window.ccRefreshDashboardMetrics — the hook spa-router.js calls on every swap back to
+  // the home view. Nothing in this file holds a count of its own any more, so there is no
+  // second copy to drift from the database.
 
-    try {
-      var responses = await Promise.all([fetch('/api/leads'), fetch('/api/finance'), fetch('/api/install-ops')]);
-      if (!responses.every(function (response) { return response.ok; })) return;
-      var payloads = await Promise.all(responses.map(function (response) { return response.json(); }));
-      var leads = payloads[0].leads || [];
-      var finance = payloads[1];
-      var operations = payloads[2];
-      var openLeads = leads.filter(function (lead) { return lead.stage !== 'sold' && lead.stage !== 'lost'; }).length;
-      var deposits = (operations.payments || []).filter(function (payment) { return payment.kind === 'deposit' && payment.status === 'received'; });
-      var depositCash = deposits.reduce(function (sum, payment) { return sum + (Number(payment.amount_cents) || 0); }, 0);
-      var summary = finance.summary || {};
-      var available = (Number(summary.paid_inflows) || 0) - (Number(summary.paid_outflows) || 0) - (Number(summary.committed_outflows) || 0);
-      var active = (operations.projects || []).filter(function (project) { return !['handover', 'warranty', 'cancelled'].includes(project.stage); }).length;
-      document.getElementById('cc-lead-nav').textContent = openLeads;
-      // The rest of these ids only exist while the dashboard view is the active #cc-view
-      // content — guard each one since navigating away removes them from the DOM.
-      var openLeadsEl = document.getElementById('cc-open-leads');
-      if (!openLeadsEl) return;
-      openLeadsEl.textContent = openLeads;
-      document.getElementById('cc-deposits').textContent = deposits.length;
-      document.getElementById('cc-deposit-cash').textContent = '₱' + (depositCash / 100).toLocaleString('en-PH', { maximumFractionDigits: 0 }) + ' received';
-      document.getElementById('cc-available-cash').textContent = '₱' + (available / 100).toLocaleString('en-PH', { maximumFractionDigits: 0 });
-      document.getElementById('cc-active-installs').textContent = active;
-    } catch (_) { /* Leave unknown metrics unclaimed. */ }
-  };
-
-  window.ccRefreshDashboardMetrics();
-
-  // Name the founder who is signed in, and drop the sidebar entries their account
-  // can't open (Team & access → Sections). Removing links is presentation only: the
-  // page and its API are refused server-side by functions/internal/_middleware.js and
-  // functions/api/_middleware.js, so a typed URL gets a 403 either way.
-  (async function showSignedInFounder() {
+  // Name the founder who is signed in. The sidebar itself no longer lists sections, so
+  // there is nothing here left to filter — /internal/apps.html applies per-account
+  // visibility to its own tiles, and both middlewares still refuse hidden pages and APIs
+  // server-side, so a typed URL 403s either way.
+  (function showSignedInFounder() {
     var label = document.getElementById('cc-who-label');
-    if (!label) return;
-    try {
-      var response = await fetch('/api/session', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
-      if (!response.ok) return; // signed out — the /internal gate will handle it on the next navigation
-      var data = await response.json();
-      if (!data.ok || !data.user) return;
+    if (!label || !window.scSectionVisibility) return;
+    window.scSectionVisibility.session().then(function (data) {
+      if (!data || !data.user) return;   // signed out — the /internal gate handles it
 
       label.textContent = data.user.name + (data.user.role === 'master' ? ' · founder' : ' · limited access');
       if (data.user.must_change) {
         label.textContent = data.user.name + ' · set your password';
-        document.getElementById('cc-who').style.borderColor = 'var(--yellow)';
+        var who = document.getElementById('cc-who');
+        if (who) who.classList.add('cc-sb-user-alert');
       }
 
-      var hidden = data.user.hidden_pages || [];
-      if (!hidden.length || !data.sections) return;
-
-      // slug → section key, straight from the server's registry.
-      var slugToKey = {};
-      data.sections.forEach(function (section) {
-        (section.pages || []).forEach(function (slug) { slugToKey[slug] = section.key; });
-      });
-
-      function keyForHref(el) {
-        var match = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(new URL(el.href, location.href).pathname);
-        return match ? slugToKey[match[1].toLowerCase()] || null : null;
+      var avatar = document.getElementById('cc-topbar-avatar');
+      if (avatar && data.user.name) {
+        // The shared team login's name is a label, not a person, so initialling it the
+        // usual way produced nonsense. Mark it as the team instead.
+        if (data.shared) {
+          avatar.textContent = 'TL';
+          avatar.title = 'Shared team login';
+        } else {
+          var parts = data.user.name.trim().split(/\s+/);
+          avatar.textContent = ((parts[0] || '?')[0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+        }
       }
-      function isHidden(key) { return !!key && hidden.indexOf(key) !== -1; }
-
-      // Sidebar entries…
-      document.querySelectorAll('.cc-sb-item[href^="/internal/"]').forEach(function (item) {
-        if (isHidden(keyForHref(item))) item.remove();
-      });
-
-      // …the dashboard's console/doc cards that link into those sections…
-      document.querySelectorAll('a.cc-panel[href^="/internal/"]').forEach(function (card) {
-        if (isHidden(keyForHref(card))) card.remove();
-      });
-
-      // …and the metric tiles reading their data (whose API would 403 anyway).
-      document.querySelectorAll('.cc-stat[data-section]').forEach(function (tile) {
-        if (isHidden(tile.getAttribute('data-section'))) tile.remove();
-      });
-
-      // A group or section whose every entry just disappeared shouldn't leave a
-      // floating heading behind.
-      document.querySelectorAll('.cc-sb-group, .cc-sb-disclosure').forEach(function (group) {
-        if (!group.querySelector('.cc-sb-item')) group.remove();
-      });
-      document.querySelectorAll('.cc-main-inner > section').forEach(function (section) {
-        if (section.querySelector('.cc-section-head') && !section.querySelector('.cc-panel')) section.remove();
-        else if (section.classList.contains('cc-strip') && !section.querySelector('.cc-panel')) section.remove();
-      });
-    } catch (_) { /* keep the static fallback text */ }
+    });
   })();
 </script>
+<script src="/internal/assets/dashboard.js"></script>
 <script src="/internal/assets/sidebar-collapse.js"></script>
 <script src="/internal/assets/spa-router.js"></script>
 </body>

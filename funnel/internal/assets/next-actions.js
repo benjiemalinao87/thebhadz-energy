@@ -7,7 +7,9 @@
  *                     ones, so they are surfaced rather than left quiet.
  *   /api/install-ops  derived from the project's stage, with the compliance gate
  *                     outranking everything else when it is incomplete.
- *   /api/projects     board tasks that are live (This week / Doing / Blocked).
+ *   /api/projects     company tasks that are live (This week / Doing / Blocked). Job
+ *                     checklists are excluded by that endpoint; installations arrive
+ *                     via /api/install-ops as one row each.
  *
  * Nothing is stored here. This page is a lens over data other tools own, so there is no
  * new schema, nothing to keep in sync, and no way for it to disagree with the source.
@@ -171,6 +173,9 @@
     return out;
   }
 
+  // Company tasks only. /api/projects serves the job_id IS NULL half of project_tasks, so
+  // the ~30 checklist rows each installation carries never flood this roll-up — jobs reach
+  // it through fromInstalls() as one row per install instead.
   function fromTasks(tasks) {
     var live = { "This week": 1, "Doing": 1, "Blocked": 1 };
     return (tasks || []).filter(function (t) { return live[t.status]; }).map(function (t) {
@@ -180,7 +185,7 @@
         // For a board task the title IS the action, so it leads. Prefixing a blocked
         // one keeps the reason visible without demoting what the work actually is.
         action: t.status === "Blocked" ? "Unblock: " + title : title,
-        who: "Project board", owner: t.owner || "", due: t.due || "",
+        who: "Company tasks", owner: t.owner || "", due: t.due || "",
         bucket: t.status === "Blocked" && !t.due ? "adrift" : bucketFor(t.due),
         href: "/internal/projects.html",
         context: t.type + " · " + t.status
@@ -274,7 +279,7 @@
       var items = [];
       if (res[0]) items = items.concat(fromLeads(res[0].leads)); else skipped.push("Contacts / leads");
       if (res[1]) items = items.concat(fromInstalls(res[1].projects)); else skipped.push("Install operations");
-      if (res[2]) items = items.concat(fromTasks(res[2].tasks)); else skipped.push("Project board");
+      if (res[2]) items = items.concat(fromTasks(res[2].tasks)); else skipped.push("Company tasks");
       render(sortItems(items), skipped);
     });
   }

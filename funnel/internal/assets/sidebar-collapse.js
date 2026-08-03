@@ -31,7 +31,7 @@
 
   function labelText(el) {
     var clone = el.cloneNode(true);
-    clone.querySelectorAll(".tail, .dot-badge, .cc-sb-group-count, svg").forEach(function (n) {
+    clone.querySelectorAll(".tail, .dot-badge, .hub-badge, .hub-dot, .cc-sb-group-count, svg").forEach(function (n) {
       n.remove();
     });
     return (clone.textContent || "").replace(/\s+/g, " ").trim();

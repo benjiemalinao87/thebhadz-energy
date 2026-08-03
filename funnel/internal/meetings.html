@@ -80,7 +80,7 @@
   .actions-panel-head h3{margin:0;flex:1;}
   .actions-close{flex:0 0 auto;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--soft);font-size:16px;line-height:1;cursor:pointer;}
   .actions-close:hover{color:var(--ink);border-color:var(--faint);}
-  .actions-toggle{display:inline-flex;align-items:center;gap:8px;margin:12px 0 0;font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid rgba(240,125,26,0.45);background:rgba(240,125,26,0.12);color:var(--orange-soft);cursor:pointer;}
+  .actions-toggle{display:inline-flex;align-items:center;gap:8px;margin:0;font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid rgba(240,125,26,0.45);background:rgba(240,125,26,0.12);color:var(--orange-soft);cursor:pointer;}
   .actions-toggle:hover{color:var(--ink);border-color:var(--orange);background:rgba(240,125,26,0.2);}
   .actions-toggle-count{font-weight:800;}
   .layout.actions-collapsed{grid-template-columns:280px minmax(0,1fr);}
@@ -276,9 +276,6 @@
 
     <div class="center-col">
       <div class="page-head">
-        <p class="ops-eyebrow">FOUNDERS / MEETING LOG</p>
-        <h2>Decisions remembered. Owners accountable.</h2>
-        <p>Weekly founder decisions and action items with a clear owner and due date.</p>
         <button type="button" class="actions-toggle" id="actions-toggle" aria-expanded="false" aria-controls="actions-panel">
           <span aria-hidden="true">📌</span>
           <span class="actions-toggle-label">Open action items</span>

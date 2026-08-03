@@ -43,15 +43,25 @@ const WORKSPACE_REDESIGN_PAGES = new Set([
   'secretarys-certificate-template', 'founder-charter', 'founders-agreement-term-sheet',
 ]);
 
-// SC-07 Project board is NOT in content/pages.json (it's a different implementation per
-// site — see note above) but both sites' nav still needs to list it in position, pointing
-// at each site's own hand-maintained projects.html.
-const PROJECTS_NAV = { navCode: 'SC-07', navLabel: 'Project board', rootFile: 'projects.html', internalFile: 'projects.html' };
+// SC-07 is NOT in content/pages.json (it's a different implementation per site — see note
+// above) but both sites' nav still needs to list it in position, pointing at each site's
+// own hand-maintained projects.html. The two are genuinely different pages, so the label
+// differs per site: the root file is the static "run the week from one board" doc, while
+// the internal one is the live jobs workspace (one record per installation, plus the
+// company task board). `navLabelBySite` overrides navLabel for the site that has an entry.
+const PROJECTS_NAV = {
+  navCode: 'SC-07',
+  navLabel: 'Project board',
+  navLabelBySite: { internal: 'Jobs &amp; projects' },
+  rootFile: 'projects.html',
+  internalFile: 'projects.html',
+};
 
 function navRows(entries, site) {
   return entries.map(e => {
     const href = site === 'root' ? e.rootFile : `/internal/${e.internalFile}`;
-    return `      <a href="${href}"><span class="code">${e.navCode}</span>${e.navLabel}</a>`;
+    const label = (e.navLabelBySite && e.navLabelBySite[site]) || e.navLabel;
+    return `      <a href="${href}"><span class="code">${e.navCode}</span>${label}</a>`;
   }).join('\n');
 }
 

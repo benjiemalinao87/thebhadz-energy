@@ -1,5 +1,27 @@
 # Progress
 
+## Ops tools: drop marketing page-heads (2026-08-03) — done
+- Jobs: removed `ops-page-head jb-head` + unused mission/head CSS
+- Same cleanup on Contacts, Documents, Notes, Meetings (kept action-items toggle)
+- Also stripped eyebrow/h1/lede from Finance, Install Ops, Quote Builder, Next Actions, Team, Captures, Founder Lab
+- Engineering doc pages unchanged
+
+## Jobs page: drop ops page-head (2026-08-03) — done
+- Removed `ops-page-head jb-head` (SC-07 eyebrow, lede, mission gate chip) from `funnel/internal/projects.html`
+- Trimmed unused `.jb-head*` / `.jb-mission*` / `.jb-eyebrow` CSS; KPI strip now starts with `margin: 0`
+
+## Command Center premium polish pass (2026-08-03) — done
+- Navy icon rail + blue active state (overrides petrol via `hub-home.css`)
+- Cool grey canvas, glass topbar, white mark plate, tighter type/card craft
+- Card CTAs aligned to Pabbly pattern (Open / View …)
+
+## Command Center Pabbly-style hub home (2026-08-03) — done
+- Primary sidebar rail: Leads, Jobs (install-ops), Documents, Mailbox, Finance with premium stroke icons + live badges
+- Secondary nav collapsed into disclosures (More tools / Strategy / Field / System)
+- Home view replaced with light app-launcher cards (`hub-home.css`); sticky topbar outside `#cc-view`
+- SPA: `cc-hub-home` toggled on dashboard; `install-ops` in operation slugs; greeting survives re-inject
+- Local preview: `cd funnel && npx wrangler pages dev . --port 8000` → sign in → `/internal/`
+
 ## Quote builder bug sweep (2026-08-03) — done
 - `/api/quote-settings` PUT merged from `DEFAULT_CONFIG`, so a partial save wiped every other setting; now merges over the saved row
 - Covering email told the customer the PDF was a "complete bill of materials" — it hasn't been since the split; reworded in both HTML and plain-text bodies

@@ -1,0 +1,402 @@
+/* MACC Founder Command Center — shell chrome.
+   The persistent frame around every view: the light working ground, the top bar, the
+   workspace column and the collapsed sidebar rail. Formerly hub-home.css, which also
+   carried the five-card launcher; that grid now lives on /internal/apps.html (apps.css),
+   so what is left here is only the shell itself.
+
+   body.cc-shell is the flag that opts the document into this light frame — it replaces the
+   dark terminal treatment defined inline in index.html, including its scanline overlay. */
+
+.cc-root {
+  --hub-navy: #06282a;
+  --hub-navy-2: #0c3a3c;
+  /* Accent shared with the Operations palette (operations-redesign.css) so the
+     frame and the tools inside it are one system, not two. */
+  --hub-blue: #004d50;
+  --hub-blue-hover: #003d41;
+  --hub-ink: #0f172a;
+  --hub-muted: #64748b;
+  --hub-line: #e8ecf1;
+  --hub-line-strong: #d5dbe3;
+  --hub-ground: #f3f5f8;
+  --hub-surface: #ffffff;
+  --hub-font: "SF Pro Display", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", sans-serif;
+  --hub-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px -18px rgba(15, 23, 42, 0.28);
+  --hub-shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.05), 0 22px 40px -20px rgba(15, 23, 42, 0.32);
+  --sidebar-rail-w: 76px;
+}
+
+html[data-theme="dark"] .cc-root {
+  --hub-ink: #edf2f7;
+  --hub-muted: #94a3b8;
+  --hub-line: #243041;
+  --hub-line-strong: #334155;
+  --hub-ground: #0b1018;
+  --hub-surface: #121a26;
+  --hub-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 14px 32px -20px rgba(0, 0, 0, 0.7);
+  --hub-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.3), 0 22px 40px -18px rgba(0, 0, 0, 0.75);
+}
+
+/* ---------- Navy rail (whole SPA shell) ---------- */
+
+.cc-root .cc-sidebar {
+  background: linear-gradient(180deg, var(--hub-navy-2) 0%, var(--hub-navy) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 8px 0 28px rgba(10, 14, 24, 0.22);
+}
+
+.cc-root .cc-sb-head {
+  padding: 16px 14px;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.cc-root .cc-sb-mark {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 0;
+  color: #0f172a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.cc-root .cc-sb-mark img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.cc-root .cc-sb-title .brand {
+  font: 700 14px/1.2 var(--hub-font);
+  letter-spacing: 0.01em;
+  color: #f8fafc;
+}
+
+.cc-root .cc-sb-title .sub {
+  color: rgba(248, 250, 252, 0.45);
+  letter-spacing: 0.14em;
+}
+
+.cc-root .cc-sb-user {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.cc-root .cc-sb-user svg { color: #7db7ff; }
+.cc-root .cc-sb-user span { color: rgba(248, 250, 252, 0.78); font-family: var(--hub-font); }
+
+.cc-root .cc-sb-group-label,
+.cc-root .cc-sb-disclosure > summary {
+  color: rgba(248, 250, 252, 0.42);
+  font-family: var(--hub-font);
+  letter-spacing: 0.16em;
+}
+
+.cc-root .cc-sb-item {
+  min-height: 42px;
+  border-radius: 10px;
+  color: rgba(248, 250, 252, 0.72);
+  font-family: var(--hub-font);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.cc-root .cc-sb-item svg { opacity: 0.9; }
+
+.cc-root .cc-sb-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.cc-root .cc-sb-item.active {
+  background: var(--hub-blue);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 20px -12px rgba(0, 132, 255, 0.9);
+}
+
+.cc-root .cc-sb-item.active::before { display: none; }
+.cc-root .cc-sb-item.active svg { opacity: 1; }
+.cc-root .cc-sb-item .tail { color: rgba(248, 250, 252, 0.4); }
+.cc-root .cc-sb-item.active .tail { color: rgba(255, 255, 255, 0.78); }
+
+.cc-root .cc-sb-disclosure > summary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.cc-root .cc-sb-disclosure > summary:focus-visible {
+  outline: 2px solid var(--hub-blue);
+}
+
+.cc-root .cc-sb-group-count {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(248, 250, 252, 0.55);
+}
+
+.cc-root .cc-sb-foot { border-top-color: rgba(255, 255, 255, 0.08); }
+.cc-root .cc-sb-btn { color: rgba(248, 250, 252, 0.75); font-family: var(--hub-font); }
+.cc-root .cc-sb-btn.danger { color: #ffb4a8; }
+
+.cc-root .cc-sb-foot .sc-theme-toggle {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(248, 250, 252, 0.85);
+  font-family: var(--hub-font);
+}
+
+.cc-root .cc-sb-foot .sc-theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+.cc-root .cc-sb-foot .sc-theme-toggle:focus-visible { outline-color: var(--hub-blue); }
+
+.cc-root .cc-sb-pin {
+  color: rgba(248, 250, 252, 0.55);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cc-root .cc-sb-pin:hover,
+.cc-root .cc-sb-pin[aria-pressed="true"] {
+  color: #fff;
+  border-color: rgba(0, 132, 255, 0.45);
+  background: rgba(0, 132, 255, 0.18);
+}
+
+@media (min-width: 981px) {
+  body.cc-sb-collapsed .cc-sidebar:hover,
+  body.cc-sb-collapsed .cc-sidebar:focus-within {
+    box-shadow: 14px 0 40px rgba(10, 14, 24, 0.4);
+  }
+}
+
+/* ---------- Workspace chrome ---------- */
+
+.cc-workspace {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--hub-ground);
+}
+
+.cc-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+  padding: 0 28px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid var(--hub-line);
+  backdrop-filter: saturate(1.2) blur(10px);
+}
+
+html[data-theme="dark"] .cc-topbar {
+  background: rgba(18, 26, 38, 0.92);
+}
+
+.cc-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  color: var(--hub-ink);
+  text-decoration: none;
+}
+
+.cc-topbar-brand img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: none;
+}
+
+.cc-topbar-brand strong {
+  font: 700 15px/1.2 var(--hub-font);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.cc-topbar-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--hub-line);
+  background: var(--hub-surface);
+  color: var(--hub-muted);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+
+.cc-topbar-btn:hover {
+  background: var(--hub-ground);
+  color: var(--hub-ink);
+  border-color: var(--hub-line-strong);
+}
+
+.cc-topbar-btn svg { width: 17px; height: 17px; }
+
+.cc-topbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #1d4ed8, #0f172a);
+  color: #fff;
+  font: 700 11px/1 var(--hub-font);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border: 2px solid var(--hub-surface);
+  box-shadow: 0 0 0 1px var(--hub-line);
+}
+
+/* ---------- Hub home ground ---------- */
+
+body.cc-shell.cc-body {
+  background: var(--hub-ground);
+  font-family: var(--hub-font);
+  /* Set the ink here, not on components: index.html's `.cc-root a { color: inherit }` is
+     more specific than any single-class rule in this file, so a component-level colour
+     loses and the text silently falls back to the dark theme's near-white. */
+  color: var(--hub-ink);
+}
+
+body.cc-shell.cc-body::before { display: none; }
+body.cc-shell .cc-main { background: transparent; }
+
+body.cc-shell .cc-main-inner {
+  max-width: 1080px;
+  padding: clamp(32px, 4.5vw, 52px) clamp(24px, 3.5vw, 40px) 64px;
+}
+
+body.cc-operation-view .cc-main { background: var(--hub-ground); }
+
+/* ---------- Primary rail ---------- */
+
+.cc-sb-primary { margin-bottom: 16px; }
+
+.cc-sb-primary .cc-sb-group-label {
+  margin-bottom: 8px;
+}
+
+.cc-sb-primary .cc-sb-item {
+  min-height: 44px;
+  font-weight: 600;
+  gap: 12px;
+}
+
+.cc-sb-primary .cc-sb-item svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.65;
+}
+
+.cc-sb-primary .cc-sb-item .hub-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.82);
+  font: 650 10px/18px var(--hub-font);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-sb-primary .cc-sb-item.active .hub-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.cc-sb-primary .cc-sb-item .hub-dot {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5a4f;
+  box-shadow: 0 0 0 2px rgba(20, 26, 38, 0.55);
+}
+
+@media (min-width: 981px) {
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary {
+    margin-bottom: 10px;
+  }
+
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item {
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    min-height: 60px;
+    padding: 9px 4px 8px;
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+    text-align: center;
+    color: rgba(248, 250, 252, 0.68);
+  }
+
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item.active {
+    color: #fff;
+  }
+
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-badge,
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-dot {
+    position: absolute;
+    top: 7px;
+    right: 9px;
+    margin: 0;
+  }
+
+  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-badge {
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
+    font-size: 8px;
+    line-height: 15px;
+  }
+}
+
+@media (max-width: 980px) {
+  .cc-topbar { padding-left: 72px; padding-right: 18px; }
+}
+
+@media (max-width: 560px) {
+  .cc-topbar-brand strong { display: none; }
+}
+
+/* The SPA router moves focus to the incoming page's heading so a screen reader announces
+   the route change (spa-router.js). That heading gets tabindex="-1", which makes it
+   focusable only programmatically — so painting a focus ring on it just draws a box around
+   the title after every click. Keyboard focus everywhere else keeps its ring; the selector
+   is scoped to .cc-root and outranks the inline `.cc-root :focus-visible` rule in
+   index.html, which is what was drawing it.
+
+   Nothing reachable by Tab is affected: an element with tabindex="-1" is skipped by Tab
+   by definition. */
+.cc-root [tabindex="-1"]:focus,
+.cc-root [tabindex="-1"]:focus-visible {
+  outline: none;
+}

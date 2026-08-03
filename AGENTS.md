@@ -506,7 +506,7 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 
 - Never mention `CLAUDE.md` (or other internal AI/instruction filenames) in any rendered frontend HTML; cite Founder OS rules by section number only.
 - On founder/Command Center tools, keep primary actions (especially recording upload) obvious and top-level — not buried under long meeting notes.
-- When implementing UI from a reference image or mockup, match the visual design closely before adding extras — the user has reverted work that diverged from the reference.
+- When implementing UI from a reference image or mockup, mock first for approval before coding when asked, and match the visual design closely before adding extras — the user has reverted work that diverged from the reference.
 - Do not push or deploy Funnel / customer-facing changes until the user has reviewed or tested locally and says to push.
 - Public Funnel founder bios: professional plain English (homeowner job first, then one proof line) — not résumé lists, LinkedIn fluff, or overly casual neighbour-chat tone.
 - On Benjie's public Funnel bio: omit that he is in Australia; also do not claim he is based in Biliran or on-island.
@@ -520,9 +520,9 @@ This table is the enforcement layer; it outranks the §1–6 prose.
 - Customer-facing Funnel v2 lives at `funnel/v2/` (own assets and `wrangler.toml`), separate from the original `funnel/index.html` landing page.
 - Standalone phone-first Facebook-ad calculator is `funnel/v2/calc.html` (live at `https://www.macc-inc.com/calc.html`); submits to the same `/api/lead` pipeline with `source=fb-calc-ad` so leads appear in Contacts.
 - Public funnel package cards hide list prices and use free-estimate CTAs; internal ops and quote tools may still reference ₱99,500.
-- One brand across both site trees: **MACC Systems & Engineering Inc.** (the BADJJ Energy Systems trading name was retired 2026-07-27). "Solar City" now names the engineering file and the SC-xx codes, not the company.
+- One brand / corporate legal name across both site trees: **MACC Systems & Engineering Inc.** (Systems plural; BADJJ Energy Systems trading name retired 2026-07-27). "Solar City" names the engineering file and SC-xx codes, not the company.
 - Founder team titles: Benjie Malinao — sales & marketing head; Jundhel Cabradilla — president, operations & engineering head; Ace Denver Corpin — administration head; Jethro Abatias — finance & accounting head.
-- Funnel v2's founder cards deliberately title Jethro "Support & systems" rather than finance & accounting — his supplied bio is IT/network/support and answers "who picks up when it breaks", which no other card did. Pending his sign-off; revert the card or supply finance evidence if he keeps the finance title.
-- Corporate legal name per the logo supplied by the founders: **MACC Systems & Engineering Inc.** (note "Systems", plural).
-- Founders share Biliran roots; on-island founders (Jundhel, Ace, Jethro) may use "From Biliran" on public cards — Benjie's card should not.
+- Funnel v2 founder cards: Jethro is titled "Support & systems" (IT/network bio; pending his sign-off). Founders share Biliran roots — on-island founders (Jundhel, Ace, Jethro) may use "From Biliran"; Benjie's card should not.
+- Command Center home is the SC-00 dashboard (`funnel/internal/index.html` + `assets/dashboard.{css,js}`): mission counter, death clock, traction floor, cash, and a "needs you today" queue ranked by consequence — all derived from the live APIs, never stored strings. The sidebar holds a single **Apps** entry; every tool lives on `funnel/internal/apps.html` (`assets/apps.{css,js}`), which applies per-account section visibility to its own tiles. Shell chrome is `assets/shell.css` (formerly `hub-home.css`, renamed when the launcher grid moved out), and `body.cc-shell` is toggled per route by `spa-router.js`.
+- Homeowner quote attachment: `docs/client-quote-companion.md` (packages, brownout honesty, BILECO net metering / RA 9513; no Biliran cash rebate).
 - Command Center dark mode: hard-coded light washes (cream/amber alert backgrounds) must pin dark ink or use theme tokens — flipping only text color produces unreadable light-on-light.

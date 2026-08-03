@@ -16,6 +16,15 @@
  * the API paths that carry its data, and both middlewares check them.
  */
 
+/**
+ * Note on /internal/apps.html — the navigation surface reached from the rail's single Apps
+ * entry. It is deliberately absent from the list below, which is what keeps it reachable:
+ * sectionForPage() returns null for a slug in no section, and the internal middleware
+ * treats that as always-available. Hiding it would strand an account with no route to the
+ * tools it may still use. It carries no data of its own and filters its own tiles through
+ * this same registry (assets/section-visibility.js), so a hidden section's tile disappears
+ * from the grid while the grid itself stays open.
+ */
 export const SECTIONS = [
   {
     key: "next-actions",
@@ -64,10 +73,13 @@ export const SECTIONS = [
   },
   {
     key: "projects",
-    label: "Project board",
+    label: "Jobs & project board",
     group: "Operations",
+    // /api/jobs is the installation workspace (jobs, their checklists, stage history);
+    // /api/projects is the company-task half of the same page. Both belong to this
+    // section, so hiding it closes the page AND the data behind it.
     pages: ["projects"],
-    apis: ["/api/projects"],
+    apis: ["/api/jobs", "/api/projects"],
   },
   {
     key: "install-ops",

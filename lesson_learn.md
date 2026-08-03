@@ -1,5 +1,23 @@
 # Lesson Learn
 
+## Ops page heads: remove the whole strip, not just the title
+
+**Fixed:** 2026-08-03
+
+**What worked:** On Jobs (`projects.html`), dropping the `ops-page-head jb-head` block (eyebrow + lede + mission chip) left KPIs and the toolbar as the first content — cleaner. `renderMission()` already early-returns when `#jb-mission-num` is missing, so no JS change was required. Also delete the matching `.jb-head*` / `.jb-mission*` CSS and the responsive `.jb-head-side` rule so dead styles do not linger.
+
+**Same pass on other founder tools:** strip marketing eyebrow/h1/lede from Contacts, Documents, Notes, Meetings (keep the action-items toggle), Finance, Install Ops, Quote Builder, Next Actions, Team, Captures, and Founder Lab — leave the functional topbar/actions as the first thing. Engineering doc pages (SC-00…06 etc.) keep their doc heads.
+
+**Do not:** Leave orphan mission IDs in JS without a null guard, or keep head-strip CSS after the markup is gone. On Team, `#team-lede` was optional in JS (`if (els.lede && …)`) so removing the node is safe.
+
+## Command Center hub: primary rail vs SPA shell
+
+**Fixed:** 2026-08-03
+
+**What worked:** Keep the SPA shell (`#cc-view` + `spa-router.js`) and restyle chrome in `hub-home.css` loaded after `operations-redesign.css` so navy rail + blue active state override petrol without rewriting every ops page. Mission modules sit in `cc-sb-primary`; everything else in `<details>`. Sticky topbar stays outside `#cc-view`.
+
+**Do not:** Hand-edit both root and internal twins for this — Command Center home is funnel-only. Do not put the sticky topbar inside `#cc-view` or SPA navigations strip it. Re-apply greeting/metrics after dashboard re-injection (`ccApplyHubGreeting` + `ccRefreshDashboardMetrics`). Premium polish is type/rail/card craft — not new features.
+
 ## Moving a number into the database leaves its label behind in the markup
 
 **Fixed:** 2026-08-03
@@ -206,3 +224,13 @@ AUTH_SECRET=<any-random-string-for-local>
 2. On workspace pages, drive `.ops-alert` (and `.good` / `.danger`) from `--ws-*-soft` tokens so both themes stay coherent; add an `html[data-theme="dark"] .workspace-page .ops-alert` rule so it out-specifies the ops-tools fallback.
 
 **Do not:** Restyle only the text color for dark mode and leave a hardcoded light wash, or set workspace text to `--ws-copy` without also theming the alert background. Finance/Team already had page-scoped fixes — don't re-break those by removing their overrides without checking specificity.
+
+## Local founder login: root `.env` is not the auth source
+
+**Fixed:** 2026-08-03
+
+**What went wrong:** Wrangler was running, but email login with repo-root `.env` (`EMAIL` / `PASSWORD`) returned 401. Local auth reads `funnel/.dev.vars` (`MASTER_EMAIL` / `MASTER_PASSWORD` / `FOUNDER_PASSWORD`) and the local D1 `users` table — root `.env` is never loaded by Pages Functions.
+
+**What worked:** Sign in at `http://localhost:8000/login` with `MASTER_EMAIL` + `MASTER_PASSWORD` from `funnel/.dev.vars`, or use shared-password mode with `FOUNDER_PASSWORD`. Confirm accounts via `npx wrangler d1 execute DB --local --command "SELECT email, role, active FROM users;"`.
+
+**Do not:** Assume root `.env` seeds or authenticates founder logins. "Please enter your password" with visible dots is usually browser autofill with an empty value — clear the field and type the password from `.dev.vars`.
