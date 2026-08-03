@@ -1,52 +1,79 @@
-/* MACC Founder Command Center — approved Operations redesign
-   Shared by Contacts, Meeting Log, Team Notes, Project Board, and Finance.
-   The dark petrol rail stays persistent; working surfaces are warm, quiet, and legible. */
+/* MACC Founder Command Center — shared Operations tokens.
+   Used by the dashboard, Jobs, Apps, Contacts, Meeting Log, Team Notes and Finance, so
+   changing a value here re-themes the whole Command Center at once — which is the point:
+   one page on a different palette reads as a different product.
+
+   Palette is HubSpot's (Canvas): Oxford/Slate text on a grey-blue ground, Calypso for
+   structure and links, Dorange as the single "act now" accent, Aqua and Candy Apple for
+   state. Token NAMES are historical — --ops-petrol and --ops-amber now hold Calypso and
+   Dorange. They are kept because every page references them; renaming would touch a dozen
+   files for no visual gain. */
 
 :root {
-  --ops-ground: #f7f6f2;
+  /* Neutrals: HubSpot's Oxford/Slate text on its grey-blue page ground. */
+  --ops-ground: #f5f8fa;
   --ops-surface: #ffffff;
-  --ops-surface-2: #f2f1ec;
-  --ops-line: #deddd6;
-  --ops-line-strong: #c7c9c4;
-  --ops-ink: #0d3037;
-  --ops-muted: #526970;
-  --ops-subtle: #71858a;
-  --ops-petrol: #004d50;
-  --ops-petrol-deep: #003d41;
-  --ops-amber: #f5b51b;
-  --ops-amber-hover: #e7a600;
-  --ops-green: #147a4b;
-  --ops-green-soft: #e6f4eb;
-  --ops-rust: #b8452f;
-  --ops-rust-soft: #fbece7;
-  --ops-blue: #235f8c;
-  --ops-blue-soft: #eaf2f8;
-  --ops-shadow: 0 1px 2px rgba(13, 48, 55, .04), 0 10px 30px -22px rgba(13, 48, 55, .25);
-  --ops-radius: 12px;
-  --ops-font: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --ops-surface-2: #eaf0f6;
+  --ops-line: #dfe3eb;
+  --ops-line-strong: #cbd6e2;
+  --ops-ink: #33475b;
+  --ops-muted: #516f90;
+  --ops-subtle: #7c98b6;
+
+  /* Structure and links: Calypso. Used for rails, selected tabs and inline links. */
+  --ops-petrol: #0091ae;
+  --ops-petrol-deep: #007a8f;
+
+  /* The one "act now" accent: Dorange, HubSpot's primary button. Text on it is white —
+     the previous accent was yellow, which needed dark ink; orange does not. */
+  --ops-amber: #ff7a59;
+  --ops-amber-hover: #ff8f73;
+
+  /* Semantic state. Aqua is darkened from #00bda5 so it still passes as text on white,
+     and Candy Apple likewise — the raw brand tints are tuned for fills, not type. */
+  --ops-green: #00a38c;
+  --ops-green-soft: #e3f7f4;
+  --ops-rust: #d94a52;
+  --ops-rust-soft: #fdecee;
+  --ops-blue: #6a78d1;
+  --ops-blue-soft: #eef0fb;
+
+  /* The persistent nav rail. A token because shell.css paints it too — when this was a
+     hardcoded hex in both files they drifted, and the dark rule here (with its attribute
+     selector) silently outranked the shell's. */
+  --ops-rail: #33475b;
+  --ops-rail-2: #2e3f50;
+
+  --ops-shadow: 0 1px 2px rgba(45, 62, 80, .06), 0 8px 22px -14px rgba(45, 62, 80, .28);
+  --ops-radius: 8px;
+  --ops-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --ops-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
 }
 
+/* HubSpot ships no dark theme, so this is derived from the same hues: navy grounds off
+   Oxford (#33475b) and the accents lifted just enough to hold contrast on them. */
 html[data-theme="dark"] {
-  --ops-ground: #071214;
-  --ops-surface: #0f2023;
-  --ops-surface-2: #14272a;
-  --ops-line: #294144;
-  --ops-line-strong: #3a575a;
-  --ops-ink: #edf6f5;
-  --ops-muted: #b4c5c3;
-  --ops-subtle: #8fa5a3;
-  --ops-petrol: #147b7d;
-  --ops-petrol-deep: #084b4e;
-  --ops-amber: #f5bd36;
-  --ops-amber-hover: #ffc94f;
-  --ops-green: #58bd84;
-  --ops-green-soft: #123326;
-  --ops-rust: #f07a67;
-  --ops-rust-soft: #391c19;
-  --ops-blue: #72add4;
-  --ops-blue-soft: #112d3d;
-  --ops-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 14px 34px -22px rgba(0, 0, 0, .85);
+  --ops-ground: #16232e;
+  --ops-surface: #1d2d3c;
+  --ops-surface-2: #24384a;
+  --ops-line: #33475b;
+  --ops-line-strong: #425b76;
+  --ops-ink: #eaf0f6;
+  --ops-muted: #b0c1d4;
+  --ops-subtle: #8ba2ba;
+  --ops-petrol: #45c0d6;
+  --ops-petrol-deep: #0091ae;
+  --ops-amber: #ff8f73;
+  --ops-amber-hover: #ffa693;
+  --ops-green: #2fd5bf;
+  --ops-green-soft: #10322f;
+  --ops-rust: #ff7b81;
+  --ops-rust-soft: #3a1d20;
+  --ops-blue: #9aa4e6;
+  --ops-blue-soft: #1e2340;
+  --ops-rail: #253546;
+  --ops-rail-2: #1d2a38;
+  --ops-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 14px 34px -22px rgba(0, 0, 0, .9);
   color-scheme: dark;
 }
 
@@ -98,7 +125,7 @@ html[data-theme="dark"] {
 }
 
 .cc-root .cc-sidebar {
-  background: linear-gradient(180deg, #005256 0%, #003f43 100%);
+  background: linear-gradient(180deg, var(--ops-rail) 0%, var(--ops-rail-2) 100%);
   border-right: 1px solid rgba(255, 255, 255, .12);
   box-shadow: 8px 0 30px rgba(0, 52, 56, .12);
 }
@@ -959,7 +986,7 @@ html[data-theme="dark"] body.ops-standalone {
 }
 
 html[data-theme="dark"] .cc-root .cc-sidebar {
-  background: linear-gradient(180deg, #073d40 0%, #062d31 100%);
+  background: linear-gradient(180deg, var(--ops-rail) 0%, var(--ops-rail-2) 100%);
   box-shadow: 8px 0 30px rgba(0,0,0,.3);
 }
 

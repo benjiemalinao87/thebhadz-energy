@@ -81,7 +81,7 @@ html[data-theme="dark"] .app:hover {
 .app-ico.jobs, .app-ico.ops { background: var(--ops-green-soft); color: var(--ops-green); }
 .app-ico.leads, .app-ico.next { background: var(--ops-blue-soft); color: var(--ops-blue); }
 .app-ico.finance { background: var(--ops-green-soft); color: var(--ops-green); }
-.app-ico.quote { background: var(--ops-amber); color: #2a1f00; }
+.app-ico.quote { background: var(--ops-amber); color: #fff; }
 .app-ico.mail, .app-ico.docs, .app-ico.notes, .app-ico.meet, .app-ico.capture {
   background: var(--ops-surface-2);
   color: var(--ops-muted);

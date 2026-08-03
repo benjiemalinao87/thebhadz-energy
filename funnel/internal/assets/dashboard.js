@@ -396,9 +396,8 @@
           Math.max(1.5, Math.round(s.v / top * 100)) + '%"></i></span>' +
           '<span class="v n">' + s.v + "</span></span>";
       }).join("") + "</div>" +
-      '<p style="margin:14px 0 0;font-size:12px;line-height:1.5;color:var(--ops-muted)">' +
-      "The gap between <b style=\"color:var(--ops-ink)\">sold</b> and " +
-      "<b style=\"color:var(--ops-ink)\">energized</b> is the Mission. Nothing counts until it closes.</p>" +
+      '<p class="db-note">The gap between <b>sold</b> and <b>energized</b> is the Mission. ' +
+      "Nothing counts until it closes.</p>" +
       "</div></section>";
   }
 

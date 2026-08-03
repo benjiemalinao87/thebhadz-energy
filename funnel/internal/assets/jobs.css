@@ -97,7 +97,7 @@ html[data-theme="dark"] {
 }
 .jb-btn:hover { background: var(--ops-surface-2); }
 .jb-btn[disabled] { opacity: .5; cursor: default; }
-.jb-btn.primary { background: var(--ops-amber); border-color: var(--ops-amber); color: #2a1f00; }
+.jb-btn.primary { background: var(--ops-amber); border-color: var(--ops-amber); color: #fff; }
 .jb-btn.primary:hover { background: var(--ops-amber-hover); }
 .jb-btn.petrol { background: var(--ops-petrol); border-color: var(--ops-petrol); color: #fff; }
 .jb-btn.petrol:hover { background: var(--ops-petrol-deep); }
@@ -115,7 +115,7 @@ html[data-theme="dark"] {
 .jb-chip.good { background: var(--ops-green-soft); color: var(--ops-green); border-color: var(--ops-green); }
 .jb-chip.warn { background: var(--jb-amber-soft); color: var(--jb-amber-ink); border-color: var(--ops-amber); }
 .jb-chip.bad { background: var(--ops-rust-soft); color: var(--ops-rust); border-color: var(--ops-rust); }
-.jb-chip.pkg-liwanag { background: var(--ops-amber); color: #2a1f00; }
+.jb-chip.pkg-liwanag { background: var(--ops-amber); color: #fff; }
 .jb-chip.pkg-ilaw { background: var(--jb-violet-soft); color: var(--jb-violet); border-color: var(--jb-violet); }
 .jb-chip.pkg-sandigan { background: var(--ops-blue-soft); color: var(--ops-blue); border-color: var(--ops-blue); }
 
@@ -251,7 +251,7 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
 .jb-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ops-amber); z-index: 2; pointer-events: none; }
 .jb-today::after {
   content: "TODAY"; position: absolute; top: 2px; left: 5px;
-  font: 700 8.5px var(--ops-mono); letter-spacing: .14em; color: #2a1f00;
+  font: 700 8.5px var(--ops-mono); letter-spacing: .14em; color: #fff;
   background: var(--ops-amber); padding: 1px 4px; border-radius: 3px;
 }
 

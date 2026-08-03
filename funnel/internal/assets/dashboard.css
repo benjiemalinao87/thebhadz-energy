@@ -2,48 +2,66 @@
    Instrument panel, not a launcher: what needs a decision today, ranked by consequence.
    Navigation lives in the rail's single Apps entry; this surface is for state.
 
-   Built on the approved Operations tokens (operations-redesign.css) so light and dark both
-   come for free — theme.js always stamps html[data-theme], which is what dark styling hangs
-   off here. Everything is prefixed .db- so it cannot collide with .cc-* or .ops-*. */
+   Type and spacing follow the convention HubSpot's dashboards use, because the first pass
+   was hard to read — 10px uppercase mono labels and 12px body copy on a page meant to be
+   scanned every morning. What changed:
+
+     · Labels are sentence case in the body face at 13–15px. Mono is reserved for figures
+       that line up in a column, never for a label — 10px uppercase mono is a terminal
+       idiom, not an interface one.
+     · Body copy 15px, card titles 16px, headline figures 34px: one step up across the
+       board rather than a few things enlarged.
+     · Card padding 22–24px, rows ~68px tall, so the grid breathes.
+
+   Colour stays on the Operations palette (operations-redesign.css) — petrol structure,
+   amber for "act now" — so this page still matches Jobs, Apps and the quote builder.
+   Light and dark both come from html[data-theme], which theme.js always stamps.
+
+   Everything is prefixed .db- so it cannot collide with .cc-* or .ops-*. */
 
 :root {
-  --db-amber-soft: #fdf4da;
-  --db-amber-ink: #6b4a00;
-  --db-surface-3: #ebe9e2;
+  --db-amber-soft: #fff1ec;
+  --db-amber-ink: #b3452a;
+  --db-track: #e7e5dd;
 }
 
 html[data-theme="dark"] {
-  --db-amber-soft: #33260a;
-  --db-amber-ink: #ffd884;
-  --db-surface-3: #1c3236;
+  --db-amber-soft: #3d241c;
+  --db-amber-ink: #ffb39e;
+  --db-track: #22383c;
 }
 
 .db {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   font-family: var(--ops-font);
+  font-size: 15px;
+  line-height: 1.55;
   color: var(--ops-ink);
 }
 
 .db * { box-sizing: border-box; }
 .db a { text-decoration: none; color: inherit; }
+
+/* Figures only — never labels. Tabular so columns of money line up. */
 .db .n { font-variant-numeric: tabular-nums; }
 
+/* One label style: sentence case, body face, readable size. */
 .db-eyebrow {
   display: block;
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ops-subtle);
+  font: 500 13.5px/1.4 var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ops-muted);
 }
 
 /* One bar primitive for every proportion on the page. */
 .db-bar {
   position: relative;
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  background: var(--db-surface-3);
+  background: var(--db-track);
   overflow: hidden;
 }
 .db-bar > i { display: block; height: 100%; border-radius: 999px; background: var(--ops-petrol); }
@@ -56,181 +74,230 @@ html[data-theme="dark"] {
   width: 1px; background: var(--ops-line-strong);
 }
 
-/* ------------------------------------------------------------- mission strip --- */
+/* ---------------------------------------------------------------- notice --- */
+
+.db-notice {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--ops-amber);
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: var(--db-amber-soft);
+  color: var(--ops-ink);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.db-notice b { display: block; margin-bottom: 3px; font-size: 16px; font-weight: 700; }
+.db-notice .ic {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ops-amber);
+  color: #fff;
+  font: 700 15px/1 var(--ops-font);
+}
+.db-notice a { color: var(--ops-petrol); font-weight: 700; white-space: nowrap; }
+html[data-theme="dark"] .db-notice a { color: var(--ops-amber-hover); }
+.db-notice a:hover { text-decoration: underline; }
+
+/* ----------------------------------------------------------- metric cards --- */
+/* Four discrete cards rather than one divided strip, so each can carry its own state
+   colour without bleeding into its neighbour. */
 
 .db-mission {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid var(--ops-line);
-  border-radius: var(--ops-radius);
-  background: var(--ops-surface);
-  box-shadow: var(--ops-shadow);
-  overflow: hidden;
+  gap: 16px;
 }
 .db-mc {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 14px 16px 15px;
-  border-right: 1px solid var(--ops-line);
+  gap: 12px;
+  padding: 22px 24px 24px;
+  border: 1px solid var(--ops-line);
+  border-radius: 8px;
+  background: var(--ops-surface);
+  box-shadow: var(--ops-shadow);
 }
-.db-mc:last-child { border-right: 0; }
-.db-mc.alarm { background: var(--ops-rust-soft); }
-.db-mc .fig { display: flex; align-items: baseline; gap: 7px; }
+.db-mc.alarm { border-color: var(--ops-rust); background: var(--ops-rust-soft); }
+.db-mc .fig { display: flex; align-items: baseline; gap: 9px; }
 .db-mc .fig b {
-  font: 700 26px/1 var(--ops-font);
-  letter-spacing: -.025em;
+  font: 700 34px/1.05 var(--ops-font);
+  letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
 }
-.db-mc .fig span { font: 600 13px var(--ops-font); color: var(--ops-subtle); }
+.db-mc .fig span { font: 500 15px var(--ops-font); color: var(--ops-muted); }
 .db-mc.alarm .fig b { color: var(--ops-rust); }
-.db-mc p { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ops-muted); }
-.db-mc p b { color: var(--ops-ink); font-weight: 650; }
+.db-mc p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ops-muted); }
+.db-mc p b { color: var(--ops-ink); font-weight: 700; }
 
-/* ------------------------------------------------------------------ layout --- */
+/* ----------------------------------------------------------------- layout --- */
 
 .db-cols {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
-.db-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.db-stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 .db-panel {
   border: 1px solid var(--ops-line);
-  border-radius: var(--ops-radius);
+  border-radius: 8px;
   background: var(--ops-surface);
   box-shadow: var(--ops-shadow);
   overflow: hidden;
 }
+
+/* Card header: a real title, not a micro-label. */
 .db-ph {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 16px;
+  gap: 12px;
+  min-height: 60px;
+  padding: 14px 24px;
   border-bottom: 1px solid var(--ops-line);
 }
 .db-ph h2 {
   margin: 0;
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ops-muted);
+  font: 600 16px/1.3 var(--ops-font);
+  letter-spacing: -.01em;
+  text-transform: none;
+  color: var(--ops-ink);
 }
-.db-ph .r { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.db-ph .lnk { font: 600 12px var(--ops-font); color: var(--ops-petrol); }
+.db-ph .r { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.db-ph .lnk { font: 600 14px var(--ops-font); color: var(--ops-petrol); white-space: nowrap; }
 html[data-theme="dark"] .db-ph .lnk { color: var(--ops-amber); }
 .db-ph .lnk:hover { text-decoration: underline; }
-.db-pb { padding: 16px; }
+.db-pb { padding: 22px 24px 24px; }
 
+/* Status pill on a card header. */
 .db-count {
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .06em;
-  padding: 2px 7px;
-  border-radius: 5px;
+  font: 700 12.5px var(--ops-font);
+  letter-spacing: 0;
+  padding: 4px 11px;
+  border-radius: 999px;
   background: var(--ops-rust);
   color: #fff;
+  white-space: nowrap;
 }
 .db-count.clear { background: var(--ops-green); }
 
-/* --------------------------------------------------------------- the queue --- */
-/* Severity is the left stripe; owner and timing are plain text in their own column.
-   No chips — a row has to be scannable in one pass. */
+/* -------------------------------------------------------------- the queue --- */
+/* Severity is the left stripe; owner and timing sit in their own column. Rows are tall
+   enough to scan and the reason is 14px, not 12.5. */
 
 .db-row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 138px 16px;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 176px 20px;
+  gap: 20px;
   align-items: center;
-  padding: 13px 16px 13px 19px;
+  padding: 18px 24px 18px 28px;
   border-bottom: 1px solid var(--ops-line);
   transition: background .12s;
 }
 .db-row:last-child { border-bottom: 0; }
 .db-row:hover { background: var(--ops-surface-2); }
-.db-row::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; }
+.db-row::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; }
 .db-row[data-sev="stop"]::before { background: var(--ops-rust); }
 .db-row[data-sev="soon"]::before { background: var(--ops-amber); }
 .db-row[data-sev="ok"]::before { background: var(--ops-green); }
 
-.db-row .t { display: block; font: 600 14px/1.35 var(--ops-font); }
+.db-row .t {
+  display: block;
+  font: 600 16px/1.4 var(--ops-font);
+  letter-spacing: -.01em;
+  color: var(--ops-ink);
+}
 .db-row .w {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: 3px;
-  font-size: 12.5px;
-  line-height: 1.45;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--ops-muted);
 }
 .db-row .kind {
   display: block;
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font: 700 13px/1.35 var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
 }
 .db-row[data-sev="stop"] .kind { color: var(--ops-rust); }
 .db-row[data-sev="soon"] .kind { color: var(--db-amber-ink); }
 .db-row[data-sev="ok"] .kind { color: var(--ops-green); }
-.db-row .sub { display: block; margin-top: 3px; font-size: 12px; color: var(--ops-subtle); }
+.db-row .sub { display: block; margin-top: 3px; font-size: 13.5px; color: var(--ops-subtle); }
 .db-row .chev { color: var(--ops-line-strong); }
 .db-row:hover .chev { color: var(--ops-petrol); }
 html[data-theme="dark"] .db-row:hover .chev { color: var(--ops-amber); }
-.db-row .chev svg { display: block; width: 15px; height: 15px; }
+.db-row .chev svg { display: block; width: 18px; height: 18px; }
 
-.db-quiet { padding: 26px 16px; text-align: center; color: var(--ops-subtle); font-size: 13px; }
+.db-quiet { padding: 34px 24px; text-align: center; color: var(--ops-muted); font-size: 15px; }
 
 /* ------------------------------------------------------------------ money --- */
 
-.db-mrow { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; }
+.db-mrow { display: flex; align-items: baseline; gap: 14px; padding: 13px 0; }
 .db-mrow + .db-mrow { border-top: 1px solid var(--ops-line); }
-.db-mrow .k { font-size: 13px; color: var(--ops-muted); }
+.db-mrow .k { font-size: 15px; color: var(--ops-muted); }
 .db-mrow .v {
   margin-left: auto;
-  font: 600 13.5px var(--ops-font);
+  font: 600 16px var(--ops-font);
   font-variant-numeric: tabular-nums;
 }
 .db-mrow .v.out { color: var(--ops-rust); }
-.db-mrow.total .k { font-weight: 650; color: var(--ops-ink); }
-.db-mrow.total .v { font-size: 17px; font-weight: 700; }
+.db-mrow.total { padding-top: 16px; }
+.db-mrow.total .k { font-size: 16px; font-weight: 700; color: var(--ops-ink); }
+.db-mrow.total .v { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
 
 /* --------------------------------------------------------------- pipeline --- */
 
-.db-fun { display: flex; flex-direction: column; gap: 9px; }
+.db-fun { display: flex; flex-direction: column; gap: 14px; }
 .db-fstep {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) 22px;
-  gap: 11px;
+  grid-template-columns: 104px minmax(0, 1fr) 32px;
+  gap: 14px;
   align-items: center;
 }
 .db-fstep .l {
-  font: 600 11px var(--ops-mono);
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  font: 500 14px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--ops-muted);
 }
-.db-fstep .db-bar { height: 14px; border-radius: 4px; }
-.db-fstep .db-bar > i { border-radius: 4px; }
+.db-fstep .db-bar { height: 20px; border-radius: 5px; }
+.db-fstep .db-bar > i { border-radius: 5px; }
 .db-fstep .v {
-  font: 650 12.5px var(--ops-mono);
+  font: 700 16px var(--ops-font);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
+/* A closing note inside a card body. */
+.db-note {
+  margin: 18px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ops-muted);
+}
+.db-note b { color: var(--ops-ink); font-weight: 700; }
+
 /* -------------------------------------------------------------- this week --- */
 
-.db-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
+.db-wrow { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
 .db-wrow + .db-wrow { border-top: 1px solid var(--ops-line); }
-.db-wrow .k { font-size: 13px; color: var(--ops-muted); }
+.db-wrow .k { font-size: 15px; color: var(--ops-muted); }
 .db-wrow .s {
   margin-left: auto;
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font: 700 13.5px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
   text-align: right;
 }
 .db-wrow .s.yes { color: var(--ops-green); }
@@ -238,32 +305,29 @@ html[data-theme="dark"] .db-row:hover .chev { color: var(--ops-amber); }
 .db-wrow .s.none { color: var(--ops-subtle); }
 
 /* ------------------------------------------------------------- workspaces --- */
-/* A quiet state strip. The rail's Apps entry is the navigation; this only reports. */
 
 .db-ws {
   display: grid;
-  /* Reflows rather than crushing six fixed columns: the left column is ~590px in the
-     real shell, which truncated every label when this was repeat(6, 1fr). */
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-  gap: 8px;
-  padding: 12px 14px 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 20px 24px 24px;
 }
 .db-wcard {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
   min-width: 0;
-  padding: 10px 11px;
+  padding: 16px 18px;
   border: 1px solid var(--ops-line);
-  border-radius: 9px;
-  transition: background .12s;
+  border-radius: 8px;
+  transition: background .12s, border-color .12s;
 }
-.db-wcard:hover { background: var(--ops-surface-2); }
-.db-wtop { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.db-wtop svg { width: 15px; height: 15px; flex: none; color: var(--ops-muted); }
-.db-wtop b { font: 650 12.5px var(--ops-font); white-space: nowrap; }
+.db-wcard:hover { background: var(--ops-surface-2); border-color: var(--ops-line-strong); }
+.db-wtop { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.db-wtop svg { width: 18px; height: 18px; flex: none; color: var(--ops-muted); }
+.db-wtop b { font: 600 15px var(--ops-font); white-space: nowrap; }
 .db-wcard .stat {
-  font: 650 11px var(--ops-mono);
+  font: 500 13.5px var(--ops-font);
   font-variant-numeric: tabular-nums;
   color: var(--ops-muted);
   white-space: nowrap;
@@ -273,66 +337,30 @@ html[data-theme="dark"] .db-row:hover .chev { color: var(--ops-amber); }
 
 /* ----------------------------------------------------------------- states --- */
 
-.db-skel { color: var(--ops-subtle); font-size: 13px; padding: 18px 16px; }
+.db-skel { color: var(--ops-muted); font-size: 15px; padding: 26px 24px; }
 .db-err {
   display: flex;
-  gap: 11px;
-  padding: 13px 15px;
+  gap: 14px;
+  padding: 20px 22px;
   border: 1px solid var(--ops-rust);
-  border-radius: var(--ops-radius);
+  border-radius: 8px;
   background: var(--ops-rust-soft);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ops-ink);
 }
-.db-err b { display: block; margin-bottom: 2px; }
+.db-err b { display: block; margin-bottom: 3px; font-size: 16px; }
 
-@media (max-width: 1200px) {
-  .db-mission { grid-template-columns: 1fr 1fr; }
-  .db-mc:nth-child(2) { border-right: 0; }
-  .db-mc:nth-child(-n+2) { border-bottom: 1px solid var(--ops-line); }
+@media (max-width: 1280px) {
+  .db-mission { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .db-cols { grid-template-columns: 1fr; }
 }
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .db-mission { grid-template-columns: 1fr; }
-  .db-mc { border-right: 0; border-bottom: 1px solid var(--ops-line); }
-  .db-row { grid-template-columns: minmax(0, 1fr) 16px; }
+  .db-row { grid-template-columns: minmax(0, 1fr) 20px; padding: 16px 18px 16px 22px; }
   .db-row .meta { display: none; }
+  .db-ph, .db-pb, .db-ws { padding-left: 18px; padding-right: 18px; }
+  .db-mc { padding: 18px 20px 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .db-row, .db-wcard { transition: none; }
 }
-
-/* Standing notice for an account still on a temporary password. Login used to force a
-   detour to the team page; this replaced it, so it has to be impossible to miss and is
-   deliberately not dismissible. */
-.db-notice {
-  display: flex;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--ops-amber);
-  border-left-width: 3px;
-  border-radius: var(--ops-radius);
-  background: var(--db-amber-soft);
-  color: var(--ops-ink);
-  font-size: 13.5px;
-  line-height: 1.5;
-}
-.db-notice b { display: block; margin-bottom: 2px; }
-.db-notice .ic {
-  flex: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--ops-amber);
-  color: #2a1f00;
-  font: 700 13px/1 var(--ops-font);
-}
-.db-notice a {
-  color: var(--ops-petrol);
-  font-weight: 650;
-  white-space: nowrap;
-}
-html[data-theme="dark"] .db-notice a { color: var(--ops-amber-hover); }
-.db-notice a:hover { text-decoration: underline; }
