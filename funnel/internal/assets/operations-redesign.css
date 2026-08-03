@@ -1246,3 +1246,189 @@ html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
 @media (max-width: 980px) {
   .cc-sb-pin { display: none !important; }
 }
+
+/* ---------- Contacts: the record drawer ----------
+   This panel never got converted with the rest of the page: .ops-contacts restyled the
+   table and the chips, so the drawer kept the old terminal treatment (10px uppercase
+   labels, dashed rules, two identical accent buttons sitting flush against each other) and
+   the palette sweep only swapped its hex values.
+
+   Redesigned on the same rules as the dashboard: sentence-case labels, one primary action
+   per group with the secondary demoted to a quiet link, solid hairlines, and 15px values
+   that can actually be read. HubSpot's CRM record sidebar is the reference. */
+
+.ops-contacts .scrim { background: rgba(45, 62, 80, .45); }
+
+.ops-contacts .drawer {
+  width: min(480px, 100%);
+  background: var(--ops-surface);
+  border-left: 1px solid var(--ops-line);
+  box-shadow: -16px 0 48px -24px rgba(45, 62, 80, .45);
+}
+
+.ops-contacts .dw-head {
+  position: relative;          /* the close button is absolutely placed within it */
+  padding: 22px 26px 20px;
+  border-bottom: 1px solid var(--ops-line);
+  background: var(--ops-surface-2);
+}
+.ops-contacts .dw-head .x {
+  float: none;
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 20px;
+  color: var(--ops-muted);
+}
+.ops-contacts .dw-head .x:hover { background: var(--ops-surface); border-color: var(--ops-line-strong); color: var(--ops-ink); }
+.ops-contacts .dw-name {
+  margin: 0 40px 8px 0;
+  font: 700 22px/1.25 var(--ops-font);
+  letter-spacing: -.02em;
+  color: var(--ops-ink);
+}
+
+/* The stage was a grey dot and a micro-caption; make it the pill it already is in the
+   table. Colour is deliberately NOT declared here so the per-stage .st-* class still wins
+   — `border: 1px solid` with no colour falls through to currentColor, which .st-* sets. */
+.ops-contacts .dw-stage {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  font: 700 12px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.ops-contacts .dw-body { padding: 24px 26px 32px; }
+
+/* Call is the action a founder is here to take, so it leads; Text is the alternative.
+   Two filled accent buttons of equal weight told you nothing about which to press. */
+.ops-contacts .actions { gap: 10px; margin-bottom: 26px; }
+.ops-contacts .actions a {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font: 600 14px var(--ops-font);
+  letter-spacing: 0;
+}
+.ops-contacts .call-btn {
+  background: var(--ops-amber);
+  border: 1px solid var(--ops-amber);
+  color: #fff;
+}
+.ops-contacts .call-btn:hover { background: var(--ops-amber-hover); border-color: var(--ops-amber-hover); }
+.ops-contacts .msg-btn {
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line-strong);
+  color: var(--ops-ink);
+}
+.ops-contacts .msg-btn:hover { background: var(--ops-surface-2); }
+
+/* Field rows: readable values, sentence-case labels, solid hairlines. */
+.ops-contacts .kv {
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ops-line);
+  font-size: 15px;
+}
+.ops-contacts .kv .k {
+  width: 104px;
+  flex: 0 0 104px;
+  padding-top: 1px;
+  font: 500 13px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ops-muted);
+}
+.ops-contacts .kv .v { color: var(--ops-ink); line-height: 1.5; }
+.ops-contacts .kv .v a { color: var(--ops-petrol); font-weight: 600; }
+.ops-contacts .kv .v a:hover { text-decoration: underline; }
+
+.ops-contacts .field { margin: 26px 0 0; }
+.ops-contacts .field label {
+  margin-bottom: 8px;
+  font: 600 14px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ops-ink);
+}
+.ops-contacts .field select,
+.ops-contacts .field textarea,
+.ops-contacts .field input {
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 8px;
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+  font-size: 15px;
+  padding: 11px 13px;
+}
+.ops-contacts .field select:focus,
+.ops-contacts .field textarea:focus,
+.ops-contacts .field input:focus {
+  outline: none;
+  border-color: var(--ops-petrol);
+  box-shadow: 0 0 0 3px rgba(0, 145, 174, .15);
+}
+.ops-contacts .field textarea { min-height: 120px; }
+
+/* One primary per group. "Clear" and "Save notes" are secondary work and read as such. */
+.ops-contacts .save {
+  margin-top: 12px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--ops-amber);
+  border: 1px solid var(--ops-amber);
+  color: #fff;
+  font: 600 14px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ops-contacts .save:hover { background: var(--ops-amber-hover); border-color: var(--ops-amber-hover); }
+.ops-contacts .save.ghost {
+  margin-left: 8px;
+  background: none;
+  border-color: transparent;
+  color: var(--ops-muted);
+  text-decoration: underline;
+}
+.ops-contacts .save.ghost:hover { background: none; color: var(--ops-ink); }
+.ops-contacts #dwsave {
+  background: var(--ops-surface);
+  border-color: var(--ops-line-strong);
+  color: var(--ops-ink);
+}
+.ops-contacts #dwsave:hover { background: var(--ops-surface-2); }
+.ops-contacts .saved { color: var(--ops-green); font-size: 13.5px; font-weight: 600; }
+
+.ops-contacts .na-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ops-muted);
+}
+
+.ops-contacts .danger {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ops-line);
+}
+.ops-contacts .danger button {
+  padding: 9px 16px;
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 8px;
+  background: var(--ops-surface);
+  color: var(--ops-rust);
+  font: 600 14px var(--ops-font);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ops-contacts .danger button:hover { border-color: var(--ops-rust); background: var(--ops-rust-soft); }

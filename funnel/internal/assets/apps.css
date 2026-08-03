@@ -1,11 +1,16 @@
 /* /internal/apps.html — the app grid reached from the rail's single Apps entry.
    Built on the Operations tokens, so light and dark both come from html[data-theme].
-   Grouped by what the tool is FOR (deliver / money / record / strategy) rather than
-   presented as five equal cards, because the groups are how the work is actually divided. */
+   Grouped by what the tool is FOR (deliver / money / record / strategy) rather than one
+   undifferentiated wall, because the groups are how the work is actually divided.
+
+   Second pass, same rules as the dashboard and the contact drawer: sentence-case section
+   headings instead of 10px uppercase mono, stats in the body face with colour reserved for
+   things that actually need attention, and equal-height cards on a fixed column count so a
+   group of five does not leave a hole in the row. */
 
 .apps-page {
   padding: clamp(18px, 3vw, 34px);
-  max-width: 1320px;
+  max-width: 1400px;
   font-family: var(--ops-font);
   color: var(--ops-ink);
 }
@@ -13,7 +18,7 @@
 .apps-page * { box-sizing: border-box; }
 .apps-page a { text-decoration: none; color: inherit; }
 
-.apps-head { margin-bottom: 26px; }
+.apps-head { margin-bottom: 32px; }
 .apps-head h1 {
   margin: 0;
   font: 700 clamp(1.6rem, 3vw, 2.15rem)/1.12 var(--ops-font);
@@ -21,105 +26,122 @@
   color: var(--ops-ink);
 }
 .apps-sub {
-  margin: 9px 0 0;
+  margin: 10px 0 0;
   max-width: 62ch;
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--ops-muted);
 }
 
-.apps-grid { display: flex; flex-direction: column; gap: 26px; }
+.apps-grid { display: flex; flex-direction: column; gap: 34px; }
 
+/* A real section heading. The micro-caps version read as a system label rather than a
+   piece of the page's structure. */
 .apps-group-title {
-  margin: 0 0 11px;
-  font: 650 10px var(--ops-mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--ops-subtle);
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ops-line);
+  font: 600 16px var(--ops-font);
+  letter-spacing: -.01em;
+  text-transform: none;
+  color: var(--ops-ink);
 }
 
+/* A fixed four-across grid with equal rows. auto-fill left a five-card group as 4 + 1,
+   which read as a broken layout rather than a deliberate one. */
 .apps-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 14px;
 }
 
 /* One tile, one destination. Nothing here is a decorative control. */
 .app {
   display: flex;
-  gap: 13px;
-  padding: 15px 16px;
+  gap: 14px;
+  padding: 18px 20px;
   border: 1px solid var(--ops-line);
-  border-radius: var(--ops-radius);
+  border-radius: 8px;
   background: var(--ops-surface);
   box-shadow: var(--ops-shadow);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: border-color .12s ease, box-shadow .12s ease;
 }
 .app:hover {
-  transform: translateY(-1px);
-  border-color: var(--ops-line-strong);
-  box-shadow: 0 2px 6px rgba(45,62,80, .06), 0 20px 44px -28px rgba(45,62,80, .35);
+  border-color: var(--ops-petrol);
+  box-shadow: 0 2px 6px rgba(45, 62, 80, .07), 0 16px 36px -24px rgba(45, 62, 80, .35);
 }
 html[data-theme="dark"] .app:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .3), 0 24px 52px -28px rgba(0, 0, 0, .9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3), 0 20px 44px -26px rgba(0, 0, 0, .9);
 }
 .app:focus-visible { outline: 2px solid var(--ops-amber); outline-offset: 2px; }
 
 .app-ico {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   flex: none;
-  border-radius: 10px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   background: var(--ops-surface-2);
   color: var(--ops-muted);
 }
-.app-ico svg { width: 18px; height: 18px; }
+.app-ico svg { width: 19px; height: 19px; }
 
-/* Tone by group, drawn from the semantic palette rather than a new one. */
-.app-ico.jobs, .app-ico.ops { background: var(--ops-green-soft); color: var(--ops-green); }
-.app-ico.leads, .app-ico.next { background: var(--ops-blue-soft); color: var(--ops-blue); }
+/* One tint per GROUP, so the colour says which kind of work a tool belongs to. Previously
+   every icon was the same navy except Quote builder, which drew the eye to it for no
+   reason the page could justify. */
+.app-ico.jobs,
+.app-ico.leads,
+.app-ico.quote,
+.app-ico.ops,
+.app-ico.next { background: var(--ops-blue-soft); color: var(--ops-blue); }
+
 .app-ico.finance { background: var(--ops-green-soft); color: var(--ops-green); }
-.app-ico.quote { background: var(--ops-amber); color: #fff; }
-.app-ico.mail, .app-ico.docs, .app-ico.notes, .app-ico.meet, .app-ico.capture {
-  background: var(--ops-surface-2);
-  color: var(--ops-muted);
-}
-.app-ico.lab, .app-ico.strategy, .app-ico.eng, .app-ico.legal, .app-ico.team {
-  background: var(--ops-blue-soft);
-  color: var(--ops-blue);
-}
 
-.app-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.app-ico.mail,
+.app-ico.docs,
+.app-ico.notes,
+.app-ico.meet,
+.app-ico.capture { background: var(--ops-surface-2); color: var(--ops-muted); }
+
+.app-ico.lab,
+.app-ico.strategy,
+.app-ico.eng,
+.app-ico.legal,
+.app-ico.team { background: var(--ops-surface-2); color: var(--ops-subtle); }
+
+.app-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .app-body b {
-  font: 650 14.5px var(--ops-font);
+  font: 600 15.5px var(--ops-font);
   letter-spacing: -.01em;
   color: var(--ops-ink);
 }
+/* Two lines, so every card in a row is the same height whatever the copy length. */
 .app-body small {
-  font-size: 12.5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13.5px;
   line-height: 1.5;
   color: var(--ops-muted);
 }
 
-/* Live counts, filled in by apps.js. Absent until the data arrives, so the tile never
-   shows a placeholder number that could be mistaken for a real one. */
+/* Live counts, filled in by apps.js. Neutral by default and coloured only when apps.js
+   marks it — "Inbox clear" in the act-now accent was telling you to act on nothing. */
 .app-stat {
-  margin-top: 3px;
-  font: 650 11px var(--ops-mono);
-  letter-spacing: .06em;
+  margin-top: auto;
+  padding-top: 8px;
+  font: 600 13px var(--ops-font);
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
-  color: var(--ops-petrol);
+  color: var(--ops-muted);
 }
-html[data-theme="dark"] .app-stat { color: var(--ops-amber); }
 .app-stat:empty { display: none; }
 .app-stat.warn { color: var(--ops-rust); }
 
-@media (max-width: 680px) {
-  .apps-row { grid-template-columns: 1fr; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .app { transition: none; }
-  .app:hover { transform: none; }
-}
+@media (max-width: 1180px) { .apps-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 880px) { .apps-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .apps-row { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .app { transition: none; } }

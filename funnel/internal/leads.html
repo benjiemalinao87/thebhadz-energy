@@ -294,7 +294,8 @@
 
   <!-- detail drawer -->
   <div class="scrim" id="scrim"></div>
-  <aside class="drawer" id="drawer" aria-hidden="true"></aside>
+  <aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-modal="true"
+         aria-labelledby="dw-name-live" tabindex="-1" style="outline:none"></aside>
 
   <div class="loading" id="loading">Loading contacts…</div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -527,8 +528,8 @@
       var options=STAGES.map(function(s){return '<option value="'+s.id+'"'+(s.id===l.stage?" selected":"")+'>'+s.label+'</option>';}).join("");
       dw.innerHTML=
         '<div class="dw-head"><button class="x" id="dwx" aria-label="Close">×</button>'+
-          '<div class="dw-name">'+esc(l.name||"—")+'</div>'+
-          '<span class="dw-stage st-'+l.stage+'" style="border:0;background:none;padding:0">● '+stageLabel[l.stage]+'</span>'+
+          '<div class="dw-name" id="dw-name-live">'+esc(l.name||"—")+'</div>'+
+          '<span class="dw-stage st-'+l.stage+'">'+stageLabel[l.stage]+'</span>'+
         '</div>'+
         '<div class="dw-body">'+
           '<div class="actions">'+
@@ -568,7 +569,7 @@
       el("scrim").classList.add("open");
       dw.classList.add("open"); dw.setAttribute("aria-hidden","false");
       el("dwx").onclick=closeDrawer;
-      el("dwx").focus();
+      dw.focus({ preventScroll: true });
       el("dwstage").onchange=function(){moveLead(id,this.value);openDrawer(id);};
       el("dwsave").onclick=function(){saveNotes(id,el("dwnotes").value);};
       el("dwnasave").onclick=function(){saveNextAction(id,el("dwna").value,el("dwnadue").value,el("dwnaowner").value);};
