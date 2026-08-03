@@ -1,5 +1,15 @@
 # Lesson Learn
 
+## Password change: never return 401 for a wrong current password
+
+**Fixed:** 2026-08-03
+
+**What went wrong:** `/api/session` change_password returned HTTP 401 when the current password did not match. Team & access (`team.js` `api()`) treats every 401 as "Session expired — signing in again," redirects to login, and never shows "Current password is incorrect." Founders thought the change failed and their session died; the temporary password was never replaced.
+
+**What worked:** Return **403** for a wrong current password (session is still valid). Parse the JSON body before deciding to bounce on 401. Only call `destroyUserSessions` after a successful change when `currentSessionId` is known, so a missing keep-id cannot wipe the browser that just changed the password.
+
+**Do not:** Reuse 401 for "authenticated but credentials for this action are wrong." 401 means not signed in; wrong password while signed in is 403 (or 422). Do not `redirectLogin()` before reading `data.error`.
+
 ## Ops page heads: remove the whole strip, not just the title
 
 **Fixed:** 2026-08-03

@@ -81,17 +81,20 @@ export async function onRequest(context) {
     const row = await env.DB.prepare(`SELECT password_hash FROM users WHERE id = ?`).bind(user.id).first();
     if (!row) return json({ ok: false, error: "Account not found." }, 404);
 
+    // 403, not 401: the session is valid — only the password check failed.
+    // Team & access treats every 401 as "session expired" and signs the founder out,
+    // which hid this error and made it look like the change never saved.
     if (!(await verifyPassword(currentPassword, row.password_hash))) {
       await logActivity(env, {
         action: "password_change_failed",
         entity: "users",
         entityId: user.id,
         user,
-        status: 401,
+        status: 403,
         detail: "Current password did not match",
         request,
       });
-      return json({ ok: false, error: "Current password is incorrect." }, 401);
+      return json({ ok: false, error: "Current password is incorrect." }, 403);
     }
     if (await verifyPassword(newPassword, row.password_hash)) {
       return json({ ok: false, error: "New password must be different from the current one." }, 422);
@@ -108,7 +111,10 @@ export async function onRequest(context) {
       .run();
 
     // Keep this browser signed in; drop every other session for the account.
-    await destroyUserSessions(env, user.id, currentSessionId(context));
+    // Only revoke others when we know this session's id — a missing keep-id would
+    // wipe the current cookie too and look like "change failed + got logged out".
+    const keepId = currentSessionId(context);
+    if (keepId) await destroyUserSessions(env, user.id, keepId);
 
     await logActivity(env, {
       action: "password_changed",

@@ -1,5 +1,11 @@
 # Progress
 
+## Fix: password change false "session expired" (2026-08-03) — done
+- Wrong current password on `/api/session` was HTTP 401; Team UI treated every 401 as logout
+- Now returns 403 + shows "Current password is incorrect"; only real auth failures bounce to login
+- Also: don't wipe the current session if `currentSessionId` is missing after a successful change
+- Needs deploy to `founders.macc-inc.com` before Benjie can retry the temporary-password replace
+
 ## Ops tools: drop marketing page-heads (2026-08-03) — done
 - Jobs: removed `ops-page-head jb-head` + unused mission/head CSS
 - Same cleanup on Contacts, Documents, Notes, Meetings (kept action-items toggle)

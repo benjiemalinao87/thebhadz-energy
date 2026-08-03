@@ -580,8 +580,13 @@
       options.body = JSON.stringify(body);
     }
     var response = await fetch(url, options);
-    if (response.status === 401) { redirectLogin(); throw new Error("Session expired — signing in again."); }
     var data = await response.json().catch(function () { return {}; });
+    // Only bounce to login on a real auth failure. Credential checks (e.g. wrong
+    // current password on change) must surface their own error without signing out.
+    if (response.status === 401) {
+      redirectLogin();
+      throw new Error(data.error || "Session expired — signing in again.");
+    }
     if (!response.ok || !data.ok) throw new Error(data.error || "Request failed (" + response.status + ").");
     return data;
   }
