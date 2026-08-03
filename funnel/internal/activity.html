@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") {
+      var extra = location.search ? "&" + location.search.slice(1) : "";
+      location.replace("/internal/?open=" + m[1].toLowerCase() + extra);
+    }
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="icon" href="/assets/img/macc-mark.png">
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/internal/assets/style.css">
+<link rel="stylesheet" href="/internal/assets/ops-tools.css">
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
+<link rel="stylesheet" href="/internal/assets/activity.css">
+
+<div class="frame">
+  <!-- Fallback nav for a standalone load; inside the shell the sidebar is the rail. -->
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="wordmark">MACC</span><span class="sub">SOLAR CITY · FOUNDER COMMAND CENTER</span></a></div>
+    <nav class="nav" aria-label="Founder tools">
+      <a href="index.html"><span class="code">HOME</span>Command center</a>
+      <a href="apps.html"><span class="code">APPS</span>All tools</a>
+      <a href="activity.html"><span class="code">LOG</span>Activity log</a>
+      <a href="team.html"><span class="code">SC-15</span>Team &amp; access</a>
+    </nav>
+    <div class="foot">PRIVATE · FOUNDERS ONLY<br>EVERY CHANGE IS RECORDED<br>ROWS ARE KEPT 180 DAYS</div>
+  </aside>
+
+  <!-- The script anchors on #log-root, an element INSIDE <main>: the SPA router renames
+       the injected <main> to id="cc-main" on every swap, so an id on <main> itself would
+       be gone by the time the page script looked for it. -->
+  <main class="content ops-content ops-page ops-log">
+   <div class="log-shell" id="log-root" data-busy="false">
+
+    <header class="log-head">
+      <div>
+        <p class="log-eyebrow">Audit trail</p>
+        <h1>Log</h1>
+        <p class="log-lede">Everything written through the Command Center — new contacts, jobs and
+          quotes, emails sent, uploads, documents and notes — newest first, with the founder who
+          did it. Reads only: nothing here can be edited or removed.</p>
+      </div>
+      <span class="log-scope" id="log-scope">Loading…</span>
+    </header>
+
+    <!-- Counts come from the API over the whole filter, not from the rows on screen —
+         a paginated feed would otherwise under-report exactly when it matters. -->
+    <section class="log-metrics" aria-label="Activity summary">
+      <div class="log-metric"><span>Events in view</span><strong id="log-m-total">—</strong><small id="log-m-total-note">Matching the current filter</small></div>
+      <div class="log-metric"><span>Last 24 hours</span><strong id="log-m-24">—</strong><small>Rolling day, not calendar day</small></div>
+      <div class="log-metric"><span>People</span><strong id="log-m-people">—</strong><small>Accounts that appear in this filter</small></div>
+      <div class="log-metric" id="log-m-failed-tile"><span>Failed sign-ins</span><strong id="log-m-failed">—</strong><small>Last 7 days, whatever the filter</small></div>
+    </section>
+
+    <div class="log-toolbar">
+      <div class="log-kinds" role="group" aria-label="What to show">
+        <button type="button" data-kind="writes" aria-pressed="true">Changes</button>
+        <button type="button" data-kind="access" aria-pressed="false">Sign-ins</button>
+        <button type="button" data-kind="" aria-pressed="false">Everything</button>
+      </div>
+
+      <div class="log-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="log-q" type="search" maxlength="80" placeholder="Search a name, record, subject or path…" aria-label="Search the log">
+      </div>
+
+      <!-- Only the master account gets a people picker; everyone else is pinned to their
+           own rows by the API, so offering the control would be a lie. -->
+      <select id="log-user" aria-label="Founder" hidden><option value="">Everyone</option></select>
+
+      <!-- Values are action-name PREFIXES, matched server-side with LIKE. "document"
+           deliberately covers documents.* and document-file.*, "note" covers notes.* and
+           note-image.*, "quote" covers quote.*, quote-settings.* and the quote.sent row. -->
+      <select id="log-area" aria-label="Area">
+        <option value="">All areas</option>
+        <option value="leads">Contacts</option>
+        <option value="jobs">Jobs</option>
+        <option value="projects">Company tasks</option>
+        <option value="quote">Quotes &amp; pricing</option>
+        <option value="finance">Finance</option>
+        <option value="mail">Email</option>
+        <option value="document">Documents</option>
+        <option value="note">Notes</option>
+        <option value="recordings">Recordings</option>
+        <option value="captures">Product captures</option>
+        <option value="install-ops">Install operations</option>
+        <option value="founder-lab">Strategy lab</option>
+        <option value="users">Accounts</option>
+      </select>
+
+      <select id="log-days" aria-label="Period">
+        <option value="1">Last 24 hours</option>
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="">Everything kept (180 days)</option>
+      </select>
+
+      <button type="button" class="log-refresh" id="log-refresh">Refresh</button>
+    </div>
+
+    <div class="log-feed" id="log-feed" aria-live="polite" aria-busy="false"></div>
+
+    <div class="log-foot">
+      <button type="button" id="log-more" hidden>Load older activity</button>
+    </div>
+
+   </div>
+  </main>
+</div>
+
+<script src="/internal/assets/activity.js"></script>
+</html>

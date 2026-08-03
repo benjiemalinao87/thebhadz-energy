@@ -31,7 +31,7 @@
   // Pages whose <main> is an ops workspace (.ops-content) rather than a document:
   // the shell swaps to the light "operations" ground for these, which their styling
   // assumes. Miss one and its text renders dark-on-dark in light mode.
-  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "docs", "projects", "finance", "team", "captures", "install-ops"];
+  var OPERATION_SLUGS = ["leads", "mail", "meetings", "notes", "docs", "projects", "finance", "team", "captures", "install-ops", "activity"];
 
   // Every internal page has two spellings: the file that actually exists
   // (/internal/leads.html) and the canonical address we show (/internal/leads).
@@ -267,7 +267,10 @@
           // after the shell's, so any :focus-visible outline they declare would win the
           // cascade and draw a box around the title after every navigation. The element is
           // tabindex="-1", so it is unreachable by Tab and losing the ring costs nothing.
-          heading.style.outline = "none";
+          // It has to be !important as well as inline: operations-redesign.css declares its
+          // .ops-page focus ring with !important, which a plain inline value loses to — so
+          // every .ops-page view was drawing the box this line exists to prevent.
+          heading.style.setProperty("outline", "none", "important");
           heading.focus({ preventScroll: true });
         } else {
           incomingMain.style.outline = "none";

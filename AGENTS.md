@@ -75,6 +75,11 @@ still apply, and its activity reads as "Shared team login" rather than a person.
   re-implement either, just call `currentUser(context)` and 401 when it returns null.**
 - `/api/session` (self-service), `/api/users` (master only), `/api/activity` (all for master,
   own rows for founders); `funnel/internal/team.html` + `assets/team.js` is the SC-15 UI.
+  `funnel/internal/activity.html` + `assets/activity.{js,css}` is **the Log** — the same audit
+  trail as a feed of readable sentences, reached from the sidebar rail. Row → sentence is
+  translated at read time in `activity.js` (audit rows are written once and never migrated),
+  so a new endpoint shows up automatically; add it to that file's `AREAS` table to give it a
+  proper noun and area tag instead of the generic fallback.
 - Roles: the founders are equals — `master` is the DEFAULT role and means full access plus
   account administration and the whole activity log. `founder` is the *limited* login for
   installers/interns/bookkeepers: tools only, own activity, no account admin. There is always

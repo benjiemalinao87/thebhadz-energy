@@ -166,10 +166,16 @@ export const SECTIONS = [
   },
   {
     key: "team",
-    label: "Team & access (own password)",
+    label: "Team, access & the log (own password)",
     group: "System",
-    pages: ["team"],
-    apis: [],
+    // /internal/activity is the Log — the same audit trail team.html shows in a tab,
+    // given its own page and its own sidebar entry. It lives in this section rather
+    // than a hideable one of its own because /api/activity is already reachable from
+    // the always-on Team page: a separate key would hide the link and leave the data,
+    // which is the theatre this registry exists to prevent. Scope is enforced inside
+    // the endpoint instead — a master sees the team, everyone else sees themselves.
+    pages: ["team", "activity"],
+    apis: ["/api/activity"],
     // Never hideable: this is where everyone changes their own password, and where a
     // new account with a temporary one is sent at first sign-in. Hiding it would lock
     // that person out of their own login. Account administration on the page is gated

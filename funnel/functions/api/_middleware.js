@@ -18,8 +18,11 @@ import { isSectionHidden, sectionForApi } from "../_pages.js";
 const PUBLIC_PATHS = new Set(["/api/lead", "/api/founder-login", "/api/founder-logout"]);
 
 // These endpoints write their own, richer audit rows (which account was created,
-// whose password was reset), so the generic logger stays out of their way.
-const SELF_LOGGED = new Set(["/api/users", "/api/session", "/api/founder-login", "/api/founder-logout"]);
+// whose password was reset, which quote went to whom), so the generic logger stays out
+// of their way — otherwise every send lands twice, once anonymously.
+const SELF_LOGGED = new Set([
+  "/api/users", "/api/session", "/api/founder-login", "/api/founder-logout", "/api/quote",
+]);
 
 const MUTATING = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 const VERBS = { POST: "create", PATCH: "update", PUT: "replace", DELETE: "delete" };
@@ -60,8 +63,18 @@ async function describe(request) {
       const body = await request.clone().json();
       if (body && typeof body === "object") {
         id = String(body.id || body.key || "").slice(0, 80);
-        for (const field of ["resource", "action", "title", "name", "customer_name", "stage", "status", "subject"]) {
+        // Enough to name the thing in the Log's feed ("added a document · Sofar warranty")
+        // without turning the audit row into a copy of the record.
+        for (const field of [
+          "resource", "action", "title", "name", "customer_name", "stage", "status",
+          "subject", "to", "label", "kind", "category",
+        ]) {
           if (typeof body[field] === "string" && body[field]) bits.push(`${field}=${body[field].slice(0, 60)}`);
+        }
+        // A document uploaded from the library carries its name one level down, and the
+        // title is optional there — without this the row would read as an unnamed create.
+        if (body.file && typeof body.file === "object" && typeof body.file.name === "string") {
+          bits.push(`file=${body.file.name.slice(0, 60)}`);
         }
       }
     } catch {

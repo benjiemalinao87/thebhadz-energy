@@ -1,0 +1,181 @@
+/* MACC Founder Command Center — the Log (/internal/activity.html).
+   A feed of every change made through the founder tools: who did it, what they touched,
+   when. Styled straight off the HubSpot tokens in operations-redesign.css, so it reads as
+   the same product as Contacts, Jobs and Finance rather than a bolted-on admin screen.
+
+   Everything is namespaced under .ops-log. The page deliberately does NOT reuse the
+   legacy --sheet/--hairline ladder from ops-tools.css: those are the terminal theme's
+   names, and this page is new enough to speak only in --ops-* tokens. */
+
+.ops-log { padding-bottom: 72px; }
+
+/* ---------- header ---------- */
+
+.ops-log .log-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin: 0 0 22px; }
+.ops-log .log-head h1 { margin: 4px 0 0; color: var(--ops-ink); font-size: clamp(30px, 3vw, 42px); font-weight: 750; letter-spacing: -.035em; line-height: 1.08; }
+.ops-log .log-eyebrow { margin: 0; color: var(--ops-petrol); font: 700 12px var(--ops-mono); letter-spacing: .09em; text-transform: uppercase; }
+.ops-log .log-lede { max-width: 640px; margin: 10px 0 0; color: var(--ops-muted); font-size: 14px; line-height: 1.65; }
+.ops-log .log-scope {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 13px;
+  border: 1px solid var(--ops-line); border-radius: 999px; background: var(--ops-surface);
+  color: var(--ops-muted); font-size: 12px; white-space: nowrap;
+}
+.ops-log .log-scope::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ops-green); }
+
+/* ---------- counters ---------- */
+
+/* auto-fit, not a fixed 4: a limited account has no "People" tile (it is the only
+   person it can see), and three tiles should fill the row rather than leave a gap. */
+.ops-log .log-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 0 0 20px; }
+.ops-log .log-metric {
+  padding: 15px 17px; border: 1px solid var(--ops-line); border-radius: var(--ops-radius);
+  background: var(--ops-surface); box-shadow: var(--ops-shadow); min-width: 0;
+}
+.ops-log .log-metric span { display: block; color: var(--ops-muted); font-size: 12px; font-weight: 650; }
+.ops-log .log-metric strong { display: block; margin-top: 6px; color: var(--ops-ink); font-size: 28px; font-weight: 750; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+.ops-log .log-metric small { display: block; margin-top: 7px; color: var(--ops-subtle); font-size: 12px; line-height: 1.4; }
+.ops-log .log-metric.warn strong { color: var(--ops-rust); }
+
+/* ---------- filters ---------- */
+
+.ops-log .log-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; margin: 0 0 18px;
+  border: 1px solid var(--ops-line); border-radius: var(--ops-radius);
+  background: var(--ops-surface); box-shadow: var(--ops-shadow);
+}
+
+/* Segmented control — HubSpot's tab strip, shrunk to a switch. */
+.ops-log .log-kinds { display: inline-flex; padding: 3px; border-radius: 7px; background: var(--ops-surface-2); }
+.ops-log .log-kinds button {
+  appearance: none; border: 0; border-radius: 5px; background: transparent;
+  padding: 7px 13px; color: var(--ops-muted); font: 650 13px var(--ops-font); cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.ops-log .log-kinds button:hover { color: var(--ops-ink); }
+.ops-log .log-kinds button[aria-pressed="true"] { background: var(--ops-surface); color: var(--ops-ink); box-shadow: 0 1px 2px rgba(45, 62, 80, .14); }
+
+.ops-log .log-search { position: relative; flex: 1; min-width: 190px; }
+.ops-log .log-search input {
+  width: 100%; min-height: 38px; padding: 0 12px 0 34px;
+  border: 1px solid var(--ops-line-strong); border-radius: 6px;
+  background: var(--ops-surface); color: var(--ops-ink); font-size: 14px;
+}
+.ops-log .log-search input::placeholder { color: var(--ops-subtle); }
+.ops-log .log-search svg { position: absolute; left: 11px; top: 50%; width: 15px; height: 15px; transform: translateY(-50%); color: var(--ops-subtle); pointer-events: none; }
+
+.ops-log .log-toolbar select {
+  min-height: 38px; padding: 0 10px; border: 1px solid var(--ops-line-strong); border-radius: 6px;
+  background: var(--ops-surface); color: var(--ops-ink); font-size: 13px; max-width: 200px;
+}
+.ops-log .log-toolbar .log-refresh {
+  appearance: none; min-height: 38px; padding: 0 14px; border: 1px solid var(--ops-line-strong);
+  border-radius: 6px; background: var(--ops-surface); color: var(--ops-ink);
+  font: 650 13px var(--ops-font); cursor: pointer;
+}
+.ops-log .log-toolbar .log-refresh:hover { border-color: var(--ops-petrol); color: var(--ops-petrol); }
+
+/* ---------- feed ---------- */
+
+.ops-log .log-feed { display: flex; flex-direction: column; gap: 0; }
+
+.ops-log .log-day {
+  display: flex; align-items: center; gap: 12px;
+  margin: 22px 0 10px; color: var(--ops-muted);
+  font: 700 12px var(--ops-font); letter-spacing: .04em; text-transform: uppercase;
+}
+.ops-log .log-day:first-child { margin-top: 0; }
+.ops-log .log-day::after { content: ""; flex: 1; height: 1px; background: var(--ops-line); }
+
+.ops-log .log-group {
+  border: 1px solid var(--ops-line); border-radius: var(--ops-radius);
+  background: var(--ops-surface); box-shadow: var(--ops-shadow); overflow: hidden;
+}
+
+.ops-log .log-item {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: start; gap: 13px; padding: 14px 16px;
+  border-top: 1px solid var(--ops-line);
+}
+.ops-log .log-item:first-child { border-top: 0; }
+.ops-log .log-item:hover { background: var(--ops-surface-2); }
+
+/* The actor's initials, coloured from their name so the same person is the same colour
+   every time — scanning a day is then a colour match, not a read. */
+.ops-log .log-avatar {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; font: 700 12px var(--ops-font); letter-spacing: .02em; user-select: none;
+}
+
+.ops-log .log-line { margin: 0; color: var(--ops-ink); font-size: 14px; line-height: 1.5; }
+.ops-log .log-line b { font-weight: 700; }
+.ops-log .log-obj { font-weight: 650; color: var(--ops-petrol); }
+.ops-log .log-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 5px 0 0; color: var(--ops-subtle); font-size: 12px; }
+/* The shared style.css gives <code> a light wash, which reads as a bright chip on the
+   dark ground. Here the path is the quietest thing on the line, so it is reset outright. */
+.ops-log .log-meta code {
+  padding: 0; border: 0; border-radius: 0; background: none;
+  font: 11px var(--ops-mono); color: var(--ops-subtle);
+}
+.ops-log .log-sep { color: var(--ops-line-strong); }
+
+/* Area tag: the tool the change happened in, tinted per area and linking to it. */
+.ops-log .log-area {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--ops-surface-2); color: var(--ops-muted);
+  font: 650 11px var(--ops-font); text-decoration: none; white-space: nowrap;
+}
+.ops-log a.log-area:hover { background: var(--ops-petrol); color: #fff; }
+.ops-log .log-area svg { width: 12px; height: 12px; }
+
+.ops-log .log-item[data-tone="petrol"] .log-area { background: #e0f4f8; color: var(--ops-petrol-deep); }
+.ops-log .log-item[data-tone="green"]  .log-area { background: var(--ops-green-soft); color: var(--ops-green); }
+.ops-log .log-item[data-tone="amber"]  .log-area { background: #fff1ec; color: #b3452a; }
+.ops-log .log-item[data-tone="blue"]   .log-area { background: var(--ops-blue-soft); color: var(--ops-blue); }
+.ops-log .log-item[data-tone="rust"]   .log-area { background: var(--ops-rust-soft); color: var(--ops-rust); }
+
+.ops-log .log-when { color: var(--ops-subtle); font-size: 12px; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+
+.ops-log .log-failed {
+  display: inline-flex; padding: 2px 7px; border-radius: 4px;
+  background: var(--ops-rust-soft); color: var(--ops-rust);
+  font: 700 10px var(--ops-mono); letter-spacing: .05em; text-transform: uppercase;
+}
+
+.ops-log .log-empty {
+  padding: 46px 22px; text-align: center; color: var(--ops-muted);
+  border: 1px dashed var(--ops-line-strong); border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+}
+.ops-log .log-empty strong { display: block; margin-bottom: 6px; color: var(--ops-ink); font-size: 15px; }
+
+.ops-log .log-foot { display: flex; justify-content: center; margin-top: 20px; }
+.ops-log .log-foot button {
+  appearance: none; min-height: 40px; padding: 0 20px;
+  border: 1px solid var(--ops-line-strong); border-radius: 6px;
+  background: var(--ops-surface); color: var(--ops-ink); font: 650 13px var(--ops-font); cursor: pointer;
+}
+.ops-log .log-foot button:hover { border-color: var(--ops-petrol); color: var(--ops-petrol); }
+
+.ops-log .log-shell[data-busy="true"] .log-feed { opacity: .55; }
+
+/* ---------- dark ---------- */
+
+html[data-theme="dark"] .ops-log .log-kinds button[aria-pressed="true"] { box-shadow: none; background: var(--ops-line); }
+html[data-theme="dark"] .ops-log .log-item[data-tone="petrol"] .log-area { background: #12384250; color: var(--ops-petrol); }
+html[data-theme="dark"] .ops-log .log-item[data-tone="amber"] .log-area { background: #3a231b; color: var(--ops-amber); }
+
+@media (max-width: 900px) {
+  .ops-log .log-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Full width so the search box wraps onto its own row instead of being squeezed to a
+     few characters between the segmented control and the selects. */
+  .ops-log .log-search { flex-basis: 100%; }
+}
+@media (max-width: 620px) {
+  .ops-log .log-item { grid-template-columns: 30px minmax(0, 1fr); }
+  .ops-log .log-avatar { width: 30px; height: 30px; font-size: 11px; }
+  /* The clock moves under the sentence rather than off the edge of a phone. */
+  .ops-log .log-when { grid-column: 2; text-align: left; margin-top: 2px; }
+  .ops-log .log-toolbar select { max-width: none; flex: 1; }
+}

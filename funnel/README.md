@@ -143,6 +143,13 @@ log. Once signed in, everything under **`/internal/*`** unlocks:
 - **`/internal/leads.html`** — the premium **leads pipeline** board.
 - **`/internal/team.html`** — **SC-15 Team & access**: your own password, and (master only)
   the founder accounts plus the whole team's activity log.
+- **`/internal/activity.html`** — **the Log**, the second entry in the sidebar rail. The same
+  audit trail as Team & access, read as a feed of sentences instead of a table: who added a
+  contact, moved a job, sent a quote or an email, uploaded a file, wrote a document. Filters
+  by Changes / Sign-ins / Everything, by person (master only), by area and by period; its
+  counters are measured over the whole filter, not the page of rows on screen. **Scope is the
+  same rule as everywhere else** — a master sees the team, everyone else sees themselves —
+  and it is enforced in `functions/api/activity.js`, not in the page.
 - **`/internal/overview.html` … `market.html`** — the internal engineering/strategy file.
 
 ### Accounts and roles
@@ -198,7 +205,10 @@ shared one for the workshop tablet, a phone with no account yet, or an urgent ha
 - `functions/api/_middleware.js` authenticates every `/api/*` call (except the public
   `/api/lead` and the login/logout endpoints), refuses the APIs of sections hidden from that
   account, **and writes an `activity_log` row for every POST/PATCH/PUT/DELETE** — actor,
-  action, record, HTTP status. It's central so no endpoint can forget either.
+  action, record, HTTP status. It's central so no endpoint can forget either. The handful of
+  endpoints in its `SELF_LOGGED` set (`/api/users`, `/api/session`, the login/logout pair and
+  `/api/quote`) write their own richer row instead, so they are skipped here rather than
+  logged twice.
 - **The shared password goes through the same machinery.** A password-only submit is compared
   (constant-time) against `FOUNDER_PASSWORD` and opens a session on the shared-login account —
   it does not bypass sessions, revocation, or the audit trail. Two switches turn it off: disable

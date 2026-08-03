@@ -258,6 +258,17 @@ export async function onRequestPost(context) {
 
   if (sendError) {
     // The stage is NOT advanced. "Quote sent" must mean a quote was sent.
+    // /api/quote is in the middleware's SELF_LOGGED set, so nothing else records this
+    // attempt — a failed send has to write its own row or it leaves no trace at all.
+    await logActivity(env, {
+      user: founder,
+      action: "quote.failed",
+      entity: "quote",
+      entityId: quote.quoteNo,
+      status: 502,
+      request,
+      detail: `${quote.quoteNo} → ${email} not sent: ${sendError}`.slice(0, 400),
+    });
     return json({ ok: false, leadId: lead.id, createdContact, error: sendError }, 502);
   }
 
@@ -283,10 +294,16 @@ export async function onRequestPost(context) {
     clean(founder.name || founder.email, 80), now
   ).run();
 
+  // `user`, not userId/userEmail: logActivity reads the founder off `user`, so the old
+  // spelling wrote an unattributed row — invisible to its own author on the Log, which
+  // scopes a non-master account to user_id = theirs.
   await logActivity(env, {
-    userId: founder.id,
-    userEmail: founder.email,
+    user: founder,
     action: "quote.sent",
+    entity: "quote",
+    entityId: quote.quoteNo,
+    status: 200,
+    request,
     detail: `${quote.quoteNo} → ${email} (${quote.packageLabel || "—"}, ${quote.kwp ? quote.kwp.toFixed(2) + " kWp" : "—"})`,
   });
 
