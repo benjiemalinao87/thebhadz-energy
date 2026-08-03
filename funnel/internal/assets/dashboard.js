@@ -21,12 +21,6 @@
 (function () {
   "use strict";
 
-  /* The Mission, from the Founder OS: 5 paid installs energized by 2026-10-09. Committed
-     at adoption and changed only by a logged decision in ops/status.md, which is why it is
-     a constant here rather than a setting. */
-  var MISSION_TARGET = 5;
-  var MISSION_DATE = "2026-10-09";
-
   var ENERGIZED = ["energized", "handover", "warranty"];
   var SOLD = ["approved", "deposit_paid", "design", "permits", "procurement", "scheduled", "installing", "testing"];
   var ON_SITE = ["installing", "testing"];
@@ -275,13 +269,8 @@
   function renderMission(data) {
     var jobs = (data.jobs && data.jobs.jobs) || [];
     var tasks = (data.projects && data.projects.tasks) || [];
+    var leads = (data.leads && data.leads.leads) || [];
     var fin = (data.finance && data.finance.summary) || {};
-
-    var energized = jobs.filter(function (j) { return ENERGIZED.indexOf(j.stage) >= 0; }).length;
-    var banked = jobs.filter(function (j) {
-      return num(j.deposit_cents) > 0 && ENERGIZED.indexOf(j.stage) < 0;
-    }).length;
-    var left = daysBetween(today(), MISSION_DATE);
 
     // Cushion in installs, which is the wording the Founder OS mandates: how many installs'
     // worth of margin sits between us and stopping. Average margin comes from real jobs, so
@@ -308,16 +297,31 @@
       return s + (j.stage === "cancelled" ? 0 : num(j.contract_price_cents));
     }, 0);
 
+    var now = today();
+    var weekAgo = new Date(now + "T00:00:00Z");
+    weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
+    var since = weekAgo.toISOString().slice(0, 10);
+    var totalLeads = data.leads ? leads.length : null;
+    var newLeads = data.leads
+      ? leads.filter(function (l) {
+          var created = String(l.created_at || "").slice(0, 10);
+          return created && created >= since;
+        }).length
+      : null;
+
     var cells = [];
 
     cells.push(
-      '<div class="db-mc"><span class="db-eyebrow">Mission · ' + MISSION_TARGET + " installs by " + fmtDate(MISSION_DATE) + "</span>" +
-      '<span class="fig"><b class="n">' + energized + '</b><span>of ' + MISSION_TARGET + " energized</span></span>" +
-      '<span class="db-bar"><i class="' + (energized ? "green" : "amber") + '" style="width:' +
-        Math.max(2, Math.round(energized / MISSION_TARGET * 100)) + '%"></i></span>' +
-      "<p><b>" + plural(banked, "deposit") + " banked</b>, " +
-        (energized ? energized + " energized" : "none energized yet") + ". " +
-        (left === null ? "" : (left >= 0 ? plural(left, "day") + " left." : plural(Math.abs(left), "day") + " past the gate.")) +
+      '<div class="db-mc"><span class="db-eyebrow">Leads</span>' +
+      '<span class="fig"><b class="n">' + (totalLeads === null ? "—" : totalLeads) + '</b><span>total</span></span>' +
+      '<span class="db-bar"><i class="' + (newLeads ? "green" : "amber") + '" style="width:' +
+        (totalLeads === null || !totalLeads
+          ? 0
+          : Math.max(2, Math.round((newLeads || 0) / totalLeads * 100))) + '%"></i></span>' +
+      "<p>" + (totalLeads === null
+        ? "Contacts not visible on this account."
+        : "<b>" + plural(totalLeads, "lead") + "</b> · " +
+          (newLeads ? "<b>" + plural(newLeads, "new lead") + "</b> in last 7 days." : "none new in last 7 days.")) +
       "</p></div>"
     );
 
@@ -534,7 +538,7 @@
 
       root.innerHTML =
         renderPasswordNotice(session) +
-        '<section class="db-mission" aria-label="Mission instruments">' + renderMission(data) + "</section>" +
+        '<section class="db-mission" aria-label="Key metrics">' + renderMission(data) + "</section>" +
         '<div class="db-cols">' +
           '<div class="db-stack">' +
             '<section class="db-panel"><div class="db-ph"><h2>Needs you today</h2>' +
