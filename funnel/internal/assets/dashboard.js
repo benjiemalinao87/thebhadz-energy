@@ -485,6 +485,21 @@
       }).join("") + "</div></section>";
   }
 
+  /**
+   * A temporary password means somebody else knows it, so anything done with this account
+   * is not yet attributable. Login no longer forces a detour to change it, which is why
+   * this sits at the top of the dashboard until it is resolved — it is not dismissible.
+   */
+  function renderPasswordNotice(session) {
+    if (!session || !session.user || !session.user.must_change) return "";
+    return '<div class="db-notice"><span class="ic" aria-hidden="true">!</span><span>' +
+      "<b>Set your own password.</b>" +
+      "You are signed in with a temporary password someone else created. Until you replace it, " +
+      "they can sign in as you and the activity log will read as if you did it. " +
+      '<a href="/internal/team.html?password=change">Change it now →</a>' +
+      "</span></div>";
+  }
+
   /* ------------------------------------------------------------------- init --- */
 
   function render() {
@@ -492,6 +507,7 @@
     if (!root) return Promise.resolve();   // not on the dashboard view
 
     return Promise.all([
+      window.scSectionVisibility ? window.scSectionVisibility.session() : null,
       get("/api/jobs"),
       get("/api/projects"),
       get("/api/leads"),
@@ -500,9 +516,10 @@
       // The mailbox reports its own unread count; ?box=in is what the endpoint expects.
       get("/api/mail?box=in")
     ]).then(function (r) {
+      var session = r[0];
       var data = {
-        jobs: r[0], projects: r[1], leads: r[2], finance: r[3], ops: r[4],
-        unread: r[5] ? num(r[5].unread) : null
+        jobs: r[1], projects: r[2], leads: r[3], finance: r[4], ops: r[5],
+        unread: r[6] ? num(r[6].unread) : null
       };
 
       // Everything hidden or unreachable: say so plainly instead of drawing empty panels.
@@ -517,6 +534,7 @@
       var blocking = queue.filter(function (q) { return q.sev === "stop"; }).length;
 
       root.innerHTML =
+        renderPasswordNotice(session) +
         '<section class="db-mission" aria-label="Mission instruments">' + renderMission(data) + "</section>" +
         '<div class="db-cols">' +
           '<div class="db-stack">' +

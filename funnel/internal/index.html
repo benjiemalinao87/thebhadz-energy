@@ -295,7 +295,7 @@
     <!-- Filled in with the signed-in founder by the /api/session call at the end of
          this file; the static text is the fallback if that request fails. -->
     <a class="cc-sb-user" id="cc-who" href="/internal/team.html" title="Your login and the team's activity">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+      <span class="cc-sb-avatar" id="cc-sb-avatar" aria-hidden="true">·</span>
       <span id="cc-who-label">Founder access · confidential</span>
     </a>
 
@@ -325,18 +325,6 @@
 
   <!-- ===================== WORKSPACE ===================== -->
   <div class="cc-workspace">
-    <header class="cc-topbar" aria-label="Command Center toolbar">
-      <a class="cc-topbar-brand" href="/internal/" title="Home">
-        <img src="/assets/img/macc-mark.png" alt="" width="28" height="28">
-        <strong>MACC Command Center</strong>
-      </a>
-      <div class="cc-topbar-actions">
-        <a class="cc-topbar-btn" href="/internal/overview.html" title="Engineering file" aria-label="Engineering file">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </a>
-        <a class="cc-topbar-avatar" id="cc-topbar-avatar" href="/internal/team.html" title="Team &amp; access" aria-label="Team and access">M</a>
-      </div>
-    </header>
 
   <!-- #cc-view is the SPA router's swap target (assets/spa-router.js). Its first child is
        either .cc-main-inner (this dashboard, the "home" view) or a fetched internal page's
@@ -449,7 +437,7 @@
         if (who) who.classList.add('cc-sb-user-alert');
       }
 
-      var avatar = document.getElementById('cc-topbar-avatar');
+      var avatar = document.getElementById('cc-sb-avatar');
       if (avatar && data.user.name) {
         // The shared team login's name is a label, not a person, so initialling it the
         // usual way produced nonsense. Mark it as the team instead.

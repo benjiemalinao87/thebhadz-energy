@@ -183,93 +183,6 @@ html[data-theme="dark"] .cc-root {
   background: var(--hub-ground);
 }
 
-.cc-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 58px;
-  padding: 0 28px;
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid var(--hub-line);
-  backdrop-filter: saturate(1.2) blur(10px);
-}
-
-html[data-theme="dark"] .cc-topbar {
-  background: rgba(18, 26, 38, 0.92);
-}
-
-.cc-topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-  color: var(--hub-ink);
-  text-decoration: none;
-}
-
-.cc-topbar-brand img {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
-  flex: none;
-}
-
-.cc-topbar-brand strong {
-  font: 700 15px/1.2 var(--hub-font);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cc-topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-}
-
-.cc-topbar-btn {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  border: 1px solid var(--hub-line);
-  background: var(--hub-surface);
-  color: var(--hub-muted);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.14s, color 0.14s, border-color 0.14s;
-}
-
-.cc-topbar-btn:hover {
-  background: var(--hub-ground);
-  color: var(--hub-ink);
-  border-color: var(--hub-line-strong);
-}
-
-.cc-topbar-btn svg { width: 17px; height: 17px; }
-
-.cc-topbar-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(145deg, #1d4ed8, #0f172a);
-  color: #fff;
-  font: 700 11px/1 var(--hub-font);
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  border: 2px solid var(--hub-surface);
-  box-shadow: 0 0 0 1px var(--hub-line);
-}
-
 /* ---------- Hub home ground ---------- */
 
 body.cc-shell.cc-body {
@@ -380,11 +293,9 @@ body.cc-operation-view .cc-main { background: var(--hub-ground); }
 }
 
 @media (max-width: 980px) {
-  .cc-topbar { padding-left: 72px; padding-right: 18px; }
 }
 
 @media (max-width: 560px) {
-  .cc-topbar-brand strong { display: none; }
 }
 
 /* The SPA router moves focus to the incoming page's heading so a screen reader announces
@@ -399,4 +310,19 @@ body.cc-operation-view .cc-main { background: var(--hub-ground); }
 .cc-root [tabindex="-1"]:focus,
 .cc-root [tabindex="-1"]:focus-visible {
   outline: none;
+}
+
+/* The signed-in founder's initials, moved out of the removed top bar into the sidebar
+   identity row — the one thing up there that the sidebar did not already carry. */
+.cc-root .cc-sb-avatar {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--hub-blue);
+  color: #fff;
+  font: 700 9px var(--mono);
+  letter-spacing: .04em;
 }

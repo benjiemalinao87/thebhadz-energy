@@ -298,13 +298,13 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
 /* ----------------------------------------------------------------- drawer ------ */
 
 .jb-scrim {
-  position: fixed; inset: 0; z-index: 40; background: var(--jb-scrim);
+  position: fixed; inset: 0; z-index: 90; background: var(--jb-scrim);
   opacity: 0; pointer-events: none; transition: opacity .2s ease;
 }
 .jb-scrim.open { opacity: 1; pointer-events: auto; }
 
 .jb-drawer {
-  position: fixed; z-index: 41; inset: 0 0 0 auto; width: min(780px, 96vw);
+  position: fixed; z-index: 91; inset: 0 0 0 auto; width: min(780px, 96vw);
   background: var(--ops-ground); border-left: 1px solid var(--ops-line-strong);
   box-shadow: var(--jb-shadow-lift); transform: translateX(100%);
   transition: transform .24s cubic-bezier(.25, .8, .3, 1);
@@ -493,7 +493,7 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
 /* ----------------------------------------------------------------- toasts ----- */
 
 .jb-toasts {
-  position: fixed; z-index: 60; bottom: 22px; left: 50%; transform: translateX(-50%);
+  position: fixed; z-index: 95; bottom: 22px; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; gap: 9px; align-items: center; pointer-events: none;
 }
 .jb-toast {

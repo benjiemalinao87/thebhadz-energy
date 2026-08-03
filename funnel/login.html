@@ -162,11 +162,13 @@
                 localStorage.setItem("sc_login_mode", sharedMode ? "shared" : "personal");
                 if (!sharedMode) localStorage.setItem("sc_login_email", email.value.trim());
               } catch (_) {}
-              // A temporary password (new account or a reset) must be replaced first.
-              if (res.j.user && res.j.user.must_change) {
-                window.location.href = "/internal/team.html?password=change";
-                return;
-              }
+              // Everyone lands on the dashboard, including someone still on a temporary
+              // password. The nag moved rather than disappeared: the dashboard shows a
+              // standing "set your own password" banner (assets/dashboard.js) and the
+              // sidebar marks the account, both linking to /internal/team?password=change.
+              // Worth knowing why that matters — until the temporary password is replaced,
+              // whoever issued it can still sign in as this person, and the activity log
+              // will attribute what they do to them.
               window.location.href = next;
             } else {
               fail((res.j && res.j.error) || "Incorrect email or password.");

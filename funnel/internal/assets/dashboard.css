@@ -301,3 +301,38 @@ html[data-theme="dark"] .db-row:hover .chev { color: var(--ops-amber); }
 @media (prefers-reduced-motion: reduce) {
   .db-row, .db-wcard { transition: none; }
 }
+
+/* Standing notice for an account still on a temporary password. Login used to force a
+   detour to the team page; this replaced it, so it has to be impossible to miss and is
+   deliberately not dismissible. */
+.db-notice {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ops-amber);
+  border-left-width: 3px;
+  border-radius: var(--ops-radius);
+  background: var(--db-amber-soft);
+  color: var(--ops-ink);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.db-notice b { display: block; margin-bottom: 2px; }
+.db-notice .ic {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ops-amber);
+  color: #2a1f00;
+  font: 700 13px/1 var(--ops-font);
+}
+.db-notice a {
+  color: var(--ops-petrol);
+  font-weight: 650;
+  white-space: nowrap;
+}
+html[data-theme="dark"] .db-notice a { color: var(--ops-amber-hover); }
+.db-notice a:hover { text-decoration: underline; }
