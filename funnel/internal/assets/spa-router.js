@@ -214,13 +214,20 @@
       stripOwnTopBar(root);
     }
 
-    // The dashboard's own inline scripts (nav-sync + window.ccRefreshDashboardMetrics) live
-    // outside .cc-main-inner in index.html, at shell level — they already ran once when
-    // this document first loaded and (being shell-level) never get removed, so there is
-    // nothing of the dashboard's own to re-inject here; ccRefreshDashboardMetrics is called
-    // directly below instead. Every other page's scripts/styles live inside <head> or
-    // <main>, which the generic selectors reach normally.
-    var pageStyles = Array.prototype.slice.call(doc.querySelectorAll('head link[rel~="stylesheet"], head style'));
+    // The dashboard's own styles and inline scripts (nav-sync + the shell chrome, plus
+    // window.ccRefreshDashboardMetrics) live outside .cc-main-inner in index.html, at shell
+    // level — they are THIS document's own head, already applied and already run, and being
+    // shell-level they never get removed. So neither is re-injected when the dashboard is
+    // swapped back in; ccRefreshDashboardMetrics is called directly below instead.
+    //
+    // Re-injecting its styles is not merely wasteful, it inverts the cascade: index.html's
+    // inline <style> would land in <head> AFTER assets/shell.css, so every rule the two
+    // share (`.cc-sidebar { width }` among them) would flip to the inline value and the
+    // sidebar rail would jump back to the full 248px on the trip home.
+    //
+    // Every other page's scripts/styles live inside <head> or <main>, which the generic
+    // selectors reach normally.
+    var pageStyles = isDashboard ? [] : Array.prototype.slice.call(doc.querySelectorAll('head link[rel~="stylesheet"], head style'));
     var pageScripts = isDashboard ? [] : Array.prototype.slice.call(doc.querySelectorAll("script"));
     var titleEl = doc.querySelector("title");
 
@@ -364,6 +371,11 @@
   // This also strips ?open=… from the address bar, so the back button after a deep-link
   // navigation lands on the plain dashboard instead of re-bouncing.
   history.replaceState({ scPath: location.pathname }, "", location.pathname);
+
+  // Mark where we are on the very first paint too. setActiveNav otherwise only runs inside
+  // swap(), so a fresh load or a refresh left the whole rail unhighlighted until the first
+  // click — the one moment you most want to know which view you are looking at.
+  setActiveNav(location.pathname);
 
   if (openParam && /^[a-z0-9-]+$/.test(openParam)) {
     navigate(urlFor(openParam), true);

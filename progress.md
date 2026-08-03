@@ -87,11 +87,24 @@
 - Calculator copy no longer prints fixed ₱99,500; still uses internal model for savings math
 - Files: `funnel/index.html`, `funnel/assets/funnel.js`, `funnel/assets/funnel.css`
 
-## Command Center sidebar auto-collapse (2026-07-27) — done
-- Desktop icon rail (68px); hover/focus expands; pin keeps open
-- `funnel/internal/assets/sidebar-collapse.js` + CSS in `operations-redesign.css`
-- Pin preference: `localStorage` key `macc-cc-sidebar-pinned`
-- Mobile drawer unchanged
+## Command Center sidebar auto-collapse (2026-07-27) — superseded 2026-08-04
+- Was: desktop icon rail (68px); hover/focus expands; pin keeps open, remembered in
+  `localStorage` under `macc-cc-sidebar-pinned`
+- Now: a permanent 82px rail with the full tool list, no hover-expand and no pin —
+  see "Command Center rail: the full tool list, permanently narrow" below
+
+## Command Center rail: the full tool list, permanently narrow (2026-08-04) — done
+- The rail had been cut to two entries (Apps, Log) with tool navigation living on
+  `/internal/apps.html`. Every destination is back in the rail, in work order:
+  Dashboard, Leads, Mail, Quotes, Jobs, Install ops, Finance, Documents, Meetings,
+  Captures — then a "Strategy" group (Actions, Notes, Lab, Market, Eng file, Legal,
+  All apps), and Log / Team in the footer above theme + log out
+- Fixed 82px wide on desktop: icon over a short label, no hover-expand, no pin, no width
+  transition. Full names are `title` attributes; the mobile drawer keeps the wide form
+- Markup: `funnel/internal/index.html`. Rail CSS: `funnel/internal/assets/shell.css`
+  (the hover/pin block in `operations-redesign.css` and `sidebar-collapse.js` are gone)
+- Every entry carries `data-section`, so `section-visibility.js` drops the ones an
+  account may not open — the rail lists sections again, so it has to be filtered
 
 ## Solar monitor mock canvases (2026-07-27) — done
 - Interactive Cursor canvas with 4 mock client/ops monitoring styles: Basic, Advanced, Creative, Jarvis

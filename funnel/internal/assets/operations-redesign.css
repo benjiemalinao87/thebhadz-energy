@@ -1144,108 +1144,11 @@ html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
   border-color: rgba(245, 189, 54, 0.35);
 }
 
-/* ---------- Command Center sidebar auto-collapse (desktop icon rail) ---------- */
-.cc-root { --sidebar-rail-w: 68px; }
-
-.cc-sb-pin {
-  margin-left: auto;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(255, 255, 255, .06);
-  color: rgba(255, 255, 255, .82);
-  cursor: pointer;
-  padding: 0;
-}
-.cc-sb-pin:hover { background: rgba(255, 255, 255, .12); color: #fff; }
-.cc-sb-pin:focus-visible { outline: 2px solid var(--ops-amber); outline-offset: 2px; }
-.cc-sb-pin[aria-pressed="true"] {
-  background: rgba(245, 189, 54, .18);
-  border-color: rgba(245, 189, 54, .45);
-  color: var(--ops-amber);
-}
-.cc-sb-pin svg { width: 16px; height: 16px; }
+/* The Command Center rail used to auto-collapse and expand back on hover, with a pin
+   button to hold it open. It is a permanent narrow rail now — icon over a short label,
+   the same width at all times — so the whole hover/pin mechanism is gone. Its definition
+   lives in assets/shell.css, next to the rest of the shell chrome. */
 .cc-root .cc-sb-head { gap: 10px; }
-
-@media (min-width: 981px) {
-  body.cc-sb-collapsed .cc-sidebar {
-    width: var(--sidebar-rail-w);
-    transition: width .2s ease;
-    overflow: hidden;
-  }
-  body.cc-sb-collapsed .cc-sidebar:hover,
-  body.cc-sb-collapsed .cc-sidebar:focus-within {
-    width: var(--sidebar-w);
-    box-shadow: 12px 0 36px rgba(45,62,80, .28);
-    z-index: 70;
-  }
-
-  /* Icon-only rail when idle (not hovered / focused). */
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-title,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-group-label,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-item .tail,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-item .dot-badge,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-user span,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .sc-theme-toggle [data-theme-label],
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-group-count {
-    display: none !important;
-  }
-
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-head {
-    justify-content: center;
-    padding: 14px 8px;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-pin {
-    display: none;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-user {
-    justify-content: center;
-    margin: 10px 8px 4px;
-    padding: 8px;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-nav {
-    padding: 8px 6px 4px;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-item {
-    justify-content: center;
-    gap: 0;
-    padding: 10px 0;
-    font-size: 0; /* hide bare text labels next to icons */
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-item.active::before {
-    display: none;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-disclosure > summary {
-    justify-content: center;
-    padding: 8px 0;
-    font-size: 0;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-disclosure > summary::before {
-    font-size: 17px;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-foot {
-    padding: 10px 6px;
-    align-items: stretch;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-btn,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .sc-theme-toggle {
-    justify-content: center;
-    gap: 0;
-    padding: 10px 0;
-    font-size: 0;
-  }
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .sc-theme-toggle [data-theme-icon] {
-    font-size: 17px;
-  }
-}
-
-@media (max-width: 980px) {
-  .cc-sb-pin { display: none !important; }
-}
 
 /* ---------- Contacts: the record drawer ----------
    This panel never got converted with the rest of the page: .ops-contacts restyled the

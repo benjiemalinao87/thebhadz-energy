@@ -287,45 +287,129 @@
         <span class="brand">MACC</span>
         <span class="sub">Command center</span>
       </div>
-      <button class="cc-sb-pin" id="cc-sb-pin" type="button" aria-pressed="false" title="Pin open" aria-label="Pin sidebar open">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
-      </button>
     </div>
 
     <!-- Filled in with the signed-in founder by the /api/session call at the end of
-         this file; the static text is the fallback if that request fails. -->
+         this file; the static text is the fallback if that request fails. On the desktop
+         rail only the avatar shows — the name lives in its title attribute. -->
     <a class="cc-sb-user" id="cc-who" href="/internal/team.html" title="Your login and the team's activity">
       <span class="cc-sb-avatar" id="cc-sb-avatar" aria-hidden="true">·</span>
       <span id="cc-who-label">Founder access · confidential</span>
     </a>
 
-    <!-- Two entries. Tool navigation moved to /internal/apps.html so this rail stops
-         competing with the dashboard for attention; the Apps grid is also where
-         per-account visibility is applied, and it can show what each tool's live state is.
-         The Log earns its place beside it because it is the one view that spans every
-         tool — what changed, everywhere, since you last looked. -->
+    <!--
+      The full tool list, in the order the work happens: today's decision (Dashboard), the
+      pipeline (Leads → Mail → Quotes), delivery (Jobs → Install ops), the money, then the
+      record. Everything slower-moving sits under the second heading.
+
+      On desktop this rail is permanently narrow — icon over a short label, no expand, no
+      pin (assets/shell.css + operations-redesign.css). The full name of each entry is its
+      title attribute, and the mobile drawer shows the wide version.
+
+      Every entry carries data-section so assets/section-visibility.js can drop the ones
+      this account may not open — the same registry both middlewares enforce, so the rail
+      can never offer a door that will slam. Add a link here without data-section and it
+      shows for everyone.
+    -->
     <nav class="cc-sb-nav" aria-label="Primary">
       <div class="cc-sb-group cc-sb-primary">
-        <a class="cc-sb-item" href="/internal/apps.html" title="All tools">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-          Apps
+        <a class="cc-sb-item" href="/internal/" title="Dashboard — what needs a decision today">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <span class="cc-sb-label">Dashboard</span>
         </a>
-        <a class="cc-sb-item" href="/internal/activity.html" title="Everything written through the Command Center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/></svg>
-          Log
+        <a class="cc-sb-item" href="/internal/leads.html" data-section="leads" title="Leads — the pipeline, from first enquiry to sold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="cc-sb-label">Leads</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/mail.html" data-section="mail" title="Mail — customer and supplier threads">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="m22 7.5-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7.5"/></svg>
+          <span class="cc-sb-label">Mail</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/quote-builder.html" data-section="quotes" title="Quote builder — sets the price a customer sees">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+          <span class="cc-sb-label">Quotes</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/projects.html" data-section="projects" title="Jobs — every installation from survey to warranty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 17v-4a6 6 0 0 1 6-6"/><path d="M14 7a6 6 0 0 1 6 6v4"/></svg>
+          <span class="cc-sb-label">Jobs</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/install-ops.html" data-section="install-ops" title="Install operations — crew, rates, safety sign-off and QC">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+          <span class="cc-sb-label">Install ops</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/finance.html" data-section="finance" title="Finance &amp; runway — inflows, committed spend, burn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-3.5-3.5L7 14"/><circle cx="19" cy="9" r="1.4"/></svg>
+          <span class="cc-sb-label">Finance</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/docs.html" data-section="documents" title="Documents — permits, signed quotes and SEC filings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7.5a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 8.36 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>
+          <span class="cc-sb-label">Documents</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/meetings.html" data-section="meetings" title="Meeting log — minutes, decisions and call recordings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 4.55 2.28A1 1 0 0 0 22 14.4V9.6a1 1 0 0 0-1.45-.88L16 11"/><rect x="2" y="6" width="14" height="12" rx="2.5"/></svg>
+          <span class="cc-sb-label">Meetings</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/captures.html" data-section="captures" title="Product captures — supplier research clipped from the web">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8"/><path d="M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8"/><path d="M21 16v2.5a2.5 2.5 0 0 1-2.5 2.5H16"/><path d="M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16"/><path d="M7 12h10"/></svg>
+          <span class="cc-sb-label">Captures</span>
+        </a>
+      </div>
+
+      <div class="cc-sb-group cc-sb-primary cc-sb-secondary">
+        <div class="cc-sb-group-label">
+          <span class="wide">Strategy &amp; the engineering file</span>
+          <span class="rail">Strategy</span>
+        </div>
+        <a class="cc-sb-item" href="/internal/next-actions.html" data-section="next-actions" title="Next actions — every overdue and upcoming step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 4-4"/><path d="m3 17 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+          <span class="cc-sb-label">Actions</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/notes.html" data-section="notes" title="Team notes — shared working notes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7.4 18.6a2 2 0 0 1-.86.51l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.86Z"/></svg>
+          <span class="cc-sb-label">Notes</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/founder-lab.html" data-section="founder-lab" title="Strategy lab — positioning, pricing and the evidence behind it">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v6.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.07-10.12a2 2 0 0 1-.21-.9V3"/><path d="M8.5 3h7"/><path d="M7 16h10"/></svg>
+          <span class="cc-sb-label">Lab</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/strategy.html" data-section="strategy" title="Strategy &amp; market — roadmap, packages, decks and the charter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.6"/></svg>
+          <span class="cc-sb-label">Market</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/overview.html" data-section="engineering" title="Engineering file — panel designer, build guide, BOM and sourcing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="17" rx="2"/><path d="M2.5 9.2h19"/><path d="M2.5 14.8h19"/><path d="M12 3.5v17"/></svg>
+          <span class="cc-sb-label">Eng file</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/sec-registration.html" data-section="legal" title="Registration &amp; legal — SEC checklist, by-laws, ERC and net metering">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 21h8"/><path d="M3 7h3.5c2 0 4-.6 5.5-1.6C13.5 6.4 15.5 7 17.5 7H21"/><path d="m16.5 16.5 2.5-6.5 2.5 6.5a4.2 4.2 0 0 1-5 0Z"/><path d="m2.5 16.5 2.5-6.5 2.5 6.5a4.2 4.2 0 0 1-5 0Z"/></svg>
+          <span class="cc-sb-label">Legal</span>
+        </a>
+        <a class="cc-sb-item" href="/internal/apps.html" title="All apps — every tool, with what each one is for">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span class="cc-sb-label">All apps</span>
         </a>
       </div>
     </nav>
 
     <div class="cc-sb-foot">
-      <button class="cc-sb-btn sc-theme-toggle" type="button" data-theme-toggle aria-pressed="false">
-        <span data-theme-icon aria-hidden="true">◐</span>
-        <span data-theme-label>Dark mode</span>
-      </button>
-      <a class="cc-sb-btn danger" href="/api/founder-logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Log out
+      <a class="cc-sb-item" href="/internal/activity.html" data-section="team" title="Log — everything written through the Command Center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7.5V12l3.5 2"/></svg>
+        <span class="cc-sb-label">Log</span>
       </a>
+      <a class="cc-sb-item" href="/internal/team.html" data-section="team" title="Team &amp; access — accounts, roles and per-account visibility">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12.5c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67 0C7.5 20 4 17.5 4 12.5V6.2a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.7a1.17 1.17 0 0 1 1.52 0C14.5 4 17 5.2 19 5.2a1 1 0 0 1 1 1Z"/><circle cx="12" cy="10.5" r="2.2"/><path d="M8.4 17a4 4 0 0 1 7.2 0"/></svg>
+        <span class="cc-sb-label">Team</span>
+      </a>
+      <div class="cc-sb-foot-row">
+        <button class="cc-sb-btn sc-theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+          <span data-theme-icon aria-hidden="true">◐</span>
+          <span data-theme-label>Dark mode</span>
+        </button>
+        <a class="cc-sb-btn danger" href="/api/founder-logout" title="Log out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="cc-sb-btn-label">Log out</span>
+        </a>
+      </div>
     </div>
   </aside>
 
@@ -426,20 +510,23 @@
   // the home view. Nothing in this file holds a count of its own any more, so there is no
   // second copy to drift from the database.
 
-  // Name the founder who is signed in. The sidebar itself no longer lists sections, so
-  // there is nothing here left to filter — /internal/apps.html applies per-account
-  // visibility to its own tiles, and both middlewares still refuse hidden pages and APIs
-  // server-side, so a typed URL 403s either way.
+  // Name the founder who is signed in, and drop the rail entries their account may not
+  // open. The rail lists sections again, so it has to be filtered like the Apps grid is —
+  // both middlewares still refuse hidden pages and APIs server-side, so a typed URL 403s
+  // either way; this is so a bookkeeper isn't shown doors that will slam.
   (function showSignedInFounder() {
     var label = document.getElementById('cc-who-label');
     if (!label || !window.scSectionVisibility) return;
-    window.scSectionVisibility.session().then(function (data) {
+    window.scSectionVisibility.apply(document.getElementById('cc-sidebar'), {
+      groups: [['.cc-sb-secondary', '.cc-sb-item']]   // a heading emptied by hiding shouldn't linger
+    }).then(function (data) {
       if (!data || !data.user) return;   // signed out — the /internal gate handles it
 
       label.textContent = data.user.name + (data.user.role === 'master' ? ' · founder' : ' · limited access');
+      var who = document.getElementById('cc-who');
+      if (who) who.title = data.user.name + ' — your login and the team’s activity';
       if (data.user.must_change) {
         label.textContent = data.user.name + ' · set your password';
-        var who = document.getElementById('cc-who');
         if (who) who.classList.add('cc-sb-user-alert');
       }
 
@@ -459,7 +546,6 @@
   })();
 </script>
 <script src="/internal/assets/dashboard.js"></script>
-<script src="/internal/assets/sidebar-collapse.js"></script>
 <script src="/internal/assets/spa-router.js"></script>
 </body>
 </html>

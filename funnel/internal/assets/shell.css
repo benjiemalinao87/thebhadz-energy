@@ -25,7 +25,10 @@
   --hub-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --hub-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px -18px rgba(15, 23, 42, 0.28);
   --hub-shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.05), 0 22px 40px -20px rgba(15, 23, 42, 0.32);
-  --sidebar-rail-w: 76px;
+  /* The desktop rail width. There is no wide desktop state to switch to — see the rail
+     section below — so this is the sidebar's only desktop width. --sidebar-w (248px,
+     declared in index.html) is now the mobile drawer's width alone. */
+  --sidebar-rail-w: 82px;
 }
 
 html[data-theme="dark"] .cc-root {
@@ -154,26 +157,6 @@ html[data-theme="dark"] .cc-root {
 .cc-root .cc-sb-foot .sc-theme-toggle:hover { background: rgba(255, 255, 255, 0.08); }
 .cc-root .cc-sb-foot .sc-theme-toggle:focus-visible { outline-color: var(--hub-blue); }
 
-.cc-root .cc-sb-pin {
-  color: rgba(248, 250, 252, 0.55);
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.cc-root .cc-sb-pin:hover,
-.cc-root .cc-sb-pin[aria-pressed="true"] {
-  color: #fff;
-  border-color: rgba(0, 132, 255, 0.45);
-  background: rgba(0, 132, 255, 0.18);
-}
-
-@media (min-width: 981px) {
-  body.cc-sb-collapsed .cc-sidebar:hover,
-  body.cc-sb-collapsed .cc-sidebar:focus-within {
-    box-shadow: 14px 0 40px rgba(10, 14, 24, 0.4);
-  }
-}
-
 /* ---------- Workspace chrome ---------- */
 
 .cc-workspace {
@@ -253,51 +236,162 @@ body.cc-operation-view .cc-main { background: var(--hub-ground); }
   box-shadow: 0 0 0 2px rgba(20, 26, 38, 0.55);
 }
 
+/* The group label has two spellings — the full sentence for the mobile drawer, a
+   one-word version for the rail. Only one is ever shown. */
+.cc-sb-group-label .rail { display: none; }
+
+/* The footer's Log / Team entries are .cc-sb-item like the nav's, so they inherit the
+   rail treatment; only the divider above them belongs to the footer. */
+.cc-sb-foot .cc-sb-item { font-weight: 600; gap: 12px; min-height: 44px; }
+.cc-sb-foot .cc-sb-item svg { width: 20px; height: 20px; stroke-width: 1.65; }
+.cc-sb-foot-row { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---------- Desktop: a permanent icon rail ----------
+   Deliberately fixed, not collapsible: no pin, no hover-expand, no width transition.
+   The rail used to widen on hover, which meant every trip to the workspace's left edge
+   shoved the page sideways — and the pin that turned it off was a preference nobody set
+   twice. So the label rides UNDER the icon, small but always legible, and the layout
+   never moves. The full name of each entry is its title attribute.
+
+   Every rule here is scoped to the desktop query; below 981px the sidebar is the mobile
+   drawer, which keeps the wide icon-beside-label form. */
 @media (min-width: 981px) {
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary {
-    margin-bottom: 10px;
+  /* Two classes deliberately: index.html's inline <style> also declares `.cc-sidebar
+     { width: var(--sidebar-w) }`, and a single-class rule here only wins on sheet order —
+     which held until something re-injected that inline block later in <head>. */
+  .cc-root .cc-sidebar {
+    width: var(--sidebar-rail-w);
+    overflow: hidden;
   }
 
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item {
-    position: relative;
+  .cc-root .cc-sb-head {
+    justify-content: center;
+    padding: 9px 8px;
+  }
+
+  .cc-root .cc-sb-mark { width: 32px; height: 32px; }
+
+  .cc-root .cc-sb-title,
+  .cc-root .cc-sb-user span:not(.cc-sb-avatar),
+  .cc-root .cc-sb-group-label .wide,
+  .cc-root .cc-sb-btn .cc-sb-btn-label,
+  .cc-root .sc-theme-toggle [data-theme-label] {
+    display: none;
+  }
+
+  .cc-root .cc-sb-group-label .rail { display: block; }
+
+  /* The identity row shrinks to the avatar alone — a name at 9px would be unreadable, and
+     an empty pill is worse than no pill. Hovering it names the signed-in founder. */
+  .cc-root .cc-sb-user {
+    justify-content: center;
+    margin: 7px 8px 0;
+    padding: 4px;
+  }
+
+  .cc-root .cc-sb-avatar { width: 24px; height: 24px; font-size: 9.5px; }
+
+  /* Seventeen destinations do not fit a fixed-height rail, so the nav scrolls — and says
+     so: a visible thumb plus a fade over the bottom edge, because a rail that silently
+     clips half its entries is worse than one that admits there is more below. The ten
+     entries above the "Strategy" divider are the ones that always fit. */
+  .cc-root .cc-sb-nav {
+    padding: 6px 6px 4px;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 18px), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 18px), transparent 100%);
+  }
+
+  .cc-root .cc-sb-nav::-webkit-scrollbar { width: 5px; }
+
+  .cc-root .cc-sb-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border: 0;
+  }
+
+  .cc-root .cc-sb-primary { margin-bottom: 8px; }
+
+  .cc-root .cc-sb-group-label {
+    padding: 0;
+    margin: 4px 0 6px;
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-align: center;
+  }
+
+  /* A hairline over the secondary group, so "Strategy" reads as a divider rather than as
+     another entry in the list. */
+  .cc-root .cc-sb-secondary {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .cc-root .cc-sb-item {
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    min-height: 60px;
-    padding: 9px 4px 8px;
+    gap: 3px;
+    min-height: 48px;
+    padding: 6px 3px 5px;
+    text-align: center;
+    color: rgba(248, 250, 252, 0.7);
+  }
+
+  .cc-root .cc-sb-item svg { width: 19px; height: 19px; }
+
+  .cc-root .cc-sb-item .cc-sb-label {
+    display: block;
+    max-width: 100%;
     font-size: 9.5px;
     font-weight: 650;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
     line-height: 1.15;
-    text-align: center;
-    color: rgba(248, 250, 252, 0.68);
+    overflow-wrap: anywhere;
   }
 
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item.active {
-    color: #fff;
-  }
+  .cc-root .cc-sb-item.active { color: #fff; }
+  .cc-root .cc-sb-item .tail,
+  .cc-root .cc-sb-item .dot-badge { display: none; }
 
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-badge,
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-dot {
+  /* Live badges float over the icon instead of pushing the label out of the way. */
+  .cc-root .cc-sb-item .hub-badge,
+  .cc-root .cc-sb-item .hub-dot {
     position: absolute;
-    top: 7px;
-    right: 9px;
+    top: 6px;
+    right: 8px;
     margin: 0;
   }
 
-  body.cc-sb-collapsed .cc-sidebar:not(:hover):not(:focus-within) .cc-sb-primary .cc-sb-item .hub-badge {
+  .cc-root .cc-sb-item .hub-badge {
     min-width: 15px;
     height: 15px;
     padding: 0 3px;
     font-size: 8px;
     line-height: 15px;
   }
-}
 
-@media (max-width: 980px) {
-}
+  .cc-root .cc-sb-foot { padding: 4px 6px 7px; gap: 1px; }
+  .cc-root .cc-sb-foot .cc-sb-item { min-height: 46px; }
 
-@media (max-width: 560px) {
+  /* Theme and log out sit side by side as glyphs — two utilities that do not need the
+     vertical space a labelled row would take from the nav above. */
+  .cc-root .cc-sb-foot-row {
+    flex-direction: row;
+    gap: 4px;
+    margin-top: 3px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .cc-root .cc-sb-foot-row .cc-sb-btn {
+    justify-content: center;
+    gap: 0;
+    padding: 6px 0;
+    min-height: 30px;
+  }
+
+  .cc-root .cc-sb-foot-row .sc-theme-toggle [data-theme-icon] { font-size: 15px; }
+  .cc-root .cc-sb-foot-row .cc-sb-btn svg { width: 17px; height: 17px; }
 }
 
 /* The SPA router moves focus to the incoming page's heading so a screen reader announces
