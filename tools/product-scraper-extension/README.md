@@ -1,4 +1,14 @@
-# MACC Product Capture — Chrome extension
+# MACC Field Kit — Chrome extension
+
+Two tools behind one toolbar icon, because both do the same thing structurally:
+read the page you are looking at, using your own founder identity.
+
+- **Capture** — one-click clipper for sourcing research (below).
+- **Outreach** — fills a brand's contact form with your details and a drafted
+  message: distributor enquiries, installer accounts, and the Biliran co-marketing
+  ask. See [Outreach tab](#outreach-tab).
+
+## Capture tab
 
 One-click clipper for sourcing research. Open a product page (Alibaba supplier
 listing, a Facebook group post, Shopee/Lazada, any shop), click the toolbar icon,
@@ -74,7 +84,7 @@ Run from the repo root; drop `funnel/` from the path if you run inside `funnel/`
 1. Get this folder onto the machine (clone the repo or download it).
 2. Open `chrome://extensions`, switch on **Developer mode** (top right).
 3. **Load unpacked** → select the `tools/product-scraper-extension` folder.
-4. Pin "MACC Product Capture" to the toolbar (puzzle-piece menu → pin).
+4. Pin "MACC Field Kit" to the toolbar (puzzle-piece menu → pin).
 5. Right-click the icon → **Options** → paste the deployed app's URL
    (e.g. `https://founders.macc-inc.com` or the `…pages.dev` preview) →
    **Save settings** → allow the permission prompt (that's Chrome asking whether
@@ -93,12 +103,25 @@ that saves to one known app has no business asking for permission on every site.
 
 ### Updating
 
-The extension is loaded unpacked, so Chrome never updates it for you. After a
-`git pull` that touches this folder, each founder opens `chrome://extensions` and
-clicks **Reload** on the extension's card. The options page shows the running
-version under **This build** — compare it with `version` in `manifest.json` to see
-whether you're stale. Bump that version in any commit that changes extension
-behaviour, so "reload it" is a checkable instruction rather than a guess.
+**Loaded unpacked** (developers, and anyone before the Store listing is live):
+Chrome never updates it for you. After a `git pull` that touches this folder, open
+`chrome://extensions` and click **Reload** on the extension's card. The options page
+shows the running version under **This build** — compare it with `version` in
+`manifest.json` to see whether you're stale.
+
+**Installed from the Chrome Web Store** (the plan for the remote team): Chrome
+updates everyone within a few hours of a new package being approved. Nobody reloads
+anything. Publishing runbook, listing copy and the review answers:
+[`docs/chrome-web-store-listing.md`](../../docs/chrome-web-store-listing.md).
+Build the upload with:
+
+```bash
+node tools/product-scraper-extension/pack.mjs   # → dist/macc-field-kit-<version>.zip
+```
+
+Either way: **bump `version` in `manifest.json` in any commit that changes extension
+behaviour.** Unpacked, it makes "reload it" checkable; on the Store, an unbumped
+version is rejected outright.
 
 ## Using it
 
@@ -123,8 +146,10 @@ for description/notes, annotate, delete, or export the current view as CSV.
 
 The extension only reads a page **when you click it** (`activeTab`) — it has no
 access to your browsing otherwise, and the only server it ever talks to is the
-Command Center origin you configured. It's a clipper for pages you're already
-reading, one at a time — not a bulk crawler; keep it that way.
+Command Center origin you configured. This is also why the Outreach tab needs no
+extra permissions to work on sungrowpower.com or anywhere else: it injects on your
+click, the same way Capture does. It's a clipper for pages you're already reading,
+one at a time — not a bulk crawler; keep it that way.
 
 ### Offline / signed-out queue
 
@@ -138,6 +163,59 @@ automatically on browser startup.
 Each founder loads the extension, points it at the same app URL, and signs in
 with their own founder login — every capture is attributed to its clipper, and
 the activity log records each save like any other Command Center action.
+
+## Outreach tab
+
+You are on Sungrow's "become a distributor" page, or Deye's contact form, or any
+brand's partner enquiry. Click the icon → **Outreach** → pick the message → **Fill
+this form**. Your name, email, phone, company, city and country go into the right
+boxes, the dropdowns get sensible answers, and the message box gets a draft.
+
+**It never submits.** It fills; you read what it wrote, tick any consent box
+yourself, and click send. Filled fields are outlined in amber for a few seconds,
+and **Undo** puts every one of them back.
+
+### The messages
+
+| Template | For |
+|---|---|
+| **Biliran co-marketing event** | The partnership ask: we host an informational event in Naval, the brand supplies literature / banner / demo unit / a speaker, and becomes our preferred brand for what we install on the island. |
+| **Become a distributor** | Distribution or dealership terms for the Philippines — tiers, MOQ, trade pricing, warranty service path, certification docs. |
+| **Installer / dealer account** | Open a buying account, or get pointed at the brand's authorised PH distributor. |
+| **Technical docs & compliance** | Datasheets, IEC 62109 / anti-islanding certificates, warranty statement — what a net-metering submission needs. |
+
+Every draft is editable in the popup before it goes anywhere, and every one of them
+is written to the honesty rules in CLAUDE.md §1.6 / §7: **no install counts we have
+not banked, no claim of certification or distributor status we do not hold, no
+volume commitment we have not earned.** The Biliran draft says out loud that we are
+newly incorporated and pre-revenue, because a brand that finds out later stops
+answering. If you edit a draft, keep that line honest.
+
+Templates live in `templates.js` — add one by appending to `MACC_TEMPLATES` with a
+`build(profile, ctx)` returning `{subject, long, short}`. `short` is used when the
+target box has a `maxlength` the long draft would overflow.
+
+### Your profile
+
+Options → **Outreach profile**. Company details (name, address, website, city,
+province, country) ship pre-filled from the repo so all four founders' outreach
+matches; your name, title, email and phone are yours to add. **Use my Command
+Center name & email** copies those two from your founder account so you don't
+retype them. It is stored in your own Chrome profile and never sent to the
+Command Center.
+
+### What it will and won't touch
+
+Fills: text inputs and textareas it can identify, plus `<select>` menus for
+country, province, "which best describes you", business focus, inquiry type, and
+"how did you hear about us".
+
+Never touches: passwords, captchas ("Code *"), checkboxes and radios (a consent box
+is yours to tick knowingly), search boxes, quantity fields, and anything that
+already has a value — unless you tick **Overwrite**.
+
+Anything it can't identify is listed in the report under the buttons, so you know
+exactly what is left for you to type.
 
 ## Troubleshooting
 
@@ -172,10 +250,26 @@ the activity log records each save like any other Command Center action.
   section key `captures` in `funnel/functions/_pages.js` (so it can be hidden
   per-account like any other section).
 - Icons: `node icons/make-icons.mjs` regenerates the PNGs (self-contained PNG
-  encoder, no deps).
-- **No automated tests exist yet.** `content.js` keeps the `?cap_site=` hook so a
-  site module can be forced from a `file://` fixture (where `location.hostname` is
-  empty), which is the seam a smoke-test harness would use — but the fixtures and
-  the runner were never written. Until they are, changes to the extractor are
-  verified by hand: open a real Alibaba listing, an FB group post with the text
-  selected, and one Shopee/Lazada page, and check the popup fills sensibly.
+  encoder, no deps). `pack.mjs` builds the Web Store zip the same way — hand-rolled
+  ZIP writer, Node built-ins only, deterministic output so a changed hash means
+  changed contents. Both exclude themselves from the package.
+- `fill.js` is the outreach form engine. Like `content.js` it runs inside the page,
+  but it is handed to `executeScript` as a **function** rather than a file, so it is
+  serialised with `toString()` and may not reference anything outside itself —
+  no imports, no shared helpers, everything arrives in `payload`. It runs with
+  `allFrames: true`, because brand contact forms are so often an embedded iframe;
+  `outreach.js` merges the per-frame reports.
+- **Tests.** `./test/run.sh` drives `fill.js` against `test/form-fixture.html` in
+  headless Chrome and fails on any regression (23 checks: field matching, the
+  captcha/password/checkbox skips, per-form scoping, maxlength clipping). Open the
+  fixture in a normal browser and click **Run** to debug interactively. The fixture
+  replicates the two form shapes we actually hit — captions as sibling `<div>`s
+  (Sungrow) and placeholder-only with a captcha (Deye) — and it caught three real
+  bugs on first run: a caption heuristic that labelled "City" as "Country", a
+  fieldset legend poisoning every field beneath it, and a page-wide "fill each
+  field once" rule that starved the second form on the page.
+- The **capture** extractor has no automated tests. `content.js` keeps the
+  `?cap_site=` hook so a site module can be forced from a `file://` fixture (where
+  `location.hostname` is empty), which is the seam a harness would use, but it was
+  never written. Changes to it are verified by hand: a real Alibaba listing, an FB
+  group post with the text selected, and one Shopee/Lazada page.

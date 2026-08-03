@@ -1,7 +1,7 @@
 # SOP — Product Capture: web page → Command Center (SC-19)
 
 **Doc:** standard operating procedure · **REV A · 2026-07-27** · Owner: _[founder]_
-Tool: **MACC Product Capture** browser extension (`tools/product-scraper-extension`) →
+Tool: **MACC Field Kit** browser extension (Capture tab) (`tools/product-scraper-extension`) →
 `/internal/captures` (SC-19 · Product Captures). Applies to everyone doing sourcing
 research: founders, and any limited account granted the **captures** section.
 
@@ -28,23 +28,37 @@ chat, half-remembered prices, or undated spreadsheet cells.
 - This is a **clipper, not a crawler**: capture pages you are actually reading, one at a
   time. No bulk scraping, no automation on top of it.
 
+> The same extension has a second tab, **Outreach**, which fills brand contact forms
+> (distributor enquiries, the Biliran co-marketing ask). It is documented in
+> [`tools/product-scraper-extension/README.md`](../tools/product-scraper-extension/README.md#outreach-tab),
+> not here — this SOP covers Capture only.
+
 ## 3. One-time setup
 
 ### 3.1 Server (admin, once — likely already done)
 
 ```bash
 npx wrangler d1 execute solar-city-leads --remote --file=funnel/schema.sql
-npx wrangler pages deploy funnel --project-name solar-city-funnel
+npx wrangler pages deploy funnel --project-name thebhadz-energy
 ```
 
 Safe to re-run; `schema.sql` only creates what's missing.
 
 ### 3.2 Each person's browser (~3 minutes)
 
+> **Desktop Chrome, Edge, Brave or any Chromium browser only.** Extensions do not exist
+> on Chrome for Android or iOS, and this will not run in Safari or Firefox. If you work
+> mainly from a phone, use **Copy row** into a spreadsheet and capture properly later.
+
+**Once the Chrome Web Store listing is live** (see
+`docs/chrome-web-store-listing.md`), steps 1–2 become: open the link from the group
+channel → **Add to Chrome**. Chrome keeps it updated from then on, and §3.3 stops
+applying to you. Until then:
+
 1. Get the repo folder `tools/product-scraper-extension` onto your machine.
 2. Open `chrome://extensions` (works the same in Edge/Brave) → turn on **Developer mode**
    (top right) → **Load unpacked** → select the `product-scraper-extension` folder.
-3. Pin **MACC Product Capture** to the toolbar (puzzle-piece icon → 📌).
+3. Pin **MACC Field Kit** to the toolbar (puzzle-piece icon → 📌).
 4. Right-click the extension icon → **Options**:
    - Paste the Command Center address (the same URL you open for `/internal`).
    - Click **Save settings** → Chrome asks permission to let the extension talk to that
@@ -55,6 +69,13 @@ Safe to re-run; `schema.sql` only creates what's missing.
    Anything else → §6 Troubleshooting.
 
 Done. There is no password or secret inside the extension — it rides on your own sign-in.
+
+### 3.3 Keeping it current
+
+Chrome does not update an unpacked extension. When the group channel says a new build
+landed: `git pull`, then `chrome://extensions` → **Reload** on the Field Kit card.
+Options → **This build** shows the version you're running, so you can check it against
+`manifest.json` in the repo.
 
 ## 4. Capturing (daily use)
 
@@ -116,6 +137,7 @@ with their source note; SC-19 itself stays the raw evidence trail.
 | "You're signed out of the Command Center — row queued" | The row is safe. Click the sign-in link it offers, log in, reopen the popup → **Retry queued**. |
 | "App unreachable — row queued" | No signal or the app is down. Rows wait locally (badge shows the count) and also retry on browser restart. |
 | "site permission was declined" (Options) | Options → **Save settings** again → click **Allow** on Chrome's prompt. |
+| "this build isn't allowed to talk to …" (Options) | The Command Center moved to a domain the extension doesn't know. Post in the group channel — it needs one line added to `optional_host_permissions` in `manifest.json`, then everyone reloads (§3.3). |
 | Nothing auto-fills on a Facebook post | You didn't select the post text first. Highlight it, click the icon again (or use ↻). |
 | Nothing auto-fills elsewhere | The site publishes no product data. Select text or type it in — it still saves fine. |
 | "Test failed / Unexpected response" | The URL in Options isn't the deployed app. It must be the address where `/internal` opens. |

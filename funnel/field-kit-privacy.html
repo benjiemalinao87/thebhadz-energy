@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MACC Field Kit — Privacy Policy</title>
+<meta name="description" content="What the MACC Field Kit browser extension stores, where it sends it, and what it never touches.">
+<meta name="robots" content="noindex">
+<style>
+  :root { --ink: #1c2b3a; --muted: #5b6b7d; --navy: #14335f; --line: #dbe2ec; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--ink); line-height: 1.6; margin: 0; background: #fff;
+    padding: 40px 20px;
+  }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 26px; color: var(--navy); margin: 0 0 4px; }
+  h2 { font-size: 17px; color: var(--navy); margin: 32px 0 8px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; }
+  ul { padding-left: 20px; }
+  li { margin: 5px 0; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>MACC Field Kit — Privacy Policy</h1>
+  <p class="sub">Last updated 4 August 2026 · MACC Systems &amp; Engineering Inc., Talustusan, Naval, Biliran, Philippines</p>
+
+  <p>MACC Field Kit is an internal work tool for the staff of MACC Systems &amp; Engineering
+  Inc. It is distributed unlisted on the Chrome Web Store so our own team can install and
+  update it; it is not a consumer product and we do not market it to the public.</p>
+
+  <p><strong>We operate no analytics, no advertising, and no third-party services inside this
+  extension.</strong> There is no tracking code of any kind, and the extension makes no network
+  request to any server other than the one described below.</p>
+
+  <h2>What the extension stores, and where</h2>
+  <table>
+    <tr><th>Data</th><th>Where it goes</th><th>Why</th></tr>
+    <tr>
+      <td>Your outreach profile — name, job title, work email, phone, and company address</td>
+      <td><strong>Your own browser only</strong>, via <code>chrome.storage.sync</code>. It syncs
+      between your own signed-in Chrome installations through Google. It is never sent to us.</td>
+      <td>So the extension can type your details into a supplier's contact form instead of you
+      retyping them.</td>
+    </tr>
+    <tr>
+      <td>Product and supplier details from a page you are viewing — title, price, supplier
+      name, location, and the page URL</td>
+      <td>Sent, <strong>only when you click Save</strong>, to your employer's own MACC Command
+      Center, authenticated with your existing staff login. Nowhere else.</td>
+      <td>So sourcing research is recorded, dated and attributable instead of living in
+      screenshots and chat messages.</td>
+    </tr>
+    <tr>
+      <td>The address of your MACC Command Center, and any rows waiting to upload because you
+      were offline</td>
+      <td>Your own browser, via <code>chrome.storage.sync</code> and
+      <code>chrome.storage.local</code>.</td>
+      <td>Configuration, and so a capture made without a connection is not lost.</td>
+    </tr>
+  </table>
+
+  <h2>What it never does</h2>
+  <ul>
+    <li><strong>It does not run while you browse.</strong> It reads a page only in the moment you
+    click its toolbar button, using Chrome's <code>activeTab</code> permission. It has no
+    access to any other tab, and none to a tab you have not clicked it on.</li>
+    <li><strong>It does not record your browsing history</strong>, your clicks, your keystrokes,
+    or anything you do on pages where you have not used it.</li>
+    <li><strong>It never submits a form for you.</strong> It fills fields; you read them and send
+    it yourself.</li>
+    <li><strong>It never reads or fills passwords, captchas, checkboxes or radio buttons.</strong></li>
+    <li><strong>It does not sell or transfer your data to anyone.</strong> There is no third party
+    to transfer it to.</li>
+    <li>It does not use your data for creditworthiness or lending purposes, or for any purpose
+    unrelated to the single purpose above.</li>
+  </ul>
+
+  <h2>Who can see the data</h2>
+  <p>Your outreach profile is visible only to you, in your own browser. Product captures are
+  visible to MACC Systems &amp; Engineering Inc. staff with access to the Command Center, and
+  each capture records which staff member saved it — the same way any other action in that
+  system is attributed.</p>
+
+  <h2>Removing your data</h2>
+  <p>Uninstalling the extension deletes everything it stored in your browser, including your
+  outreach profile and any queued rows. Product captures already saved to the Command Center
+  belong to the company's records; ask a MACC administrator to delete a row, or delete it
+  yourself from the captures page.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy: <a href="mailto:official@macc-inc.com">official@macc-inc.com</a>,
+  MACC Systems &amp; Engineering Inc., Talustusan, Naval, Biliran, Philippines.</p>
+
+  <footer>MACC Systems &amp; Engineering Inc. · Solar supply, fabrication and installation</footer>
+</main>
+</body>
+</html>

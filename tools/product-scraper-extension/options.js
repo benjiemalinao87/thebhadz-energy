@@ -12,10 +12,54 @@ function normalizeOrigin(input) {
   try { return new URL(String(input).trim()).origin; } catch (e) { return ''; }
 }
 
+function profileStatus(msg, kind) {
+  const el = $('profileStatus');
+  el.textContent = msg || '';
+  el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+async function loadProfile() {
+  const { outreachProfile } = await chrome.storage.sync.get({ outreachProfile: null });
+  const p = { ...MACC_PROFILE_DEFAULTS, ...(outreachProfile || {}) };
+  $('profileGrid').innerHTML = MACC_PROFILE_FIELDS
+    .map((f) => '<label>' + f.label +
+      '<input id="p_' + f.key + '" placeholder="' + f.placeholder.replace(/"/g, '&quot;') + '" spellcheck="false"></label>')
+    .join('');
+  for (const f of MACC_PROFILE_FIELDS) $('p_' + f.key).value = p[f.key] || '';
+}
+
+async function saveProfile() {
+  const p = {};
+  for (const f of MACC_PROFILE_FIELDS) p[f.key] = $('p_' + f.key).value.trim();
+  await chrome.storage.sync.set({ outreachProfile: p });
+  const missing = ['firstName', 'lastName', 'email', 'phone'].filter((k) => !p[k]);
+  if (missing.length) profileStatus('Saved — still missing ' + missing.join(', ') + ', which most forms require.', 'warn');
+  else profileStatus('Profile saved ✓', 'ok');
+}
+
+/** Pulls name + email from the founder's Command Center account. */
+async function fillFromAccount() {
+  profileStatus('Asking the Command Center…');
+  const resp = await chrome.runtime.sendMessage({ type: 'whoami' });
+  if (!resp || !resp.ok) {
+    profileStatus(resp && resp.error === 'not-signed-in'
+      ? 'Not signed in to the Command Center in this browser — sign in there, then try again.'
+      : 'Couldn’t reach the Command Center: ' + ((resp && resp.error) || 'unknown error'), 'err');
+    return;
+  }
+  const user = resp.user || {};
+  const parts = String(user.name || '').trim().split(/\s+/);
+  if (parts.length && parts[0] && !$('p_firstName').value) $('p_firstName').value = parts[0];
+  if (parts.length > 1 && !$('p_lastName').value) $('p_lastName').value = parts.slice(1).join(' ');
+  if (user.email && !$('p_email').value) $('p_email').value = user.email;
+  profileStatus('Filled in from your account — check it, add your phone, then Save profile.', 'ok');
+}
+
 async function load() {
   const s = await chrome.storage.sync.get({ appUrl: '' });
   $('appUrl').value = s.appUrl;
   $('version').textContent = chrome.runtime.getManifest().version;
+  loadProfile();
   refreshQueue();
 }
 
@@ -104,6 +148,8 @@ async function clearQueue() {
 
 document.addEventListener('DOMContentLoaded', () => {
   $('saveBtn').addEventListener('click', saveSettings);
+  $('profileSaveBtn').addEventListener('click', saveProfile);
+  $('profileFillBtn').addEventListener('click', fillFromAccount);
   $('testBtn').addEventListener('click', testConnection);
   $('openAppBtn').addEventListener('click', openApp);
   $('retryBtn').addEventListener('click', retryNow);

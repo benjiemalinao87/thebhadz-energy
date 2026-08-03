@@ -16,8 +16,12 @@ async function getSettings() {
   return chrome.storage.sync.get({ appUrl: '' });
 }
 
+function endpoint(appUrl, path) {
+  return appUrl.replace(/\/+$/, '') + path;
+}
+
 function capturesEndpoint(appUrl) {
-  return appUrl.replace(/\/+$/, '') + '/api/captures';
+  return endpoint(appUrl, '/api/captures');
 }
 
 async function getQueue() {
@@ -38,12 +42,16 @@ async function updateBadge(n) {
 }
 
 async function callApp(method, query, body) {
+  return callAppPath(method, '/api/captures' + (query || ''), body);
+}
+
+async function callAppPath(method, path, body) {
   const { appUrl } = await getSettings();
   if (!appUrl) return { ok: false, error: 'no-app' };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 20000);
   try {
-    const res = await fetch(capturesEndpoint(appUrl) + (query || ''), {
+    const res = await fetch(endpoint(appUrl, path), {
       method,
       credentials: 'include',
       signal: ctrl.signal,
@@ -54,7 +62,7 @@ async function callApp(method, query, body) {
     const text = await res.text();
     let parsed;
     try { parsed = JSON.parse(text); } catch (e) {
-      return { ok: false, error: 'Unexpected response from ' + new URL(capturesEndpoint(appUrl)).host + ' — is the URL your Command Center deployment?' };
+      return { ok: false, error: 'Unexpected response from ' + new URL(endpoint(appUrl, path)).host + ' — is the URL your Command Center deployment?' };
     }
     if (!res.ok) return { ok: false, error: (parsed && parsed.error) || 'HTTP ' + res.status, network: res.status >= 500 };
     if (parsed && parsed.ok) return parsed;
@@ -100,6 +108,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === 'save') return handleSave(msg.row);
     if (msg.type === 'retryQueue') return handleRetry();
     if (msg.type === 'testConnection') return callApp('GET', '?limit=1');
+    // Seeds the outreach profile from the founder's own account, so nobody retypes
+    // the name and email they already signed in with.
+    if (msg.type === 'whoami') return callAppPath('GET', '/api/session');
     if (msg.type === 'clearQueue') { await setQueue([]); return { ok: true }; }
     return { ok: false, error: 'unknown message: ' + msg.type };
   };

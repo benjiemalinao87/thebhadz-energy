@@ -8,9 +8,14 @@
 <body class="popup">
 <header>
   <img src="icons/icon32.png" alt="">
-  <div><strong>Product Capture</strong><span>page → MACC Command Center</span></div>
+  <div><strong>MACC Field Kit</strong><span>capture products · fill contact forms</span></div>
   <button id="openOptions" class="icon-btn" title="Settings" type="button">⚙</button>
 </header>
+<nav class="tabs" role="tablist">
+  <button id="tabCapture" class="tab is-on" type="button" role="tab">Capture</button>
+  <button id="tabOutreach" class="tab" type="button" role="tab">Outreach</button>
+</nav>
+<section id="paneCapture">
 <div id="srcline" class="srcline">Reading page…</div>
 <div id="warn" class="warn" hidden></div>
 <form id="form" autocomplete="off">
@@ -39,6 +44,37 @@
   <button id="retry" type="button">Retry queued</button>
 </div>
 <button id="openOptions2" class="linklike" type="button" hidden>Open settings</button>
+</section>
+
+<section id="paneOutreach" hidden>
+  <div id="oSrcline" class="srcline">Reading this page…</div>
+  <div id="oProfileWarn" class="warn" hidden></div>
+  <div class="opad">
+    <label class="stack">Message to use
+      <select id="oTemplate"></select>
+      <span class="hint" id="oHint"></span>
+    </label>
+    <label class="stack">Brand (used in the greeting)
+      <input id="oBrand" placeholder="e.g. Sungrow" spellcheck="false">
+    </label>
+    <label class="stack">Draft — edit before you fill
+      <textarea id="oMessage" rows="9" spellcheck="true"></textarea>
+    </label>
+    <label class="check"><input type="checkbox" id="oOverwrite"> Overwrite fields that already have a value</label>
+  </div>
+  <div class="actions">
+    <button id="oFill" class="primary" type="button">Fill this form</button>
+    <button id="oCopy" type="button" title="Copy the draft to the clipboard">Copy</button>
+    <button id="oUndo" type="button" title="Put every field back the way it was">Undo</button>
+  </div>
+  <div id="oStatus" class="status"></div>
+  <div id="oReport" class="report" hidden></div>
+  <p class="footnote">Nothing is ever submitted for you — read what it wrote, tick any consent boxes, then send it yourself.</p>
+</section>
+
+<script src="templates.js"></script>
+<script src="fill.js"></script>
 <script src="popup.js"></script>
+<script src="outreach.js"></script>
 </body>
 </html>

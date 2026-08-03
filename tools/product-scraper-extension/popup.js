@@ -161,7 +161,24 @@ function clearAutoFields() {
   for (const id of ['product', 'brand', 'cost', 'currency', 'location', 'supplier', 'moq', 'description', 'other', 'image', 'url']) $(id).value = '';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Each tab does its page work once, on first view: opening the popup to write an
+// outreach draft shouldn't run the product extractor over a contact page, and vice
+// versa. The last tab used is remembered, so the popup opens where you left it.
+let capturePrimed = false;
+let outreachPrimed = false;
+
+function activateTab(name) {
+  const outreach = name === 'outreach';
+  $('paneCapture').hidden = outreach;
+  $('paneOutreach').hidden = !outreach;
+  $('tabCapture').classList.toggle('is-on', !outreach);
+  $('tabOutreach').classList.toggle('is-on', outreach);
+  chrome.storage.local.set({ lastTab: outreach ? 'outreach' : 'capture' });
+  if (!outreach && !capturePrimed) { capturePrimed = true; extract(); }
+  if (outreach && !outreachPrimed && window.maccOutreachInit) { outreachPrimed = true; window.maccOutreachInit(); }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   $('form').addEventListener('submit', (e) => { e.preventDefault(); save(); });
   $('save').addEventListener('click', save);
   $('copy').addEventListener('click', copyRow);
@@ -169,6 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('retry').addEventListener('click', retryQueue);
   $('openOptions').addEventListener('click', () => chrome.runtime.openOptionsPage());
   $('openOptions2').addEventListener('click', () => chrome.runtime.openOptionsPage());
-  extract();
+  $('tabCapture').addEventListener('click', () => activateTab('capture'));
+  $('tabOutreach').addEventListener('click', () => activateTab('outreach'));
   refreshQueue();
+  const { lastTab = 'capture' } = await chrome.storage.local.get('lastTab');
+  activateTab(lastTab);
 });

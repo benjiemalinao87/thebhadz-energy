@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fill-engine fixture</title>
+<meta property="og:site_name" content="Sungrow">
+<style>
+  body { font-family: system-ui, sans-serif; margin: 24px; max-width: 900px; }
+  fieldset { margin: 0 0 24px; padding: 14px; }
+  .fld { margin: 10px 0; }
+  .cap { font-size: 13px; color: #444; }
+  input, select, textarea { width: 100%; padding: 6px; font: inherit; }
+  #out { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; background: #f4f6f8; padding: 12px; }
+</style>
+</head>
+<body>
+<h1>Fill-engine fixture</h1>
+<p>Open this file, click <b>Run</b>, and read the report. It exercises the two form
+shapes we actually hit: a labelled-by-sibling-div form (Sungrow-style) and a
+placeholder-only form with a captcha (Deye-style). Both are replicas, not copies —
+no request ever leaves the page.</p>
+
+<!-- Sungrow-style: captions are sibling <div>s, not <label for>. -->
+<form><fieldset><legend>A · caption-div form</legend>
+  <div class="fld"><div class="cap">Which best describes you?</div>
+    <select><option value="">Select</option><option>Distributor</option><option>Installer</option><option>Homeowner</option><option>Other</option></select></div>
+  <div class="fld"><div class="cap">First Name</div><input placeholder="Enter your first name"></div>
+  <div class="fld"><div class="cap">Last Name</div><input placeholder="Enter your last name"></div>
+  <div class="fld"><div class="cap">Email</div><input placeholder="Enter your email address"></div>
+  <div class="fld"><div class="cap">Phone Number</div><input placeholder="Enter your phone number"></div>
+  <div class="fld"><div class="cap">Country / Region</div>
+    <select><option value="">Select your Country / Region</option><option>Indonesia</option><option>Philippines</option><option>Vietnam</option></select></div>
+  <div class="fld"><div class="cap">City</div><input placeholder="Enter your city"></div>
+  <div class="fld"><div class="cap">Company Name</div><input placeholder="Enter your company name"></div>
+  <div class="fld"><div class="cap">What is your primary business focus?</div>
+    <select><option value="">Select your primary business focus</option><option>Utility-scale</option><option>Commercial &amp; Industrial</option><option>Residential</option></select></div>
+  <div class="fld"><div class="cap">Inquiry Type</div>
+    <select><option value="">Select your inquiry type</option><option>Technical support</option><option>Become a partner</option><option>After-sales</option></select></div>
+  <div class="fld"><div class="cap">How did you learn about Sungrow?</div>
+    <select><option value="">Select an option</option><option>Exhibition</option><option>Search engine</option><option>Referral</option></select></div>
+  <div class="fld"><div class="cap">Demand Description</div><textarea rows="4" placeholder="Enter your demand description"></textarea></div>
+</fieldset></form>
+
+<!-- Deye-style: placeholders only, a captcha, and a pre-filled field. A second form
+     on the same page must get its own Email/Name filled, not be treated as
+     duplicates of form A's. -->
+<form><fieldset><legend>B · placeholder-only form (with captcha)</legend>
+  <div class="fld"><input placeholder="Name *"></div>
+  <div class="fld"><input placeholder="Telephone"></div>
+  <div class="fld"><input placeholder="Company" value="Should not be overwritten"></div>
+  <div class="fld"><input placeholder="Address"></div>
+  <div class="fld"><input placeholder="Email *"></div>
+  <div class="fld"><textarea rows="4" placeholder="Message *"></textarea></div>
+  <div class="fld"><input placeholder="Code *"></div>
+  <div class="fld"><input type="password" placeholder="Password"></div>
+  <div class="fld"><input type="search" placeholder="Search"></div>
+  <div class="fld"><label><input type="checkbox"> I agree to the privacy policy</label></div>
+</fieldset></form>
+
+<!-- Length-capped message boxes: 700 should take the short draft whole, 300 should
+     clip it at a word boundary and say so. -->
+<form><fieldset><legend>C · capped message boxes</legend>
+  <div class="fld"><div class="cap">Your message (maxlength 700)</div><textarea maxlength="700" rows="3"></textarea></div>
+</fieldset></form>
+<form><fieldset><legend>D · very short message box</legend>
+  <div class="fld"><div class="cap">Your message (maxlength 300)</div><textarea maxlength="300" rows="3"></textarea></div>
+</fieldset></form>
+
+<p><button id="run" type="button">Run</button> <button id="undo" type="button">Undo</button></p>
+<div id="out">—</div>
+
+<script src="../templates.js"></script>
+<script src="../fill.js"></script>
+<script src="fixture.js"></script>
+</body>
+</html>

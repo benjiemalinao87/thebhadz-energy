@@ -33,3 +33,8 @@ build/
 # history in 280f0db.
 funnel/_ccseed.html
 _ccseed.html
+
+# Chrome Web Store upload artifact, rebuilt on demand by
+# `node tools/product-scraper-extension/pack.mjs`. Deterministic from the source in
+# that folder, so committing it would only add binary churn to every extension change.
+tools/product-scraper-extension/dist/

@@ -22,6 +22,17 @@
     <span id="status" class="status"></span>
   </div>
 
+  <h2>Outreach profile</h2>
+  <p class="hint" style="margin:0">What the <strong>Outreach</strong> tab types into brand contact forms — Sungrow, Deye,
+  distributor enquiries, the Biliran co-marketing ask. Stored in your own Chrome profile, never sent to the Command Center.
+  Company details are pre-filled from the repo so every founder's outreach matches; the personal ones are yours.</p>
+  <div id="profileGrid" class="profile-grid"></div>
+  <div class="row">
+    <button id="profileSaveBtn" class="primary" type="button">Save profile</button>
+    <button id="profileFillBtn" type="button" title="Copy your name and email from your Command Center account">Use my Command Center name &amp; email</button>
+    <span id="profileStatus" class="status"></span>
+  </div>
+
   <h2>Offline queue</h2>
   <div class="row">
     <span id="queueMsg" class="hint"></span>
@@ -43,6 +54,7 @@
   not self-update: when the repo version is newer, <code>git pull</code>, then hit <strong>Reload</strong> on the
   extension’s card at <code>chrome://extensions</code>.</p>
 </main>
+<script src="templates.js"></script>
 <script src="options.js"></script>
 </body>
 </html>
