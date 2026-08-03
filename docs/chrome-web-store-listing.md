@@ -93,19 +93,28 @@ It never submits a form for you. It never fills passwords, captchas, checkboxes 
 buttons. It does not run while you browse — only in the moment you click it. It contains
 no analytics and no advertising, and talks to no server other than our own workspace.
 
-Privacy policy: https://macc-inc.com/field-kit-privacy
+Privacy policy: https://thebhadz-energy.pages.dev/field-kit-privacy
 ```
 
 **Privacy policy URL**
 
 ```
-https://macc-inc.com/field-kit-privacy
+https://thebhadz-energy.pages.dev/field-kit-privacy
 ```
 
-> This page ships in this repo at `funnel/field-kit-privacy.html`. **Confirm it loads
-> publicly before you paste the URL** — the reviewer will open it, and a 404 fails the
-> submission. If the funnel's public host is not `macc-inc.com`, use the host that
-> actually serves the funnel and update this doc.
+> Verified live and serving the right page on 2026-08-04 (HTTP 200, title "MACC Field
+> Kit — Privacy Policy"). The source is `funnel/field-kit-privacy.html`.
+>
+> **Why the `pages.dev` host and not `macc-inc.com`:** the apex `macc-inc.com` has no
+> A or AAAA record and does not resolve at all, and `www.macc-inc.com` answers every
+> path — including this one — with the funnel homepage rather than the requested page,
+> so it is not serving the current `thebhadz-energy` deployment. A reviewer opening
+> either would see the wrong thing. See §8. Once the custom domain is fixed, switch this
+> URL and the one in the description above, and re-verify with:
+>
+> ```bash
+> curl -sL https://www.macc-inc.com/field-kit-privacy | grep -o '<title>[^<]*</title>'
+> ```
 
 **Support / contact email:** `official@macc-inc.com`
 
@@ -199,3 +208,31 @@ personal communications, location, web history, user activity.
 3. `node tools/product-scraper-extension/pack.mjs`
 4. Dev console → the item → **Package → Upload new package** → Submit.
 5. Chrome pushes it to everyone within a few hours. Nobody reloads anything.
+
+## 8. Unrelated finding — the custom domain is not serving this deployment
+
+Turned up while verifying the privacy policy URL on 2026-08-04. Not a blocker for the
+Store submission (§3 uses the `pages.dev` host, which is verified working), but it
+affects the customer funnel, which matters a great deal more.
+
+| Check | Result |
+|---|---|
+| `macc-inc.com` (apex) A / AAAA record | **None.** The name does not resolve. Anyone typing `macc-inc.com` gets a DNS failure. |
+| `www.macc-inc.com/field-kit-privacy` | HTTP 200, but returns the **funnel homepage**, not the page. |
+| `www.macc-inc.com/field-kit-privacy.html` | HTTP 200, homepage again. |
+| `thebhadz-energy.pages.dev/field-kit-privacy` | HTTP 200, the correct page. |
+| `thebhadz-energy.pages.dev/field-kit-privacy.html` | HTTP 308 → clean URL, which is normal Pages behaviour. |
+
+The `.html` path behaving differently on the two hosts is the tell: `www.macc-inc.com`
+is not fronting the current `thebhadz-energy` Pages project. It is either a different
+project, an older deployment, or has a catch-all/SPA fallback returning `index.html`
+for everything.
+
+Worth someone checking, because if it is stale then **every fix pushed to the funnel
+since that domain was attached has been invisible to customers** — the quote builder,
+the calculator, the theme work — while `pages.dev` quietly serves the current build.
+
+Where to look: Cloudflare dashboard → Pages → `thebhadz-energy` → Custom domains, and
+the DNS records on the `macc-inc.com` zone. The apex needs a record (a CNAME flattened
+to the Pages project) and `www` needs to point at this project rather than whatever it
+currently resolves to.
