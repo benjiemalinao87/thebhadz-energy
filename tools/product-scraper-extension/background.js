@@ -8,6 +8,10 @@
 // extension to hold (optional) host permission for the app's origin — both are
 // arranged by the options page.
 
+// Must not exceed MAX_BATCH in funnel/functions/api/captures.js — a larger POST is
+// rejected wholesale (422), which for the queue means it can never drain.
+const MAX_BATCH = 50;
+
 async function getSettings() {
   return chrome.storage.sync.get({ appUrl: '' });
 }
@@ -76,14 +80,18 @@ async function handleSave(row) {
 }
 
 async function handleRetry() {
-  const queue = await getQueue();
-  if (!queue.length) return { ok: true, flushed: 0, queueSize: 0 };
-  const r = await callApp('POST', '', { rows: queue });
-  if (r.ok) {
-    await setQueue([]);
-    return { ok: true, flushed: queue.length, queueSize: 0 };
+  let flushed = 0;
+  for (;;) {
+    const queue = await getQueue();
+    if (!queue.length) return { ok: true, flushed, queueSize: 0 };
+    const slice = queue.slice(0, MAX_BATCH);
+    const r = await callApp('POST', '', { rows: slice });
+    if (!r.ok) return { ok: false, error: r.error, queueSize: queue.length, flushed };
+    // Re-read instead of reusing `queue`: a save landing mid-flush appends to the
+    // tail, and the rows just uploaded are always at the head.
+    await setQueue((await getQueue()).slice(slice.length));
+    flushed += slice.length;
   }
-  return { ok: false, error: r.error, queueSize: queue.length };
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {

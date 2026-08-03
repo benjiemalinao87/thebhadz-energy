@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
-// Column order must match COLUMNS in apps-script/Code.gs — the sheet and the
-// "Copy row" TSV both use it.
+// capturedAt + the FIELDS order in funnel/functions/api/captures.js. Only the
+// "Copy row" TSV uses it (Save posts a JSON object), but keeping the two in step
+// means a pasted row lines up with an exported one.
 const COLS = ['capturedAt', 'brand', 'product', 'description', 'cost', 'currency', 'location', 'supplier', 'moq', 'source', 'url', 'image', 'other', 'notes'];
 
 function setStatus(msg, kind) {
@@ -127,7 +128,7 @@ async function copyRow() {
   const tsv = COLS.map((k) => String(row[k] || '').replace(/[\t\r\n]+/g, ' ')).join('\t');
   try {
     await navigator.clipboard.writeText(tsv);
-    setStatus('Copied as a tab-separated row — paste straight into the sheet.', 'ok');
+    setStatus('Copied as a tab-separated row — paste straight into a spreadsheet.', 'ok');
   } catch (e) {
     setStatus('Clipboard blocked: ' + e.message, 'err');
   }
@@ -143,12 +144,16 @@ async function retryQueue() {
   $('retry').disabled = true;
   const resp = await chrome.runtime.sendMessage({ type: 'retryQueue' });
   $('retry').disabled = false;
+  // A long queue uploads in batches, so a failure can follow partial success.
+  const stalled = (msg) => (resp && resp.flushed
+    ? 'Uploaded ' + resp.flushed + ' row(s), then stopped — ' + msg.charAt(0).toLowerCase() + msg.slice(1)
+    : msg);
   if (resp && resp.ok) setStatus(resp.flushed ? 'Uploaded ' + resp.flushed + ' queued row(s) ✓' : 'Queue is empty.', 'ok');
   else if (resp && resp.error === 'not-signed-in') {
     const { appUrl } = await chrome.storage.sync.get({ appUrl: '' });
-    setStatus('Still signed out of the Command Center — sign in, then retry.', 'warn');
+    setStatus(stalled('Still signed out of the Command Center — sign in, then retry.'), 'warn');
     if (appUrl) showAppLink('Open the Command Center to sign in →', appUrl + '/internal/');
-  } else setStatus('Still unreachable: ' + ((resp && resp.error) || 'unknown error'), 'warn');
+  } else setStatus(stalled('Still unreachable: ' + ((resp && resp.error) || 'unknown error')), 'warn');
   refreshQueue();
 }
 

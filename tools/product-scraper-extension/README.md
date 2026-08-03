@@ -63,7 +63,7 @@ current, all that's needed is the schema addition:
 
 ```bash
 npx wrangler d1 execute solar-city-leads --remote --file=funnel/schema.sql
-npx wrangler pages deploy funnel --project-name solar-city-funnel
+npx wrangler pages deploy funnel --project-name thebhadz-energy
 ```
 
 (`schema.sql` is all `CREATE TABLE IF NOT EXISTS`, so re-running it is safe.
@@ -76,12 +76,29 @@ Run from the repo root; drop `funnel/` from the path if you run inside `funnel/`
 3. **Load unpacked** → select the `tools/product-scraper-extension` folder.
 4. Pin "MACC Product Capture" to the toolbar (puzzle-piece menu → pin).
 5. Right-click the icon → **Options** → paste the deployed app's URL
-   (e.g. `https://solar-city-funnel.pages.dev` or the custom domain) →
+   (e.g. `https://founders.macc-inc.com` or the `…pages.dev` preview) →
    **Save settings** → allow the permission prompt (that's Chrome asking whether
    the extension may talk to your app — required).
 6. Make sure you're signed in to the Command Center in this browser, then click
    **Test connection**. It should confirm you're signed in and the API is
    reachable.
+
+**Allowed hosts.** `optional_host_permissions` in `manifest.json` lists where the
+Command Center is permitted to live — `*.macc-inc.com`, `*.pages.dev`, and
+`localhost`/`127.0.0.1` for `wrangler pages dev`. Chrome will only prompt for an
+origin matching one of those patterns, so a new deployment domain means adding a
+line there and reloading the extension; the options page says so explicitly if you
+paste an origin it can't request. It is deliberately not `https://*/*` — a clipper
+that saves to one known app has no business asking for permission on every site.
+
+### Updating
+
+The extension is loaded unpacked, so Chrome never updates it for you. After a
+`git pull` that touches this folder, each founder opens `chrome://extensions` and
+clicks **Reload** on the extension's card. The options page shows the running
+version under **This build** — compare it with `version` in `manifest.json` to see
+whether you're stale. Bump that version in any commit that changes extension
+behaviour, so "reload it" is a checkable instruction rather than a guess.
 
 ## Using it
 
@@ -144,7 +161,10 @@ the activity log records each save like any other Command Center action.
   offline queue and the badge. Requests carry the founder's session cookie via
   `credentials: 'include'`; the options page requests the app origin as an
   optional host permission, which is what lets the cookie ride along and bypasses
-  CORS. A 401 is surfaced as the distinct `not-signed-in` state, and queued.
+  CORS. A 401 is surfaced as the distinct `not-signed-in` state, and queued. The
+  queue flushes in slices of `MAX_BATCH` (50) — it must not exceed the endpoint's
+  own `MAX_BATCH`, or a queue that grew past it would be rejected wholesale (422)
+  on every retry and never drain.
 - Server side lives in the funnel app: `funnel/functions/api/captures.js`
   (GET/POST/PATCH/DELETE, validation, `created_by` from the session),
   `funnel/schema.sql` → `product_captures`, viewer at
@@ -153,6 +173,9 @@ the activity log records each save like any other Command Center action.
   per-account like any other section).
 - Icons: `node icons/make-icons.mjs` regenerates the PNGs (self-contained PNG
   encoder, no deps).
-- Extractor smoke tests run against local HTML fixtures in headless Chromium
-  (`?cap_site=` forces a site module from `file://`); the endpoint has a Node
-  test harness driving `onRequest` against real SQLite via `node:sqlite`.
+- **No automated tests exist yet.** `content.js` keeps the `?cap_site=` hook so a
+  site module can be forced from a `file://` fixture (where `location.hostname` is
+  empty), which is the seam a smoke-test harness would use — but the fixtures and
+  the runner were never written. Until they are, changes to the extractor are
+  verified by hand: open a real Alibaba listing, an FB group post with the text
+  selected, and one Shopee/Lazada page, and check the popup fills sensibly.

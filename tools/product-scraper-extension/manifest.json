@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MACC Product Capture",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "One-click capture of product & supplier info (Alibaba, Facebook, any product page) into the MACC Command Center.",
   "icons": {
     "16": "icons/icon16.png",
@@ -27,5 +27,11 @@
     "open_in_tab": true
   },
   "permissions": ["activeTab", "scripting", "storage"],
-  "optional_host_permissions": ["https://*/*", "http://localhost/*"]
+  "optional_host_permissions": [
+    "https://*.macc-inc.com/*",
+    "https://macc-inc.com/*",
+    "https://*.pages.dev/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ]
 }

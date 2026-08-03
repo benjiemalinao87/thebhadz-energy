@@ -15,6 +15,7 @@ function normalizeOrigin(input) {
 async function load() {
   const s = await chrome.storage.sync.get({ appUrl: '' });
   $('appUrl').value = s.appUrl;
+  $('version').textContent = chrome.runtime.getManifest().version;
   refreshQueue();
 }
 
@@ -33,15 +34,23 @@ async function saveSettings() {
   // Ask for the host permission BEFORE any other await: permissions.request must
   // run while the click still counts as a user gesture.
   let granted = false;
+  // Chrome throws (rather than returning false) when the origin matches nothing in
+  // the manifest's optional_host_permissions — a different failure from "the founder
+  // clicked Deny", and one no amount of re-saving will fix.
+  let blocked = false;
   try {
     granted = await chrome.permissions.request({ origins: [origin + '/*'] });
   } catch (e) {
     granted = false;
+    blocked = true;
   }
   await chrome.storage.sync.set({ appUrl: origin });
   $('appUrl').value = origin;
   if (granted) setStatus('Saved ✓ — the extension may now talk to ' + origin, 'ok');
-  else setStatus('Saved, but the site permission was declined — saving captures will fail until you re-save and allow it.', 'warn');
+  else if (blocked) {
+    setStatus('Saved, but this build isn’t allowed to talk to ' + origin +
+      ' — add it to "optional_host_permissions" in manifest.json, reload the extension on chrome://extensions, then save again.', 'err');
+  } else setStatus('Saved, but the site permission was declined — saving captures will fail until you re-save and allow it.', 'warn');
   return granted;
 }
 
@@ -78,9 +87,11 @@ async function retryNow() {
   $('retryBtn').disabled = true;
   const resp = await chrome.runtime.sendMessage({ type: 'retryQueue' });
   $('retryBtn').disabled = false;
+  // A long queue uploads in batches of 50, so a failure can follow partial success.
+  const partial = resp && resp.flushed ? 'Uploaded ' + resp.flushed + ' row(s), then stopped. ' : '';
   if (resp && resp.ok) setStatus(resp.flushed ? 'Uploaded ' + resp.flushed + ' row(s) ✓' : 'Queue is empty.', 'ok');
-  else if (resp && resp.error === 'not-signed-in') setStatus('Still signed out — open the Command Center, sign in, then retry.', 'warn');
-  else setStatus('Retry failed: ' + ((resp && resp.error) || 'unknown error'), 'err');
+  else if (resp && resp.error === 'not-signed-in') setStatus(partial + 'Still signed out — open the Command Center, sign in, then retry.', 'warn');
+  else setStatus(partial + 'Retry failed: ' + ((resp && resp.error) || 'unknown error'), 'err');
   refreshQueue();
 }
 
