@@ -27,6 +27,15 @@
   document.querySelectorAll("[data-tab]").forEach(function (button) {
     button.addEventListener("click", function () { selectTab(button.getAttribute("data-tab")); });
   });
+  document.querySelectorAll("[data-open-dialog]").forEach(function (button) {
+    button.addEventListener("click", function () { openDialog(button.getAttribute("data-open-dialog")); });
+  });
+  document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var dialog = button.closest("dialog");
+      if (dialog && dialog.open) dialog.close();
+    });
+  });
   document.querySelector('#payment-form [name="payment_date"]').value = today();
   document.querySelector('#assignment-form [name="work_date"]').value = today();
   load();
@@ -88,7 +97,7 @@
 
   function renderProjects() {
     var target = document.getElementById("ops-projects");
-    if (!state.projects.length) { target.innerHTML = '<div class="ops-empty">No installation projects yet. Create the first one above when a real customer reaches survey/quote stage.</div>'; return; }
+    if (!state.projects.length) { target.innerHTML = '<div class="ops-empty">No installation projects yet. Use <strong>Create project</strong> when a real customer reaches survey/quote stage.</div>'; return; }
     target.innerHTML = state.projects.map(function (p) {
       var costs = state.costs.filter(function (c) { return c.project_id === p.id; });
       var payments = state.payments.filter(function (pay) { return pay.project_id === p.id && pay.status === "received"; });
@@ -202,8 +211,24 @@
     try {
       await request("POST", body); var selectedProject = data.get("project_id"); form.reset();
       if (form.id === "payment-form" || form.id === "assignment-form") form.elements[form.id === "payment-form" ? "payment_date" : "work_date"].value = today();
+      if (form.id === "project-form") form.elements.contract_price.value = "99500";
+      if (form.id === "installer-form") form.elements.role.value = "Installer";
+      closeFormDialog(form);
       await load(); if (selectedProject) chooseProject(selectedProject);
     } catch (error) { alert(error.message); }
+  }
+
+  function openDialog(id) {
+    var dialog = document.getElementById(id);
+    if (!dialog) return;
+    if (id === "payment-dialog") document.querySelector('#payment-form [name="payment_date"]').value = today();
+    if (id === "assignment-dialog") document.querySelector('#assignment-form [name="work_date"]').value = today();
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function closeFormDialog(form) {
+    var dialog = form.closest("dialog");
+    if (dialog && dialog.open) dialog.close();
   }
 
   function chooseProject(id) { document.querySelectorAll("[data-project-select]").forEach(function (select) { select.value = id; }); }

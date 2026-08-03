@@ -5,12 +5,16 @@
   var receiptUrl = "/api/finance-receipt";
   var state = { transactions: [], summary: {}, settings: {}, projects: [] };
   var form = document.getElementById("fin-form");
-  if (!form) return;
+  var dialog = document.getElementById("fin-dialog");
+  if (!form || !dialog) return;
 
   var kind = form.elements.kind;
   kind.addEventListener("change", toggleFounderFields);
   form.addEventListener("submit", saveTransaction);
-  document.getElementById("fin-cancel").addEventListener("click", resetForm);
+  document.getElementById("fin-add").addEventListener("click", openCreate);
+  document.getElementById("fin-cancel").addEventListener("click", closeDialog);
+  document.getElementById("fin-dialog-close").addEventListener("click", closeDialog);
+  dialog.addEventListener("cancel", function () { resetForm(); });
   document.getElementById("fin-filter").addEventListener("change", renderLedger);
   document.getElementById("fin-export").addEventListener("click", exportCsv);
   document.getElementById("fin-save-settings").addEventListener("click", saveSettings);
@@ -126,7 +130,7 @@
       };
       var method = body.id ? "PATCH" : "POST";
       await request(method, body);
-      resetForm(); await load();
+      closeDialog(); await load();
     } catch (error) { alert(error.message || "Could not save transaction."); }
     document.getElementById("fin-receipt-note").textContent = "Optional · max 10 MB";
   }
@@ -147,6 +151,12 @@
     catch (error) { alert(error.message); }
   }
 
+  function openCreate() {
+    resetForm();
+    document.getElementById("fin-dialog-title").textContent = "Add a transaction";
+    if (!dialog.open) dialog.showModal();
+  }
+
   function editTransaction(id) {
     var t = state.transactions.find(function (item) { return item.id === id; });
     if (!t) return;
@@ -154,14 +164,21 @@
     form.elements.amount.value = fromCents(t.amount_cents);
     form.dataset.receiptKey = t.receipt_key || "";
     document.getElementById("fin-submit").textContent = "Update transaction";
-    document.getElementById("fin-cancel").hidden = false;
-    toggleFounderFields(); form.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("fin-dialog-title").textContent = "Edit transaction";
+    toggleFounderFields();
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function closeDialog() {
+    if (dialog.open) dialog.close();
+    resetForm();
   }
 
   function resetForm() {
     form.reset(); form.elements.txn_date.value = today(); form.dataset.receiptKey = "";
     document.getElementById("fin-submit").textContent = "Save transaction";
-    document.getElementById("fin-cancel").hidden = true; toggleFounderFields();
+    document.getElementById("fin-dialog-title").textContent = "Add a transaction";
+    toggleFounderFields();
   }
 
   function toggleFounderFields() {

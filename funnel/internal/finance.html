@@ -73,7 +73,29 @@
     </nav>
 
     <section class="ops-panel" id="finance-ledger" role="tabpanel" data-panel="ledger">
-      <div class="ops-section-head"><div><span class="ops-kicker">MONEY IN · MONEY OUT</span><h2>Add a transaction</h2><p>Use “committed” for an approved bill that has not left the account yet.</p></div></div>
+      <div class="ops-toolbar">
+        <div class="ops-toolbar-start">
+          <button type="button" id="fin-add">Add transaction</button>
+        </div>
+        <div class="ops-filter"><label>Show<select id="fin-filter"><option value="all">All transactions</option><option value="paid">Paid / received</option><option value="committed">Committed</option><option value="inflow">Money in</option><option value="outflow">Money out</option></select></label></div>
+      </div>
+      <div id="fin-ledger"></div>
+    </section>
+
+    <section class="ops-panel" id="finance-funding" role="tabpanel" data-panel="funding" hidden>
+      <div class="ops-section-head"><div><span class="ops-kicker">FOUNDER CONTRIBUTIONS</span><h2>Who funded what?</h2><p>Amounts are grouped by the classification recorded in the ledger.</p></div></div>
+      <div id="fin-funding"></div>
+    </section>
+
+    <dialog class="ops-dialog" id="fin-dialog" aria-labelledby="fin-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">MONEY IN · MONEY OUT</span>
+          <h2 id="fin-dialog-title">Add a transaction</h2>
+          <p>Use “committed” for an approved bill that has not left the account yet.</p>
+        </div>
+        <button type="button" class="secondary ops-dialog-close" id="fin-dialog-close">Close</button>
+      </div>
       <form class="ops-form" id="fin-form">
         <input type="hidden" name="id">
         <label>Date<input name="txn_date" type="date" required></label>
@@ -96,21 +118,11 @@
         <label class="wide">Notes<textarea name="notes" rows="2" maxlength="1200"></textarea></label>
         <div class="ops-form-actions">
           <button type="submit" id="fin-submit">Save transaction</button>
-          <button type="button" class="secondary" id="fin-cancel" hidden>Cancel edit</button>
+          <button type="button" class="secondary" id="fin-cancel">Cancel</button>
           <span class="ops-helper">Install Operations automatically adds received customer payments and paid job costs here.</span>
         </div>
       </form>
-
-      <div class="ops-toolbar">
-        <div class="ops-filter"><label>Show<select id="fin-filter"><option value="all">All transactions</option><option value="paid">Paid / received</option><option value="committed">Committed</option><option value="inflow">Money in</option><option value="outflow">Money out</option></select></label></div>
-      </div>
-      <div id="fin-ledger"></div>
-    </section>
-
-    <section class="ops-panel" id="finance-funding" role="tabpanel" data-panel="funding" hidden>
-      <div class="ops-section-head"><div><span class="ops-kicker">FOUNDER CONTRIBUTIONS</span><h2>Who funded what?</h2><p>Amounts are grouped by the classification recorded in the ledger.</p></div></div>
-      <div id="fin-funding"></div>
-    </section>
+    </dialog>
   </main>
 </div>
 

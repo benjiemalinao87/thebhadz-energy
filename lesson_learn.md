@@ -244,3 +244,21 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Sign in at `http://localhost:8000/login` with `MASTER_EMAIL` + `MASTER_PASSWORD` from `funnel/.dev.vars`, or use shared-password mode with `FOUNDER_PASSWORD`. Confirm accounts via `npx wrangler d1 execute DB --local --command "SELECT email, role, active FROM users;"`.
 
 **Do not:** Assume root `.env` seeds or authenticates founder logins. "Please enter your password" with visible dots is usually browser autofill with an empty value — clear the field and type the password from `.dev.vars`.
+
+## Ops create forms belong in modals, and dialogs must live inside <main>
+
+**Fixed:** 2026-08-04
+
+**What went wrong:** Finance Ledger and Install Ops (projects / costing / crew) kept tall always-open create forms above the lists, so the data founders actually need sat below the fold.
+
+**What worked:** Primary "Add…" buttons open native `<dialog class="ops-dialog">` with the existing forms. After save (or Cancel/Escape), close and reset. Put every dialog **inside** the page `<main>` — `spa-router.js` only injects `main` into `#cc-view`, so siblings outside `main` vanish on SPA navigation (Quote Builder already does this).
+
+**Do not:** Leave create forms permanently expanded on list pages. Do not park `<dialog>` next to `<main>` as a body sibling on Command Center pages that go through the SPA.
+
+## Dashboard first metric: Leads from live `/api/leads`, not Mission constants
+
+**Fixed:** 2026-08-04
+
+**What worked:** Replaced the Mission/energized card in `dashboard.js` `renderMission()` with a Leads card. Total = `leads.length`; "new in last 7 days" filters on `created_at` date slice `>= today - 7` (same window pattern as `renderWeek`). If the leads section 403s, show "—" and "Contacts not visible" rather than inventing zero.
+
+**Do not:** Hard-code Mission target/date into the first instrument card when the ask is top-of-funnel volume. Keep Mission wording in Pipeline copy where sold→energized still matters.

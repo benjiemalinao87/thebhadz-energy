@@ -1,5 +1,11 @@
 # Progress
 
+## Ops create forms → modals (2026-08-04) — done
+- Finance Ledger: Add/Edit transaction opens `#fin-dialog` (list + filter stay default view)
+- Install Ops: Create project, Add cost, Add payment, Add installer, Create assignment each open a native `<dialog>`
+- Shared chrome in `ops-tools.css` (`.ops-dialog`); dialogs live inside `<main>` so SPA swap keeps them
+- Local: hard-refresh Finance / Install Ops after Wrangler is up
+
 ## Fix: password change false "session expired" (2026-08-03) — done
 - Wrong current password on `/api/session` was HTTP 401; Team UI treated every 401 as logout
 - Now returns 403 + shows "Current password is incorrect"; only real auth failures bounce to login

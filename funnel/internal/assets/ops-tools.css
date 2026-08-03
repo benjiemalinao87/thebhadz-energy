@@ -104,6 +104,36 @@ html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #3a1d20;
   .ops-form { grid-template-columns: repeat(2, 1fr); }
   .ops-card-grid { grid-template-columns: repeat(2, 1fr); }
 }
+/* Create/edit forms live in dialogs so the list stays the default view. */
+.ops-dialog {
+  width: min(920px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .55);
+  overflow: hidden;
+}
+.ops-dialog::backdrop { background: rgba(4, 12, 14, .58); backdrop-filter: blur(2px); }
+.ops-dialog-head {
+  display: flex; align-items: start; justify-content: space-between; gap: 16px;
+  padding: 18px 20px 0;
+}
+.ops-dialog-head h2 { margin: 0; font: 600 17px var(--sans); letter-spacing: -.01em; }
+.ops-dialog-head p { margin: 4px 0 0; color: var(--faint); font-size: 13px; line-height: 1.45; }
+.ops-dialog-head .ops-dialog-close { flex: 0 0 auto; margin-top: 2px; }
+/* Beat page-level .ops-finance/.workspace-page .ops-form chrome so the dialog
+   owns the card and the form is just the scrollable field grid. */
+.ops-content dialog.ops-dialog .ops-form {
+  margin: 16px 0 0; border: 0; border-top: 1px solid var(--hairline);
+  border-radius: 0; background: transparent; max-height: min(70vh, 640px); overflow: auto;
+}
+.ops-toolbar-start { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-right: auto; }
+.ops-toolbar .ops-filter { margin-left: auto; }
+
 @media (max-width: 760px) {
   .ops-content { padding: 28px 18px 72px; }
   .ops-metrics { grid-template-columns: repeat(2, 1fr); }
@@ -113,4 +143,6 @@ html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #3a1d20;
   .ops-section-head { align-items: stretch; flex-direction: column; }
   .ops-card-grid, .ops-checks { grid-template-columns: 1fr; }
   .ops-card-head { flex-direction: column; }
+  .ops-dialog { width: calc(100vw - 16px); max-height: calc(100vh - 16px); border-radius: 10px; }
+  .ops-dialog .ops-form { max-height: none; }
 }

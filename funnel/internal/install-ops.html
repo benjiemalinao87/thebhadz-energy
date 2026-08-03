@@ -62,7 +62,47 @@
     </nav>
 
     <section class="ops-panel" data-panel="projects">
-      <div class="ops-section-head"><div><span class="ops-kicker">CUSTOMER → SITE → HANDOVER</span><h2>Create an installation project</h2><p>Create this from a qualified/sold lead or enter the customer manually.</p></div></div>
+      <div class="ops-toolbar">
+        <div class="ops-toolbar-start">
+          <button type="button" data-open-dialog="project-dialog">Create project</button>
+        </div>
+      </div>
+      <div id="ops-projects" class="ops-projects"></div>
+    </section>
+
+    <section class="ops-panel" data-panel="costing" hidden>
+      <div class="ops-section-head"><div><span class="ops-kicker">TARGET → COMMITTED → ACTUAL</span><h2>Project costing and customer payments</h2><p>A committed or paid cost automatically appears in Finance. A received payment does the same.</p></div></div>
+      <div class="ops-toolbar">
+        <div class="ops-toolbar-start">
+          <button type="button" data-open-dialog="cost-dialog">Add cost</button>
+          <button type="button" class="secondary" data-open-dialog="payment-dialog">Add payment</button>
+        </div>
+      </div>
+      <h3>Cost lines</h3><div id="ops-costs"></div>
+      <h3>Customer payments</h3><div id="ops-payments"></div>
+    </section>
+
+    <section class="ops-panel" data-panel="crew" hidden>
+      <div class="ops-section-head"><div><span class="ops-kicker">WHO · WHEN · SAFETY · QC · PAYOUT</span><h2>Installers and field assignments</h2><p>Designed to stay usable on a phone during site work.</p></div></div>
+      <div class="ops-toolbar">
+        <div class="ops-toolbar-start">
+          <button type="button" data-open-dialog="installer-dialog">Add installer</button>
+          <button type="button" class="secondary" data-open-dialog="assignment-dialog">Create assignment</button>
+        </div>
+      </div>
+      <h3>Installer directory</h3><div id="ops-installers"></div>
+      <h3>Field assignments</h3><div id="ops-assignments" class="ops-list"></div>
+    </section>
+
+    <dialog class="ops-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">CUSTOMER → SITE → HANDOVER</span>
+          <h2 id="project-dialog-title">Create an installation project</h2>
+          <p>Create this from a qualified/sold lead or enter the customer manually.</p>
+        </div>
+        <button type="button" class="secondary ops-dialog-close" data-close-dialog>Close</button>
+      </div>
       <form class="ops-form" id="project-form">
         <label>CRM lead<select name="lead_id" id="project-lead"><option value="">Manual customer</option></select></label>
         <label>Customer name<input name="customer_name" maxlength="120" required></label>
@@ -76,80 +116,95 @@
         <label class="wide">Notes<textarea name="notes" rows="2" maxlength="2000"></textarea></label>
         <div class="ops-form-actions"><button type="submit">Create installation project</button></div>
       </form>
-      <div id="ops-projects" class="ops-projects"></div>
-    </section>
+    </dialog>
 
-    <section class="ops-panel" data-panel="costing" hidden>
-      <div class="ops-section-head"><div><span class="ops-kicker">TARGET → COMMITTED → ACTUAL</span><h2>Project costing and customer payments</h2><p>A committed or paid cost automatically appears in Finance. A received payment does the same.</p></div></div>
-      <div class="ops-split">
-        <div class="ops-subpanel">
-          <h3>Add project cost</h3>
-          <form class="ops-form two" id="cost-form">
-            <label class="wide">Project<select name="project_id" data-project-select required></select></label>
-            <label>Category<select name="category"><option>Panels</option><option>Inverter</option><option>Racking / BOS</option><option>Labor</option><option>Transport</option><option>Permits / engineering</option><option>Warranty / rework</option><option>Other</option></select></label>
-            <label>Description<input name="description" required maxlength="180"></label>
-            <label>Vendor<input name="vendor" maxlength="120"></label>
-            <label>Status<select name="status"><option value="planned">Planned</option><option value="committed">Committed</option><option value="paid">Paid</option></select></label>
-            <label>Budget (₱)<input name="budget" type="number" min="0" step="0.01"></label>
-            <label>Committed (₱)<input name="committed" type="number" min="0" step="0.01"></label>
-            <label>Actual paid (₱)<input name="actual" type="number" min="0" step="0.01"></label>
-            <div class="ops-form-actions"><button type="submit">Add cost</button></div>
-          </form>
+    <dialog class="ops-dialog" id="cost-dialog" aria-labelledby="cost-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">TARGET → COMMITTED → ACTUAL</span>
+          <h2 id="cost-dialog-title">Add project cost</h2>
+          <p>Committed or paid costs post to Finance automatically.</p>
         </div>
-        <div class="ops-subpanel">
-          <h3>Add customer payment</h3>
-          <form class="ops-form two" id="payment-form">
-            <label class="wide">Project<select name="project_id" data-project-select required></select></label>
-            <label>Date<input name="payment_date" type="date" required></label>
-            <label>Payment type<select name="kind"><option value="deposit">Deposit</option><option value="progress">Progress</option><option value="final">Final</option><option value="refund">Refund</option></select></label>
-            <label>Amount (₱)<input name="amount" type="number" min="0.01" step="0.01" required></label>
-            <label>Status<select name="status"><option value="expected">Expected</option><option value="received">Received in account</option></select></label>
-            <label class="wide">Reference<input name="reference" maxlength="160" placeholder="Bank transfer / OR / invoice"></label>
-            <div class="ops-form-actions"><button type="submit">Add payment</button></div>
-          </form>
-        </div>
+        <button type="button" class="secondary ops-dialog-close" data-close-dialog>Close</button>
       </div>
-      <h3>Cost lines</h3><div id="ops-costs"></div>
-      <h3>Customer payments</h3><div id="ops-payments"></div>
-    </section>
+      <form class="ops-form two" id="cost-form">
+        <label class="wide">Project<select name="project_id" data-project-select required></select></label>
+        <label>Category<select name="category"><option>Panels</option><option>Inverter</option><option>Racking / BOS</option><option>Labor</option><option>Transport</option><option>Permits / engineering</option><option>Warranty / rework</option><option>Other</option></select></label>
+        <label>Description<input name="description" required maxlength="180"></label>
+        <label>Vendor<input name="vendor" maxlength="120"></label>
+        <label>Status<select name="status"><option value="planned">Planned</option><option value="committed">Committed</option><option value="paid">Paid</option></select></label>
+        <label>Budget (₱)<input name="budget" type="number" min="0" step="0.01"></label>
+        <label>Committed (₱)<input name="committed" type="number" min="0" step="0.01"></label>
+        <label>Actual paid (₱)<input name="actual" type="number" min="0" step="0.01"></label>
+        <div class="ops-form-actions"><button type="submit">Add cost</button></div>
+      </form>
+    </dialog>
 
-    <section class="ops-panel" data-panel="crew" hidden>
-      <div class="ops-section-head"><div><span class="ops-kicker">WHO · WHEN · SAFETY · QC · PAYOUT</span><h2>Installers and field assignments</h2><p>Designed to stay usable on a phone during site work.</p></div></div>
-      <div class="ops-split">
-        <div class="ops-subpanel">
-          <h3>Add installer / contractor</h3>
-          <form class="ops-form two" id="installer-form">
-            <label>Name<input name="name" maxlength="120" required></label>
-            <label>Role<input name="role" maxlength="80" value="Installer"></label>
-            <label>Phone<input name="phone" maxlength="40"></label>
-            <label>Rate basis<select name="rate_type"><option value="daily">Daily</option><option value="hourly">Hourly</option><option value="project">Per project</option></select></label>
-            <label>Rate (₱)<input name="rate" type="number" min="0" step="0.01"></label>
-            <label>Licence / certificate<input name="license_number" maxlength="100"></label>
-            <label>Licence expiry<input name="license_expiry" type="date"></label>
-            <label class="wide">Notes<textarea name="notes" rows="2"></textarea></label>
-            <div class="ops-form-actions"><button type="submit">Add installer</button></div>
-          </form>
+    <dialog class="ops-dialog" id="payment-dialog" aria-labelledby="payment-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">CUSTOMER CASH</span>
+          <h2 id="payment-dialog-title">Add customer payment</h2>
+          <p>Received payments post to Finance automatically.</p>
         </div>
-        <div class="ops-subpanel">
-          <h3>Assign installer to a job</h3>
-          <form class="ops-form two" id="assignment-form">
-            <label class="wide">Project<select name="project_id" data-project-select required></select></label>
-            <label class="wide">Installer<select name="installer_id" id="assignment-installer" required></select></label>
-            <label>Work date<input name="work_date" type="date" required></label>
-            <label>Status<select name="status"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="approved">Approved for payout</option><option value="paid">Paid</option></select></label>
-            <label>Hours<input name="hours" type="number" min="0" step="0.5"></label>
-            <label>Days<input name="days" type="number" min="0" step="0.5"></label>
-            <label>Agreed payout (₱)<input name="agreed" type="number" min="0" step="0.01"></label>
-            <label>QC result<select name="qc_status"><option value="pending">Pending</option><option value="passed">Passed</option><option value="rework">Rework required</option></select></label>
-            <label class="wide"><span>Safety check</span><span><input name="safety_checked" type="checkbox" style="width:auto"> Briefing and PPE confirmed</span></label>
-            <label class="wide">Field notes<textarea name="notes" rows="2"></textarea></label>
-            <div class="ops-form-actions"><button type="submit">Create assignment</button></div>
-          </form>
-        </div>
+        <button type="button" class="secondary ops-dialog-close" data-close-dialog>Close</button>
       </div>
-      <h3>Installer directory</h3><div id="ops-installers"></div>
-      <h3>Field assignments</h3><div id="ops-assignments" class="ops-list"></div>
-    </section>
+      <form class="ops-form two" id="payment-form">
+        <label class="wide">Project<select name="project_id" data-project-select required></select></label>
+        <label>Date<input name="payment_date" type="date" required></label>
+        <label>Payment type<select name="kind"><option value="deposit">Deposit</option><option value="progress">Progress</option><option value="final">Final</option><option value="refund">Refund</option></select></label>
+        <label>Amount (₱)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+        <label>Status<select name="status"><option value="expected">Expected</option><option value="received">Received in account</option></select></label>
+        <label class="wide">Reference<input name="reference" maxlength="160" placeholder="Bank transfer / OR / invoice"></label>
+        <div class="ops-form-actions"><button type="submit">Add payment</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="ops-dialog" id="installer-dialog" aria-labelledby="installer-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">CREW</span>
+          <h2 id="installer-dialog-title">Add installer / contractor</h2>
+          <p>Directory entry for field assignments and payouts.</p>
+        </div>
+        <button type="button" class="secondary ops-dialog-close" data-close-dialog>Close</button>
+      </div>
+      <form class="ops-form two" id="installer-form">
+        <label>Name<input name="name" maxlength="120" required></label>
+        <label>Role<input name="role" maxlength="80" value="Installer"></label>
+        <label>Phone<input name="phone" maxlength="40"></label>
+        <label>Rate basis<select name="rate_type"><option value="daily">Daily</option><option value="hourly">Hourly</option><option value="project">Per project</option></select></label>
+        <label>Rate (₱)<input name="rate" type="number" min="0" step="0.01"></label>
+        <label>Licence / certificate<input name="license_number" maxlength="100"></label>
+        <label>Licence expiry<input name="license_expiry" type="date"></label>
+        <label class="wide">Notes<textarea name="notes" rows="2"></textarea></label>
+        <div class="ops-form-actions"><button type="submit">Add installer</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="ops-dialog" id="assignment-dialog" aria-labelledby="assignment-dialog-title">
+      <div class="ops-dialog-head">
+        <div>
+          <span class="ops-kicker">FIELD WORK</span>
+          <h2 id="assignment-dialog-title">Assign installer to a job</h2>
+          <p>Safety check and QC stay on the assignment record.</p>
+        </div>
+        <button type="button" class="secondary ops-dialog-close" data-close-dialog>Close</button>
+      </div>
+      <form class="ops-form two" id="assignment-form">
+        <label class="wide">Project<select name="project_id" data-project-select required></select></label>
+        <label class="wide">Installer<select name="installer_id" id="assignment-installer" required></select></label>
+        <label>Work date<input name="work_date" type="date" required></label>
+        <label>Status<select name="status"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="approved">Approved for payout</option><option value="paid">Paid</option></select></label>
+        <label>Hours<input name="hours" type="number" min="0" step="0.5"></label>
+        <label>Days<input name="days" type="number" min="0" step="0.5"></label>
+        <label>Agreed payout (₱)<input name="agreed" type="number" min="0" step="0.01"></label>
+        <label>QC result<select name="qc_status"><option value="pending">Pending</option><option value="passed">Passed</option><option value="rework">Rework required</option></select></label>
+        <label class="wide"><span>Safety check</span><span><input name="safety_checked" type="checkbox" style="width:auto"> Briefing and PPE confirmed</span></label>
+        <label class="wide">Field notes<textarea name="notes" rows="2"></textarea></label>
+        <div class="ops-form-actions"><button type="submit">Create assignment</button></div>
+      </form>
+    </dialog>
   </main>
 </div>
 
