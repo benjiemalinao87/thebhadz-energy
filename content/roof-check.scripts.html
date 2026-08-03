@@ -5,7 +5,7 @@
   var KEY='sc_biliran_map_v1'; // shares pins with SC-09
   var PIN_TYPES=[
     {k:'lead',label:'Lead',c:'#2f80ed'},{k:'survey',label:'Survey booked',c:'#8e44ad'},
-    {k:'install',label:'Install',c:'#27ae60'},{k:'demo',label:'Demo day',c:'#e67e22'},
+    {k:'install',label:'Install',c:'#00a38c'},{k:'demo',label:'Demo day',c:'#e67e22'},
     {k:'comp',label:'Competitor',c:'#c0392b'},{k:'solar',label:'Solar spotted',c:'#F2B705'}];
   var db=load(); db.pins=db.pins||[]; db.status=db.status||{}; db.notes=db.notes||{};
   function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}}

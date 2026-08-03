@@ -25,31 +25,31 @@
      Surfaces that are deliberately dark in BOTH themes (the hero, the tier caps)
      keep explicit light ink, because their background is fixed. */
   .workspace-support-moat{
-    --panel:var(--ws-surface,#fff); --panel2:var(--ws-surface-2,#f0f1ec);
-    --line:var(--ws-line,#d7d9d2); --ink:var(--ws-ink,#102f34);
-    --soft:var(--ws-copy,#294950); --faint:var(--ws-muted,#5d7072);
-    --deep:var(--ws-petrol,#073f43); --deep2:var(--ws-petrol-2,#0a5558);
-    --accent:var(--ws-copper,#b9682d); --accent-ink:var(--ws-warn-ink,#8a5b00);
-    --fill:var(--ws-amber,#f5b81b);
-    --blue:var(--ws-petrol,#073f43); --blue-ink:var(--ws-petrol-2,#0a5558);
-    --green:var(--ws-green,#267a56); --green-ink:var(--ws-green,#267a56);
-    --red:var(--ws-red,#b5372b); --red-soft:var(--ws-red-soft,#fff0ed);
-    --shadow:var(--ws-shadow,0 1px 1px rgba(7,63,67,.05),0 10px 28px rgba(7,63,67,.06));
+    --panel:var(--ws-surface,#fff); --panel2:var(--ws-surface-2,#eaf0f6);
+    --line:var(--ws-line,#dfe3eb); --ink:var(--ws-ink,#33475b);
+    --soft:var(--ws-copy,#425b76); --faint:var(--ws-muted,#516f90);
+    --deep:var(--ws-petrol,#2e3f50); --deep2:var(--ws-petrol-2,#33475b);
+    --accent:var(--ws-copper,#c25e3a); --accent-ink:var(--ws-warn-ink,#b3452a);
+    --fill:var(--ws-amber,#ff7a59);
+    --blue:var(--ws-petrol,#2e3f50); --blue-ink:var(--ws-petrol-2,#33475b);
+    --green:var(--ws-green,#00a38c); --green-ink:var(--ws-green,#00a38c);
+    --red:var(--ws-red,#d94a52); --red-soft:var(--ws-red-soft,#fdecee);
+    --shadow:var(--ws-shadow,0 1px 1px rgba(45,62,80,.05),0 10px 28px rgba(45,62,80,.06));
     --mono:ui-monospace,"SF Mono",Menlo,monospace;
     --sans:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
   }
   *{box-sizing:border-box;}
   body.workspace-support-moat{margin:0;font-family:var(--sans);color:var(--ink);
-    background:var(--ws-canvas,#f7f6f2);min-height:100vh;line-height:1.62;}
+    background:var(--ws-canvas,#f5f8fa);min-height:100vh;line-height:1.62;}
   a{color:var(--accent);}
 
   .bar{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);
     background:var(--deep);position:sticky;top:0;z-index:20;flex-wrap:wrap;}
   .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;text-decoration:none;color:#fff;letter-spacing:0.02em;}
   .brand img{width:32px;height:32px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;}
-  .bar h1{font-size:16px;font-weight:600;color:#c9dcda;margin:0;}
+  .bar h1{font-size:16px;font-weight:600;color:#dbe4ee;margin:0;}
   .bar .sp{flex:1;}
-  .bar .link{font-family:var(--mono);font-size:12.5px;color:#d2e2e0;text-decoration:none;border:1px solid rgba(255,255,255,.28);padding:7px 12px;border-radius:6px;}
+  .bar .link{font-family:var(--mono);font-size:12.5px;color:#dbe4ee;text-decoration:none;border:1px solid rgba(255,255,255,.28);padding:7px 12px;border-radius:6px;}
   .bar .link:hover{color:#fff;border-color:rgba(255,255,255,.55);}
 
   .wrap{max-width:1020px;margin:0 auto;padding:44px 28px 120px;}
@@ -63,7 +63,7 @@
   .hero .ey{color:#ffd257;}
   .hero .statement{font-size:clamp(26px,4.1vw,42px);font-weight:800;letter-spacing:-0.025em;line-height:1.12;margin:0;max-width:19ch;position:relative;color:#fff;}
   .hero .statement .hl{color:#ffd257;}
-  .hero .gloss{color:#d6e6e4;font-size:16.5px;max-width:62ch;margin:20px 0 0;position:relative;}
+  .hero .gloss{color:#dbe4ee;font-size:16.5px;max-width:62ch;margin:20px 0 0;position:relative;}
   .hero .gloss strong{color:#fff;}
 
   .stamp{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
@@ -155,7 +155,7 @@
   .no{color:var(--faint);}
 
   /* big rule callout */
-  .rule{background:var(--ws-amber-soft,#fff4cd);
+  .rule{background:var(--ws-amber-soft,#fff1ec);
     border:1px solid var(--accent);border-radius:15px;padding:28px 30px;margin:22px 0;}
   .rule .ey{color:var(--accent-ink);}
   .rule p.big{font-size:clamp(19px,2.5vw,25px);font-weight:800;letter-spacing:-0.015em;line-height:1.28;margin:0 0 12px;max-width:26ch;color:var(--ink);}
@@ -196,7 +196,7 @@
   .item .cost{font-family:var(--mono);font-size:11px;color:var(--faint);display:block;margin-top:5px;}
 
   /* econ */
-  .econ-note{background:var(--ws-green-soft,#eaf5ee);border:1px solid var(--green);border-radius:12px;padding:18px 21px;margin-top:14px;}
+  .econ-note{background:var(--ws-green-soft,#e3f7f4);border:1px solid var(--green);border-radius:12px;padding:18px 21px;margin-top:14px;}
   .econ-note .ey{color:var(--green-ink);}
   .econ-note p{margin:0;font-size:14.5px;color:var(--soft);max-width:74ch;}
   .econ-note p strong{color:var(--ink);}

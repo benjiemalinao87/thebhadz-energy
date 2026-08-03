@@ -2,29 +2,34 @@
    Shared visual layer for technical docs, planning tools, maps, and culture pages.
    Functional page CSS remains authoritative for geometry and data interactions. */
 
+/* Every colour here now defers to the shared Operations token of the same role, with the
+   HubSpot literal as the fallback. Pages inside the Command Center load
+   operations-redesign.css, so the ops token wins there and one edit re-themes everything;
+   the doc pages do NOT load it, and the fallback keeps them correct on their own. Same
+   var(--x, literal) pattern the doc pages already use for --ws-line and --ops-ink. */
 :root {
-  --ws-canvas: #f7f6f2;
-  --ws-surface: #ffffff;
-  --ws-surface-2: #f0f1ec;
-  --ws-petrol: #073f43;
-  --ws-petrol-2: #0a5558;
-  --ws-ink: #102f34;
-  --ws-copy: #294950;
-  --ws-muted: #5d7072;
-  --ws-line: #d7d9d2;
-  --ws-amber: #f5b81b;
-  --ws-amber-soft: #fff4cd;
-  --ws-copper: #b9682d;
-  --ws-green: #267a56;
-  --ws-green-soft: #eaf5ee;
-  --ws-red: #b5372b;
-  --ws-red-soft: #fff0ed;
-  /* Amber as TEXT. --ws-amber is a fill colour and drops to ~2:1 as ink on the light
-     canvas, so anything that writes a warning in words uses this instead. */
-  --ws-warn-ink: #8a5b00;
-  --ws-blueprint: #10233f;
-  --ws-radius: 10px;
-  --ws-shadow: 0 1px 1px rgba(7, 63, 67, .05), 0 10px 28px rgba(7, 63, 67, .06);
+  --ws-canvas: var(--ops-ground, #f5f8fa);
+  --ws-surface: var(--ops-surface, #ffffff);
+  --ws-surface-2: var(--ops-surface-2, #eaf0f6);
+  --ws-petrol: var(--ops-rail, #33475b);
+  --ws-petrol-2: var(--ops-rail-2, #2e3f50);
+  --ws-ink: var(--ops-ink, #33475b);
+  --ws-copy: #425b76;
+  --ws-muted: var(--ops-muted, #516f90);
+  --ws-line: var(--ops-line, #dfe3eb);
+  --ws-amber: var(--ops-amber, #ff7a59);
+  --ws-amber-soft: #fff1ec;
+  --ws-copper: #c25e3a;
+  --ws-green: var(--ops-green, #00a38c);
+  --ws-green-soft: var(--ops-green-soft, #e3f7f4);
+  --ws-red: var(--ops-rust, #d94a52);
+  --ws-red-soft: var(--ops-rust-soft, #fdecee);
+  /* The accent as TEXT. --ws-amber is a fill colour and drops to roughly 2:1 as ink on the
+     light canvas, so anything writing a warning in words uses this instead. */
+  --ws-warn-ink: #b3452a;
+  --ws-blueprint: #2e3f50;
+  --ws-radius: 8px;
+  --ws-shadow: 0 1px 2px rgba(45, 62, 80, .06), 0 8px 22px -14px rgba(45, 62, 80, .28);
 
   /* Re-map the legacy document variables so inherited components stay coherent. */
   --paper: var(--ws-canvas);
@@ -33,37 +38,37 @@
   --faint: var(--ws-muted);
   --hairline: var(--ws-line);
   --copper: var(--ws-copper);
-  --copper-bright: #cf7d3f;
+  --copper-bright: var(--ops-amber-hover, #ff8f73);
   --sun: var(--ws-amber);
   --ok: var(--ws-green);
   --warn: var(--ws-copper);
   --silicon: var(--ws-petrol);
   --wafer: var(--ws-blueprint);
-  --busbar: #8da3a5;
+  --busbar: var(--ops-subtle, #7c98b6);
 }
 
 html[data-theme="dark"] {
-  --ws-canvas: #071214;
-  --ws-surface: #0f2023;
-  --ws-surface-2: #14272a;
-  --ws-petrol: #116d70;
-  --ws-petrol-2: #1b8a8c;
-  --ws-ink: #edf6f5;
-  --ws-copy: #c8d8d6;
-  --ws-muted: #98aaa8;
-  --ws-line: #294144;
-  --ws-amber: #f5bd36;
-  --ws-amber-soft: #352b0d;
-  --ws-copper: #ef9a58;
-  --ws-green: #58bd84;
-  --ws-green-soft: #123326;
-  --ws-red: #f07a67;
-  --ws-red-soft: #391c19;
-  --ws-warn-ink: #f0c669;
-  --ws-blueprint: #081323;
+  --ws-canvas: #16232e;
+  --ws-surface: #1d2d3c;
+  --ws-surface-2: #24384a;
+  --ws-petrol: #253546;
+  --ws-petrol-2: #1d2a38;
+  --ws-ink: #eaf0f6;
+  --ws-copy: #b0c1d4;
+  --ws-muted: #8ba2ba;
+  --ws-line: #33475b;
+  --ws-amber: #ff8f73;
+  --ws-amber-soft: #3d241c;
+  --ws-copper: #ffa693;
+  --ws-green: #2fd5bf;
+  --ws-green-soft: #10322f;
+  --ws-red: #ff7b81;
+  --ws-red-soft: #3a1d20;
+  --ws-warn-ink: #ffb39e;
+  --ws-blueprint: #1d2a38;
   --ws-shadow: 0 1px 2px rgba(0,0,0,.18), 0 14px 34px -22px rgba(0,0,0,.85);
-  --copper-bright: #ffae70;
-  --busbar: #728f91;
+  --copper-bright: var(--ops-amber-hover, #ffa693);
+  --busbar: #7c98b6;
   color-scheme: dark;
 }
 
@@ -87,10 +92,10 @@ body.workspace-page .frame,
   width: 252px;
   flex-basis: 252px;
   padding: 22px 0;
-  color: #c7dad8;
+  color: #dbe4ee;
   background:
     radial-gradient(circle at 15% 0%, rgba(245, 184, 27, .12), transparent 26%),
-    linear-gradient(180deg, #073f43 0%, #06363a 100%);
+    linear-gradient(180deg, #2e3f50 0%, #263444 100%);
   border-right: 1px solid rgba(255, 255, 255, .08);
 }
 
@@ -137,7 +142,7 @@ body.workspace-principles > .sc-theme-toggle-standalone {
 }
 
 .frame:has(> main.workspace-page) > .sidebar .brand .sub {
-  color: #9bb8b7;
+  color: #b0c1d4;
   letter-spacing: .1em;
 }
 
@@ -151,7 +156,7 @@ body.workspace-principles > .sc-theme-toggle-standalone {
   margin: 2px 0;
   border: 0;
   border-radius: 8px;
-  color: #c8d9d8;
+  color: #dbe4ee;
 }
 
 .frame:has(> main.workspace-page) > .sidebar .nav a:hover {
@@ -171,7 +176,7 @@ body.workspace-principles > .sc-theme-toggle-standalone {
 
 .frame:has(> main.workspace-page) > .sidebar .foot {
   border-color: rgba(255,255,255,.12);
-  color: #8faaa9;
+  color: #b0c1d4;
 }
 
 /* Main work surface */
@@ -183,7 +188,7 @@ main.workspace-page,
   padding: clamp(32px, 4vw, 58px) clamp(24px, 4.5vw, 72px) 104px;
   color: var(--ws-copy);
   background:
-    linear-gradient(rgba(7,63,67,.025) 1px, transparent 1px),
+    linear-gradient(rgba(45,62,80,.025) 1px, transparent 1px),
     var(--ws-canvas);
   background-size: 100% 32px;
 }
@@ -261,7 +266,7 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
   color: var(--ws-copy);
   background: var(--ws-surface);
   border: 1px solid var(--ws-line);
-  border-left: 4px solid #8da3a5;
+  border-left: 4px solid #7c98b6;
   border-radius: 0 var(--ws-radius) var(--ws-radius) 0;
   box-shadow: var(--ws-shadow);
 }
@@ -298,7 +303,7 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
 
 .workspace-page caption { color: var(--ws-muted); }
 .workspace-page th {
-  color: #d8e7e5;
+  color: #dbe4ee;
   background: var(--ws-petrol);
   border-bottom-color: var(--ws-petrol);
 }
@@ -465,19 +470,19 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
 .workspace-overview .hero {
   margin: -58px -72px 46px;
   padding: 62px 72px 38px;
-  color: #d7e7e5;
+  color: #dbe4ee;
   background:
     radial-gradient(circle at 82% 10%, rgba(245,184,27,.14), transparent 28%),
-    linear-gradient(135deg, #073f43 0%, #0a5558 100%);
+    linear-gradient(135deg, #2e3f50 0%, #33475b 100%);
   border-bottom-right-radius: 28px;
 }
 .workspace-overview .hero h1 {
   max-width: 14ch;
   color: #fff;
 }
-.workspace-overview .hero .lede { color: #d7e7e5; }
-.workspace-overview .hero .doc-eyebrow { color: #ffd25e; }
-.workspace-overview .hero .doc-eyebrow .rev { color: #a7c2c0; }
+.workspace-overview .hero .lede { color: #dbe4ee; }
+.workspace-overview .hero .doc-eyebrow { color: var(--ops-amber, #ff8f73); }
+.workspace-overview .hero .doc-eyebrow .rev { color: #b0c1d4; }
 .workspace-overview .hero-diagram {
   max-width: 980px;
   margin-top: 28px;
@@ -496,7 +501,7 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
   border-radius: var(--ws-radius);
   box-shadow: var(--ws-shadow);
 }
-.workspace-overview .stage-card { border-top: 4px solid #8da3a5; }
+.workspace-overview .stage-card { border-top: 4px solid #7c98b6; }
 .workspace-overview .stage-card.s2 { border-top-color: var(--ws-copper); }
 .workspace-overview .stage-card.s3 { border-top-color: var(--ws-amber); }
 .workspace-overview :is(.stage-card,.toc-card) h3 { color: var(--ws-ink); }
@@ -507,8 +512,8 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
 }
 .workspace-overview .toc-card:hover {
   color: var(--ws-copy);
-  border-color: #9dbbb7;
-  box-shadow: 0 14px 32px rgba(7,63,67,.11);
+  border-color: #cbd6e2;
+  box-shadow: 0 14px 32px rgba(45,62,80,.11);
   transform: translateY(-2px);
 }
 
@@ -588,7 +593,7 @@ main.workspace-page > :not(.designer-grid):not(.rc-wrap):not(.map-wrap):not(.ops
   border: 1px solid var(--ws-line);
   border-top: 5px solid var(--ws-copper);
   border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(7,63,67,.14);
+  box-shadow: 0 18px 44px rgba(45,62,80,.14);
 }
 .workspace-founders .fcard :is(h2,h3,strong) { color: var(--ws-ink); }
 .workspace-founders .fcard :is(p,span) { color: var(--ws-copy); }
@@ -632,18 +637,18 @@ body.workspace-principles .bar {
   border-color: rgba(255,255,255,.12);
 }
 body.workspace-principles .bar .brand { color: #fff; }
-body.workspace-principles .bar h1 { color: #c9dcda; }
-body.workspace-principles .bar .link { color: #d2e2e0; border-color: rgba(255,255,255,.28); }
+body.workspace-principles .bar h1 { color: #dbe4ee; }
+body.workspace-principles .bar .link { color: #dbe4ee; border-color: rgba(255,255,255,.28); }
 body.workspace-principles .wrap { max-width: 1120px; }
 body.workspace-principles .vision {
   color: #fff;
-  background: linear-gradient(135deg, #073f43, #0c6466);
-  border-color: #2c7475;
+  background: linear-gradient(135deg, #2e3f50, #3c5170);
+  border-color: #425b76;
   box-shadow: var(--ws-shadow);
 }
 body.workspace-principles .vision .statement,
 body.workspace-principles .vision strong { color: #fff; }
-body.workspace-principles .vision .gloss { color: #d6e6e4; }
+body.workspace-principles .vision .gloss { color: #dbe4ee; }
 body.workspace-principles .vision .hl { color: #ffd257; }
 body.workspace-principles .mission,
 body.workspace-principles .goal,
@@ -667,7 +672,7 @@ body.workspace-principles .sec-head h2 { color: var(--ws-ink); }
 body.workspace-principles .motto {
   color: #fff;
   background: var(--ws-petrol);
-  border-color: #2c7475;
+  border-color: #425b76;
 }
 body.workspace-principles .motto p { color: #fff; }
 body.workspace-principles .motto .hl { color: #ffd257; }
@@ -680,13 +685,13 @@ body.workspace-principles .motto .hl { color: #ffd257; }
 #cc-main.workspace-principles > .wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 0 72px; }
 #cc-main.workspace-principles .vision {
   color: #fff;
-  background: linear-gradient(135deg, #073f43, #0c6466);
-  border-color: #2c7475;
+  background: linear-gradient(135deg, #2e3f50, #3c5170);
+  border-color: #425b76;
   box-shadow: var(--ws-shadow);
 }
 #cc-main.workspace-principles .vision .statement,
 #cc-main.workspace-principles .vision strong { color: #fff; }
-#cc-main.workspace-principles .vision .gloss { color: #d6e6e4; }
+#cc-main.workspace-principles .vision .gloss { color: #dbe4ee; }
 #cc-main.workspace-principles .vision .hl { color: #ffd257; }
 #cc-main.workspace-principles :is(.mission,.goal,.val) {
   color: var(--ws-copy);
@@ -708,7 +713,7 @@ body.workspace-principles .motto .hl { color: #ffd257; }
 #cc-main.workspace-principles .motto {
   color: #fff;
   background: var(--ws-petrol);
-  border-color: #2c7475;
+  border-color: #425b76;
 }
 #cc-main.workspace-principles .motto p { color: #fff; }
 #cc-main.workspace-principles .motto .hl { color: #ffd257; }
@@ -756,7 +761,7 @@ html[data-theme="dark"] .frame:has(> main.workspace-page) {
   background: var(--ws-canvas);
 }
 
-html[data-theme="dark"] .workspace-page code { color: #a6d7d4; background: #152a2c; }
+html[data-theme="dark"] .workspace-page code { color: #9ad9e6; background: #24384a; }
 html[data-theme="dark"] .workspace-page .callout.warn { background: #302816; }
 /* Beat ops-tools' dark .ops-alert fallback so workspace tokens stay in charge. */
 html[data-theme="dark"] .workspace-page .ops-alert {
@@ -792,12 +797,12 @@ html[data-theme="dark"] .workspace-install-ops .ops-alert.danger {
 html[data-theme="dark"] .workspace-install-ops .ops-alert.danger strong { color: #fff3f0; }
 html[data-theme="dark"] .workspace-page :is(input, select, textarea) {
   color: var(--ws-ink);
-  background: #071214;
-  border-color: #4d6f72;
+  background: #16232e;
+  border-color: #33475b;
   box-shadow: inset 0 1px 2px rgba(0,0,0,.35);
 }
 html[data-theme="dark"] .workspace-page :is(input, select, textarea):hover {
-  border-color: #6a9195;
+  border-color: #425b76;
 }
 html[data-theme="dark"] .workspace-page :is(input, textarea)::placeholder {
   color: var(--ws-muted);
@@ -809,8 +814,8 @@ html[data-theme="dark"] .workspace-page :is(.secondary, .lab-import, .ops-file) 
 }
 html[data-theme="dark"] .workspace-page :is(.ops-tabs, .lab-tabs) button { color: var(--ws-muted); background: var(--ws-surface); }
 html[data-theme="dark"] .workspace-page :is(.ops-tabs, .lab-tabs) button[aria-selected="true"] { color: #fff; background: var(--ws-petrol); }
-html[data-theme="dark"] .workspace-page tbody tr:nth-child(even) td { background: #102326; }
-html[data-theme="dark"] .workspace-page tbody tr:hover td { background: #173033; }
+html[data-theme="dark"] .workspace-page tbody tr:nth-child(even) td { background: #1d2d3c; }
+html[data-theme="dark"] .workspace-page tbody tr:hover td { background: #24384a; }
 html[data-theme="dark"] .workspace-page :is(.stage-card, .toc-card, .ad-card, .fcard, .pkg, .step) {
   color: var(--ws-copy);
   background: var(--ws-surface);

@@ -109,7 +109,7 @@
   border-left: 4px solid var(--sun);
   background: var(--ws-amber-soft, #fff8e6); color: var(--ws-copy, var(--ink));
 }
-.qb-send-status.good { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
+.qb-send-status.good { border-color: var(--ok); background: var(--ws-green-soft, #e3f7f4); }
 .qb-send-status.bad { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
 
 /* Price list. A dense editable table, so it gets its own wider dialog. */
@@ -159,11 +159,11 @@
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   min-width: 62px; padding: 5px 8px; cursor: pointer; border: 1px solid;
   font: 600 9.5px var(--mono); letter-spacing: .07em; text-transform: uppercase;
-  border-color: var(--ws-warn-ink, #8a5b00); color: var(--ws-warn-ink, #8a5b00);
+  border-color: var(--ws-warn-ink, #b3452a); color: var(--ws-warn-ink, #b3452a);
   background: var(--ws-amber-soft, #fff8e6);
 }
 .qb-pl-flag.is-firm {
-  border-color: var(--ok); color: var(--ok); background: var(--ws-green-soft, #edf8f1);
+  border-color: var(--ok); color: var(--ok); background: var(--ws-green-soft, #e3f7f4);
 }
 .qb-pl-flag:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .qb-pl-row .drop {
@@ -291,7 +291,7 @@
 .qb-flag + .qb-flag { margin-top: 8px; }
 .qb-flag strong { display: block; margin-bottom: 2px; color: var(--ink); }
 .qb-flag.stop { border-color: var(--ws-red, #b42318); background: var(--ws-red-soft, #fff2f0); }
-.qb-flag.ok { border-color: var(--ok); background: var(--ws-green-soft, #edf8f1); }
+.qb-flag.ok { border-color: var(--ok); background: var(--ws-green-soft, #e3f7f4); }
 
 /* Standing facts — "the checklist prints", "the brownout line prints" — are true on
    every quote. Shown as one tight line each and folded away, so the flags that are
@@ -323,7 +323,7 @@
 #qb-flags { margin-top: 14px; }
 
 /* A price we have not confirmed with a supplier must never look like one we have. */
-.qb-unquoted { color: var(--ws-warn-ink, #8a5b00); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.qb-unquoted { color: var(--ws-warn-ink, #b3452a); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
 
 /* ---------- the customer-copy editor ----------
    One row per scope line: switch, heading, detail, revert. Heading and detail sit
@@ -466,12 +466,12 @@
 .qs .qs-foot { color: #666 !important; }
 /* An unconfirmed price must stay visibly flagged on the printout, so the badge
    keeps the light-ground amber rather than the theme's (pale, dark-ground) one. */
-.qs .qb-unquoted { color: #8a5b00 !important; }
+.qs .qb-unquoted { color: #b3452a !important; }
 /* Internal-sheet inks. Two classes each, so they out-specify the `.qs *` blanket
    above rather than relying on order. */
 .qs .qs-stripe { background: #b42318 !important; }
 .qs .qs-stripe, .qs .qs-stripe * { color: #fff !important; }
-.qs tr.qs-ok td { color: #14603a !important; }
+.qs tr.qs-ok td { color: #00786a !important; }
 .qs tr.qs-bad td { color: #b42318 !important; }
 .qs .qs-why { color: #444 !important; }
 
@@ -537,7 +537,7 @@
 .qs table.qs-cost { margin-bottom: 4px; }
 .qs table.qs-cost td { font-size: 10.5px; }
 .qs table.qs-cost td:last-child { width: 32%; text-align: right; font-family: "Courier New", monospace; }
-.qs tr.qs-ok td { color: #14603a; }
+.qs tr.qs-ok td { color: #00786a; }
 .qs tr.qs-bad td { color: #b42318; }
 
 .qs-legal { margin-top: 12px; }

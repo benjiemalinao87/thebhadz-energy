@@ -32,7 +32,7 @@
     --bg:#020202; --panel-a:rgba(12,12,12,0.96); --panel-b:rgba(5,5,5,0.98);
     --z-900:#18181b; --z-800:#27272a; --z-700:#3f3f46; --z-600:#52525b;
     --z-500:#71717a; --z-400:#a1a1aa; --z-300:#d4d4d8; --z-200:#e4e4e7; --z-100:#f4f4f5; --z-50:#fafafa;
-    --cyan:#67e8f9; --green:#4ade80; --yellow:#facc15; --red:#fb7185; --purple:#c084fc; --blue:#60a5fa; --amber:#f59e0b;
+    --cyan:#45c0d6; --green:#2fd5bf; --yellow:#ff8f73; --red:#ff7b81; --purple:#9aa4e6; --blue:#7aa7d9; --amber:#ff7a59;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -41,11 +41,11 @@
     -webkit-font-smoothing:antialiased;
     background:
       radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,0.05), transparent 55%),
-      radial-gradient(1000px 500px at 100% -5%, rgba(250,204,21,0.035), transparent 50%),
+      radial-gradient(1000px 500px at 100% -5%, rgba(255,143,115,0.035), transparent 50%),
       var(--bg);
   }
   a{color:inherit;text-decoration:none;}
-  ::selection{background:rgba(103,232,249,0.25);color:#fff;}
+  ::selection{background:rgba(69,192,214,0.25);color:#fff;}
   body::before{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0.08;
     background-image:linear-gradient(to bottom,rgba(255,255,255,0.10) 1px,transparent 1px);background-size:100% 4px;}
 
@@ -61,9 +61,9 @@
   .titles h1{font-family:var(--display);font-size:1.5rem;font-weight:600;margin:0;color:var(--z-50);letter-spacing:0.01em;}
   .bar .sp{flex:1;}
   .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 13px;font-size:11px;text-transform:uppercase;letter-spacing:0.24em;
-    border:1px solid rgba(103,232,249,0.35);background:rgba(103,232,249,0.10);color:#cffafe;}
+    border:1px solid rgba(69,192,214,0.35);background:rgba(69,192,214,0.10);color:#d6f2f8;}
   .logout{font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--red);border:1px solid transparent;border-radius:999px;padding:8px 14px;transition:background .15s;}
-  .logout:hover{background:rgba(251,113,133,0.08);}
+  .logout:hover{background:rgba(255,123,129,0.08);}
 
   /* ---- panel base ---- */
   .panel{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--z-800);
@@ -78,7 +78,7 @@
   .tab{font-size:11.5px;text-transform:uppercase;letter-spacing:0.16em;color:var(--z-400);padding:8px 17px;border-radius:999px;cursor:pointer;
     border:none;background:transparent;font-family:var(--mono);transition:background .15s,color .15s;}
   .tab:hover{color:var(--z-100);}
-  .tab.on{background:rgba(103,232,249,0.14);color:#cffafe;}
+  .tab.on{background:rgba(69,192,214,0.14);color:#d6f2f8;}
   .tools .sp{flex:1;}
   input[type=text],input[type=email],textarea,select{
     font-family:var(--mono);font-size:14.5px;color:var(--z-100);background:rgba(9,9,11,0.85);
@@ -90,11 +90,11 @@
     border-radius:999px;padding:10px 18px;border:1px solid var(--z-700);background:rgba(24,24,27,0.9);color:var(--z-100);
     transition:border-color .15s,background .15s;}
   .btn:hover{border-color:var(--z-500);background:rgba(39,39,42,0.9);}
-  .btn.primary{border-color:rgba(103,232,249,0.45);background:rgba(103,232,249,0.12);color:#cffafe;}
-  .btn.primary:hover{background:rgba(103,232,249,0.2);}
+  .btn.primary{border-color:rgba(69,192,214,0.45);background:rgba(69,192,214,0.12);color:#d6f2f8;}
+  .btn.primary:hover{background:rgba(69,192,214,0.2);}
   .btn:disabled{opacity:.45;cursor:not-allowed;}
-  .btn.danger{color:var(--red);border-color:rgba(251,113,133,0.35);}
-  .btn.danger:hover{background:rgba(251,113,133,0.10);border-color:var(--red);}
+  .btn.danger{color:var(--red);border-color:rgba(255,123,129,0.35);}
+  .btn.danger:hover{background:rgba(255,123,129,0.10);border-color:var(--red);}
   /* Row-level delete: only revealed on hover/focus so the list stays calm. */
   .row .del{opacity:0;flex:none;border:none;background:transparent;cursor:pointer;padding:4px 6px;
     color:var(--z-500);border-radius:6px;font-family:var(--mono);font-size:14px;line-height:1;transition:opacity .12s,color .12s;}
@@ -105,7 +105,7 @@
   .list{display:flex;flex-direction:column;}
   .row{display:flex;gap:14px;align-items:baseline;padding:17px 20px;border-bottom:1px solid rgba(39,39,42,0.7);cursor:pointer;transition:background .12s;}
   .row:last-child{border-bottom:none;}
-  .row:hover{background:rgba(103,232,249,0.045);}
+  .row:hover{background:rgba(69,192,214,0.045);}
   .row.unread .who{color:var(--z-50);}
   .row.unread .subj{color:var(--z-50);font-weight:600;}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);flex:none;align-self:center;}
@@ -116,9 +116,9 @@
   .prev{font-size:13.5px;color:var(--z-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;}
   .when{font-size:12.5px;color:var(--z-600);flex:none;white-space:nowrap;}
   .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.16em;border-radius:4px;padding:2px 7px;flex:none;}
-  .tag.out{border:1px solid rgba(74,222,128,0.4);color:#bbf7d0;}
+  .tag.out{border:1px solid rgba(47,213,191,0.4);color:#b8ece4;}
   .tag.clip{border:1px solid var(--z-700);color:var(--z-400);}
-  .tag.err{border:1px solid rgba(251,113,133,0.5);color:#fecdd3;}
+  .tag.err{border:1px solid rgba(255,123,129,0.5);color:#fecdd3;}
   .empty{padding:52px 20px;text-align:center;color:var(--z-600);font-size:14px;}
 
   /* ---- reader ---- */
@@ -174,7 +174,7 @@
      to the shared --ops-* tokens, which follow html[data-theme]. Anything that
      hardcodes a colour instead of using a variable would survive that remap and
      break in light mode, so those few spots are re-pointed at tokens here. */
-  .ops-standalone .tab.on{background:var(--ops-amber, rgba(103,232,249,0.14));color:var(--ops-petrol-deep, #cffafe);}
+  .ops-standalone .tab.on{background:var(--ops-amber, rgba(69,192,214,0.14));color:var(--ops-petrol-deep, #d6f2f8);}
   .ops-standalone .badge{border-color:var(--ops-line-strong);background:var(--ops-surface-2);color:var(--ops-muted);}
   .ops-standalone .tabs{background:var(--ops-surface-2);}
   .ops-standalone input[type=text],

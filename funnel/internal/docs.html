@@ -31,28 +31,28 @@
   :root{
     --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
     --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-    --z-800:#deddd6; --z-500:#687e84; --red:#b8452f;
+    --z-800:#dfe3eb; --z-500:#7c98b6; --red:#d94a52;
   }
   .ops-docs{
     /* light-theme values; the --ops-* vars flip to dark automatically */
     --docs-surface:var(--ops-surface,#ffffff);
-    --docs-surface-2:var(--ops-surface-2,#f2f1ec);
+    --docs-surface-2:var(--ops-surface-2,#eaf0f6);
     --docs-field:var(--ops-surface,#ffffff);
-    --docs-line:var(--ops-line,#deddd6);
-    --docs-line-strong:var(--ops-line-strong,#c7c9c4);
-    --docs-ink:var(--ops-ink,#0d3037);
-    --docs-muted:var(--ops-muted,#526970);
-    --docs-subtle:var(--ops-subtle,#71858a);
-    --docs-blue:var(--ops-blue,#235f8c);
-    --docs-amber:var(--ops-amber,#f5b51b);
-    --docs-red:var(--ops-rust,#b8452f);
+    --docs-line:var(--ops-line,#dfe3eb);
+    --docs-line-strong:var(--ops-line-strong,#cbd6e2);
+    --docs-ink:var(--ops-ink,#33475b);
+    --docs-muted:var(--ops-muted,#516f90);
+    --docs-subtle:var(--ops-subtle,#7c98b6);
+    --docs-blue:var(--ops-blue,#6a78d1);
+    --docs-amber:var(--ops-amber,#ff7a59);
+    --docs-red:var(--ops-rust,#d94a52);
     --docs-file-accent:#9b6900;          /* readable amber-ink on white */
-    --docs-hover:rgba(13,48,55,0.06);
+    --docs-hover:rgba(45,62,80,0.06);
     --docs-veil:rgba(247,246,242,0.72);
   }
   html[data-theme="dark"] .ops-docs{
     --docs-field:#0a181b;
-    --docs-file-accent:#f5bd36;
+    --docs-file-accent:#ff8f73;
     --docs-hover:rgba(255,255,255,0.06);
     --docs-veil:rgba(2,10,12,0.72);
   }
@@ -79,7 +79,7 @@
   .chip:hover{background:var(--docs-hover);color:var(--docs-ink);}
   .chip .swatch{width:9px;height:9px;flex:0 0 9px;border-radius:3px;background:var(--chip-color,var(--docs-subtle));}
   .chip .n{margin-left:auto;font:600 11px var(--mono);color:var(--docs-subtle);font-variant-numeric:tabular-nums;}
-  .chip.on{background:var(--docs-surface);border-color:var(--docs-line-strong);color:var(--docs-ink);box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(13,48,55,.25));}
+  .chip.on{background:var(--docs-surface);border-color:var(--docs-line-strong);color:var(--docs-ink);box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(45,62,80,.25));}
   .chip.on .n{color:var(--docs-ink);}
   @media (max-width:900px){
     .layout{grid-template-columns:minmax(0,1fr);gap:16px;}
@@ -106,14 +106,14 @@
   /* ---- panel base ---- */
   .panel{position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--docs-line);
     background:var(--docs-surface);
-    box-shadow:var(--ops-shadow,0 1px 2px rgba(13,48,55,.04),0 10px 30px -22px rgba(13,48,55,.25));}
+    box-shadow:var(--ops-shadow,0 1px 2px rgba(45,62,80,.04),0 10px 30px -22px rgba(45,62,80,.25));}
   .panel>*{position:relative;z-index:1;}
 
   /* ---- action row ---- */
   .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:22px;}
   .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;
     border-radius:10px;padding:11px 18px;cursor:pointer;transition:filter .14s,border-color .14s,color .14s;border:0;}
-  .btn.primary{color:#172b30;background:var(--docs-amber);}
+  .btn.primary{color:#ffffff;background:var(--docs-amber);}
   .btn.primary:hover{filter:brightness(1.06);}
   .btn.ghost{color:var(--docs-ink);background:var(--docs-field);border:1px dashed var(--docs-line-strong);}
   .btn.ghost:hover{border-color:var(--docs-amber);}
@@ -141,7 +141,7 @@
   .row{display:flex;align-items:center;gap:14px;padding:15px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
   .row:hover{border-color:var(--docs-blue);}
   .row .doc-icon{width:38px;height:44px;flex:0 0 38px;display:grid;place-items:center;border:1px solid var(--docs-line);border-radius:8px;}
-  .row .doc-icon.kind-doc{color:var(--docs-blue);background:rgba(96,165,250,0.10);}
+  .row .doc-icon.kind-doc{color:var(--docs-blue);background:rgba(122,167,217,0.10);}
   .row .doc-icon.kind-file{color:var(--docs-file-accent);background:rgba(245,158,11,0.10);}
   .row .doc-icon.thumb{padding:0;overflow:hidden;background:var(--docs-surface-2);}
   .row .doc-icon.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -171,7 +171,7 @@
   .toolbar .tb{min-width:34px;height:32px;padding:0 9px;display:grid;place-items:center;border:1px solid transparent;border-radius:7px;background:none;cursor:pointer;
     font-family:var(--mono);font-size:12px;font-weight:700;color:var(--docs-muted);transition:all .12s;}
   .toolbar .tb:hover{background:var(--docs-hover);color:var(--docs-ink);}
-  .toolbar .tb.on{color:#172b30;background:var(--docs-amber);border-color:var(--docs-amber);}
+  .toolbar .tb.on{color:#ffffff;background:var(--docs-amber);border-color:var(--docs-amber);}
   .toolbar .sep{width:1px;align-self:stretch;margin:2px 5px;background:var(--docs-line-strong);}
   .editor{
     min-height:320px;max-height:62vh;overflow-y:auto;padding:18px 20px;border:1px solid var(--docs-line-strong);border-top:0;border-radius:0 0 10px 10px;
@@ -236,7 +236,7 @@
   /* ---- toast ---- */
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:150;opacity:0;pointer-events:none;
     background:var(--docs-surface);border:1px solid var(--docs-line-strong);border-radius:999px;padding:10px 20px;font-size:12px;color:var(--docs-ink);
-    box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(13,48,55,.25));transition:opacity .2s,transform .2s;}
+    box-shadow:var(--ops-shadow,0 10px 30px -22px rgba(45,62,80,.25));transition:opacity .2s,transform .2s;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   @media (max-width:620px){
@@ -397,13 +397,13 @@
   // Filing categories. Keep the keys in step with CATEGORIES in
   // functions/api/documents.js — the server is the authority, this is the labelling.
   var CATEGORIES=[
-    {key:"general",   label:"General",          color:"#8fa5a3"},
-    {key:"pricing",   label:"Pricing & Quotes", color:"#f5b51b"},
-    {key:"sops",      label:"SOPs & Install",   color:"#147a4b"},
-    {key:"legal",     label:"Legal & Permits",  color:"#b8452f"},
-    {key:"suppliers", label:"Suppliers & BOM",  color:"#235f8c"},
+    {key:"general",   label:"General",          color:"#8ba2ba"},
+    {key:"pricing",   label:"Pricing & Quotes", color:"#ff7a59"},
+    {key:"sops",      label:"SOPs & Install",   color:"#00a38c"},
+    {key:"legal",     label:"Legal & Permits",  color:"#d94a52"},
+    {key:"suppliers", label:"Suppliers & BOM",  color:"#6a78d1"},
     {key:"marketing", label:"Marketing",        color:"#8b5cf6"},
-    {key:"meetings",  label:"Meetings",         color:"#0f7f86"}
+    {key:"meetings",  label:"Meetings",         color:"#0091ae"}
   ];
   function category(key){
     for(var i=0;i<CATEGORIES.length;i++)if(CATEGORIES[i].key===key)return CATEGORIES[i];

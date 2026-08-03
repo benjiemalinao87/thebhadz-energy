@@ -88,7 +88,7 @@ html[data-theme="dark"] {
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--ops-amber);
-  color: #172b30;
+  color: #ffffff;
   font: 700 14px var(--ops-font);
   text-decoration: none;
 }
@@ -127,7 +127,7 @@ html[data-theme="dark"] {
 .cc-root .cc-sidebar {
   background: linear-gradient(180deg, var(--ops-rail) 0%, var(--ops-rail-2) 100%);
   border-right: 1px solid rgba(255, 255, 255, .12);
-  box-shadow: 8px 0 30px rgba(0, 52, 56, .12);
+  box-shadow: 8px 0 30px rgba(45,62,80, .12);
 }
 
 .sc-theme-toggle {
@@ -158,7 +158,7 @@ html[data-theme="dark"] {
   background: rgba(255, 255, 255, .06);
   border-color: rgba(255, 255, 255, .14);
 }
-.cc-root .cc-sb-user svg { color: #a9e0de; }
+.cc-root .cc-sb-user svg { color: var(--ops-petrol); }
 .cc-root .cc-sb-user span { color: #e8f2f1; }
 .cc-root .cc-sb-group-label { color: rgba(255, 255, 255, .58); font-size: 10px; }
 .cc-root .cc-sb-item {
@@ -172,7 +172,7 @@ html[data-theme="dark"] {
 .cc-root .cc-sb-item.active {
   background: var(--ops-amber);
   border-color: rgba(255, 255, 255, .26);
-  color: #172b30;
+  color: #ffffff;
   box-shadow: 0 6px 18px -12px rgba(0, 0, 0, .6);
 }
 .cc-root .cc-sb-item.active::before { background: #fff3bd; left: -12px; height: 24px; }
@@ -256,20 +256,24 @@ html[data-theme="dark"] {
   --faint: var(--ops-subtle);
   --ink: var(--ops-ink);
   --orange: var(--ops-amber);
-  --orange-soft: #9b6900;
+  --orange-soft: #b3452a;
   --cyan: var(--ops-petrol);
   --green: var(--ops-green);
-  --yellow: #9a6b00;
-  --purple: #65519a;
+  --yellow: #b3452a;
+  --purple: #4e5bb8;
   --red: var(--ops-rust);
   --amber: var(--ops-amber);
+  /* The legacy --z ladder came from the dark terminal theme, where a LOW number meant
+     near-white text. On this light ground the ladder is inverted: low numbers are ink,
+     high numbers are hairlines. Getting --z-100 wrong renders every table cell that still
+     uses it (leads.html's phone column) as white-on-white. */
   --z-50: var(--ops-ink);
-  --z-100: #183c43;
-  --z-200: #294950;
-  --z-300: #3d5960;
-  --z-400: #526970;
-  --z-500: #687e84;
-  --z-600: #71858a;
+  --z-100: var(--ops-ink);
+  --z-200: #425b76;
+  --z-300: #516f90;
+  --z-400: #516f90;
+  --z-500: #7c98b6;
+  --z-600: #7c98b6;
   --z-700: #aeb7b5;
   --z-800: var(--ops-line);
   --z-900: var(--ops-surface-2);
@@ -439,12 +443,12 @@ body.ops-standalone {
   background: var(--ops-surface);
   border-left: 1px solid var(--ops-line);
   color: var(--ops-ink);
-  box-shadow: -18px 0 48px rgba(13, 48, 55, .16);
+  box-shadow: -18px 0 48px rgba(45,62,80, .16);
 }
 .ops-contacts .drawer .dw-head,
 .ops-contacts .drawer .dw-section { border-color: var(--ops-line); }
 .ops-contacts .drawer :is(input, select, textarea) { background: #fff; color: var(--ops-ink); border-color: var(--ops-line-strong); }
-.ops-contacts .drawer .save { min-height: 44px; background: var(--ops-amber); color: #172b30; border: 0; }
+.ops-contacts .drawer .save { min-height: 44px; background: var(--ops-amber); color: #ffffff; border: 0; }
 .ops-contacts .scrim { background: rgba(1, 36, 39, .38); }
 
 /* ---------- Meeting log ---------- */
@@ -495,7 +499,7 @@ body.ops-standalone {
   font-size: 12px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #e0b35c;
+  border: 1px solid var(--ops-amber);
   background: #fff4e5;
   color: #8a6100;
   cursor: pointer;
@@ -539,7 +543,7 @@ body.ops-standalone {
 }
 .ops-meetings .actions-tab.act {
   background: #fff4e5;
-  border-color: #e0b35c;
+  border-color: var(--ops-amber);
   color: #8a6100;
 }
 .ops-meetings .actions-founder {
@@ -568,8 +572,8 @@ body.ops-standalone {
   background: var(--ops-surface-2);
 }
 .ops-meetings .rail-chip.act {
-  background: #edf7f5;
-  border-color: #b8d7d3;
+  background: var(--ops-surface-2);
+  border-color: var(--ops-line-strong);
   color: var(--ops-petrol);
 }
 .ops-meetings .rail a.m.is-hidden { display: none; }
@@ -594,7 +598,7 @@ body.ops-standalone {
   color: var(--ops-muted);
 }
 .ops-meetings .rail a.m:hover { background: var(--ops-surface-2); color: var(--ops-ink); }
-.ops-meetings .rail a.m.act { background: #edf7f5; border-color: #b8d7d3; border-left-color: var(--ops-petrol); color: var(--ops-ink); }
+.ops-meetings .rail a.m.act { background: var(--ops-surface-2); border-color: var(--ops-line-strong); border-left-color: var(--ops-petrol); color: var(--ops-ink); }
 .ops-meetings .rail a.m .d { color: var(--ops-petrol); font-weight: 700; }
 .ops-meetings .rail a.m .t { color: var(--ops-ink); }
 .ops-meetings .rail a.m .n { color: var(--ops-muted); }
@@ -617,18 +621,18 @@ body.ops-standalone {
 .ops-meetings .actions-panel .ai { border-top-color: var(--ops-line); }
 .ops-meetings .digest .ai .task,
 .ops-meetings .actions-panel .ai .task,
-.ops-meetings .meeting :is(p, li) { color: #294950; }
+.ops-meetings .meeting :is(p, li) { color: #425b76; }
 .ops-meetings .meeting .mh { border-bottom-color: var(--ops-line); }
 .ops-meetings .meeting .mh .date,
 .ops-meetings .meeting h4 { color: #8a6100; }
 .ops-meetings .meeting .tag { border-color: var(--ops-line); color: var(--ops-muted); background: var(--ops-surface-2); }
-.ops-meetings .decisions { background: var(--ops-green-soft); border-color: #a7d6bb; color: var(--ops-ink); }
+.ops-meetings .decisions { background: var(--ops-green-soft); border-color: var(--ops-green); color: var(--ops-ink); }
 .ops-meetings .howto { border-color: var(--ops-line); background: var(--ops-surface-2); color: var(--ops-muted); }
 
 /* Meeting recordings — keep upload impossible to miss on the light ops theme */
 html:not([data-theme="dark"]) .ops-meetings .rec-dock {
   top: 16px;
-  background: linear-gradient(135deg, #fff8ef, #edf7f5 60%, #fff);
+  background: linear-gradient(135deg, #fff8ef, var(--ops-surface-2) 60%, #fff);
   border: 2px solid var(--ops-amber);
   box-shadow: var(--ops-shadow);
 }
@@ -644,7 +648,7 @@ html:not([data-theme="dark"]) .ops-meetings .rec-dock select {
 }
 html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop {
   background: #fff4e5;
-  border-color: #e0b35c;
+  border-color: var(--ops-amber);
   color: var(--ops-muted);
 }
 html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop:hover,
@@ -656,12 +660,12 @@ html:not([data-theme="dark"]) .ops-meetings .rec-dock-drop.drag {
 html:not([data-theme="dark"]) .ops-meetings .rec-dock-btn,
 html:not([data-theme="dark"]) .ops-meetings .rec-add {
   background: var(--ops-amber);
-  color: #172b30;
+  color: #ffffff;
   box-shadow: none;
 }
 html:not([data-theme="dark"]) .ops-meetings .rec-panel {
   background: #fff8ef;
-  border-color: #e0b35c;
+  border-color: var(--ops-amber);
 }
 html:not([data-theme="dark"]) .ops-meetings .rec-panel h4 { color: #8a6100; }
 html:not([data-theme="dark"]) .ops-meetings .rec-hint { color: var(--ops-muted); }
@@ -672,7 +676,7 @@ html:not([data-theme="dark"]) .ops-meetings .rec-empty { color: var(--ops-muted)
 html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   background: #fff4e5;
   color: #8a6100;
-  border-color: #e0b35c;
+  border-color: var(--ops-amber);
 }
 
 /* ---------- Team notes ---------- */
@@ -709,7 +713,7 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 .ops-notes .attach-row { align-items: stretch; }
 .ops-notes .attach-btn { min-height: 42px; background: #fff; color: var(--ops-ink); border-color: var(--ops-line-strong); }
 .ops-notes .attach-hint { width: 100%; color: var(--ops-muted); }
-.ops-notes .save-btn { min-height: 44px; background: var(--ops-amber); border-color: var(--ops-amber); color: #172b30; }
+.ops-notes .save-btn { min-height: 44px; background: var(--ops-amber); border-color: var(--ops-amber); color: #ffffff; }
 .ops-notes .feed-head { grid-area: feedhead; margin: 0 0 12px; }
 .ops-notes .feed-head .tag { color: var(--ops-ink); font-size: 18px; letter-spacing: 0; text-transform: none; }
 .ops-notes .feed-head .rule { background: var(--ops-line); }
@@ -719,7 +723,7 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 .ops-notes .note .who { color: var(--ops-petrol); font-size: 13px; }
 .ops-notes .note .when { color: var(--ops-muted); }
 .ops-notes .note h3 { color: var(--ops-ink); font-family: var(--ops-font); }
-.ops-notes .note .body { color: #3d5960; font-size: 13px; line-height: 1.6; }
+.ops-notes .note .body { color: #516f90; font-size: 13px; line-height: 1.6; }
 .ops-notes .note .act { min-height: 34px; color: var(--ops-muted); letter-spacing: 0; text-transform: none; font-size: 12px; }
 .ops-notes .note .act:hover { background: var(--ops-surface-2); color: var(--ops-ink); }
 .ops-notes .note .imgs a,
@@ -748,7 +752,7 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   border: 1px solid var(--ops-amber);
   border-radius: 8px;
   background: var(--ops-amber);
-  color: #172b30;
+  color: #ffffff;
   font-weight: 750;
 }
 .ops-projects .controls { margin: 14px 0; padding: 12px; border: 1px solid var(--ops-line); border-radius: 10px; background: var(--ops-surface); }
@@ -765,17 +769,17 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 .ops-projects .lane-head .name { color: var(--ops-ink); font-size: 13px; letter-spacing: 0; text-transform: none; }
 .ops-projects .lane-head .n { color: var(--ops-muted); }
 .ops-projects .lane.blocked { background: #fff8f5; border-color: #e8b2a6; }
-.ops-projects .lane.done { background: #f3faf5; border-color: #b2d9c0; }
+.ops-projects .lane.done { background: var(--ops-green-soft); border-color: var(--ops-green); }
 .ops-projects .card {
   border-color: var(--ops-line);
   border-radius: 9px;
   background: #fff;
   color: var(--ops-ink);
-  box-shadow: 0 2px 10px -8px rgba(13, 48, 55, .35);
+  box-shadow: 0 2px 10px -8px rgba(45,62,80, .35);
 }
 .ops-projects .card-title { color: var(--ops-ink); font: 700 14px/1.35 var(--ops-font); }
 .ops-projects .card-owner { color: var(--ops-muted); }
-.ops-projects .card-notes { color: #526970; }
+.ops-projects .card-notes { color: #516f90; }
 .ops-projects .card .type { border-color: var(--ops-line); background: var(--ops-blue-soft); color: var(--ops-blue); }
 .ops-projects .card :is(input, textarea) { border-color: var(--ops-line-strong); background: #fff; color: var(--ops-ink); }
 .ops-projects .review { border-color: var(--ops-line); background: var(--ops-surface); }
@@ -798,7 +802,7 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
   font-weight: 700;
 }
 .ops-finance .ops-button:not(.secondary),
-.ops-finance button:not(.secondary) { border-color: var(--ops-amber); background: var(--ops-amber); color: #172b30; }
+.ops-finance button:not(.secondary) { border-color: var(--ops-amber); background: var(--ops-amber); color: #ffffff; }
 .ops-finance .ops-button.secondary,
 .ops-finance button.secondary { border-color: var(--ops-line-strong); background: #fff; color: var(--ops-ink); }
 .ops-finance .ops-alert { border: 1px solid #bad5e5; border-left: 4px solid var(--ops-blue); border-radius: 9px; background: #eff7fb; color: var(--ops-ink); }
@@ -853,7 +857,7 @@ html:not([data-theme="dark"]) .ops-meetings .rail a.m .rec-badge {
 .ops-team .ops-topbar .ops-button,
 .ops-team .ops-form-actions button { min-height: 42px; }
 .ops-team button:not(.secondary):not(.danger),
-.ops-team .ops-button:not(.secondary):not(.danger) { border-color: var(--ops-amber); background: var(--ops-amber); color: #172b30; }
+.ops-team .ops-button:not(.secondary):not(.danger) { border-color: var(--ops-amber); background: var(--ops-amber); color: #ffffff; }
 .ops-team button.secondary,
 .ops-team .ops-button.secondary { border-color: var(--ops-line-strong); background: #fff; color: var(--ops-ink); }
 .ops-team .ops-tabs { width: max-content; gap: 0; margin: 24px 0 0; border: 1px solid var(--ops-line-strong); border-radius: 8px; overflow: hidden; background: #fff; }
@@ -1046,7 +1050,7 @@ html[data-theme="dark"] .ops-notes .attach-btn:focus-visible { outline-color: va
 /* Meeting log — upload dock + recordings in dark mode (light-theme rec-dock rules must not bleed in) */
 html[data-theme="dark"] .ops-meetings .rec-dock {
   top: 16px;
-  background: linear-gradient(135deg, #1a3a5c, #14314f 55%, #0f2023);
+  background: linear-gradient(135deg, #1a3a5c, #14314f 55%, #1d2d3c);
   border: 2px solid var(--ops-amber);
   box-shadow: var(--ops-shadow);
 }
@@ -1074,7 +1078,7 @@ html[data-theme="dark"] .ops-meetings .rec-dock-drop.drag {
 html[data-theme="dark"] .ops-meetings .rec-dock-btn,
 html[data-theme="dark"] .ops-meetings .rec-add {
   background: var(--ops-amber);
-  color: #172b30;
+  color: #ffffff;
   box-shadow: none;
 }
 html[data-theme="dark"] .ops-meetings .rec-panel {
@@ -1125,8 +1129,8 @@ html[data-theme="dark"] .ops-meetings .actions-tab.act {
   color: var(--ops-amber);
 }
 html[data-theme="dark"] .ops-meetings .rail-chip.act {
-  background: #123326;
-  border-color: #2a6b4a;
+  background: var(--ops-green-soft);
+  border-color: var(--ops-green);
   color: var(--ops-green);
 }
 html[data-theme="dark"] .ops-meetings .owner-group h4 .av {
@@ -1176,7 +1180,7 @@ html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
   body.cc-sb-collapsed .cc-sidebar:hover,
   body.cc-sb-collapsed .cc-sidebar:focus-within {
     width: var(--sidebar-w);
-    box-shadow: 12px 0 36px rgba(0, 52, 56, .28);
+    box-shadow: 12px 0 36px rgba(45,62,80, .28);
     z-index: 70;
   }
 

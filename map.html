@@ -167,7 +167,7 @@
   var PIN_TYPES = [
     {k:'lead',   label:'Lead',          c:'#2f80ed'},
     {k:'survey', label:'Survey booked', c:'#8e44ad'},
-    {k:'install',label:'Install',       c:'#27ae60'},
+    {k:'install',label:'Install',       c:'#00a38c'},
     {k:'demo',   label:'Demo day',      c:'#e67e22'},
     {k:'comp',   label:'Competitor',    c:'#c0392b'},
     {k:'solar',  label:'Solar spotted', c:'#F2B705'}
@@ -176,7 +176,7 @@
     {k:'none', label:'None',        c:'#c7d2dc'},
     {k:'prospect', label:'Prospecting', c:'#7fb2e5'},
     {k:'active', label:'Active',    c:'#f0b429'},
-    {k:'won', label:'Won',          c:'#2f9e5b'}
+    {k:'won', label:'Won',          c:'#00a38c'}
   ];
   // ---- state ----
   var db = load();
@@ -203,7 +203,7 @@
     if(mode==='priority'){ return ['#F2B705','#3f7cae','#274b63'][ (p.priority||3)-1 ] || '#274b63'; }
     if(mode==='pop'){
       var t = Math.min(1,(p.pop||0)/57000);
-      return d3.interpolateRgb('#22405c','#7ad0c0')(0.15+0.85*t);
+      return d3.interpolateRgb('#22405c','#45c0d6')(0.15+0.85*t);
     }
     if(mode==='status'){ var s=STATUS.find(x=>x.k===(db.status[p.psgc]||'none')); return s?s.c:'#c7d2dc'; }
   }

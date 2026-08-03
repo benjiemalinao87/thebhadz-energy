@@ -69,7 +69,7 @@
 .gate-checklist label { display: flex; gap: 10px; align-items: start; padding: 12px; border-bottom: 1px solid var(--hairline); font-size: 14px; }
 .gate-checklist input { width: auto; margin-top: 4px; }
 .lab-decision { margin-top: 24px; padding: 18px; border-left: 5px solid var(--warn); background: #fff7ed; }
-.lab-decision.is-ready { border-color: var(--ok); background: #edf8f1; }
+.lab-decision.is-ready { border-color: var(--ok); background: #e3f7f4; }
 .lab-decision strong { display: block; margin-bottom: 5px; }
 .lab-decision ul { margin-bottom: 0; }
 

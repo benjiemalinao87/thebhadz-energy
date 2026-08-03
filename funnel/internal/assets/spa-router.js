@@ -263,8 +263,14 @@
         var heading = incomingMain.querySelector("h1, h2");
         if (heading) {
           heading.tabIndex = -1;
+          // Suppressed inline rather than in CSS: a page's own stylesheets are injected
+          // after the shell's, so any :focus-visible outline they declare would win the
+          // cascade and draw a box around the title after every navigation. The element is
+          // tabindex="-1", so it is unreachable by Tab and losing the ring costs nothing.
+          heading.style.outline = "none";
           heading.focus({ preventScroll: true });
         } else {
+          incomingMain.style.outline = "none";
           incomingMain.focus({ preventScroll: true });
         }
         if (routeStatus) routeStatus.textContent = (titleEl ? titleEl.textContent : "Page") + " loaded";
