@@ -10,16 +10,17 @@
  *  1. It will not let a LIWANAG (on-grid) quote leave without the brownout truth on
  *     it. Anti-islanding shuts an on-grid system off in an outage; implying otherwise
  *     is the value gap that kills word-of-mouth (§1.6).
- *  2. It will not print a quote without the permit / licensed-electrical-practitioner /
- *     BILECO net-metering checklist attached (§7 hard gate).
- *  3. It will not present an unquoted supplier price as a confirmed one. Every catalog
+ *  2. It will not present an unquoted supplier price as a confirmed one. Every catalog
  *     line carries a `quoted` flag; anything false is badged on screen AND on paper,
  *     and the sheet is stamped INDICATIVE until the numbers come back from suppliers.
- *  4. It will not SEND a CUSTOM (above-ladder) quote whose price nobody set: with no
+ *  3. It will not SEND a CUSTOM (above-ladder) quote whose price nobody set: with no
  *     explicit contract price the sheet falls back to its own total, which is cost-plus
  *     (§3). The corridor helper (benchmark ₱/kW × size × (1 − undercut)) computes the
  *     compliant price; margin is then checked against the founders' floor, and TRUE NET
  *     (margin − referral − warranty reserve − tax set-aside) is shown beside it.
+ *
+ * Permit / licensed-electrician / net-metering gates stay on the Jobs board (and block
+ * deposits in Install Ops). They are not printed on the customer quotation.
  *
  * On pricing: the price ladder comes first and the sheet second. Cost-plus is banned
  * (§3) — materials pass through at supplier cost, our margin sits in the fabrication +
@@ -333,9 +334,9 @@
    * Shopee-kit comparison — the homeowner prices our clamps against Lazada and
    * reads the fee line as padding. We sell a fixed-price installed package (§3),
    * so the document has to argue that, not hand over a shopping list. What it may
-   * never do is hide the honesty blocks: the brownout truth (§1.6), the compliance
-   * checklist and the INDICATIVE stamp (§7) print on the customer copy regardless
-   * of anything set here.
+   * never do is hide the honesty blocks: the brownout truth (§1.6) and the
+   * INDICATIVE stamp (§7) print on the customer copy regardless of anything set
+   * here. Permit / electrician / net-metering gates stay on the Jobs board.
    *
    * `auto` is what the model says. The founder can rename a line, rewrite its
    * detail, or switch it off entirely — every job has something the last one did
@@ -692,9 +693,9 @@
    *   "stop" — this quote is wrong or unsendable as configured. Always visible, loud.
    *   "warn" — a live decision about THIS quote (thin profit, a scope line left off).
    *            Always visible, quieter.
-   *   "note" — standing facts, true of every quote we ever send (the checklist prints,
-   *            the brownout line prints, which tier this landed in). Folded away behind
-   *            a count, because after the first read they are furniture.
+   *   "note" — standing facts, true of every quote we ever send (the brownout
+   *            line prints, which tier this landed in). Folded away behind a
+   *            count, because after the first read they are furniture.
    */
   function renderFlags(m) {
     var flags = [];
@@ -757,9 +758,6 @@
         "This system shuts down in an outage — anti-islanding. The printed quote carries that statement and it cannot " +
         "be removed. If the customer wants brownout cover, quote the hybrid package with a battery.");
     }
-
-    add("note", "Permit / electrician / net-metering checklist (§7).",
-      "Printed on every quote. A deposit cannot be accepted until all three are signed off.");
 
     // Blanked and switched off amount to the same thing on paper, so they are
     // reported together and named by what the line IS, not by whatever heading
@@ -1010,22 +1008,10 @@
 
       brownout + indicative +
 
-      // §7 hard gate — this block is why a quote is allowed to exist at all.
-      '<div class="qs-gate">' +
-        '<h3>Compliance checklist — completed before any deposit is accepted</h3>' +
-        '<ul>' +
-          '<li>LGU electrical permit filed, with plans signed by a licensed electrical practitioner (PEE / REE).</li>' +
-          '<li>Licensed electrical practitioner sign-off on the final as-built installation.</li>' +
-          (m.spec.gridTied
-            ? '<li>BILECO net-metering application prepared, filed and tracked by us — not by the homeowner.</li>'
-            : '<li>Off-grid commissioning, owner training and handover pack (no net-metering application required).</li>') +
-          '<li>Philippine Electrical Code compliance throughout; typhoon-rated mounting; anti-islanding verified at commissioning.</li>' +
-        '</ul>' +
-      '</div>' +
-
       // The customer's own next action, and the milestones after it. Onboarding
       // "bumpers" (§6): the homeowner should never have to chase us to find out
-      // what happens next.
+      // what happens next. Permit / electrician / net-metering stay on the Jobs
+      // board — not on this customer sheet.
       '<div class="qs-steps">' +
         '<h3>What happens next</h3>' +
         '<ol>' +
@@ -1516,12 +1502,12 @@
    * Build the payload for /api/quote.
    *
    * The NUMBERS come from the model. The WORDS are read back out of the sheet
-   * that is already on screen — the brownout statement, the compliance
-   * checklist, the milestones, the warranties and the terms are lifted from the
-   * rendered DOM rather than written a second time here. That is deliberate:
-   * these are the sentences the Founder OS requires on a quote, and a second
-   * copy of them in a payload builder is a copy that will eventually disagree
-   * with the one the founder proof-read on screen.
+   * that is already on screen — the brownout statement, the milestones, the
+   * warranties and the terms are lifted from the rendered DOM rather than written
+   * a second time here. That is deliberate: these are the sentences the Founder
+   * OS requires on a quote, and a second copy of them in a payload builder is a
+   * copy that will eventually disagree with the one the founder proof-read on
+   * screen.
    */
   function quotePayload(m) {
     var sheet = el("qs-client");        // the customer copy — never the internal sheet
@@ -1598,7 +1584,6 @@
         priceNote: textOf(sheet.querySelector(".qs-why")),
         brownout: callout("what happens during a brownout"),
         indicative: callout("indicative quotation"),
-        checklist: listOf(".qs-gate li"),
         steps: listOf(".qs-steps li"),
         warranties: legal("warranties"),
         basis: (legal("basis of the savings estimate")[0] || ""),

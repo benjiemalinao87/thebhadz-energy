@@ -1,5 +1,11 @@
 # Progress
 
+## Quote: remove Compliance checklist from customer copy + PDF (2026-08-04) — done
+- Dropped the printed checklist block from Quote Builder customer sheet and `_quote-pdf.js`
+- `/api/quote` no longer requires `checklist` in the payload; covering email wording updated
+- Jobs / Install Ops still enforce permit · electrician · net-metering before deposit
+- Local: hard-refresh Quote Builder; Print / Email quote to confirm the block is gone
+
 ## Jobs: delete from Overview drawer (2026-08-04) — done
 - Wired existing `/api/jobs` DELETE into the job drawer Overview danger zone
 - Confirm → delete (checklist + stage history + unpaid rows); refused once a payment is received

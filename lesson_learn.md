@@ -272,3 +272,11 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Add a danger zone on Overview: Delete (confirm → `DELETE { id }`) when no received payment; Cancel (`PATCH stage: cancelled`) when money is on the ledger or as the soft alternative. Exclude `cancelled` from board columns — `phaseOf("cancelled")` falls back to intake and would otherwise park cancelled jobs under Survey & quote.
 
 **Do not:** Hard-delete a job after a received payment (orphans the SC-09 ledger). Do not put Delete only on the card chrome without the server's payment guard messaging.
+
+## Quote customer copy: drop the printed Compliance checklist
+
+**Fixed:** 2026-08-04
+
+**What worked:** Removed the Compliance checklist block from the on-screen customer sheet (`quote-builder.js`), the PDF renderer (`_quote-pdf.js`), and the `/api/quote` payload requirement that rejected sends without it. Covering email no longer says the checklist is "on your quotation." Permit / electrician / net-metering gates remain on the Jobs board and still block deposits in Install Ops.
+
+**Do not:** Put the checklist back on the customer PDF without an explicit ask. Do not weaken the Jobs/Install Ops deposit gate when removing customer-facing copy.

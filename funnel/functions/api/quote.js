@@ -133,10 +133,8 @@ export async function onRequestPost(context) {
 
   // Founder OS invariants. The tool that builds the quote already enforces these
   // on screen; they are re-checked here because this is the door the document
-  // actually leaves through, and a UI check is not a control.
-  if (!Array.isArray(quote.checklist) || !quote.checklist.length) {
-    return json({ ok: false, error: "The permit / licensed-practitioner / net-metering checklist must be on every quote (§7)." }, 422);
-  }
+  // actually leaves through, and a UI check is not a control. Permit / electrician /
+  // net-metering gates stay on the Jobs board — not on the customer PDF.
   if (!quote.hasBattery && !quote.brownout) {
     return json({ ok: false, error: "A system with no battery must carry the brownout statement (§1.6)." }, 422);
   }
@@ -531,8 +529,8 @@ ${pad(
     `<span class="m-ink" style="color:${C.ink}">MACC Systems &amp; Engineering Inc.</span><br>` +
     `<span class="m-ink3" style="color:${C.ink3}">Biliran Province, Philippines</span>` +
     `<div class="m-ink3" style="font-family:${FACE};font-size:11.5px;line-height:1.55;color:${C.ink3};padding-top:12px">` +
-      `No deposit is due until the permit, licensed-electrician sign-off and net-metering checklist on your ` +
-      `quotation are complete. This quotation was prepared solely for you.</div>` +
+      `No deposit is due until permit, licensed-electrician sign-off and net-metering steps are complete. ` +
+      `This quotation was prepared solely for you.</div>` +
   `</td></tr></table>`
 )}
 ${gap(36)}
@@ -570,8 +568,8 @@ ${gap(36)}
     "Your full quotation is attached as a PDF - everything included in the",
     "price, the warranties and the terms.",
     "",
-    "No deposit is due until the permit, licensed-electrician sign-off and",
-    "net-metering checklist on your quotation are complete.",
+    "No deposit is due until permit, licensed-electrician sign-off and",
+    "net-metering steps are complete.",
     "",
     preparedBy || "",
     "MACC Systems & Engineering Inc.",

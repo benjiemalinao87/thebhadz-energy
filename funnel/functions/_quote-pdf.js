@@ -15,9 +15,11 @@
  * endpoint that never receives the build-up cannot accidentally email it.
  *
  * What must never diverge, and is asserted by /api/quote before this runs:
- *   - the compliance checklist prints on every quote (Founder OS §7)
  *   - a system with no battery prints the brownout truth (Founder OS §1.6)
  *   - unconfirmed prices stamp the sheet INDICATIVE (Founder OS §7)
+ *
+ * Permit / electrician / net-metering gates live on the Jobs board, not on this
+ * customer PDF.
  */
 import { A4, Page, buildPdf, wrap } from "./_pdf.js";
 
@@ -208,24 +210,6 @@ export function renderQuotePdf(q) {
     page.stroke(M, y, RIGHT - M, h, { gray: 0, lineWidth: 1.2 });
     page.text("INDICATIVE QUOTATION", M + 9, y + 13, { size: 7.5, bold: true });
     lines.forEach((line, i) => page.text(line, M + 9, y + 25 + i * 10, { size: 8 }));
-    y += h + 12;
-  }
-
-  // ---- compliance gate -----------------------------------------------------
-  // Prints on every quote. It cannot be switched off, and a deposit cannot be
-  // accepted until all of it is signed off (Founder OS §7).
-  {
-    const items = q.checklist.map((t) => wrap(t, RIGHT - M - 34, 8));
-    const h = 22 + items.reduce((n, l) => n + l.length * 10 + 3, 0) + 8;
-    need(h + 10);
-    page.stroke(M, y, RIGHT - M, h, { gray: 0, lineWidth: 1.2 });
-    page.text("COMPLIANCE CHECKLIST - COMPLETED BEFORE ANY DEPOSIT IS ACCEPTED", M + 9, y + 14, { size: 8, bold: true });
-    let iy = y + 27;
-    items.forEach((lines) => {
-      page.stroke(M + 12, iy - 6, 7, 7, { gray: 0 });
-      lines.forEach((line, i) => page.text(line, M + 26, iy + i * 10, { size: 8 }));
-      iy += lines.length * 10 + 3;
-    });
     y += h + 12;
   }
 
