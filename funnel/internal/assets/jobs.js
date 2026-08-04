@@ -478,7 +478,11 @@
   function viewBoard() {
     var jobs = visibleJobs();
     return '<div class="jb-board" id="jb-board">' + state.phases.map(function (p) {
-      var mine = jobs.filter(function (j) { return phaseOf(j.stage).key === p.key; });
+      // Cancelled is not a board column — phaseOf falls back to intake, which would
+      // wrongly park cancelled jobs under Survey & quote.
+      var mine = jobs.filter(function (j) {
+        return j.stage !== "cancelled" && phaseOf(j.stage).key === p.key;
+      });
       var sum = mine.reduce(function (n, j) { return n + num(j.contract_price_cents); }, 0);
       return '<section class="jb-col" data-phase="' + esc(p.key) + '">' +
         '<header class="jb-col-head"><h3>' + esc(p.label) + "</h3>" +
@@ -736,6 +740,46 @@
     });
   }
 
+  function deleteJob(job) {
+    if (!job) return;
+    if (hasReceivedPayment(job)) {
+      toast("bad", "Cannot delete — money is on the ledger",
+        "Cancel the job instead so the payment trail stays readable.");
+      return;
+    }
+    var label = (job.job_code || "this job") + (job.customer_name ? " (" + job.customer_name + ")" : "");
+    if (!confirm("Delete " + label + "?\n\nChecklist, stage history and unpaid money rows go with it. This cannot be undone.")) {
+      return;
+    }
+    send("DELETE", { id: job.id }).then(function (d) {
+      if (!d) return;
+      toast("ok", (job.job_code || "Job") + " deleted", "Removed from the board.");
+      closeJob();
+      return reloadJobs();
+    }).catch(function (err) {
+      if (err.status === 409) {
+        toast("bad", "Cannot delete — money is on the ledger", err.message);
+        return;
+      }
+      toast("bad", "Could not delete the job", err.message);
+    });
+  }
+
+  function cancelJob(job) {
+    if (!job || job.stage === "cancelled") return;
+    var label = job.job_code || "this job";
+    if (!confirm("Cancel " + label + "?\n\nThe record stays for the ledger. The board stops chasing its open tasks.")) {
+      return;
+    }
+    send("PATCH", { id: job.id, stage: "cancelled" }).then(function (d) {
+      if (!d) return;
+      toast("ok", label + " cancelled", "Costs and payments stay on the ledger.");
+      return refreshAfterWrite(job.id);
+    }).catch(function (err) {
+      toast("bad", "Could not cancel the job", err.message);
+    });
+  }
+
   /* ---------------------------------------------------------------- drawer --- */
 
   function openJob(id) {
@@ -935,7 +979,38 @@
       }).join("") +
       "<p style=\"margin:14px 0 0;color:var(--ops-muted);font-size:12.5px\">These three cannot be skipped. " +
       "Toggling one settles its checklist task too, and the same rule runs server-side on every stage move.</p>" +
-      "</div></div>";
+      "</div></div>" +
+
+      dangerZone(job);
+  }
+
+  /** True once any payment on this job has status received — delete is then refused. */
+  function hasReceivedPayment(job) {
+    if (num(job.paid_cents) > 0) return true;
+    var payments = (state.detail && state.detail.payments) || [];
+    return payments.some(function (p) { return p.status === "received"; });
+  }
+
+  function dangerZone(job) {
+    if (job.stage === "cancelled") {
+      return '<div class="jb-panel jb-danger" style="margin-top:14px">' +
+        '<div class="jb-panel-head"><h3>This job is cancelled</h3></div>' +
+        '<div class="jb-panel-body"><p style="margin:0 0 12px">Costs and payments stay on the ledger. ' +
+        "Delete is not offered after cancel — the accounting trail has to remain readable.</p></div></div>";
+    }
+    if (hasReceivedPayment(job)) {
+      return '<div class="jb-panel jb-danger" style="margin-top:14px">' +
+        '<div class="jb-panel-head"><h3>Close this job</h3></div>' +
+        '<div class="jb-panel-body"><p style="margin:0 0 12px">Received payments are on the ledger, so this job cannot be deleted. ' +
+        "Cancel it instead — the record stays, the board stops chasing it.</p>" +
+        '<button type="button" class="jb-btn danger" data-act="cancel-job">Cancel job</button></div></div>';
+    }
+    return '<div class="jb-panel jb-danger" style="margin-top:14px">' +
+      '<div class="jb-panel-head"><h3>Delete this job</h3></div>' +
+      '<div class="jb-panel-body"><p style="margin:0 0 12px">Removes the job, its checklist, stage history, draft costs and unpaid payment rows. ' +
+      "This cannot be undone. Prefer Cancel if the customer relationship should stay on file.</p>" +
+      '<button type="button" class="jb-btn danger" data-act="delete-job">Delete job</button>' +
+      ' <button type="button" class="jb-btn" data-act="cancel-job">Cancel instead</button></div></div>';
   }
 
   function ring(pct) {
@@ -1523,7 +1598,14 @@
         if (!d) return;
         return refreshAfterWrite(job.id);
       }).catch(function (err) { toast("bad", "Could not add the task", err.message); });
+      return;
     }
+
+    var del = e.target.closest && e.target.closest('[data-act="delete-job"]');
+    if (del) { deleteJob(job); return; }
+
+    var cancel = e.target.closest && e.target.closest('[data-act="cancel-job"]');
+    if (cancel) { cancelJob(job); }
   });
 
   el("jb-dbody").addEventListener("keydown", function (e) {

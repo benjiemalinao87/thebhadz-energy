@@ -1,5 +1,11 @@
 # Progress
 
+## Jobs: delete from Overview drawer (2026-08-04) — done
+- Wired existing `/api/jobs` DELETE into the job drawer Overview danger zone
+- Confirm → delete (checklist + stage history + unpaid rows); refused once a payment is received
+- Paid jobs get Cancel instead (`stage: cancelled`); cancelled jobs stay off the board columns
+- Local: hard-refresh Jobs (`/internal/projects`) after Wrangler is up
+
 ## Ops create forms → modals (2026-08-04) — done
 - Finance Ledger: Add/Edit transaction opens `#fin-dialog` (list + filter stay default view)
 - Install Ops: Create project, Add cost, Add payment, Add installer, Create assignment each open a native `<dialog>`

@@ -262,3 +262,13 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Replaced the Mission/energized card in `dashboard.js` `renderMission()` with a Leads card. Total = `leads.length`; "new in last 7 days" filters on `created_at` date slice `>= today - 7` (same window pattern as `renderWeek`). If the leads section 403s, show "—" and "Contacts not visible" rather than inventing zero.
 
 **Do not:** Hard-code Mission target/date into the first instrument card when the ask is top-of-funnel volume. Keep Mission wording in Pipeline copy where sold→energized still matters.
+
+## Jobs: delete UI was missing even though the API already deleted
+
+**Fixed:** 2026-08-04
+
+**What went wrong:** `/api/jobs` DELETE (and the paid-payment 409 refusal) already existed, but the Jobs drawer had no control that called it — founders could not remove a test job like JOB-2026-001.
+
+**What worked:** Add a danger zone on Overview: Delete (confirm → `DELETE { id }`) when no received payment; Cancel (`PATCH stage: cancelled`) when money is on the ledger or as the soft alternative. Exclude `cancelled` from board columns — `phaseOf("cancelled")` falls back to intake and would otherwise park cancelled jobs under Survey & quote.
+
+**Do not:** Hard-delete a job after a received payment (orphans the SC-09 ledger). Do not put Delete only on the card chrome without the server's payment guard messaging.

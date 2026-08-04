@@ -103,6 +103,8 @@ html[data-theme="dark"] {
 .jb-btn.petrol:hover { background: var(--ops-petrol-deep); }
 .jb-btn.danger { color: var(--ops-rust); border-color: var(--ops-rust); background: transparent; }
 .jb-btn.danger:hover { background: var(--ops-rust-soft); }
+.jb-panel.jb-danger { border-color: var(--ops-rust); }
+.jb-panel.jb-danger .jb-panel-head h3 { color: var(--ops-rust); }
 
 /* ------------------------------------------------------------------ chips ------ */
 
