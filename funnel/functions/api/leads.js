@@ -2,6 +2,8 @@
  * /api/leads — founder-gated pipeline data (backed by D1 env.DB).
  *
  *   GET                       → { ok, leads: [...] }  (all leads, newest first)
+ *   POST   { name, phone, … } → create a contact entered by a founder (walk-in,
+ *                               Messenger hand-off, neighbour intro — not the public form)
  *   PATCH  { id, stage }      → move a lead to a new stage
  *   PATCH  { id, notes }      → update a lead's notes
  *   PATCH  { id, next_action, next_action_due, next_action_owner }
@@ -96,6 +98,88 @@ export async function onRequest(context) {
        FROM leads ORDER BY datetime(created_at) DESC`
     ).all();
     return json({ ok: true, leads: results || [] });
+  }
+
+  // ---- Create (founder-entered contact) ----
+  if (method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+
+    const name = textOrNull(body.name, 120);
+    if (!name) return json({ ok: false, error: "A name is required." }, 422);
+
+    const phone = textOrNull(body.phone, 40) || "";
+    const digits = phone.replace(/[^\d]/g, "");
+    if (digits.length < 10 || digits.length > 13) {
+      return json({ ok: false, error: "A valid mobile number is required (10–13 digits)." }, 422);
+    }
+
+    const stage = typeof body.stage === "string" && STAGES.includes(body.stage) ? body.stage : "lead";
+    const now = new Date().toISOString();
+    const row = {
+      name,
+      phone,
+      email: textOrNull(body.email, 120) || "",
+      goal: textOrNull(body.goal, 120) || "",
+      address: textOrNull(body.address, 300) || "",
+      monthly_bill: textOrNull(body.monthly_bill, 40) || "",
+      package: textOrNull(body.package, 60) || "",
+      financing: body.financing === true || body.financing === 1 || body.financing === "yes" ? 1 : 0,
+      current_solution: textOrNull(body.current_solution, 200) || "",
+      interview_opt_in: 0,
+      stage,
+      notes: textOrNull(body.notes, 4000),
+      source: textOrNull(body.source, 40) || "manual",
+      created_at: now,
+      updated_at: now,
+    };
+
+    try {
+      const result = await env.DB.prepare(
+        `INSERT INTO leads
+          (name, phone, email, goal, address, monthly_bill, package, financing,
+           current_solution, interview_opt_in, stage, notes,
+           source, utm_source, utm_medium, utm_campaign, referrer, ip, country,
+           created_at, updated_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?, ?, '','','','','','', ?,?)`
+      ).bind(
+        row.name, row.phone, row.email, row.goal, row.address,
+        row.monthly_bill, row.package, row.financing,
+        row.current_solution, row.interview_opt_in, row.stage, row.notes,
+        row.source, row.created_at, row.updated_at
+      ).run();
+
+      const id = result && result.meta && result.meta.last_row_id;
+      if (!id) return json({ ok: false, error: "Contact was saved but its id could not be read." }, 500);
+
+      return json({
+        ok: true,
+        lead: {
+          id,
+          name: row.name,
+          phone: row.phone,
+          email: row.email,
+          goal: row.goal,
+          address: row.address,
+          monthly_bill: row.monthly_bill,
+          package: row.package,
+          financing: row.financing,
+          current_solution: row.current_solution,
+          interview_opt_in: row.interview_opt_in,
+          stage: row.stage,
+          notes: row.notes,
+          next_action: null,
+          next_action_due: null,
+          next_action_owner: null,
+          source: row.source,
+          utm_source: null,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+        },
+      });
+    } catch (err) {
+      return json({ ok: false, error: "Could not save the contact: " + String(err && err.message || err) }, 500);
+    }
   }
 
   // ---- Update ----

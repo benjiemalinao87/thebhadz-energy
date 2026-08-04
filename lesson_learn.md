@@ -280,3 +280,13 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Removed the Compliance checklist block from the on-screen customer sheet (`quote-builder.js`), the PDF renderer (`_quote-pdf.js`), and the `/api/quote` payload requirement that rejected sends without it. Covering email no longer says the checklist is "on your quotation." Permit / electrician / net-metering gates remain on the Jobs board and still block deposits in Install Ops.
 
 **Do not:** Put the checklist back on the customer PDF without an explicit ask. Do not weaken the Jobs/Install Ops deposit gate when removing customer-facing copy.
+
+## Contacts: Create lead was missing because /api/leads had no POST
+
+**Fixed:** 2026-08-04
+
+**What went wrong:** Contacts could list/patch/delete, but founders had no way to enter a walk-in or Messenger hand-off — only the public `/api/lead` form created rows.
+
+**What worked:** Add `POST /api/leads` (name + valid mobile required) and a `+ Create lead` button that opens a modal. Source defaults to `manual`. Keep the control next to search, not buried in the drawer.
+
+**Do not:** Route founder-entered contacts through the public `/api/lead` honeypot endpoint. Do not require goal/package on manual create — those are often unknown at first contact.

@@ -401,10 +401,22 @@ body.ops-standalone {
 
 .ops-contacts .filters {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr);
+  grid-template-columns: minmax(280px, 1fr) auto;
   gap: 12px;
   margin: 0 0 16px;
 }
+.ops-contacts .create-lead {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 9px;
+  border: 0;
+  background: var(--ops-amber);
+  color: #fff;
+  font: 650 13px var(--ops-font);
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.ops-contacts .create-lead:hover { background: var(--ops-amber-hover); }
 .ops-contacts .search,
 .ops-notes .search {
   min-height: 44px;
@@ -416,7 +428,53 @@ body.ops-standalone {
 .ops-notes .search input { color: var(--ops-ink); background: transparent; font-size: 14px; }
 .ops-contacts .search input::placeholder,
 .ops-notes .search input::placeholder { color: var(--ops-subtle); }
-.ops-contacts .chips { gap: 8px; }
+.ops-contacts .chips { grid-column: 1 / -1; gap: 8px; }
+.ops-contacts .lead-dialog {
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 12px;
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  box-shadow: 0 24px 60px rgba(45, 62, 80, .22);
+}
+.ops-contacts .lead-dialog::backdrop { background: rgba(45, 62, 80, .45); }
+.ops-contacts .lead-dialog-head { border-bottom-color: var(--ops-line); }
+.ops-contacts .lead-dialog-head h2 { color: var(--ops-ink); font-family: var(--ops-font); }
+.ops-contacts .lead-dialog-head p { color: var(--ops-muted); }
+.ops-contacts .lead-dialog-head .x {
+  border-color: var(--ops-line-strong);
+  background: var(--ops-surface);
+  color: var(--ops-muted);
+}
+.ops-contacts .lead-dialog-head .x:hover { color: var(--ops-ink); background: var(--ops-surface-2); }
+.ops-contacts .lead-dialog label { color: var(--ops-muted); font-family: var(--ops-font); }
+.ops-contacts .lead-dialog input,
+.ops-contacts .lead-dialog select,
+.ops-contacts .lead-dialog textarea {
+  border-color: var(--ops-line-strong);
+  background: #fff;
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+}
+.ops-contacts .lead-dialog input:focus,
+.ops-contacts .lead-dialog select:focus,
+.ops-contacts .lead-dialog textarea:focus { border-color: var(--ops-petrol); }
+.ops-contacts .lead-dialog .err { color: var(--ops-rust); }
+.ops-contacts .lead-dialog .actions .cancel {
+  border-color: var(--ops-line-strong);
+  color: var(--ops-muted);
+  font-family: var(--ops-font);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.ops-contacts .lead-dialog .actions .cancel:hover { color: var(--ops-ink); background: var(--ops-surface-2); }
+.ops-contacts .lead-dialog .actions .go {
+  background: var(--ops-amber);
+  border-color: var(--ops-amber);
+  font-family: var(--ops-font);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.ops-contacts .lead-dialog .actions .go:hover { background: var(--ops-amber-hover); }
 .ops-contacts .chip {
   min-height: 36px;
   padding: 0 14px;

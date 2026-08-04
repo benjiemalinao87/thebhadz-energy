@@ -6,6 +6,11 @@
 - Jobs / Install Ops still enforce permit · electrician · net-metering before deposit
 - Local: hard-refresh Quote Builder; Print / Email quote to confirm the block is gone
 
+## Contacts: Create lead button + POST /api/leads (2026-08-04) — done
+- `+ Create lead` beside search opens a modal (name + mobile required)
+- Founder-entered contacts land as New Lead with `source: manual`
+- Local: hard-refresh Contacts after Wrangler is up
+
 ## Jobs: delete from Overview drawer (2026-08-04) — done
 - Wired existing `/api/jobs` DELETE into the job drawer Overview danger zone
 - Confirm → delete (checklist + stage history + unpaid rows); refused once a payment is received

@@ -23,7 +23,7 @@
   /* ============================================================
      MACC CRM — Contacts table
      Command-center "monitor" theme (matches /internal dashboard).
-     Backed by /api/leads (GET list, PATCH stage/notes, DELETE).
+     Backed by /api/leads (GET list, POST create, PATCH stage/notes, DELETE).
      ============================================================ */
   :root{
     --mono:ui-monospace,"SF Mono",SFMono-Regular,"IBM Plex Mono",Menlo,Monaco,Consolas,monospace;
@@ -96,7 +96,13 @@
     font-family:var(--mono);font-size:13px;padding:9px 12px 9px 34px;}
   .search input::placeholder{color:var(--z-600);}
   .search input:focus{outline:none;border-color:rgba(69,192,214,0.5);}
-  .chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .create-lead{
+    flex:none;min-height:40px;padding:0 16px;border-radius:10px;cursor:pointer;
+    font-family:var(--mono);font-size:12px;font-weight:650;letter-spacing:0.04em;
+    background:var(--amber);border:1px solid var(--amber);color:#fff;
+  }
+  .create-lead:hover{filter:brightness(1.08);}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;width:100%;}
   .chip{font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;color:var(--z-400);background:rgba(9,9,11,0.6);
     border:1px solid var(--z-800);border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .14s;font-family:var(--mono);}
   .chip:hover{border-color:var(--z-600);color:var(--z-200);}
@@ -213,6 +219,38 @@
     box-shadow:0 8px 24px rgba(0,0,0,0.5);transition:transform .2s;}
   .toast.show{transform:translateX(-50%) translateY(0);}
 
+  /* Create-lead dialog — matches the drawer field language on this page. */
+  .lead-dialog{
+    width:min(480px,calc(100vw - 24px));max-height:calc(100vh - 24px);margin:auto;padding:0;
+    border:1px solid var(--z-800);border-radius:14px;background:#0a0a0b;color:var(--z-100);
+    box-shadow:0 24px 60px rgba(0,0,0,.55);
+  }
+  .lead-dialog::backdrop{background:rgba(0,0,0,.62);}
+  .lead-dialog-head{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--z-800);}
+  .lead-dialog-head h2{margin:0;font-family:var(--display);font-size:1.15rem;font-weight:600;color:var(--z-50);}
+  .lead-dialog-head p{margin:4px 0 0;font-size:12px;color:var(--z-500);line-height:1.45;}
+  .lead-dialog-head .x{margin-left:auto;flex:none;width:34px;height:34px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--z-800);background:transparent;color:var(--z-400);font-size:16px;}
+  .lead-dialog-head .x:hover{color:var(--z-100);border-color:var(--z-600);}
+  .lead-dialog form{padding:16px 20px 20px;display:grid;gap:12px;}
+  .lead-dialog .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .lead-dialog label{display:flex;flex-direction:column;gap:5px;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--z-500);}
+  .lead-dialog input,.lead-dialog select,.lead-dialog textarea{
+    font-family:var(--mono);font-size:13px;padding:9px 11px;border-radius:8px;
+    border:1px solid var(--z-800);background:rgba(9,9,11,.7);color:var(--z-100);
+  }
+  .lead-dialog textarea{min-height:72px;resize:vertical;text-transform:none;letter-spacing:0;font-size:13px;}
+  .lead-dialog input:focus,.lead-dialog select:focus,.lead-dialog textarea:focus{outline:none;border-color:rgba(69,192,214,.5);}
+  .lead-dialog .err{min-height:18px;font-size:12px;color:var(--red);}
+  .lead-dialog .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px;}
+  .lead-dialog .actions button{min-height:40px;padding:0 16px;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+  .lead-dialog .actions .cancel{background:transparent;border:1px solid var(--z-800);color:var(--z-300);}
+  .lead-dialog .actions .cancel:hover{border-color:var(--z-600);color:var(--z-100);}
+  .lead-dialog .actions .go{background:var(--amber);border:1px solid var(--amber);color:#fff;font-weight:650;}
+  .lead-dialog .actions .go:hover{filter:brightness(1.08);}
+  .lead-dialog .actions .go:disabled{opacity:.55;cursor:wait;}
+  @media (max-width:520px){.lead-dialog .row2{grid-template-columns:1fr;}}
+
   @media (max-width:640px){
     .strip{grid-template-columns:1fr 1fr;}
     td.hide-sm,thead th.hide-sm{display:none;}
@@ -254,6 +292,7 @@
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input id="search" type="search" placeholder="Search name, phone, email…" aria-label="Search contacts">
       </div>
+      <button type="button" class="create-lead" id="create-lead">+ Create lead</button>
       <div class="chips" id="chips"></div>
     </div>
 
@@ -296,6 +335,58 @@
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-modal="true"
          aria-labelledby="dw-name-live" tabindex="-1" style="outline:none"></aside>
+
+  <dialog class="lead-dialog" id="lead-create" aria-labelledby="lead-create-title">
+    <div class="lead-dialog-head">
+      <div>
+        <h2 id="lead-create-title">Create lead</h2>
+        <p>Walk-in, Messenger hand-off, or neighbour intro — lands in the pipeline as New Lead.</p>
+      </div>
+      <button type="button" class="x" id="lead-create-close" aria-label="Close">✕</button>
+    </div>
+    <form id="lead-create-form" novalidate>
+      <div class="row2">
+        <label>Name *
+          <input name="name" id="lc-name" maxlength="120" required autocomplete="name" placeholder="Full name">
+        </label>
+        <label>Mobile *
+          <input name="phone" id="lc-phone" maxlength="40" required inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxxx">
+        </label>
+      </div>
+      <div class="row2">
+        <label>Email
+          <input name="email" id="lc-email" type="email" maxlength="120" autocomplete="email" placeholder="optional">
+        </label>
+        <label>Package
+          <select name="package" id="lc-package">
+            <option value="">Not sure yet</option>
+            <option value="LIWANAG (on-grid)">LIWANAG — on-grid</option>
+            <option value="ILAW (off-grid)">ILAW — off-grid</option>
+            <option value="SANDIGAN (hybrid)">SANDIGAN — hybrid</option>
+          </select>
+        </label>
+      </div>
+      <label>Site address
+        <input name="address" id="lc-address" maxlength="300" autocomplete="street-address" placeholder="Barangay / sitio — needed before a survey">
+      </label>
+      <label>Goal
+        <select name="goal" id="lc-goal">
+          <option value="">Not asked yet</option>
+          <option value="Lower my bill (on-grid)">Lower my bill</option>
+          <option value="Backup during brownouts (off-grid)">Backup during brownouts</option>
+          <option value="Both / hybrid">Both / hybrid</option>
+        </select>
+      </label>
+      <label>Notes
+        <textarea name="notes" id="lc-notes" maxlength="4000" placeholder="How you met them, what they said…"></textarea>
+      </label>
+      <div class="err" id="lc-err" role="alert"></div>
+      <div class="actions">
+        <button type="button" class="cancel" id="lead-create-cancel">Cancel</button>
+        <button type="submit" class="go" id="lead-create-save">Save lead</button>
+      </div>
+    </form>
+  </dialog>
 
   <div class="loading" id="loading">Loading contacts…</div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -404,7 +495,7 @@
       if(rows.length===0){
         tb.innerHTML='<tr><td colspan="8"><div class="empty">'+
           '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>'+
-          '<div>'+(leads.length?"No contacts match this filter.":"No contacts yet. Leads from the funnel land here.")+'</div></div></td></tr>';
+          '<div>'+(leads.length?"No contacts match this filter.":"No contacts yet. Create a lead, or wait for the funnel to deliver one.")+'</div></div></td></tr>';
         el("foot-count").textContent="0 shown";
         return;
       }
@@ -587,7 +678,76 @@
       drawerReturnFocus=null;
     }
     el("scrim").addEventListener("click",closeDrawer);
-    document.addEventListener("keydown",function(e){if(e.key==="Escape")closeDrawer();});
+    document.addEventListener("keydown",function(e){
+      if(e.key!=="Escape")return;
+      var dlg=el("lead-create");
+      if(dlg&&dlg.open){dlg.close();return;}
+      closeDrawer();
+    });
+
+    /* ---- create lead ---- */
+    function openCreate(){
+      var dlg=el("lead-create");
+      var form=el("lead-create-form");
+      if(!dlg||!form)return;
+      form.reset();
+      el("lc-err").textContent="";
+      el("lead-create-save").disabled=false;
+      if(!dlg.open)dlg.showModal();
+      setTimeout(function(){el("lc-name").focus();},30);
+    }
+    function closeCreate(){
+      var dlg=el("lead-create");
+      if(dlg&&dlg.open)dlg.close();
+    }
+    function createLead(e){
+      e.preventDefault();
+      var name=(el("lc-name").value||"").trim();
+      var phone=(el("lc-phone").value||"").trim();
+      var digits=phone.replace(/[^\d]/g,"");
+      var err=el("lc-err");
+      err.textContent="";
+      if(!name){err.textContent="A name is required.";el("lc-name").focus();return;}
+      if(digits.length<10||digits.length>13){err.textContent="Enter a valid mobile number (10–13 digits).";el("lc-phone").focus();return;}
+
+      var save=el("lead-create-save");
+      save.disabled=true;
+      fetch("/api/leads",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify({
+          name:name,
+          phone:phone,
+          email:(el("lc-email").value||"").trim(),
+          package:el("lc-package").value||"",
+          address:(el("lc-address").value||"").trim(),
+          goal:el("lc-goal").value||"",
+          notes:(el("lc-notes").value||"").trim(),
+          source:"manual"
+        })
+      })
+        .then(function(r){
+          if(r.status===401){window.location.href="/login.html?next=/internal/leads.html";return null;}
+          return r.json().then(function(d){return {ok:r.ok,d:d};});
+        })
+        .then(function(res){
+          save.disabled=false;
+          if(!res)return;
+          if(!res.ok||!res.d||!res.d.ok){
+            err.textContent=(res.d&&res.d.error)||"Could not save the lead.";
+            return;
+          }
+          leads.unshift(res.d.lead);
+          closeCreate();
+          renderChips();renderStats();renderRows();
+          toast("Lead created — "+(res.d.lead.name||"contact"));
+        })
+        .catch(function(){save.disabled=false;err.textContent="Network error — try again.";});
+    }
+    el("create-lead").addEventListener("click",openCreate);
+    el("lead-create-close").addEventListener("click",closeCreate);
+    el("lead-create-cancel").addEventListener("click",closeCreate);
+    el("lead-create-form").addEventListener("submit",createLead);
 
     function saveNotes(id,notes){
       var l=leads.filter(function(x){return x.id==id;})[0]; if(l)l.notes=notes;
