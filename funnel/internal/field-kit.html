@@ -23,7 +23,25 @@
 <style>
   /* Page-specific only; colours all come from the --ops-* tokens so light and dark
      both work without a second palette (the mistake 7041e58 cleaned up). */
-  .fk-page { max-width: 860px; }
+  /* This view carries its own ground, face and padding. The "content" class on the main
+     element is inert here — it is defined in assets/style.css, which this page does not
+     load — and inside the shell the inherited base font is the dashboard's monospace
+     (body.cc-body in index.html). The .cc-operation-view treatment that would replace all
+     three is applied only to the slugs in spa-router.js's OPERATION_SLUGS, and a read-only
+     guide is not one of them. So the main element spans the full width to paint the ground
+     and set the sans face, and the 860px reading measure moves down to its children —
+     capping the main element itself would stop the ground mid-page. */
+  .fk-page {
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    padding: clamp(24px, 3.5vw, 44px) clamp(20px, 3.5vw, 44px) 88px;
+    background: var(--ops-ground);
+    color: var(--ops-ink);
+    font-family: var(--ops-font);
+  }
+  .fk-page > * { max-width: 860px; }
+
   .fk-head { margin-bottom: 26px; }
   .fk-head h1 { font-size: 26px; margin: 0 0 8px; color: var(--ops-ink); letter-spacing: -.01em; }
   .fk-head p { margin: 0; color: var(--ops-muted); font-size: 15px; line-height: 1.6; }
