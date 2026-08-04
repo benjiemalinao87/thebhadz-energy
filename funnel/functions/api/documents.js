@@ -3,11 +3,14 @@
  * file bytes live in R2 env.NOTES_R2 under docs/, via /api/document-file).
  *
  *   GET                                    → { ok, documents: [...], categories }
+ *                                            (company library only — rows with lead_id are
+ *                                            contact attachments and stay off this list)
  *   GET    ?id=N                           → { ok, document }          (full row incl. body_html)
- *   GET    ?lead_id=N                      → { ok, documents: [...] }  (files/docs linked to a contact)
+ *   GET    ?lead_id=N                      → { ok, documents: [...] }  (that contact's files only)
  *   POST   { title, body_html }            → create a rich-text doc (kind='doc')
  *   POST   { title?, file: {…}, lead_id? } → register an uploaded file (kind='file');
- *                                            optional lead_id attaches it to a Contacts row
+ *                                            with lead_id the file is a contact attachment
+ *                                            and does not appear in the Documents library
  *   PATCH  { id, title?, body_html?, category?, lead_id? } → update
  *   DELETE { id }                          → remove a document + its R2 file/thumbnail if any
  *
@@ -209,7 +212,9 @@ export async function onRequest(context) {
       return json({ ok: true, documents: results || [], categories: CATEGORIES });
     }
     const { results } = await env.DB.prepare(
-      `SELECT ${LIST_COLUMNS} FROM documents ORDER BY datetime(updated_at) DESC`
+      `SELECT ${LIST_COLUMNS} FROM documents
+       WHERE lead_id IS NULL
+       ORDER BY datetime(updated_at) DESC`
     ).all();
     return json({ ok: true, documents: results || [], categories: CATEGORIES });
   }
