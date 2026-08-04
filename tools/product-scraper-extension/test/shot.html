@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Store screenshot — 1280×800</title>
+<style>
+  /* Exactly the Web Store screenshot canvas. Nothing may overflow it. */
+  html, body { margin: 0; padding: 0; width: 1280px; height: 800px; overflow: hidden; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f7;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 0 34px;
+    box-sizing: border-box;
+  }
+  .stage { flex: 1; min-width: 0; }
+  h1 { font-size: 25px; color: #14335f; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sub { font-size: 14.5px; color: #5b6b7d; margin: 0 0 18px; line-height: 1.5; }
+
+  /* A generic supplier enquiry form — deliberately unbranded. This illustrates the
+     shape of page the extension works on; it is not any company's real page. */
+  .browser { background: #fff; border: 1px solid #cfd8e3; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 20px rgba(20,51,95,.10); }
+  .chrome-bar { background: #f4f6f9; border-bottom: 1px solid #e2e8f0; padding: 8px 12px; display: flex; align-items: center; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #d5dce6; }
+  .addr { flex: 1; margin-left: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 11.5px; color: #7b8794; padding: 4px 11px; }
+  .page { padding: 16px 18px 18px; }
+  .page h2 { font-size: 15px; margin: 0 0 12px; color: #1c2b3a; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  .f { display: flex; flex-direction: column; gap: 3px; }
+  .f.wide { grid-column: 1 / -1; }
+  .f span { font-size: 10.5px; color: #6b7a8c; font-weight: 600; }
+  .f i { font-style: normal; font-size: 12px; color: #1c2b3a; border: 1px solid #dbe2ec; border-radius: 5px; padding: 6px 8px; background: #fff; }
+  .f i.done { outline: 2px solid #f59e0b; outline-offset: 1px; }
+  .f i.empty { color: #b6c0cc; }
+  .f i.msg { min-height: 62px; line-height: 1.45; font-size: 11px; }
+
+  .side { width: 392px; flex: none; }
+  iframe { width: 390px; height: 726px; border: 1px solid #cfd8e3; border-radius: 10px; background: #f5f7fa; box-shadow: 0 8px 26px rgba(20,51,95,.16); display: block; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <h1>Fill a supplier contact form from your saved details</h1>
+  <p class="sub">Click the toolbar button, pick the enquiry you are making, and the form is filled with
+  your own contact details and a draft message. Filled fields are outlined. Nothing is ever submitted for you.</p>
+  <div class="browser">
+    <div class="chrome-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="addr">supplier-website.example / contact</span></div>
+    <div class="page">
+      <h2>Contact us</h2>
+      <div class="grid">
+        <div class="f"><span>First name</span><i class="done">Benjie</i></div>
+        <div class="f"><span>Last name</span><i class="done">Malinao</i></div>
+        <div class="f"><span>Email</span><i class="done">official@macc-inc.com</i></div>
+        <div class="f"><span>Phone</span><i class="done">+63 955 723 5093</i></div>
+        <div class="f"><span>Company</span><i class="done">MACC Systems &amp; Engineering Inc.</i></div>
+        <div class="f"><span>Country</span><i class="done">Philippines</i></div>
+        <div class="f"><span>Inquiry type</span><i class="done">Become a partner</i></div>
+        <div class="f"><span>Verification code</span><i class="empty">left for you</i></div>
+        <div class="f wide"><span>Message</span><i class="done msg" id="mockMsg"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="side"><iframe id="pop"></iframe></div>
+
+<script src="../templates.js"></script>
+<script src="shot.js"></script>
+</body>
+</html>

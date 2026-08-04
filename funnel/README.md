@@ -344,6 +344,14 @@ signed-in founder, and saves appear in the activity log. The section key is `cap
 it can be hidden per-account like any other tool. Apply `schema.sql` (command above) once
 before first use. Team usage SOP: `docs/sop-product-capture.md` in the repo root.
 
+**`/internal/field-kit.html`** is how a founder installs and learns that extension — the
+Chrome Web Store link once it clears review, the load-unpacked route until then, connecting
+it to the Command Center, the outreach profile, both tabs, and a troubleshooting table. It is
+**deliberately unregistered** in `functions/_pages.js`, exactly like `apps.html`: an account
+with `captures` hidden still uses the extension's Outreach half, so gating the instructions
+would strand the person who most needs them. The page holds no data, only instructions.
+Reached from the rail (**Field Kit**) and from the Apps grid.
+
 ### Team notes (D1 + R2-backed)
 
 **`/internal/notes.html`** is the founders' shared notebook — write a note (name, optional

@@ -24,6 +24,12 @@
  * tools it may still use. It carries no data of its own and filters its own tiles through
  * this same registry (assets/section-visibility.js), so a hidden section's tile disappears
  * from the grid while the grid itself stays open.
+ *
+ * Note on /internal/field-kit.html — same reasoning, same deliberate absence. It is the
+ * install-and-use guide for the browser extension. Filing it under `captures` would hide
+ * it from exactly the account that needs it: someone with Captures hidden still uses the
+ * extension's Outreach half, which touches no section and no API. The page holds no data —
+ * only instructions — so there is nothing to gate.
  */
 export const SECTIONS = [
   {

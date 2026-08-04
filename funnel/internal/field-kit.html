@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Kit browser extension — MACC Systems &amp; Engineering Inc.</title>
+<script>
+  // The Command Center shell is the UI for this page. A standalone load — refresh,
+  // bookmark, pasted link — hits this real file with no shell around it, so bounce to
+  // the dashboard, which reopens the page inside the SPA via ?open= (spa-router.js).
+  // The slug comes from the path, so this block is identical on every page. Inside the
+  // shell it re-runs after a swap, finds #cc-view, and does nothing.
+  (function () {
+    if (document.getElementById("cc-view")) return;
+    var m = /^\/internal\/([a-z0-9-]+)(?:\.html)?$/i.exec(location.pathname);
+    if (m && m[1].toLowerCase() !== "index") location.replace("/internal/?open=" + m[1].toLowerCase());
+  })();
+</script>
+<script src="/internal/assets/theme.js"></script>
+<link rel="icon" href="/assets/img/macc-mark.png">
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/internal/assets/operations-redesign.css">
+<style>
+  /* Page-specific only; colours all come from the --ops-* tokens so light and dark
+     both work without a second palette (the mistake 7041e58 cleaned up). */
+  .fk-page { max-width: 860px; }
+  .fk-head { margin-bottom: 26px; }
+  .fk-head h1 { font-size: 26px; margin: 0 0 8px; color: var(--ops-ink); letter-spacing: -.01em; }
+  .fk-head p { margin: 0; color: var(--ops-muted); font-size: 15px; line-height: 1.6; }
+
+  .fk-step { border: 1px solid var(--ops-line); border-radius: 10px; background: var(--ops-surface); padding: 18px 20px; margin: 0 0 14px; }
+  .fk-step > h2 { display: flex; align-items: baseline; gap: 10px; font-size: 16px; margin: 0 0 10px; color: var(--ops-ink); }
+  .fk-step > h2 .n {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--ops-surface-2); color: var(--ops-muted);
+    font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .fk-step p, .fk-step li { color: var(--ops-muted); font-size: 14px; line-height: 1.62; }
+  .fk-step p { margin: 0 0 9px; }
+  .fk-step ol, .fk-step ul { margin: 0 0 4px; padding-left: 20px; }
+  .fk-step li { margin: 5px 0; }
+  .fk-step b, .fk-step strong { color: var(--ops-ink); }
+  .fk-step code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px;
+    background: var(--ops-surface-2); color: var(--ops-ink); padding: 1px 5px; border-radius: 4px;
+  }
+  .fk-step a { color: var(--ops-petrol); }
+
+  .fk-note {
+    border-left: 3px solid var(--ops-line-strong); padding: 2px 0 2px 13px; margin: 12px 0 0;
+    font-size: 13.5px; color: var(--ops-subtle);
+  }
+  .fk-warn {
+    border: 1px solid var(--ops-line); border-left: 3px solid var(--ops-amber);
+    border-radius: 8px; background: var(--ops-surface-2);
+    padding: 11px 14px; margin: 12px 0 0; font-size: 13.5px; color: var(--ops-muted);
+  }
+  .fk-warn b { color: var(--ops-ink); }
+
+  .fk-pending {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ops-muted); background: var(--ops-surface-2);
+    border: 1px solid var(--ops-line); border-radius: 20px; padding: 4px 11px;
+  }
+
+  .fk-table { width: 100%; border-collapse: collapse; margin: 4px 0 0; font-size: 13.5px; }
+  .fk-table th, .fk-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--ops-line); vertical-align: top; color: var(--ops-muted); }
+  .fk-table th { color: var(--ops-subtle); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+  .fk-table td:first-child { color: var(--ops-ink); white-space: nowrap; }
+  .fk-scroll { overflow-x: auto; }
+
+  .fk-foot { margin: 22px 0 0; font-size: 13px; color: var(--ops-subtle); }
+  .fk-foot a { color: var(--ops-petrol); }
+</style>
+</head>
+<body class="ops-standalone">
+
+<main class="content fk-page">
+
+  <header class="fk-head">
+    <h1>Field Kit browser extension</h1>
+    <p>One toolbar button that does two jobs: saves a supplier listing into
+      <a href="/internal/captures.html">Product captures</a>, and fills a manufacturer's contact
+      form with your details and a drafted message. Install it once, then it is two clicks
+      instead of twenty minutes of retyping.</p>
+  </header>
+
+  <section class="fk-step">
+    <h2><span class="n">0</span> Check you can run it</h2>
+    <p><b>Desktop Chrome, Edge, Brave or any Chromium browser.</b> Extensions do not exist on
+      Chrome for Android or iOS, and this will not run in Safari or Firefox.</p>
+    <p class="fk-note">Working from a phone today? Skip the extension. Capture what you need by
+      hand, or use the <b>Copy row</b> button on a laptop later — nothing here is the only way
+      to get a row into Captures.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">1</span> Get the extension</h2>
+    <p><span class="fk-pending">Chrome Web Store · in review</span></p>
+    <p>Submitted 4 August 2026. Once Google approves it, the install link goes here and in the
+      group channel — one click, and Chrome keeps it updated for you afterwards. Review usually
+      takes a few days.</p>
+    <p><b>Until then, load it from the repo:</b></p>
+    <ol>
+      <li>Get the <code>solar city</code> repo onto your machine (<code>git pull</code> if you
+        already have it).</li>
+      <li>Open <code>chrome://extensions</code> and switch on <b>Developer mode</b>, top right.</li>
+      <li>Click <b>Load unpacked</b> and select the folder
+        <code>tools/product-scraper-extension</code>.</li>
+      <li>Pin <b>MACC Field Kit</b> to the toolbar — puzzle-piece icon, then the pin.</li>
+    </ol>
+    <p class="fk-note">Loaded this way, Chrome never updates it. When the group channel says a
+      new build landed: <code>git pull</code>, then <b>Reload</b> on the Field Kit card at
+      <code>chrome://extensions</code>. Once you install from the Store instead, remove the
+      unpacked copy — two copies means two icons and two separate offline queues.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">2</span> Connect it to the Command Center</h2>
+    <ol>
+      <li>Right-click the extension icon → <b>Options</b>.</li>
+      <li>Paste the address you use for the Command Center — the same one you are reading this
+        page on — and click <b>Save settings</b>.</li>
+      <li>Chrome asks whether the extension may talk to that site. Click <b>Allow</b>. Saving
+        captures fails without it.</li>
+      <li>Make sure you are signed in here <b>with your own login</b>, not the shared team
+        password. Captures are attributed, and "Shared team login" tells nobody who found the
+        supplier.</li>
+      <li>Click <b>Test connection</b>. You want
+        <i>"Connected ✓ — signed in, captures API reachable."</i></li>
+    </ol>
+    <p class="fk-note">There is no extra password or API key anywhere in the extension. It talks
+      to the Command Center as you, using the session you are already signed in with — which is
+      also why every capture lands with your name on it.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">3</span> Fill in your outreach profile</h2>
+    <p>Still in <b>Options</b>, under <b>Outreach profile</b>. The company details — name,
+      address, website, city, province — are already filled in and the same for everyone. Add
+      the ones that are yours: <b>first and last name, job title, work email, phone</b>.</p>
+    <p><b>Use my Command Center name &amp; email</b> copies those two across from your account so
+      you do not retype them. Then <b>Save profile</b>.</p>
+    <p class="fk-note">This lives in your own browser and is never sent to the Command Center.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">4</span> Capture tab — saving a supplier listing</h2>
+    <p>On an Alibaba listing, a Facebook Marketplace item, a Shopee or Lazada page, any shop:
+      click the icon, check what it read, add a line in <b>Notes</b> saying why it matters, and
+      hit <b>Save to Command Center</b>. The row appears on
+      <a href="/internal/captures.html">Product captures</a> with today's date and the source URL.</p>
+    <ul>
+      <li><b>Facebook group posts:</b> select the post text first, then click the icon. Facebook's
+        markup cannot be read reliably, so your selection <i>is</i> the capture.</li>
+      <li><b>Check the price kept its full range and unit</b> — "US $28.50 – 32.00 / piece", not
+        just "28.50".</li>
+      <li><b>No signal, or your session expired?</b> The row is queued on your machine and the
+        icon shows a count. Sign in, then <b>Retry queued</b>.</li>
+    </ul>
+    <p class="fk-warn"><b>A capture is evidence, not a quote.</b> It records what a listing said
+      on a date. Nothing from Captures goes into a customer quote until a supplier confirms it
+      in writing.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">5</span> Outreach tab — filling a brand's contact form</h2>
+    <p>On a manufacturer's contact or "become a distributor" page — Sungrow, Deye, Solis,
+      anyone — click the icon, switch to <b>Outreach</b>, pick the message, and click
+      <b>Fill this form</b>. Filled fields get an amber outline, and a list under the buttons
+      shows exactly what it wrote and what it left for you.</p>
+    <div class="fk-scroll">
+      <table class="fk-table">
+        <tr><th>Message</th><th>Use it for</th></tr>
+        <tr><td>Biliran co-marketing event</td><td>We host an informational event in Naval; they supply literature, a banner or demo unit, and ideally a speaker — and become our preferred brand for what we install here.</td></tr>
+        <tr><td>Become a distributor</td><td>Distribution or dealer terms for the Philippines: tiers, MOQ, trade pricing, warranty service path.</td></tr>
+        <tr><td>Installer / dealer account</td><td>Open a buying account, or get pointed at their authorised Philippine distributor.</td></tr>
+        <tr><td>Technical docs &amp; compliance</td><td>Datasheets, IEC 62109 and anti-islanding certificates — what a net-metering submission needs.</td></tr>
+      </table>
+    </div>
+    <p style="margin-top:12px"><b>It never submits anything.</b> It fills the form; you read it,
+      tick any consent box yourself, and press send. <b>Undo</b> puts every field back. It will
+      not touch passwords, captchas, checkboxes or radio buttons, and it leaves alone any field
+      that already has a value.</p>
+    <p class="fk-warn"><b>Edit the draft, but keep it honest.</b> Every message says plainly that
+      we are newly incorporated and pre-revenue, and promises no volumes. That is deliberate:
+      a brand that finds out later stops replying, and an inflated claim costs us the
+      relationship. Never add install counts, certifications or distributor status we do not
+      have.</p>
+  </section>
+
+  <section class="fk-step">
+    <h2><span class="n">6</span> If something breaks</h2>
+    <div class="fk-scroll">
+      <table class="fk-table">
+        <tr><th>It says</th><th>Do this</th></tr>
+        <tr><td>Signed out — row queued</td><td>The row is safe. Sign in here, reopen the popup, <b>Retry queued</b>.</td></tr>
+        <tr><td>App unreachable — row queued</td><td>No signal or the app is down. Queued rows also retry on browser restart.</td></tr>
+        <tr><td>Site permission was declined</td><td>Options → <b>Save settings</b> again → <b>Allow</b> on Chrome's prompt.</td></tr>
+        <tr><td>This build isn't allowed to talk to&nbsp;…</td><td>The Command Center moved to a domain the extension does not know. Post in the group channel — it needs a one-line change and a reload.</td></tr>
+        <tr><td>Nothing auto-fills on a Facebook post</td><td>Select the post text first, then click the icon.</td></tr>
+        <tr><td>Nothing auto-fills on a contact form</td><td>The site names its fields in a way the extension cannot read. Type them, or use <b>Copy</b> to take the draft and email them instead.</td></tr>
+        <tr><td>That section is not available on your account</td><td>Captures is hidden from your login. Ask a founder to tick it under Team &amp; access → Sections. Outreach still works.</td></tr>
+      </table>
+    </div>
+    <p class="fk-note">Anything else: post it in the group channel, not a DM — same rule as
+      everything else here.</p>
+  </section>
+
+  <p class="fk-foot">Deeper detail lives in the repo: the full capture SOP in
+    <code>docs/sop-product-capture.md</code>, how the extension works and how to change it in
+    <code>tools/product-scraper-extension/README.md</code>, and the Web Store publishing runbook
+    in <code>docs/chrome-web-store-listing.md</code>.</p>
+
+</main>
+
+</body>
+</html>

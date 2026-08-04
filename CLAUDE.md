@@ -155,9 +155,12 @@ site — do not try to unify them):
 - `index.html` — root's is the SC-00 overview hero page (its content partner is
   `content/overview.html`, output to root as `index.html`); `funnel/internal/index.html` is
   the bespoke Command Center dashboard, structurally unrelated.
-- Founder-tools-only pages (`activity.html`, `finance.html`, `install-ops.html`, `founder-lab.html`,
-  `leads.html`, `meetings.html`, `notes.html`, `principles.html`, `team.html`, `strategy-deck-*.html`)
-  exist only inside `funnel/internal/` — there is no root twin, nothing to unify.
+- Founder-tools-only pages (`activity.html`, `field-kit.html`, `finance.html`, `install-ops.html`,
+  `founder-lab.html`, `leads.html`, `meetings.html`, `notes.html`, `principles.html`, `team.html`,
+  `strategy-deck-*.html`) exist only inside `funnel/internal/` — there is no root twin, nothing
+  to unify. `field-kit.html` is the install-and-use guide for the browser extension in
+  `tools/product-scraper-extension/`; like `apps.html` it is deliberately unregistered in
+  `functions/_pages.js`, so every account can read it (see the note at the top of that file).
 
 ## Audience & tone
 
