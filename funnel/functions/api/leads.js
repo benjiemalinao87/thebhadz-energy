@@ -6,6 +6,7 @@
  *                               Messenger hand-off, neighbour intro — not the public form)
  *   PATCH  { id, stage }      → move a lead to a new stage
  *   PATCH  { id, notes }      → update a lead's notes
+ *   PATCH  { id, name?, phone?, email?, … } → edit contact fields (phone required if sent)
  *   PATCH  { id, next_action, next_action_due, next_action_owner }
  *                             → set/clear the one next step for this lead
  *   DELETE { id }             → remove a lead
@@ -207,6 +208,54 @@ export async function onRequest(context) {
       ).bind(notes, now, id).run();
       if (!r.meta || r.meta.changes === 0) return json({ ok: false, error: "Lead not found." }, 404);
       return json({ ok: true });
+    }
+
+    // Contact card fields — phone stays the only hard requirement when it is sent.
+    const FIELD_MAX = {
+      name: 120, phone: 40, email: 120, goal: 120, address: 300,
+      monthly_bill: 40, package: 60, current_solution: 200,
+    };
+    const touchingFields = Object.keys(FIELD_MAX).some((k) => k in body) || ("financing" in body);
+    if (touchingFields) {
+      const sets = [];
+      const binds = [];
+      for (const [field, max] of Object.entries(FIELD_MAX)) {
+        if (!(field in body)) continue;
+        let value = textOrNull(body[field], max);
+        if (field === "phone") {
+          const phone = value || "";
+          const digits = phone.replace(/[^\d]/g, "");
+          if (digits.length < 10 || digits.length > 13) {
+            return json({ ok: false, error: "A valid mobile number is required (10–13 digits)." }, 422);
+          }
+          value = phone;
+        } else if (field === "name" || field === "email" || field === "goal" ||
+                   field === "address" || field === "monthly_bill" || field === "package" ||
+                   field === "current_solution") {
+          value = value || "";
+        }
+        sets.push(`${field} = ?`);
+        binds.push(value);
+      }
+      if ("financing" in body) {
+        sets.push("financing = ?");
+        binds.push(body.financing === true || body.financing === 1 || body.financing === "yes" ? 1 : 0);
+      }
+      if (!sets.length) return json({ ok: false, error: "Nothing to update." }, 422);
+      sets.push("updated_at = ?");
+      binds.push(now, id);
+      const r = await env.DB.prepare(
+        `UPDATE leads SET ${sets.join(", ")} WHERE id = ?`
+      ).bind(...binds).run();
+      if (!r.meta || r.meta.changes === 0) return json({ ok: false, error: "Lead not found." }, 404);
+      const lead = await env.DB.prepare(
+        `SELECT id, name, phone, email, goal, address, monthly_bill, package, financing,
+                current_solution, interview_opt_in, stage, notes,
+                next_action, next_action_due, next_action_owner,
+                source, utm_source, created_at, updated_at
+         FROM leads WHERE id = ?`
+      ).bind(id).first();
+      return json({ ok: true, lead });
     }
 
     // The three next-action fields move together: sending any one of them rewrites the

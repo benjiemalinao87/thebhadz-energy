@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS documents (
   -- suppliers | marketing | meetings (validated in functions/api/documents.js —
   -- kept a plain TEXT here so adding a category is a one-list code change).
   category    TEXT NOT NULL DEFAULT 'general',
+  -- Optional link to a Contacts (/api/leads) row — contracts, signed quotes, survey photos.
+  lead_id     INTEGER,
   author      TEXT NOT NULL DEFAULT '',   -- founder name from the session, never the body
   updated_by  TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL,              -- ISO timestamp
@@ -92,6 +94,7 @@ CREATE TABLE IF NOT EXISTS documents (
 
 CREATE INDEX IF NOT EXISTS idx_documents_updated ON documents(updated_at);
 CREATE INDEX IF NOT EXISTS idx_documents_category ON documents(category);
+CREATE INDEX IF NOT EXISTS idx_documents_lead ON documents(lead_id);
 
 -- Board tasks. A row with job_id set is work on one installation (SC-07 job drawer);
 -- a row with job_id NULL is company work (the Founder OS Traction/Product/Ops board).

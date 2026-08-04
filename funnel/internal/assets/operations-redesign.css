@@ -1393,3 +1393,39 @@ html[data-theme="dark"] .ops-meetings .rail a.m .rec-badge {
   text-transform: none;
 }
 .ops-contacts .danger button:hover { border-color: var(--ops-rust); background: var(--ops-rust-soft); }
+
+.ops-contacts .dw-file {
+  border-color: var(--ops-line);
+  background: var(--ops-surface-2);
+}
+.ops-contacts .dw-file .meta b { color: var(--ops-ink); }
+.ops-contacts .dw-file .meta small { color: var(--ops-muted); }
+.ops-contacts .dw-file a { color: var(--ops-petrol); font-weight: 600; }
+.ops-contacts .dw-file .kill {
+  border-color: var(--ops-line-strong);
+  color: var(--ops-muted);
+}
+.ops-contacts .dw-file .kill:hover {
+  border-color: var(--ops-rust);
+  color: var(--ops-rust);
+  background: var(--ops-rust-soft);
+}
+.ops-contacts .dw-files-empty { color: var(--ops-muted); }
+.ops-contacts .field .row2 input,
+.ops-contacts .field .row2 select {
+  width: 100%;
+  background: #fff;
+  color: var(--ops-ink);
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: 400 14px var(--ops-font);
+}
+.ops-contacts #dwaddress {
+  background: #fff;
+  color: var(--ops-ink);
+  border: 1px solid var(--ops-line-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: 400 14px var(--ops-font);
+}

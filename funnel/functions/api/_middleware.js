@@ -13,7 +13,7 @@
  * form and the login/logout endpoints themselves.
  */
 import { currentUser, logActivity } from "../_auth.js";
-import { isSectionHidden, sectionForApi } from "../_pages.js";
+import { isApiHidden, sectionForApi } from "../_pages.js";
 
 const PUBLIC_PATHS = new Set(["/api/lead", "/api/founder-login", "/api/founder-logout"]);
 
@@ -98,18 +98,21 @@ export async function onRequest(context) {
 
   // A hidden section's data has to be unreachable, not just unlinked — otherwise
   // hiding Finance from an installer stops at the sidebar and /api/finance still pays out.
-  const section = sectionForApi(pathname);
-  if (section && isSectionHidden(user, section.key)) {
+  // Shared APIs (listed on more than one section) stay open while any owning section is.
+  if (isApiHidden(user, pathname)) {
+    const section = sectionForApi(pathname);
     if (typeof waitUntil === "function") {
       waitUntil(
         logActivity(env, {
           user,
           action: "section.denied",
-          entity: section.key,
+          entity: section ? section.key : "unknown",
           method: request.method,
           path: pathname,
           status: 403,
-          detail: `${section.label} is hidden from this account`,
+          detail: section
+            ? `${section.label} is hidden from this account`
+            : "That API is not available on this account",
           request,
         })
       );

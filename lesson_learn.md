@@ -290,3 +290,11 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Add `POST /api/leads` (name + valid mobile required) and a `+ Create lead` button that opens a modal. Source defaults to `manual`. Keep the control next to search, not buried in the drawer.
 
 **Do not:** Route founder-entered contacts through the public `/api/lead` honeypot endpoint. Do not require goal/package on manual create — those are often unknown at first contact.
+
+## Contacts: edit + attach files to a lead
+
+**Fixed:** 2026-08-04
+
+**What worked:** PATCH contact fields on `/api/leads` (phone still the only required field). Documents gain optional `lead_id`; contact drawer uploads to R2 then registers with `lead_id` + category `legal`. Shared `/api/documents` + `/api/document-file` on both Contacts and Documents sections, with `isApiHidden` allowing access if any owning section is visible.
+
+**Do not:** Duplicate upload plumbing under `/api/leads`. Do not gate contact file upload solely on the Documents section being visible.

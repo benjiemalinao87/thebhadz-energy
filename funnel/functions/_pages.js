@@ -47,7 +47,9 @@ export const SECTIONS = [
     label: "Contacts / leads pipeline",
     group: "Operations",
     pages: ["leads"],
-    apis: ["/api/leads"],
+    // Documents APIs are shared so a contract can be uploaded from the contact
+    // drawer without opening the library — still blocked if BOTH sections are hidden.
+    apis: ["/api/leads", "/api/documents", "/api/document-file"],
   },
   {
     key: "meetings",
@@ -204,13 +206,27 @@ export function sectionForPage(slug) {
   return null;
 }
 
+/** Every section that claims this /api/* path (shared APIs may appear on more than one). */
+export function sectionsForApi(pathname) {
+  const path = String(pathname || "").replace(/\/+$/, "");
+  return SECTIONS.filter((section) => section.apis.indexOf(path) !== -1);
+}
+
 /** The section an /api/* path belongs to, or null if the endpoint isn't section-bound. */
 export function sectionForApi(pathname) {
-  const path = String(pathname || "").replace(/\/+$/, "");
-  for (const section of SECTIONS) {
-    if (section.apis.indexOf(path) !== -1) return section;
-  }
-  return null;
+  const matched = sectionsForApi(pathname);
+  return matched.length ? matched[0] : null;
+}
+
+/**
+ * An API is reachable when it is unbound, or when the account still has at least one
+ * section that lists it. Shared paths (e.g. /api/documents on Contacts and Documents)
+ * stay open unless every owning section is hidden.
+ */
+export function isApiHidden(user, pathname) {
+  const matched = sectionsForApi(pathname);
+  if (!matched.length) return false;
+  return matched.every((section) => isSectionHidden(user, section.key));
 }
 
 /**

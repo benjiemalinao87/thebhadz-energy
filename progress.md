@@ -11,6 +11,12 @@
 - Founder-entered contacts land as New Lead with `source: manual`
 - Local: hard-refresh Contacts after Wrangler is up
 
+## Contacts: edit fields + attach files to a lead (2026-08-04) — done
+- Contact drawer: editable name/phone/email/package/address/goal/bill/financing + Save contact
+- Files section uploads via `/api/document-file` → `/api/documents` with `lead_id` (category legal)
+- `documents.lead_id` column; Documents APIs shared with Contacts section visibility
+- Local: hard-refresh Contacts; open a lead → edit + upload a PDF
+
 ## Jobs: delete from Overview drawer (2026-08-04) — done
 - Wired existing `/api/jobs` DELETE into the job drawer Overview danger zone
 - Confirm → delete (checklist + stage history + unpaid rows); refused once a payment is received

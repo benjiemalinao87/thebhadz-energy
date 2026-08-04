@@ -2,11 +2,13 @@
  * /api/documents — founder-gated document library (backed by D1 env.DB; uploaded
  * file bytes live in R2 env.NOTES_R2 under docs/, via /api/document-file).
  *
- *   GET                                    → { ok, documents: [...] }  (no body_html, newest first)
+ *   GET                                    → { ok, documents: [...], categories }
  *   GET    ?id=N                           → { ok, document }          (full row incl. body_html)
+ *   GET    ?lead_id=N                      → { ok, documents: [...] }  (files/docs linked to a contact)
  *   POST   { title, body_html }            → create a rich-text doc (kind='doc')
- *   POST   { title?, file: {key,name,type,size,thumbKey?} } → register an uploaded file (kind='file')
- *   PATCH  { id, title?, body_html? }      → update (body_html only for kind='doc')
+ *   POST   { title?, file: {…}, lead_id? } → register an uploaded file (kind='file');
+ *                                            optional lead_id attaches it to a Contacts row
+ *   PATCH  { id, title?, body_html?, category?, lead_id? } → update
  *   DELETE { id }                          → remove a document + its R2 file/thumbnail if any
  *
  * thumb_key points at the small preview /api/document-file stored next to an image
@@ -93,6 +95,7 @@ async function migrate(env) {
        file_type   TEXT,
        file_size   INTEGER NOT NULL DEFAULT 0,
        category    TEXT NOT NULL DEFAULT 'general',
+       lead_id     INTEGER,
        author      TEXT NOT NULL DEFAULT '',
        updated_by  TEXT NOT NULL DEFAULT '',
        created_at  TEXT NOT NULL,
@@ -107,6 +110,13 @@ async function migrate(env) {
   } catch { /* already present */ }
   try {
     await env.DB.prepare(`ALTER TABLE documents ADD COLUMN thumb_key TEXT`).run();
+  } catch { /* already present */ }
+  // Optional link to a Contacts row — contracts and survey photos live on the person.
+  try {
+    await env.DB.prepare(`ALTER TABLE documents ADD COLUMN lead_id INTEGER`).run();
+  } catch { /* already present */ }
+  try {
+    await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_documents_lead ON documents(lead_id)`).run();
   } catch { /* already present */ }
 }
 
@@ -157,7 +167,14 @@ function cleanFile(file) {
 }
 
 const LIST_COLUMNS =
-  "id, kind, title, file_key, file_name, file_type, file_size, thumb_key, category, author, updated_by, created_at, updated_at";
+  "id, kind, title, file_key, file_name, file_type, file_size, thumb_key, category, lead_id, author, updated_by, created_at, updated_at";
+
+/** Positive integer lead id, or null when clearing / omitting the link. */
+function cleanLeadId(value) {
+  if (value === null || value === "" || value === undefined) return null;
+  const id = parseInt(value, 10);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -175,13 +192,21 @@ export async function onRequest(context) {
 
   // ---- List / read one ----
   if (method === "GET") {
-    const idParam = new URL(request.url).searchParams.get("id");
+    const url = new URL(request.url);
+    const idParam = url.searchParams.get("id");
     if (idParam !== null) {
       const id = parseInt(idParam, 10);
       if (!Number.isInteger(id)) return json({ ok: false, error: "A valid id is required." }, 422);
       const row = await env.DB.prepare(`SELECT * FROM documents WHERE id = ?`).bind(id).first();
       if (!row) return json({ ok: false, error: "Document not found." }, 404);
       return json({ ok: true, document: row });
+    }
+    const leadId = cleanLeadId(url.searchParams.get("lead_id"));
+    if (leadId) {
+      const { results } = await env.DB.prepare(
+        `SELECT ${LIST_COLUMNS} FROM documents WHERE lead_id = ? ORDER BY datetime(updated_at) DESC`
+      ).bind(leadId).all();
+      return json({ ok: true, documents: results || [], categories: CATEGORIES });
     }
     const { results } = await env.DB.prepare(
       `SELECT ${LIST_COLUMNS} FROM documents ORDER BY datetime(updated_at) DESC`
@@ -195,6 +220,14 @@ export async function onRequest(context) {
     try { b = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
     const author = String(founder.name || "").slice(0, 80).trim();
     const category = cleanCategory(b.category);
+    const leadId = cleanLeadId(b.lead_id);
+    if (b.lead_id !== undefined && b.lead_id !== null && b.lead_id !== "" && !leadId) {
+      return json({ ok: false, error: "A valid lead_id is required to attach a document to a contact." }, 422);
+    }
+    if (leadId) {
+      const lead = await env.DB.prepare(`SELECT id FROM leads WHERE id = ?`).bind(leadId).first();
+      if (!lead) return json({ ok: false, error: "That contact was not found." }, 404);
+    }
     const now = new Date().toISOString();
 
     // Uploaded file → one library row pointing at the R2 object.
@@ -203,13 +236,13 @@ export async function onRequest(context) {
       if (!file) return json({ ok: false, error: "Invalid file metadata — upload via /api/document-file first." }, 422);
       const title = String(b.title || file.name).slice(0, MAX_TITLE).trim() || file.name;
       const r = await env.DB.prepare(
-        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, thumb_key, category, author, updated_by, created_at, updated_at)
-         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(title, file.key, file.name, file.type, file.size, file.thumbKey, category, author, author, now, now).run();
+        `INSERT INTO documents (kind, title, body_html, file_key, file_name, file_type, file_size, thumb_key, category, lead_id, author, updated_by, created_at, updated_at)
+         VALUES ('file', ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(title, file.key, file.name, file.type, file.size, file.thumbKey, category, leadId, author, author, now, now).run();
       return json({
         ok: true,
         document: {
-          id: r.meta.last_row_id, kind: "file", title, category,
+          id: r.meta.last_row_id, kind: "file", title, category, lead_id: leadId,
           file_key: file.key, file_name: file.name, file_type: file.type, file_size: file.size, thumb_key: file.thumbKey,
           author, updated_by: author, created_at: now, updated_at: now,
         },
@@ -223,13 +256,13 @@ export async function onRequest(context) {
     if (rawBody.length > MAX_BODY_HTML) return json({ ok: false, error: "Document is too long." }, 413);
     const bodyHtml = await sanitizeHtml(rawBody);
     const r = await env.DB.prepare(
-      `INSERT INTO documents (kind, title, body_html, category, author, updated_by, created_at, updated_at)
-       VALUES ('doc', ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(title, bodyHtml, category, author, author, now, now).run();
+      `INSERT INTO documents (kind, title, body_html, category, lead_id, author, updated_by, created_at, updated_at)
+       VALUES ('doc', ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(title, bodyHtml, category, leadId, author, author, now, now).run();
     return json({
       ok: true,
       document: {
-        id: r.meta.last_row_id, kind: "doc", title, body_html: bodyHtml, category,
+        id: r.meta.last_row_id, kind: "doc", title, body_html: bodyHtml, category, lead_id: leadId,
         file_key: null, file_name: null, file_type: null, file_size: 0, thumb_key: null,
         author, updated_by: author, created_at: now, updated_at: now,
       },
@@ -261,7 +294,18 @@ export async function onRequest(context) {
     if (b.category !== undefined) {
       sets.push("category = ?"); binds.push(cleanCategory(b.category));
     }
-    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title, body_html, or category)." }, 422);
+    if (b.lead_id !== undefined) {
+      const leadId = cleanLeadId(b.lead_id);
+      if (b.lead_id !== null && b.lead_id !== "" && !leadId) {
+        return json({ ok: false, error: "A valid lead_id is required." }, 422);
+      }
+      if (leadId) {
+        const lead = await env.DB.prepare(`SELECT id FROM leads WHERE id = ?`).bind(leadId).first();
+        if (!lead) return json({ ok: false, error: "That contact was not found." }, 404);
+      }
+      sets.push("lead_id = ?"); binds.push(leadId);
+    }
+    if (!sets.length) return json({ ok: false, error: "Nothing to update (send title, body_html, category, or lead_id)." }, 422);
 
     sets.push("updated_by = ?"); binds.push(String(founder.name || "").slice(0, 80).trim());
     sets.push("updated_at = ?"); binds.push(new Date().toISOString());

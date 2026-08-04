@@ -155,6 +155,21 @@
   button.save.ghost{background:none;border:1px solid var(--z-800);color:var(--z-500);}
   .na-hint{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--z-500);}
 
+  .dw-files{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+  .dw-file{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--z-800);border-radius:8px;background:rgba(9,9,11,.55);}
+  .dw-file .meta{flex:1;min-width:0;}
+  .dw-file .meta b{display:block;font-size:13px;color:var(--z-100);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dw-file .meta small{display:block;font-size:11px;color:var(--z-500);margin-top:2px;}
+  .dw-file a{color:var(--cyan);font-size:12px;text-decoration:none;}
+  .dw-file a:hover{text-decoration:underline;}
+  .dw-file .kill{background:none;border:1px solid var(--z-800);color:var(--z-500);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;font-family:var(--mono);}
+  .dw-file .kill:hover{border-color:var(--red);color:var(--red);}
+  .dw-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .dw-upload input[type=file]{display:none;}
+  .dw-files-empty{font-size:12.5px;color:var(--z-500);margin:4px 0 0;}
+  .field .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media (max-width:420px){.field .row2{grid-template-columns:1fr;}}
+
   /* stage select (inline) */
   .stage-sel{appearance:none;-webkit-appearance:none;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;
     border-radius:999px;padding:5px 26px 5px 12px;cursor:pointer;border:1px solid transparent;
@@ -611,6 +626,31 @@
 
     // ---- drawer ----
     var openId=null,drawerReturnFocus=null;
+    var PKG_OPTS=[
+      {v:"",l:"Not sure yet"},
+      {v:"LIWANAG (on-grid)",l:"LIWANAG — on-grid"},
+      {v:"ILAW (off-grid)",l:"ILAW — off-grid"},
+      {v:"SANDIGAN (hybrid)",l:"SANDIGAN — hybrid"}
+    ];
+    var GOAL_OPTS=[
+      {v:"",l:"Not asked yet"},
+      {v:"Lower my bill (on-grid)",l:"Lower my bill"},
+      {v:"Backup during brownouts (off-grid)",l:"Backup during brownouts"},
+      {v:"Both / hybrid",l:"Both / hybrid"}
+    ];
+    function optList(opts,cur){
+      return opts.map(function(o){
+        return '<option value="'+esc(o.v)+'"'+(o.v===cur?" selected":"")+'>'+esc(o.l)+'</option>';
+      }).join("");
+    }
+    function formatSize(n){
+      n=Number(n)||0;
+      if(n>=1048576)return (n/1048576).toFixed(1)+" MB";
+      if(n>=1024)return Math.round(n/1024)+" KB";
+      return n+" B";
+    }
+    function fileUrl(key){return "/api/document-file?key="+encodeURIComponent(key);}
+
     function openDrawer(id){
       var l=leads.filter(function(x){return x.id==id;})[0]; if(!l)return;
       if(!openId)drawerReturnFocus=document.activeElement;
@@ -619,7 +659,7 @@
       var options=STAGES.map(function(s){return '<option value="'+s.id+'"'+(s.id===l.stage?" selected":"")+'>'+s.label+'</option>';}).join("");
       dw.innerHTML=
         '<div class="dw-head"><button class="x" id="dwx" aria-label="Close">×</button>'+
-          '<div class="dw-name" id="dw-name-live">'+esc(l.name||"—")+'</div>'+
+          '<div class="dw-name" id="dw-name-live">'+esc(l.name||l.phone||"—")+'</div>'+
           '<span class="dw-stage st-'+l.stage+'">'+stageLabel[l.stage]+'</span>'+
         '</div>'+
         '<div class="dw-body">'+
@@ -627,18 +667,37 @@
             '<a class="call-btn" href="'+telHref(l.phone)+'">📞 Call</a>'+
             '<a class="msg-btn" href="sms:'+digits(l.phone)+'">💬 Text</a>'+
           '</div>'+
-          kv("Phone",'<a href="'+telHref(l.phone)+'">'+esc(l.phone||"—")+'</a>')+
-          (l.email?kv("Email",'<a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>'):"")+
-          (l.goal?kv("Goal",esc(l.goal)):"")+
-          (l.address?kv("Address",'<a href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'" target="_blank" rel="noopener">'+esc(l.address)+'</a>'):"")+
-          (l.monthly_bill?kv("Bill",esc(l.monthly_bill)):"")+
-          (l.package?kv("Package",esc(l.package)):"")+
-          (l.current_solution?kv("Doing now",esc(l.current_solution)):"")+
-          ((l.interview_opt_in==1||l.interview_opt_in===true)?kv("Interview","Open to a 15-min call"):"")+
-          kv("Financing",isFin(l)?"Yes — wants installments":"No")+
-          ((l.utm_source||l.source)?kv("Source",esc(l.utm_source||l.source)):"")+
+          '<div class="field"><label>Contact details</label>'+
+            '<div class="row2">'+
+              '<input id="dwname" maxlength="120" placeholder="Name (optional)" value="'+esc(l.name||"")+'" aria-label="Name">'+
+              '<input id="dwphone" maxlength="40" inputmode="tel" placeholder="Mobile *" value="'+esc(l.phone||"")+'" aria-label="Mobile" required>'+
+            '</div>'+
+            '<div class="row2" style="margin-top:8px">'+
+              '<input id="dwemail" type="email" maxlength="120" placeholder="Email" value="'+esc(l.email||"")+'" aria-label="Email">'+
+              '<select id="dwpackage" aria-label="Package">'+optList(PKG_OPTS,l.package||"")+'</select>'+
+            '</div>'+
+            '<input id="dwaddress" maxlength="300" placeholder="Site address" value="'+esc(l.address||"")+'" aria-label="Address" style="margin-top:8px;width:100%">'+
+            '<div class="row2" style="margin-top:8px">'+
+              '<select id="dwgoal" aria-label="Goal">'+optList(GOAL_OPTS,l.goal||"")+'</select>'+
+              '<input id="dwbill" maxlength="40" placeholder="Monthly bill" value="'+esc(l.monthly_bill||"")+'" aria-label="Monthly bill">'+
+            '</div>'+
+            '<label style="display:flex;flex-direction:row;align-items:center;gap:8px;margin-top:10px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--z-300)">'+
+              '<input type="checkbox" id="dwfin" style="width:auto"'+(isFin(l)?" checked":"")+'> Wants financing / installments'+
+            '</label>'+
+            '<button class="save" id="dwcontact">Save contact</button><span class="saved" id="dwcontactsaved"></span>'+
+          '</div>'+
+          kv("Source",esc(l.utm_source||l.source||"—"))+
           kv("Received",fmtDate(l.created_at))+
           '<div class="field"><label>Stage</label><select id="dwstage">'+options+'</select></div>'+
+          '<div class="field"><label>Files — contracts, signed quotes, survey photos</label>'+
+            '<div class="dw-files" id="dwfiles"><p class="dw-files-empty">Loading…</p></div>'+
+            '<div class="dw-upload">'+
+              '<button type="button" class="save" id="dwupload">Upload file</button>'+
+              '<input type="file" id="dwfile" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx" multiple>'+
+              '<span class="saved" id="dwuploadstat"></span>'+
+            '</div>'+
+            '<p class="na-hint">Files also appear in Documents. Max 25 MB each.</p>'+
+          '</div>'+
           '<div class="field na-field"><label>Next action — the one thing that moves this forward</label>'+
             '<input id="dwna" maxlength="200" list="na-presets" placeholder="Book the site survey" value="'+esc(l.next_action||"")+'">'+
             '<div class="na-row">'+
@@ -662,6 +721,7 @@
       el("dwx").onclick=closeDrawer;
       dw.focus({ preventScroll: true });
       el("dwstage").onchange=function(){moveLead(id,this.value);openDrawer(id);};
+      el("dwcontact").onclick=function(){saveContact(id);};
       el("dwsave").onclick=function(){saveNotes(id,el("dwnotes").value);};
       el("dwnasave").onclick=function(){saveNextAction(id,el("dwna").value,el("dwnadue").value,el("dwnaowner").value);};
       el("dwnaclear").onclick=function(){
@@ -669,7 +729,147 @@
         saveNextAction(id,"","","");
       };
       el("dwdel").onclick=function(){if(confirm("Delete this contact permanently?"))delLead(id);};
+      el("dwupload").onclick=function(){el("dwfile").click();};
+      el("dwfile").onchange=function(){uploadLeadFiles(id,this);};
+      loadLeadFiles(id);
     }
+
+    function saveContact(id){
+      var phone=(el("dwphone").value||"").trim();
+      var digitsOnly=phone.replace(/[^\d]/g,"");
+      if(digitsOnly.length<10||digitsOnly.length>13){
+        toast("Enter a valid mobile number (10–13 digits).");
+        el("dwphone").focus();
+        return;
+      }
+      var body={
+        id:id,
+        name:(el("dwname").value||"").trim(),
+        phone:phone,
+        email:(el("dwemail").value||"").trim(),
+        package:el("dwpackage").value||"",
+        address:(el("dwaddress").value||"").trim(),
+        goal:el("dwgoal").value||"",
+        monthly_bill:(el("dwbill").value||"").trim(),
+        financing:!!el("dwfin").checked
+      };
+      fetch("/api/leads",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(!d.ok){toast(d.error||"Save failed");return;}
+          var i=leads.findIndex(function(x){return x.id==id;});
+          if(i>=0&&d.lead)leads[i]=Object.assign(leads[i],d.lead);
+          var s=el("dwcontactsaved");if(s){s.textContent="Saved ✓";setTimeout(function(){if(s)s.textContent="";},1800);}
+          renderChips();renderStats();renderRows();
+          var live=el("dw-name-live");
+          if(live)live.textContent=(d.lead&&d.lead.name)||phone||"—";
+          var call=document.querySelector(".call-btn");
+          var msg=document.querySelector(".msg-btn");
+          if(call)call.href=telHref(phone);
+          if(msg)msg.href="sms:"+digits(phone);
+        })
+        .catch(function(){toast("Network error");});
+    }
+
+    function renderLeadFiles(docs){
+      var host=el("dwfiles");
+      if(!host)return;
+      if(!docs.length){
+        host.innerHTML='<p class="dw-files-empty">No files yet — upload a contract or signed quote.</p>';
+        return;
+      }
+      host.innerHTML=docs.map(function(d){
+        var open=d.kind==="file"&&d.file_key
+          ? '<a href="'+fileUrl(d.file_key)+'" target="_blank" rel="noopener">Open</a>'
+          : (d.kind==="doc"?'<a href="/internal/docs.html">Open in Documents</a>':"");
+        return '<div class="dw-file" data-doc="'+d.id+'">'+
+          '<div class="meta"><b>'+esc(d.title||d.file_name||"File")+'</b>'+
+          '<small>'+esc((d.file_type||d.kind||"").split("/").pop().toUpperCase())+
+          (d.file_size?" · "+formatSize(d.file_size):"")+
+          (d.author?" · "+esc(d.author):"")+"</small></div>"+
+          open+
+          '<button type="button" class="kill" data-kill-doc="'+d.id+'" aria-label="Remove file">✕</button>'+
+        '</div>';
+      }).join("");
+      Array.prototype.forEach.call(host.querySelectorAll("[data-kill-doc]"),function(btn){
+        btn.onclick=function(){
+          var docId=parseInt(btn.getAttribute("data-kill-doc"),10);
+          if(!confirm("Remove this file from the contact and Documents library?"))return;
+          fetch("/api/documents",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:docId})})
+            .then(function(r){return r.json();})
+            .then(function(d){
+              if(!d.ok){toast(d.error||"Could not delete");return;}
+              loadLeadFiles(openId);
+              toast("File removed");
+            })
+            .catch(function(){toast("Network error");});
+        };
+      });
+    }
+
+    function loadLeadFiles(leadId){
+      var host=el("dwfiles");
+      if(!host)return;
+      fetch("/api/documents?lead_id="+encodeURIComponent(leadId),{headers:{"Accept":"application/json"}})
+        .then(function(r){
+          if(r.status===401){window.location.href="/login.html?next=/internal/leads.html";return null;}
+          if(r.status===403){host.innerHTML='<p class="dw-files-empty">Documents access is hidden on this account.</p>';return null;}
+          return r.json();
+        })
+        .then(function(d){
+          if(!d)return;
+          if(!d.ok){host.innerHTML='<p class="dw-files-empty">'+(esc(d.error)||"Could not load files.")+'</p>';return;}
+          renderLeadFiles(d.documents||[]);
+        })
+        .catch(function(){host.innerHTML='<p class="dw-files-empty">Could not load files.</p>';});
+    }
+
+    function uploadLeadFiles(leadId,input){
+      var files=Array.prototype.slice.call(input.files||[]);
+      input.value="";
+      if(!files.length)return;
+      var stat=el("dwuploadstat");
+      var btn=el("dwupload");
+      var remaining=files.length;
+      if(btn)btn.disabled=true;
+      if(stat)stat.textContent="Uploading…";
+      files.forEach(function(f){
+        if(f.size>25*1024*1024){
+          toast(f.name+" is over 25 MB — skipped");
+          if(!--remaining)done();
+          return;
+        }
+        var fd=new FormData();
+        fd.append("file",f);
+        fetch("/api/document-file",{method:"POST",body:fd})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if(!d.ok)throw new Error(d.error||"Upload failed");
+            return fetch("/api/documents",{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({
+                title:d.file.name,
+                file:d.file,
+                category:"legal",
+                lead_id:leadId
+              })
+            }).then(function(r){return r.json();});
+          })
+          .then(function(d){
+            if(!d.ok)throw new Error(d.error||"Save failed");
+            toast((d.document&&d.document.title||f.name)+" attached ✓");
+          })
+          .catch(function(err){toast(err.message||"Upload failed");})
+          .finally(function(){if(!--remaining)done();});
+      });
+      function done(){
+        if(btn)btn.disabled=false;
+        if(stat)stat.textContent="";
+        if(openId===leadId)loadLeadFiles(leadId);
+      }
+    }
+
     function kv(k,v){return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';}
     function closeDrawer(){
       if(!openId)return;
