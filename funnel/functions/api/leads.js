@@ -105,14 +105,15 @@ export async function onRequest(context) {
     let body;
     try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
 
-    const name = textOrNull(body.name, 120);
-    if (!name) return json({ ok: false, error: "A name is required." }, 422);
-
     const phone = textOrNull(body.phone, 40) || "";
     const digits = phone.replace(/[^\d]/g, "");
     if (digits.length < 10 || digits.length > 13) {
       return json({ ok: false, error: "A valid mobile number is required (10–13 digits)." }, 422);
     }
+
+    // Name is optional on founder create — phone is the only hard requirement.
+    // Schema is NOT NULL, so blank becomes "" rather than null.
+    const name = textOrNull(body.name, 120) || "";
 
     const stage = typeof body.stage === "string" && STAGES.includes(body.stage) ? body.stage : "lead";
     const now = new Date().toISOString();

@@ -346,8 +346,8 @@
     </div>
     <form id="lead-create-form" novalidate>
       <div class="row2">
-        <label>Name *
-          <input name="name" id="lc-name" maxlength="120" required autocomplete="name" placeholder="Full name">
+        <label>Name
+          <input name="name" id="lc-name" maxlength="120" autocomplete="name" placeholder="optional">
         </label>
         <label>Mobile *
           <input name="phone" id="lc-phone" maxlength="40" required inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxxx">
@@ -694,7 +694,7 @@
       el("lc-err").textContent="";
       el("lead-create-save").disabled=false;
       if(!dlg.open)dlg.showModal();
-      setTimeout(function(){el("lc-name").focus();},30);
+      setTimeout(function(){el("lc-phone").focus();},30);
     }
     function closeCreate(){
       var dlg=el("lead-create");
@@ -707,7 +707,6 @@
       var digits=phone.replace(/[^\d]/g,"");
       var err=el("lc-err");
       err.textContent="";
-      if(!name){err.textContent="A name is required.";el("lc-name").focus();return;}
       if(digits.length<10||digits.length>13){err.textContent="Enter a valid mobile number (10–13 digits).";el("lc-phone").focus();return;}
 
       var save=el("lead-create-save");
