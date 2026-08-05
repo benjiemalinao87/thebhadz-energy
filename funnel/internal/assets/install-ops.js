@@ -36,6 +36,17 @@
       if (dialog && dialog.open) dialog.close();
     });
   });
+  // The dialogs render as right-edge drawers (ops-tools.css), so clicking the dimmed
+  // page must dismiss them like the Jobs scrim does. A ::backdrop click lands on the
+  // <dialog> itself with coordinates outside its box — that is the whole test.
+  document.querySelectorAll("dialog.ops-dialog").forEach(function (dialog) {
+    dialog.addEventListener("click", function (e) {
+      if (e.target !== dialog) return;
+      var r = dialog.getBoundingClientRect();
+      var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside && dialog.open) dialog.close();
+    });
+  });
   document.querySelector('#payment-form [name="payment_date"]').value = today();
   document.querySelector('#assignment-form [name="work_date"]').value = today();
   load();

@@ -15,6 +15,14 @@
   document.getElementById("fin-cancel").addEventListener("click", closeDialog);
   document.getElementById("fin-dialog-close").addEventListener("click", closeDialog);
   dialog.addEventListener("cancel", function () { resetForm(); });
+  // Drawer parity with Jobs and Install ops: a click on the dimmed page (::backdrop
+  // clicks land on the <dialog> with coordinates outside its box) dismisses it.
+  dialog.addEventListener("click", function (e) {
+    if (e.target !== dialog) return;
+    var r = dialog.getBoundingClientRect();
+    var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!inside && dialog.open) closeDialog();
+  });
   document.getElementById("fin-filter").addEventListener("change", renderLedger);
   document.getElementById("fin-export").addEventListener("click", exportCsv);
   document.getElementById("fin-save-settings").addEventListener("click", saveSettings);

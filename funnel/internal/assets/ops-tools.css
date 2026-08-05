@@ -104,32 +104,55 @@ html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #3a1d20;
   .ops-form { grid-template-columns: repeat(2, 1fr); }
   .ops-card-grid { grid-template-columns: repeat(2, 1fr); }
 }
-/* Create/edit forms live in dialogs so the list stays the default view. */
+/* Create/edit forms live in dialogs so the list stays the default view.
+   Styled as a right-edge drawer — the same surface the Jobs board uses for its
+   detail and new-job panels — so every create/edit form in the Command Center
+   slides in from the same place. Still a native <dialog> + showModal(): Escape,
+   focus trapping and the backdrop stay free; only the geometry changed. */
 .ops-dialog {
-  width: min(920px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
-  margin: auto;
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(600px, 96vw);
+  height: 100%;
+  max-height: none;
+  margin: 0;
   padding: 0;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
+  border: 0;
+  border-left: 1px solid var(--hairline);
+  border-radius: 0;
   background: var(--sheet);
   color: var(--ink);
-  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .55);
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, .55);
   overflow: hidden;
 }
+.ops-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: ops-drawer-in .24s cubic-bezier(.25, .8, .3, 1);
+}
+@keyframes ops-drawer-in { from { transform: translateX(100%); } }
 .ops-dialog::backdrop { background: rgba(4, 12, 14, .58); backdrop-filter: blur(2px); }
 .ops-dialog-head {
   display: flex; align-items: start; justify-content: space-between; gap: 16px;
   padding: 18px 20px 0;
+  flex: none;
 }
 .ops-dialog-head h2 { margin: 0; font: 600 17px var(--sans); letter-spacing: -.01em; }
 .ops-dialog-head p { margin: 4px 0 0; color: var(--faint); font-size: 13px; line-height: 1.45; }
 .ops-dialog-head .ops-dialog-close { flex: 0 0 auto; margin-top: 2px; }
-/* Beat page-level .ops-finance/.workspace-page .ops-form chrome so the dialog
-   owns the card and the form is just the scrollable field grid. */
+/* Beat page-level .ops-finance/.workspace-page .ops-form chrome so the drawer
+   owns the card and the form is just the scrollable field grid filling it. */
 .ops-content dialog.ops-dialog .ops-form {
   margin: 16px 0 0; border: 0; border-top: 1px solid var(--hairline);
-  border-radius: 0; background: transparent; max-height: min(70vh, 640px); overflow: auto;
+  border-radius: 0; background: transparent;
+  flex: 1; max-height: none; overflow: auto; align-content: start;
+  /* Drawer width fits two columns; the 4-across modal grid does not survive here. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-bottom: 32px;
+}
+.ops-content dialog.ops-dialog .ops-form .ops-form-actions { grid-column: 1 / -1; }
+@media (prefers-reduced-motion: reduce) {
+  .ops-dialog[open] { animation: none; }
 }
 .ops-toolbar-start { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-right: auto; }
 .ops-toolbar .ops-filter { margin-left: auto; }
@@ -143,6 +166,7 @@ html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #3a1d20;
   .ops-section-head { align-items: stretch; flex-direction: column; }
   .ops-card-grid, .ops-checks { grid-template-columns: 1fr; }
   .ops-card-head { flex-direction: column; }
-  .ops-dialog { width: calc(100vw - 16px); max-height: calc(100vh - 16px); border-radius: 10px; }
-  .ops-dialog .ops-form { max-height: none; }
+  .ops-dialog { width: 100vw; border-left: 0; }
+  /* Same specificity as the drawer's two-column rule above, or it never applies. */
+  .ops-content dialog.ops-dialog .ops-form { grid-template-columns: 1fr; }
 }
