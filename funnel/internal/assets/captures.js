@@ -184,7 +184,9 @@
     var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     var link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "product-captures-" + new Date().toISOString().slice(0, 10) + ".csv";
+    // Stamped with the Manila date, so an export taken at 7am does not file itself
+    // under yesterday. See assets/ph-date.js.
+    link.download = "product-captures-" + window.phToday() + ".csv";
     document.body.appendChild(link);
     link.click();
     setTimeout(function () { URL.revokeObjectURL(link.href); link.remove(); }, 500);

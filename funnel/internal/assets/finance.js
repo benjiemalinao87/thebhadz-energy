@@ -211,7 +211,8 @@
   function redirectLogin() { location.href = "/login.html?next=" + encodeURIComponent(location.pathname); }
   function status(message, bad) { var node = document.getElementById("fin-status"); node.textContent = message; node.style.color = bad ? "#b42318" : ""; }
   function text(id, value) { document.getElementById(id).textContent = value; }
-  function today() { return new Date().toISOString().slice(0, 10); }
+  // Manila, not UTC — before 08:00 PHT those are different days. See ph-date.js.
+  function today() { return window.phToday(); }
   function num(value) { return Number(value) || 0; }
   function toCents(value) { return Math.round((Number(value) || 0) * 100); }
   function fromCents(value) { return (num(value) / 100).toFixed(2); }

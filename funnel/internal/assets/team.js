@@ -656,7 +656,9 @@
     if (days === 0) return "Today";
     if (days === 1) return "Yesterday";
     if (days < 7) return days + " days ago";
-    return date.toISOString().slice(0, 10);
+    // The Manila calendar date of the event, not its UTC one: a 9pm sign-in should not
+    // be filed under the following day. See assets/ph-date.js.
+    return window.phDate(date);
   }
 
   function clock(iso) {

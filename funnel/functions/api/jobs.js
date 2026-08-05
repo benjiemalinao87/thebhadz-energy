@@ -21,6 +21,7 @@
  * founder attached. Nothing here re-implements either.
  */
 import { currentUser } from "../_auth.js";
+import { phToday } from "../_ph-date.js";
 
 const STAGES = [
   "survey", "quoted", "approved", "deposit_paid", "design", "permits", "procurement",
@@ -54,6 +55,9 @@ const GATES = [
 
 const ROLES = ["Tech", "Sales", "Admin", "PEE", "Ops", "Procurement"];
 const PHASE_KEYS = PHASES.map((p) => p.key);
+const GATE_KEYS = GATES.map((g) => g.key);
+// Every gate open — the state a job is created in, before any row exists to read.
+const GATE_DEFAULTS = Object.fromEntries(GATES.map((g) => [g.key, 0]));
 
 /**
  * The standard install checklist a new job is seeded with — the reason a job is never a
@@ -182,6 +186,12 @@ async function migrate(env) {
   const indexes = [
     `CREATE INDEX IF NOT EXISTS idx_job_stage_events_job ON job_stage_events(job_id, created_at)`,
     `CREATE INDEX IF NOT EXISTS idx_project_tasks_job ON project_tasks(job_id, sort_order)`,
+    // UNIQUE, because a job code ends up on a customer receipt. nextJobCode reads the
+    // highest code and inserts in a separate statement, so two founders creating jobs in
+    // the same second can compute the same number; the database has to be the arbiter.
+    // Kept alongside the old non-unique index rather than replacing it: dropping an index
+    // a running deploy is planning on is the riskier move, and SQLite is happy with both.
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_install_projects_code_unique ON install_projects(job_code) WHERE job_code IS NOT NULL AND job_code != ''`,
     `CREATE INDEX IF NOT EXISTS idx_install_projects_code ON install_projects(job_code)`,
   ];
   for (const sql of indexes) {
@@ -258,14 +268,16 @@ async function listJobs(env) {
          CASE WHEN install_date IS NULL OR install_date = '' THEN 1 ELSE 0 END,
          install_date ASC, datetime(updated_at) DESC`
     ),
+    // Overdue is measured against the Manila date, not SQLite's date('now') (UTC): before
+    // 08:00 PHT those differ by a day, which is exactly when the crew checks the board.
     env.DB.prepare(
       `SELECT job_id,
               COUNT(*) AS total,
               SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) AS done,
               SUM(CASE WHEN status != 'Done' AND due != '' AND due IS NOT NULL
-                        AND due < date('now') THEN 1 ELSE 0 END) AS overdue
+                        AND due < ? THEN 1 ELSE 0 END) AS overdue
        FROM project_tasks WHERE job_id IS NOT NULL GROUP BY job_id`
-    ),
+    ).bind(phToday()),
     env.DB.prepare(
       `SELECT project_id,
               SUM(CASE WHEN actual_cents > 0 THEN actual_cents
@@ -411,14 +423,28 @@ async function createJob(env, body, user) {
   const pkg = text(body.package, 60) || text(lead && lead.package, 60) || "Custom";
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
-  const code = await nextJobCode(env, now.slice(0, 4));
   const installDate = date(body.install_date);
   const surveyDate = date(body.survey_date);
   const stage = STAGES.includes(body.stage) ? body.stage : "survey";
 
+  // A brand-new job has no gate signed off, so being *born* into On site or Energized
+  // would walk straight past the check moveStage exists to enforce. The refusal has to
+  // live on create too, or the guarantee is only as good as the UI that never sends it.
+  const startPhase = phaseOf(stage);
+  if (startPhase && startPhase.gated) {
+    const missing = missingGates({ ...GATE_DEFAULTS, net_metering_na: isOffGrid(pkg) ? 1 : 0 });
+    if (missing.length) {
+      return json({
+        ok: false,
+        error: `A new job cannot start in ${startPhase.label} — its compliance gates are still open.`,
+        missing: missing.map((g) => ({ key: g.key, label: g.label })),
+      }, 409);
+    }
+  }
+
   const job = {
     id,
-    job_code: code,
+    job_code: "",
     lead_id: lead ? lead.id : null,
     customer_name: customer,
     phone: text(body.phone, 40) || text(lead && lead.phone, 40),
@@ -437,23 +463,41 @@ async function createJob(env, body, user) {
     stage_entered_at: now,
   };
 
-  await env.DB.prepare(
-    `INSERT INTO install_projects
-       (id, job_code, lead_id, customer_name, phone, site_address, package,
-        contract_price_cents, target_cost_cents, stage, owner, survey_date, install_date,
-        net_metering_na, notes, stage_entered_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).bind(
-    job.id, job.job_code, job.lead_id, job.customer_name, job.phone, job.site_address,
-    job.package, job.contract_price_cents, job.target_cost_cents, job.stage, job.owner,
-    job.survey_date, job.install_date, job.net_metering_na, job.notes, job.stage_entered_at,
-    now, now
-  ).run();
+  // Allocate the code and insert under the unique index. A racing create takes the number
+  // first and this insert fails; recompute and try again rather than handing a founder an
+  // error for something the database just told us how to fix. Three attempts is plenty for
+  // a three-person team — beyond that something is wrong that a retry will not cure.
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    job.job_code = await nextJobCode(env, now.slice(0, 4));
+    try {
+      await env.DB.prepare(
+        `INSERT INTO install_projects
+           (id, job_code, lead_id, customer_name, phone, site_address, package,
+            contract_price_cents, target_cost_cents, stage, owner, survey_date, install_date,
+            net_metering_na, notes, stage_entered_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        job.id, job.job_code, job.lead_id, job.customer_name, job.phone, job.site_address,
+        job.package, job.contract_price_cents, job.target_cost_cents, job.stage, job.owner,
+        job.survey_date, job.install_date, job.net_metering_na, job.notes, job.stage_entered_at,
+        now, now
+      ).run();
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err;
+      if (!/UNIQUE|constraint/i.test(String(err && err.message))) throw err;
+    }
+  }
+  if (lastErr) {
+    return json({ ok: false, error: "Another job took that job code. Try creating it again." }, 409);
+  }
 
   const seeded = await seedTemplate(env, job, now);
   await logStageEvent(env, id, null, stage, 0, `Job created with ${seeded} template tasks`, actorName(user));
 
-  return json({ ok: true, id, job_code: code, tasks_seeded: seeded });
+  return json({ ok: true, id, job_code: job.job_code, tasks_seeded: seeded });
 }
 
 /**
@@ -659,8 +703,13 @@ async function patchTask(env, body) {
   await env.DB.prepare(`UPDATE project_tasks SET ${sets.join(", ")} WHERE id = ?`).bind(...binds).run();
 
   // The other half of the one-fact rule: settling a gate task signs off the job's gate.
+  //
+  // gate_key is a column name spliced into SQL below, so it is checked against the GATES
+  // list first. Today only seedTemplate writes that column and only from the local
+  // TEMPLATE, so nothing user-supplied can reach it — the whitelist is what keeps that
+  // true after the next endpoint that learns to write project_tasks.
   let gate = null;
-  if (task.gate_key && task.job_id && body.done !== undefined) {
+  if (GATE_KEYS.includes(task.gate_key) && task.job_id && body.done !== undefined) {
     const done = flag(body.done);
     await env.DB.prepare(
       `UPDATE install_projects SET ${task.gate_key} = ?, updated_at = ? WHERE id = ?`
@@ -684,6 +733,12 @@ async function deleteTask(env, body) {
  * Delete a job. Refused once real money is attached — a record with a received payment
  * is an accounting document, and removing it would silently orphan the ledger rows SC-09
  * has already reported. Cancel the job instead.
+ *
+ * Every cost, payment and crew assignment can carry a finance_transaction_id: install-ops
+ * writes the SC-09 ledger row and the install row as a pair, and deletes them as a pair
+ * (/api/install-ops DELETE). This did not, so removing a job with a committed supplier
+ * cost left an expense in Finance pointing at a project that no longer existed — an
+ * unreconcilable ledger nobody would notice until month end. The paired rows go too.
  */
 async function deleteJob(env, body) {
   const id = text(body.id, 80);
@@ -697,15 +752,29 @@ async function deleteJob(env, body) {
       error: "This job has received payments. Move it to the Cancelled stage instead of deleting it.",
     }, 409);
   }
+
+  const ledger = await env.DB.batch([
+    env.DB.prepare(`SELECT finance_transaction_id AS fid FROM install_costs WHERE project_id = ?`).bind(id),
+    env.DB.prepare(`SELECT finance_transaction_id AS fid FROM install_payments WHERE project_id = ?`).bind(id),
+    env.DB.prepare(`SELECT finance_transaction_id AS fid FROM install_assignments WHERE project_id = ?`).bind(id),
+  ]);
+  const financeIds = ledger
+    .flatMap((r) => r.results || [])
+    .map((r) => r.fid)
+    .filter(Boolean);
+
   await env.DB.batch([
     env.DB.prepare(`DELETE FROM project_tasks WHERE job_id = ?`).bind(id),
     env.DB.prepare(`DELETE FROM job_stage_events WHERE job_id = ?`).bind(id),
     env.DB.prepare(`DELETE FROM install_costs WHERE project_id = ?`).bind(id),
     env.DB.prepare(`DELETE FROM install_payments WHERE project_id = ?`).bind(id),
     env.DB.prepare(`DELETE FROM install_assignments WHERE project_id = ?`).bind(id),
+    ...financeIds.map((fid) =>
+      env.DB.prepare(`DELETE FROM finance_transactions WHERE id = ?`).bind(fid)
+    ),
     env.DB.prepare(`DELETE FROM install_projects WHERE id = ?`).bind(id),
   ]);
-  return json({ ok: true });
+  return json({ ok: true, finance_rows_removed: financeIds.length });
 }
 
 /* --------------------------------------------------------------- handler ------- */

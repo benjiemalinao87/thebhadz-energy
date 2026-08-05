@@ -52,7 +52,8 @@
     });
   }
   function num(v) { return Number(v) || 0; }
-  function today() { return new Date().toISOString().slice(0, 10); }
+  // Manila, not UTC — before 08:00 PHT those are different days. See ph-date.js.
+  function today() { return window.phToday(); }
   function daysBetween(a, b) {
     if (!a || !b) return null;
     return Math.round((new Date(b + "T00:00:00Z") - new Date(a + "T00:00:00Z")) / 86400000);

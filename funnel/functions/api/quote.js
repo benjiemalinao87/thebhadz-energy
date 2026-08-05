@@ -22,6 +22,7 @@
  * endpoint only has to ask who the founder is and 401 when there isn't one.
  */
 import { currentUser, logActivity } from "../_auth.js";
+import { phDaysFromToday } from "../_ph-date.js";
 import { renderQuotePdf } from "../_quote-pdf.js";
 import { toBase64 } from "../_pdf.js";
 
@@ -278,7 +279,7 @@ export async function onRequestPost(context) {
   ).bind(
     email, now,
     "Follow up on the quote and book the site survey",
-    new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+    phDaysFromToday(2),
     clean(founder.name || founder.email, 80),
     lead.id
   ).run();

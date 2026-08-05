@@ -10,6 +10,7 @@
  * Owner always comes from the session on create.
  */
 import { currentUser } from "../_auth.js";
+import { phToday } from "../_ph-date.js";
 
 const METRICS = ["leads", "deposits", "surveys", "sold", "manual"];
 const STATUSES = ["Backlog", "This week", "Doing", "Done", "Missed"];
@@ -98,9 +99,8 @@ async function countMetric(env, metric, start, end) {
   }
 }
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
+// Manila, not UTC — a goal's days-remaining must not tick over at 08:00 PHT.
+const todayIso = phToday;
 
 function daysBetween(a, b) {
   if (!a || !b) return null;
