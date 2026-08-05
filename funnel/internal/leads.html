@@ -229,8 +229,11 @@
     padding:9px 14px;border-radius:8px;cursor:pointer;font-family:var(--mono);}
   .danger button:hover{border-color:var(--red);background:rgba(255,123,129,0.08);}
 
+  /* An actionable error ("delete or unlink that job first") is longer than a pill —
+     cap the width and let it wrap instead of running off the side of the viewport. */
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:95;
-    background:#0a0a0b;border:1px solid var(--z-700);color:var(--z-100);padding:11px 20px;border-radius:999px;font-size:13px;
+    background:#0a0a0b;border:1px solid var(--z-700);color:var(--z-100);padding:11px 20px;border-radius:18px;font-size:13px;
+    max-width:min(520px,calc(100vw - 32px));text-align:center;line-height:1.5;
     box-shadow:0 8px 24px rgba(0,0,0,0.5);transition:transform .2s;}
   .toast.show{transform:translateX(-50%) translateY(0);}
 
@@ -435,7 +438,10 @@
     function isFin(l){return l.financing==1||l.financing===true;}
 
     var toastT;
-    function toast(msg){var t=el("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2200);}
+    // Long messages are the ones that tell the founder what to do next, so they get
+    // proportionally longer on screen — 2.2s is not enough to read a two-line error.
+    function toast(msg){var t=el("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);
+      toastT=setTimeout(function(){t.classList.remove("show");},msg.length>60?5200:2200);}
 
     function load(){
       fetch("/api/leads",{headers:{"Accept":"application/json"}})
@@ -958,7 +964,7 @@
     function delLead(id){
       fetch("/api/leads",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
         .then(function(r){return r.json();})
-        .then(function(d){if(d.ok){leads=leads.filter(function(x){return x.id!=id;});closeDrawer();renderChips();renderStats();renderRows();toast("Contact deleted");}else{toast("Delete failed");}})
+        .then(function(d){if(d.ok){leads=leads.filter(function(x){return x.id!=id;});closeDrawer();renderChips();renderStats();renderRows();toast("Contact deleted");}else{toast(d.error||"Delete failed");}})
         .catch(function(){toast("Network error");});
     }
 

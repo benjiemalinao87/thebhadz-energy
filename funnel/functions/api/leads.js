@@ -69,13 +69,64 @@ function json(body, status = 200) {
   });
 }
 
+/**
+ * Read from a table this endpoint doesn't own.
+ *
+ * `documents` is created lazily by /api/documents and `install_projects` by
+ * /api/install-ops, so on a database where neither has been touched yet the query is
+ * "no such table" — which must read as "nothing linked", not as a failed delete. Any
+ * other error still propagates.
+ */
+function tolerateMissingTable(err) {
+  if (/no such table/i.test(String(err && err.message))) return null;
+  throw err;
+}
+
+async function firstOrNull(env, sql, binds) {
+  try {
+    return await env.DB.prepare(sql).bind(...binds).first();
+  } catch (err) {
+    return tolerateMissingTable(err);
+  }
+}
+
+async function allOrEmpty(env, sql, binds) {
+  try {
+    const r = await env.DB.prepare(sql).bind(...binds).all();
+    return (r && r.results) || [];
+  } catch (err) {
+    tolerateMissingTable(err);
+    return [];
+  }
+}
+
+/** Same guard /api/documents uses before handing a key to R2. */
+function isDocKey(value) {
+  return typeof value === "string" && value.startsWith("docs/") && !value.includes("..") && value.length <= 300;
+}
+
 // The founder behind this request, or null. functions/api/_middleware.js already
 // resolved (and logged) them; currentUser reuses that same lookup.
 function requireFounder(context) {
   return currentUser(context);
 }
 
+/**
+ * An unhandled throw here would return Pages' own HTML error page, and every caller in
+ * leads.html parses the response as JSON — so a database error surfaced to the founder
+ * as a bare "Network error" with nothing to act on. Always answer in JSON.
+ */
 export async function onRequest(context) {
+  try {
+    return await handle(context);
+  } catch (err) {
+    const detail = String((err && err.message) || err);
+    console.error("api/leads failed:", detail);
+    return json({ ok: false, error: `Server error: ${detail}` }, 500);
+  }
+}
+
+async function handle(context) {
   const { request, env } = context;
 
   if (!(await requireFounder(context))) {
@@ -282,9 +333,59 @@ export async function onRequest(context) {
     try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
     const id = parseInt(body.id, 10);
     if (!Number.isInteger(id)) return json({ ok: false, error: "A valid id is required." }, 422);
+
+    const lead = await env.DB.prepare(`SELECT id, name FROM leads WHERE id = ?`).bind(id).first();
+    if (!lead) return json({ ok: false, error: "Lead not found." }, 404);
+
+    // An installation carries money, permits and a signed-off checklist, and
+    // install_projects.lead_id is a real foreign key — cascading it away behind a
+    // contact delete would both destroy that record and (before this check existed)
+    // fail the DELETE with an unhandled FOREIGN KEY error. Refuse and name the job
+    // so the founder unlinks it deliberately.
+    const job = await firstOrNull(
+      env,
+      `SELECT id, job_code, customer_name FROM install_projects WHERE lead_id = ? LIMIT 1`,
+      [id]
+    );
+    if (job) {
+      const label = job.job_code || job.id;
+      return json(
+        {
+          ok: false,
+          error: `This contact is linked to install job ${label}. Open SC-07 and delete or unlink that job first.`,
+          job_id: job.id,
+          job_code: job.job_code || null,
+        },
+        409
+      );
+    }
+
+    // Files attached to a contact live on the contact only (they are hidden from the
+    // Documents library), so nobody could ever reach them again once the person is
+    // gone. Delete the rows and their R2 objects instead of orphaning both.
+    const files = await allOrEmpty(
+      env,
+      `SELECT id, file_key, thumb_key FROM documents WHERE lead_id = ?`,
+      [id]
+    );
+    if (files.length) {
+      await env.DB.prepare(`DELETE FROM documents WHERE lead_id = ?`).bind(id).run();
+      for (const row of files) {
+        for (const key of [row.file_key, row.thumb_key]) {
+          if (env.NOTES_R2 && isDocKey(key)) {
+            try { await env.NOTES_R2.delete(key); }
+            catch { /* best effort — the row is already gone either way */ }
+          }
+        }
+      }
+    }
+
+    // `quotes` rows are deliberately left in place: each one is the evidence that a
+    // quotation actually left the building. leads.id is AUTOINCREMENT, so the stale
+    // lead_id can never be reassigned to a different person.
     const r = await env.DB.prepare(`DELETE FROM leads WHERE id = ?`).bind(id).run();
     if (!r.meta || r.meta.changes === 0) return json({ ok: false, error: "Lead not found." }, 404);
-    return json({ ok: true });
+    return json({ ok: true, files_deleted: files.length });
   }
 
   return json({ ok: false, error: "Method not allowed." }, 405);
