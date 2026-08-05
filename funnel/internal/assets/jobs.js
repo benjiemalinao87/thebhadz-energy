@@ -1352,9 +1352,7 @@
   }
 
   function pickSummary(lead) {
-    if (!lead) {
-      return '<span style="color:var(--ops-muted)">Nothing selected — type a customer name below and the job stands on its own.</span>';
-    }
+    if (!lead) return "Nothing selected — type a customer name below and the job stands on its own.";
     return (num(lead.has_job)
       ? '<b class="warn">This contact already has a job.</b> Creating another makes a second one for the same customer.<br>'
       : "") +
