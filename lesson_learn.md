@@ -308,3 +308,13 @@ AUTH_SECRET=<any-random-string-for-local>
 **What worked:** Add a ✕ (`data-kill-company`) on each mini card, confirm, `send("DELETE", { id }, COMPANY_API)`, then `reloadCompany()`. Same kill pattern as job checklist tasks.
 
 **Do not:** Assume a write endpoint means the Command Center surface can mutate — always check the view that founders actually use. Do not delete through `/api/jobs` task DELETE; company rows have no `job_id` and live on `/api/projects`.
+
+## Goals replace company tasks under Jobs
+
+**Fixed:** 2026-08-05
+
+**What went wrong:** Company tasks lived as a fifth tab on Jobs, so install work and founder outcomes shared one surface. Founders could not set countable targets (2 leads / 2 deposits) with timeline, assignee, or dashboard progress.
+
+**What worked:** New `goals` section — `/api/goals` + `goals.html` (board + timeline), session owner, assignee from active users, live metric counts, urgency from pace vs end date. Strip company tab from Jobs; dashboard KPI and Next actions read Goals. Keep dialogs inside `<main>` for SPA.
+
+**Do not:** Put company-level OKRs back under Jobs. Do not store auto-metric progress as truth — recompute on GET from leads/payments/jobs.

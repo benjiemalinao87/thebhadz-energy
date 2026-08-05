@@ -1,5 +1,13 @@
 # Progress
 
+## Goals: new Command Center section (2026-08-05) — done
+- Sidebar **Goals** + `/internal/goals.html` + `/api/goals` (D1 `goals`, auto-migrate)
+- Countable metrics: new leads, sold, deposits, surveys, manual — live progress for non-manual
+- Board + Timeline views; owner from session; assignee picker; urgency colors; delete
+- Dashboard “Goals on track” KPI + Goals panel; Next actions pulls at-risk goals
+- Removed Company tasks tab from Jobs
+- Local: `cd funnel && npx wrangler pages dev . --port 8000` → hard-refresh → Goals in rail
+
 ## Jobs: delete company tasks from Company tab (2026-08-05) — done
 - Company tasks board was read-only mini-cards; `/api/projects` DELETE already existed
 - Added ✕ on each card → confirm → DELETE → reload company list

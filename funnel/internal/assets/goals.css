@@ -1,0 +1,166 @@
+/* Goals — HubSpot-lean ops board: progress bars, urgency edges, light chrome. */
+
+.gl-wrap { max-width: 1280px; margin: 0 auto; padding: 18px 18px 48px; }
+
+.gl-kpis {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px;
+}
+.gl-kpi {
+  border: 1px solid var(--ops-line); border-radius: 10px; background: var(--ops-surface);
+  padding: 12px 14px; border-left: 3px solid var(--ops-petrol);
+}
+.gl-kpi.hit { border-left-color: var(--ops-green, #1f8a4c); }
+.gl-kpi.risk { border-left-color: var(--ops-sun, #d97706); }
+.gl-kpi.miss { border-left-color: var(--ops-rust); }
+.gl-kpi span { display: block; font: 600 11px var(--ops-mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ops-muted); }
+.gl-kpi b { display: block; margin-top: 4px; font: 750 22px/1.1 var(--ops-font); color: var(--ops-ink); }
+.gl-kpi small { display: block; margin-top: 4px; color: var(--ops-muted); font-size: 12px; }
+
+.gl-toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.gl-views {
+  display: inline-flex; border: 1px solid var(--ops-line-strong); border-radius: 9px;
+  background: var(--ops-surface); padding: 3px; gap: 2px;
+}
+.gl-views button {
+  border: 0; background: transparent; color: var(--ops-muted); cursor: pointer;
+  padding: 7px 14px; border-radius: 7px; font: 650 13px var(--ops-font);
+}
+.gl-views button[aria-selected="true"] {
+  background: var(--ops-petrol); color: #fff;
+}
+
+.gl-btn {
+  border: 1px solid var(--ops-line-strong); background: var(--ops-surface); color: var(--ops-ink);
+  border-radius: 8px; padding: 8px 14px; font: 650 13px var(--ops-font); cursor: pointer;
+}
+.gl-btn.primary { background: var(--ops-copper, #e4572e); border-color: var(--ops-copper, #e4572e); color: #fff; }
+.gl-btn.ghost { background: transparent; }
+.gl-btn.danger { color: var(--ops-rust); border-color: transparent; background: transparent; margin-right: auto; }
+.gl-btn:hover { filter: brightness(1.05); }
+
+.gl-board {
+  display: grid; grid-template-columns: repeat(5, minmax(180px, 1fr)); gap: 10px; align-items: start;
+}
+.gl-col {
+  border: 1px solid var(--ops-line); border-radius: 12px; background: var(--ops-surface-2, var(--ops-ground));
+  min-height: 180px;
+}
+.gl-col-head {
+  display: flex; align-items: center; gap: 8px; padding: 11px 12px 9px;
+  border-bottom: 1px solid var(--ops-line);
+}
+.gl-col-head h3 {
+  margin: 0; font: 750 11px var(--ops-mono); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ops-muted);
+}
+.gl-col-head .n {
+  margin-left: auto; font: 700 11px var(--ops-mono); color: var(--ops-subtle);
+  background: var(--ops-surface); border: 1px solid var(--ops-line); border-radius: 999px;
+  padding: 1px 7px;
+}
+.gl-col-body { display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+.gl-empty {
+  border: 1px dashed var(--ops-line-strong); border-radius: 8px; padding: 18px 10px;
+  text-align: center; color: var(--ops-subtle); font-size: 12.5px;
+}
+
+.gl-card {
+  border: 1px solid var(--ops-line); border-radius: 10px; background: var(--ops-surface);
+  padding: 11px 12px; display: flex; flex-direction: column; gap: 7px; cursor: pointer;
+  border-left: 3px solid var(--ops-petrol); box-shadow: var(--ops-shadow, none);
+  text-align: left; width: 100%; font: inherit; color: inherit;
+}
+.gl-card.hit { border-left-color: var(--ops-green, #1f8a4c); }
+.gl-card.risk { border-left-color: var(--ops-sun, #d97706); }
+.gl-card.miss { border-left-color: var(--ops-rust); }
+.gl-card:hover { border-color: var(--ops-petrol); }
+.gl-card h4 { margin: 0; font: 700 14px/1.3 var(--ops-font); color: var(--ops-ink); }
+.gl-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11.5px; color: var(--ops-muted); }
+.gl-chip {
+  font: 700 10px var(--ops-mono); letter-spacing: .06em; text-transform: uppercase;
+  border-radius: 999px; padding: 2px 7px; background: var(--ops-surface-2, #f3f4f6); color: var(--ops-muted);
+}
+.gl-chip.metric { color: var(--ops-petrol); }
+.gl-bar {
+  height: 6px; border-radius: 99px; background: var(--ops-line); overflow: hidden;
+}
+.gl-bar i { display: block; height: 100%; border-radius: inherit; background: var(--ops-petrol); }
+.gl-bar i.hit { background: var(--ops-green, #1f8a4c); }
+.gl-bar i.risk { background: var(--ops-sun, #d97706); }
+.gl-bar i.miss { background: var(--ops-rust); }
+.gl-prog { font: 650 12px var(--ops-mono); color: var(--ops-ink); }
+
+/* Timeline */
+.gl-tl { border: 1px solid var(--ops-line); border-radius: 12px; background: var(--ops-surface); overflow: hidden; }
+.gl-tl-row {
+  display: grid; grid-template-columns: minmax(160px, 220px) 1fr; gap: 0;
+  border-bottom: 1px solid var(--ops-line); min-height: 52px;
+}
+.gl-tl-row:last-child { border-bottom: 0; }
+.gl-tl-label {
+  padding: 10px 12px; border-right: 1px solid var(--ops-line); display: flex;
+  flex-direction: column; gap: 3px; justify-content: center; cursor: pointer;
+}
+.gl-tl-label b { font: 700 13px var(--ops-font); color: var(--ops-ink); }
+.gl-tl-label span { font-size: 11px; color: var(--ops-muted); }
+.gl-tl-track { position: relative; padding: 14px 12px; }
+.gl-tl-track::before {
+  content: ""; position: absolute; left: 12px; right: 12px; top: 50%; height: 2px;
+  background: var(--ops-line); transform: translateY(-50%);
+}
+.gl-tl-bar {
+  position: absolute; top: 50%; transform: translateY(-50%); height: 22px;
+  border-radius: 6px; background: color-mix(in srgb, var(--ops-petrol) 35%, transparent);
+  border: 1px solid var(--ops-petrol); cursor: pointer; display: flex; align-items: center;
+  padding: 0 8px; font: 650 11px var(--ops-mono); color: var(--ops-ink); white-space: nowrap;
+  overflow: hidden;
+}
+.gl-tl-bar.hit { background: color-mix(in srgb, var(--ops-green, #1f8a4c) 35%, transparent); border-color: var(--ops-green, #1f8a4c); }
+.gl-tl-bar.risk { background: color-mix(in srgb, var(--ops-sun, #d97706) 40%, transparent); border-color: var(--ops-sun, #d97706); }
+.gl-tl-bar.miss { background: color-mix(in srgb, var(--ops-rust) 35%, transparent); border-color: var(--ops-rust); }
+
+.gl-dialog {
+  border: 1px solid var(--ops-line-strong); border-radius: 14px; padding: 0;
+  width: min(520px, 94vw); background: var(--ops-surface); color: var(--ops-ink);
+  box-shadow: 0 24px 60px rgba(0,0,0,.28);
+}
+.gl-dialog::backdrop { background: rgba(15, 23, 42, .45); }
+.gl-dialog form { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 20px; }
+.gl-dialog-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+.gl-dialog-head h2 { margin: 4px 0 0; font: 750 20px var(--ops-font); }
+.gl-kicker { font: 700 10px var(--ops-mono); letter-spacing: .12em; color: var(--ops-muted); }
+.gl-dialog label { display: flex; flex-direction: column; gap: 5px; font: 650 12px var(--ops-font); color: var(--ops-muted); }
+.gl-dialog input, .gl-dialog select, .gl-dialog textarea {
+  border: 1px solid var(--ops-line-strong); border-radius: 8px; padding: 9px 11px;
+  font: 400 14px var(--ops-font); background: var(--ops-ground); color: var(--ops-ink);
+}
+.gl-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gl-dialog-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.gl-spacer { flex: 1; }
+
+.gl-toasts {
+  position: fixed; right: 16px; bottom: 16px; z-index: 120; display: flex; flex-direction: column; gap: 8px;
+}
+.gl-toast {
+  background: var(--ops-ink); color: #fff; border-radius: 10px; padding: 10px 14px;
+  font: 650 13px var(--ops-font); box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 320px;
+}
+.gl-toast.bad { background: var(--ops-rust); }
+
+.gl-blank {
+  border: 1px solid var(--ops-line); border-radius: 12px; background: var(--ops-surface);
+  padding: 36px 20px; text-align: center;
+}
+.gl-blank h3 { margin: 0 0 8px; font: 750 18px var(--ops-font); }
+.gl-blank p { margin: 0 0 16px; color: var(--ops-muted); font-size: 14px; }
+
+@media (max-width: 980px) {
+  .gl-kpis { grid-template-columns: 1fr 1fr; }
+  .gl-board { grid-template-columns: 1fr; }
+  .gl-grid2 { grid-template-columns: 1fr; }
+  .gl-tl-row { grid-template-columns: 1fr; }
+  .gl-tl-label { border-right: 0; border-bottom: 1px solid var(--ops-line); }
+}

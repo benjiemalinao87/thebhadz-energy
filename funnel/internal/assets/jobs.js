@@ -1,15 +1,10 @@
 /**
  * SC-07 Jobs workspace — funnel/internal/projects.html
  *
- * Two halves of one page:
- *   Jobs      — one record per installation, read/written through /api/jobs. Board, list,
- *               schedule and crew are four views of the same loaded rows, so switching
- *               never costs a round trip. Clicking a job opens a drawer that fetches its
- *               detail bundle (tasks, costs, payments, crew, stage history, audit trail).
- *   Company   — the Founder OS Traction/Product/Ops board, still on /api/projects, which
- *               now serves only tasks with no job_id. Job checklists are deliberately
- *               excluded from the traction gauge: ~30 rows per job would let it read
- *               near-100% while nobody is selling.
+ * One installation per job, read/written through /api/jobs. Board, list, schedule and crew
+ * are four views of the same loaded rows. Clicking a job opens a drawer that fetches its
+ * detail bundle (tasks, costs, payments, crew, stage history, audit trail).
+ * Company-level outcomes live on Goals (/internal/goals.html), not here.
  *
  * Runs its init immediately rather than on DOMContentLoaded, and returns early when its
  * anchor element is absent — the Command Center SPA router re-creates and re-executes this
@@ -22,8 +17,6 @@
   if (!root) return;
 
   var JOBS_API = "/api/jobs";
-  var COMPANY_API = "/api/projects";
-
   /* ------------------------------------------------------------ vocabulary ---- */
 
   // Mirrors PHASES in functions/api/jobs.js. The server sends its own copy with every
@@ -64,7 +57,7 @@
   ];
 
   var ROLES = ["Tech", "Sales", "Admin", "PEE", "Ops", "Procurement"];
-  var VIEWS = ["board", "list", "schedule", "crew", "company"];
+  var VIEWS = ["board", "list", "schedule", "crew"];
 
   // Contact stages, as SC-14 names them. Shown against each name in the new-job picker so
   // an early-stage contact reads as "that person, not yet sold" rather than as a mystery.
@@ -75,7 +68,7 @@
   var LEAD_SELLING = ["sold", "proposal", "quote_sent", "demoed"];
 
   var state = {
-    jobs: [], installers: [], leads: [], company: [], phases: PHASES, templateSize: 0,
+    jobs: [], installers: [], leads: [], phases: PHASES, templateSize: 0,
     view: "board", query: "", loaded: false,
     openId: null, tab: "overview", detail: null, detailLoading: false,
     composing: false, pickedName: "", lastFocus: null
@@ -251,20 +244,13 @@
   /* ------------------------------------------------------------------- load --- */
 
   function load() {
-    return Promise.all([
-      get(JOBS_API),
-      // The company board is a separate section's data; if it is hidden for this account
-      // the jobs half must still render, so a failure here is not fatal.
-      get(COMPANY_API).catch(function () { return null; })
-    ]).then(function (res) {
-      var jobs = res[0];
+    return get(JOBS_API).then(function (jobs) {
       if (!jobs) return;
       state.jobs = jobs.jobs || [];
       state.installers = jobs.installers || [];
       state.leads = jobs.leads || [];
       state.phases = (jobs.phases && jobs.phases.length) ? jobs.phases : PHASES;
       state.templateSize = num(jobs.template_size);
-      state.company = res[1] ? (res[1].tasks || []) : [];
       state.loaded = true;
       render();
     }).catch(function (err) {
@@ -285,26 +271,6 @@
     });
   }
 
-  function reloadCompany() {
-    return get(COMPANY_API).then(function (d) {
-      if (!d) return;
-      state.company = d.tasks || [];
-      render();
-    });
-  }
-
-  function deleteCompanyTask(id) {
-    var task = state.company.filter(function (t) { return t.id === id; })[0];
-    if (!task) return;
-    if (!confirm('Delete company task "' + task.title + '"?\n\nThis cannot be undone.')) return;
-    send("DELETE", { id: id }, COMPANY_API).then(function (d) {
-      if (!d) return;
-      toast("ok", "Company task deleted", task.title);
-      return reloadCompany();
-    }).catch(function (err) {
-      toast("bad", "Could not delete the task", err.message);
-    });
-  }
 
   /* ------------------------------------------------------------------ views --- */
 
@@ -321,15 +287,14 @@
     renderMission();
     renderKpis();
     renderToolbar();
-    if (!state.jobs.length && state.view !== "company") {
+    if (!state.jobs.length) {
       root.innerHTML = emptyState();
       return;
     }
     if (state.view === "board") root.innerHTML = viewBoard();
     else if (state.view === "list") root.innerHTML = viewList();
     else if (state.view === "schedule") root.innerHTML = viewSchedule();
-    else if (state.view === "crew") root.innerHTML = viewCrew();
-    else root.innerHTML = viewCompany();
+    else root.innerHTML = viewCrew();
   }
 
   function emptyState() {
@@ -436,7 +401,7 @@
     var host = el("jb-views-host");
     if (!host) return;
     host.hidden = false;
-    var counts = { board: visibleJobs().length, company: state.company.filter(function (t) { return t.status !== "Done"; }).length };
+    var counts = { board: visibleJobs().length };
     Array.prototype.forEach.call(host.querySelectorAll("button[data-view]"), function (b) {
       var v = b.getAttribute("data-view");
       b.setAttribute("aria-selected", v === state.view ? "true" : "false");
@@ -681,43 +646,6 @@
         : licensed + " licensed electricians on the roster.") +
       "</b> Every job needs one to sign off and supervise energizing, so a licence expiring " +
       "inside the booking window is flagged here before a date is promised, not after.</span></div>";
-  }
-
-  /* ---------------------------------------------------------------- company --- */
-
-  function viewCompany() {
-    var lanes = ["Backlog", "This week", "Doing", "Blocked", "Done"];
-    var active = state.company.filter(function (t) { return t.status !== "Done"; });
-    var traction = active.filter(function (t) { return t.type === "Traction"; }).length;
-    var pct = active.length ? Math.round(traction / active.length * 100) : 0;
-
-    var cols = lanes.map(function (lane) {
-      var items = state.company.filter(function (t) { return t.status === lane; });
-      return '<section class="jb-col"><header class="jb-col-head"><h3>' + esc(lane) + "</h3>" +
-        '<span class="jb-count">' + items.length + "</span></header>" +
-        '<div class="jb-col-body">' +
-        (items.length ? items.map(function (t) {
-          var late = t.due && t.due < today() && t.status !== "Done";
-          var tone = t.type === "Traction" ? "good" : t.type === "Product" ? "warn" : "stage";
-          return '<div class="jb-mini" data-company-task="' + esc(t.id) + '">' +
-            '<div class="row"><span class="jb-chip ' + tone + '">' + esc(t.type) + "</span>" +
-            (t.due ? '<span class="jb-date' + (late ? " late" : "") + '">' + fmtDate(t.due) + "</span>" : "") +
-            '<button type="button" class="kill" data-kill-company="' + esc(t.id) +
-              '" aria-label="Delete company task">✕</button>' +
-            "</div><h4>" + esc(t.title) + "</h4>" +
-            (t.owner ? '<div class="row"><span class="jb-who"><i>' + esc(initials(t.owner)) + "</i>" + esc(t.owner) + "</span></div>" : "") +
-            (t.notes ? '<div class="row"><span class="sub" style="font-size:12px;color:var(--ops-muted)">' + esc(t.notes) + "</span></div>" : "") +
-            "</div>";
-        }).join("") : '<div class="jb-col-empty">Nothing here</div>') +
-        "</div></section>";
-    }).join("");
-
-    return '<div class="jb-note-bar first"><span><b>Traction share ' + pct + "%</b> of " + active.length +
-      " active company tasks" + (pct < 50 && active.length ? " — below the 50% floor" : "") + ". " +
-      "Job checklists are excluded on purpose: counting ~" + (state.templateSize || 30) +
-      " rows per install would let this read near-100% while nobody is selling. " +
-      "Company work is what the floor measures.</span></div>" +
-      '<div class="jb-board">' + cols + "</div>";
   }
 
   /* ----------------------------------------------------------- stage moves --- */
@@ -1539,11 +1467,6 @@
   }
 
   root.addEventListener("click", function (e) {
-    var killCo = e.target.closest && e.target.closest("[data-kill-company]");
-    if (killCo) {
-      deleteCompanyTask(killCo.getAttribute("data-kill-company"));
-      return;
-    }
     var act = e.target.closest && e.target.closest("[data-act]");
     if (act) {
       var name = act.getAttribute("data-act");

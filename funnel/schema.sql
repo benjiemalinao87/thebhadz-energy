@@ -548,3 +548,27 @@ CREATE TABLE IF NOT EXISTS product_captures (
 
 CREATE INDEX IF NOT EXISTS idx_captures_created ON product_captures(created_at);
 CREATE INDEX IF NOT EXISTS idx_captures_source ON product_captures(source);
+
+-- Founder Goals: countable outcomes (leads / deposits / surveys / sold / manual)
+-- with a timeline. Progress for non-manual metrics is computed live in /api/goals,
+-- not stored as truth. Owner is the session user at create time.
+CREATE TABLE IF NOT EXISTS goals (
+  id               TEXT PRIMARY KEY,
+  title            TEXT NOT NULL,
+  metric           TEXT NOT NULL DEFAULT 'manual',
+  target           INTEGER NOT NULL DEFAULT 1,
+  current_manual   INTEGER NOT NULL DEFAULT 0,
+  start_date       TEXT NOT NULL,
+  end_date         TEXT NOT NULL,
+  status           TEXT NOT NULL DEFAULT 'Backlog',
+  owner_user_id    INTEGER,
+  owner_name       TEXT NOT NULL DEFAULT '',
+  assignee_user_id INTEGER,
+  assignee_name    TEXT NOT NULL DEFAULT '',
+  notes            TEXT NOT NULL DEFAULT '',
+  created_at       TEXT NOT NULL,
+  updated_at       TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_goals_end ON goals(end_date);
+CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);

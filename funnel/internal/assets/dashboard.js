@@ -9,7 +9,7 @@
  * Sources, each optional: a section hidden from this account 403s, and the panels it feeds
  * simply do not render.
  *   /api/jobs         jobs with gates, task counts, crew, money per job; installers
- *   /api/projects     company tasks (the job_id IS NULL half — the Founder OS board)
+ *   /api/goals        countable founder goals with live progress and urgency
  *   /api/leads        contacts, their stage and their next action
  *   /api/finance      cash summary and 30-day burn
  *   /api/install-ops  payments, for what actually landed this week
@@ -98,7 +98,7 @@
    */
   function buildQueue(data) {
     var jobs = (data.jobs && data.jobs.jobs) || [];
-    var tasks = (data.projects && data.projects.tasks) || [];
+    var goals = (data.goals && data.goals.goals) || [];
     var leads = (data.leads && data.leads.leads) || [];
     var installers = (data.jobs && data.jobs.installers) || [];
     var now = today();
@@ -168,20 +168,21 @@
       });
     });
 
-    // 5 · Company work that is overdue or stuck.
-    tasks.forEach(function (t) {
-      if (t.status === "Done") return;
-      var late = t.due && t.due < now;
-      if (!late && t.status !== "Blocked") return;
+    // 5 · Goals that are overdue or at risk of missing the target.
+    goals.forEach(function (g) {
+      if (g.status === "Done" || g.status === "Missed") return;
+      if (g.urgency !== "miss" && g.urgency !== "risk") return;
+      var late = g.urgency === "miss";
       rows.push({
         sev: late ? "stop" : "soon", rank: late ? 30 : 40,
-        kind: late ? plural(Math.abs(daysBetween(now, t.due)), "day") + " late" : "Blocked",
-        title: t.title,
-        why: (t.notes ? t.notes + " " : "") + (late
-          ? "Due " + fmtDate(t.due) + " and still " + String(t.status).toLowerCase() + "."
-          : "Blocked with no due date movement."),
-        sub: [t.owner || "unowned", t.type].filter(Boolean).join(" · "),
-        href: "/internal/projects.html"
+        kind: late ? "Goal missed pace" : "Goal at risk",
+        title: g.title,
+        why: (g.current || 0) + " of " + (g.target || 1) + " · ends " + fmtDate(g.end_date) +
+          (g.days_left !== null && g.days_left < 0
+            ? " (" + plural(Math.abs(g.days_left), "day") + " overdue)."
+            : g.days_left !== null ? " (" + plural(g.days_left, "day") + " left)." : "."),
+        sub: [g.assignee_name || g.owner_name || "unowned", g.metric].filter(Boolean).join(" · "),
+        href: "/internal/goals.html"
       });
     });
 
@@ -268,7 +269,7 @@
 
   function renderMission(data) {
     var jobs = (data.jobs && data.jobs.jobs) || [];
-    var tasks = (data.projects && data.projects.tasks) || [];
+    var goals = (data.goals && data.goals.goals) || [];
     var leads = (data.leads && data.leads.leads) || [];
     var fin = (data.finance && data.finance.summary) || {};
 
@@ -288,9 +289,9 @@
     var cushion = avgMargin > 0 ? available / avgMargin : null;
     var months = burn > 0 ? available / burn : null;
 
-    var active = tasks.filter(function (t) { return t.status !== "Done"; });
-    var traction = active.filter(function (t) { return t.type === "Traction"; }).length;
-    var pct = active.length ? Math.round(traction / active.length * 100) : null;
+    var activeGoals = goals.filter(function (g) { return g.status !== "Done" && g.status !== "Missed"; });
+    var onTrack = activeGoals.filter(function (g) { return g.urgency === "ok" || g.urgency === "hit"; }).length;
+    var pct = data.goals ? (activeGoals.length ? Math.round(onTrack / activeGoals.length * 100) : 100) : null;
 
     var cash = num(fin.customer_cash) || jobs.reduce(function (s, j) { return s + num(j.paid_cents); }, 0);
     var contracted = jobs.reduce(function (s, j) {
@@ -339,14 +340,16 @@
     );
 
     cells.push(
-      '<div class="db-mc"><span class="db-eyebrow">Traction share · floor 50%</span>' +
+      '<div class="db-mc"><span class="db-eyebrow">Goals on track</span>' +
       '<span class="fig"><b class="n">' + (pct === null ? "—" : pct) + "</b><span>%</span></span>" +
       '<span class="db-bar mark"><i class="' + (pct !== null && pct < 50 ? "rust" : "green") + '" style="width:' +
         (pct === null ? 0 : pct) + '%"></i></span>' +
       "<p>" + (pct === null
-        ? "No active company tasks to measure."
-        : traction + " of " + active.length + " active company tasks. " +
-          (pct < 50 ? "<b>Below the floor — Monday and Tuesday go traction-only.</b>" : "<b>At or above the floor.</b>")) +
+        ? "Goals not visible on this account."
+        : !activeGoals.length
+          ? 'No active goals. <a href="/internal/goals.html">Set one →</a>'
+          : onTrack + " of " + activeGoals.length + " active goals on pace. " +
+            (pct < 50 ? "<b>Behind — open Goals and reassign or re-scope.</b>" : "<b>On pace.</b>")) +
       "</p></div>"
     );
 
@@ -359,6 +362,27 @@
     );
 
     return cells.join("");
+  }
+
+  function renderGoals(data) {
+    if (!data.goals) return "";
+    var goals = data.goals.goals || [];
+    var active = goals.filter(function (g) { return g.status !== "Done" && g.status !== "Missed"; });
+    if (!active.length && !goals.length) {
+      return '<section class="db-panel"><div class="db-ph"><h2>Goals</h2>' +
+        '<span class="r"><a class="lnk" href="/internal/goals.html">Open →</a></span></div>' +
+        '<div class="db-pb"><p style="margin:0;color:var(--ops-muted);font-size:13px">No goals yet. Set a countable outcome — leads, deposits, surveys — with a timeline.</p></div></section>';
+    }
+    var show = (active.length ? active : goals).slice(0, 4);
+    return '<section class="db-panel"><div class="db-ph"><h2>Goals</h2>' +
+      '<span class="r"><a class="lnk" href="/internal/goals.html">All goals →</a></span></div>' +
+      '<div class="db-pb">' + show.map(function (g) {
+        var tone = g.urgency === "hit" ? "green" : g.urgency === "risk" ? "amber" : g.urgency === "miss" ? "rust" : "";
+        return '<div class="db-mrow"><span class="k">' + esc(g.title) + "</span>" +
+          '<span class="v n">' + (g.current || 0) + "/" + (g.target || 1) + "</span></div>" +
+          '<span class="db-bar" style="margin:2px 0 10px"><i class="' + tone + '" style="width:' +
+          (g.pct || 0) + '%"></i></span>';
+      }).join("") + "</div></section>";
   }
 
   function renderMoney(data) {
@@ -512,7 +536,7 @@
     return Promise.all([
       window.scSectionVisibility ? window.scSectionVisibility.session() : null,
       get("/api/jobs"),
-      get("/api/projects"),
+      get("/api/goals"),
       get("/api/leads"),
       get("/api/finance"),
       get("/api/install-ops"),
@@ -521,12 +545,12 @@
     ]).then(function (r) {
       var session = r[0];
       var data = {
-        jobs: r[1], projects: r[2], leads: r[3], finance: r[4], ops: r[5],
+        jobs: r[1], goals: r[2], leads: r[3], finance: r[4], ops: r[5],
         unread: r[6] ? num(r[6].unread) : null
       };
 
       // Everything hidden or unreachable: say so plainly instead of drawing empty panels.
-      if (!data.jobs && !data.projects && !data.leads && !data.finance) {
+      if (!data.jobs && !data.goals && !data.leads && !data.finance) {
         root.innerHTML = '<div class="db-err"><span aria-hidden="true">!</span><span>' +
           "<b>No dashboard data available</b>Either this account cannot see these sections, " +
           "or the database is unreachable. Open Apps to go somewhere directly.</span></div>";
@@ -548,7 +572,7 @@
             "</div>" + renderQueue(queue) + "</section>" +
             renderWorkspaces(data) +
           "</div>" +
-          '<div class="db-stack">' + renderMoney(data) + renderPipeline(data) + renderWeek(data) + "</div>" +
+          '<div class="db-stack">' + renderGoals(data) + renderMoney(data) + renderPipeline(data) + renderWeek(data) + "</div>" +
         "</div>";
 
       // Drop anything this account may not open (the API would 403 anyway).

@@ -36,7 +36,7 @@ export const SECTIONS = [
     key: "next-actions",
     label: "Next actions (roll-up)",
     group: "Operations",
-    // Reads /api/leads, /api/install-ops and /api/projects rather than owning data.
+    // Reads /api/leads, /api/install-ops and /api/goals rather than owning data.
     // Those APIs stay individually gated, so hiding a section still hides its rows
     // here — the page degrades to what the account may actually see.
     pages: ["next-actions"],
@@ -81,13 +81,20 @@ export const SECTIONS = [
   },
   {
     key: "projects",
-    label: "Jobs & project board",
+    label: "Jobs",
     group: "Operations",
-    // /api/jobs is the installation workspace (jobs, their checklists, stage history);
-    // /api/projects is the company-task half of the same page. Both belong to this
-    // section, so hiding it closes the page AND the data behind it.
+    // Installation workspace only. Company-level outcomes live under Goals (/api/goals).
+    // /api/projects remains gated here so any leftover company-task rows stay behind the
+    // same visibility flag as Jobs until they are retired.
     pages: ["projects"],
     apis: ["/api/jobs", "/api/projects"],
+  },
+  {
+    key: "goals",
+    label: "Goals",
+    group: "Strategy",
+    pages: ["goals"],
+    apis: ["/api/goals"],
   },
   {
     key: "install-ops",

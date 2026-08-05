@@ -67,6 +67,7 @@
     leads:             { label: "Contacts",         tone: "blue",   href: "/internal/leads.html",           noun: "contact",           icon: ICON.user },
     jobs:              { label: "Jobs",             tone: "petrol", href: "/internal/projects.html",        noun: "job",               icon: ICON.home },
     projects:          { label: "Company tasks",    tone: "petrol", href: "/internal/projects.html",        noun: "company task",      icon: ICON.check },
+    goals:             { label: "Goals",            tone: "blue",   href: "/internal/goals.html",           noun: "goal",              icon: ICON.check },
     "install-ops":     { label: "Install ops",      tone: "petrol", href: "/internal/install-ops.html",     noun: "install-ops entry", icon: ICON.wrench },
     quote:             { label: "Quotes",           tone: "amber",  href: "/internal/quote-builder.html",   noun: "quote",             icon: ICON.doc },
     // `whole` marks a singleton the tools save in one shot: a PUT replaces the entire

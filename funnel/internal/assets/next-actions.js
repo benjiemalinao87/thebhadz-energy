@@ -7,7 +7,7 @@
  *                     ones, so they are surfaced rather than left quiet.
  *   /api/install-ops  derived from the project's stage, with the compliance gate
  *                     outranking everything else when it is incomplete.
- *   /api/projects     company tasks that are live (This week / Doing / Blocked). Job
+ *   /api/goals        active goals that are at risk or overdue. Job
  *                     checklists are excluded by that endpoint; installations arrive
  *                     via /api/install-ops as one row each.
  *
@@ -173,22 +173,19 @@
     return out;
   }
 
-  // Company tasks only. /api/projects serves the job_id IS NULL half of project_tasks, so
-  // the ~30 checklist rows each installation carries never flood this roll-up — jobs reach
-  // it through fromInstalls() as one row per install instead.
-  function fromTasks(tasks) {
-    var live = { "This week": 1, "Doing": 1, "Blocked": 1 };
-    return (tasks || []).filter(function (t) { return live[t.status]; }).map(function (t) {
-      var title = t.title || "Untitled task";
+  function fromGoals(goals) {
+    return (goals || []).filter(function (g) {
+      return g.status !== "Done" && g.status !== "Missed" &&
+        (g.urgency === "risk" || g.urgency === "miss" || g.status === "This week" || g.status === "Doing");
+    }).map(function (g) {
+      var due = g.end_date || "";
       return {
-        source: "TASK",
-        // For a board task the title IS the action, so it leads. Prefixing a blocked
-        // one keeps the reason visible without demoting what the work actually is.
-        action: t.status === "Blocked" ? "Unblock: " + title : title,
-        who: "Company tasks", owner: t.owner || "", due: t.due || "",
-        bucket: t.status === "Blocked" && !t.due ? "adrift" : bucketFor(t.due),
-        href: "/internal/projects.html",
-        context: t.type + " · " + t.status
+        source: "GOAL",
+        action: (g.urgency === "miss" ? "Rescue: " : "Hit: ") + (g.title || "Untitled goal"),
+        who: "Goals", owner: g.assignee_name || g.owner_name || "", due: due,
+        bucket: g.urgency === "miss" ? "overdue" : bucketFor(due),
+        href: "/internal/goals.html",
+        context: (g.current || 0) + "/" + (g.target || 1) + " · " + (g.metric || "")
       };
     });
   }
@@ -273,13 +270,13 @@
     Promise.all([
       grab("/api/leads"),
       grab("/api/install-ops"),
-      grab("/api/projects")
+      grab("/api/goals")
     ]).then(function (res) {
       var skipped = [];
       var items = [];
       if (res[0]) items = items.concat(fromLeads(res[0].leads)); else skipped.push("Contacts / leads");
       if (res[1]) items = items.concat(fromInstalls(res[1].projects)); else skipped.push("Install operations");
-      if (res[2]) items = items.concat(fromTasks(res[2].tasks)); else skipped.push("Company tasks");
+      if (res[2]) items = items.concat(fromGoals(res[2].goals)); else skipped.push("Goals");
       render(sortItems(items), skipped);
     });
   }
