@@ -285,9 +285,22 @@ async function listJobs(env) {
        FROM install_assignments a JOIN installers i ON i.id = a.installer_id`
     ),
     env.DB.prepare(`SELECT * FROM installers ORDER BY active DESC, name ASC`),
+    // Every contact, not just the late-funnel ones. This used to filter to
+    // quote_sent/demoed/proposal/sold, which made "New job from contact" look like there
+    // were no contacts at all on a young pipeline where everyone is still 'lead' — and a
+    // deposit can land before anyone remembers to move the stage. The ordering does the
+    // work instead: closest-to-sold first, lost last, and has_job flags the ones already
+    // converted so the picker can warn instead of quietly creating a duplicate job.
     env.DB.prepare(
-      `SELECT id, name, phone, address, package, stage FROM leads
-       WHERE stage IN ('proposal', 'sold', 'quote_sent', 'demoed') ORDER BY datetime(updated_at) DESC LIMIT 200`
+      `SELECT l.id, l.name, l.phone, l.address, l.package, l.stage,
+              EXISTS (SELECT 1 FROM install_projects p WHERE p.lead_id = l.id) AS has_job
+       FROM leads l
+       ORDER BY CASE l.stage
+                  WHEN 'sold' THEN 1 WHEN 'proposal' THEN 2 WHEN 'quote_sent' THEN 3
+                  WHEN 'demoed' THEN 4 WHEN 'contacted' THEN 5 WHEN 'lead' THEN 6
+                  ELSE 7 END,
+                datetime(l.updated_at) DESC
+       LIMIT 500`
     ),
   ]);
 

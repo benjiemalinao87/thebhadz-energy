@@ -66,11 +66,19 @@
   var ROLES = ["Tech", "Sales", "Admin", "PEE", "Ops", "Procurement"];
   var VIEWS = ["board", "list", "schedule", "crew", "company"];
 
+  // Contact stages, as SC-14 names them. Shown against each name in the new-job picker so
+  // an early-stage contact reads as "that person, not yet sold" rather than as a mystery.
+  var LEAD_STAGE = {
+    lead: "New lead", contacted: "Contacted", demoed: "Demoed",
+    quote_sent: "Quote sent", proposal: "Proposal", sold: "Sold", lost: "Lost"
+  };
+  var LEAD_SELLING = ["sold", "proposal", "quote_sent", "demoed"];
+
   var state = {
     jobs: [], installers: [], leads: [], company: [], phases: PHASES, templateSize: 0,
     view: "board", query: "", loaded: false,
     openId: null, tab: "overview", detail: null, detailLoading: false,
-    composing: false, lastFocus: null
+    composing: false, pickedName: "", lastFocus: null
   };
 
   /* --------------------------------------------------------------- helpers ---- */
@@ -274,6 +282,27 @@
       state.installers = d.installers || [];
       state.leads = d.leads || [];
       render();
+    });
+  }
+
+  function reloadCompany() {
+    return get(COMPANY_API).then(function (d) {
+      if (!d) return;
+      state.company = d.tasks || [];
+      render();
+    });
+  }
+
+  function deleteCompanyTask(id) {
+    var task = state.company.filter(function (t) { return t.id === id; })[0];
+    if (!task) return;
+    if (!confirm('Delete company task "' + task.title + '"?\n\nThis cannot be undone.')) return;
+    send("DELETE", { id: id }, COMPANY_API).then(function (d) {
+      if (!d) return;
+      toast("ok", "Company task deleted", task.title);
+      return reloadCompany();
+    }).catch(function (err) {
+      toast("bad", "Could not delete the task", err.message);
     });
   }
 
@@ -670,9 +699,11 @@
         (items.length ? items.map(function (t) {
           var late = t.due && t.due < today() && t.status !== "Done";
           var tone = t.type === "Traction" ? "good" : t.type === "Product" ? "warn" : "stage";
-          return '<div class="jb-mini">' +
+          return '<div class="jb-mini" data-company-task="' + esc(t.id) + '">' +
             '<div class="row"><span class="jb-chip ' + tone + '">' + esc(t.type) + "</span>" +
             (t.due ? '<span class="jb-date' + (late ? " late" : "") + '">' + fmtDate(t.due) + "</span>" : "") +
+            '<button type="button" class="kill" data-kill-company="' + esc(t.id) +
+              '" aria-label="Delete company task">✕</button>' +
             "</div><h4>" + esc(t.title) + "</h4>" +
             (t.owner ? '<div class="row"><span class="jb-who"><i>' + esc(initials(t.owner)) + "</i>" + esc(t.owner) + "</span></div>" : "") +
             (t.notes ? '<div class="row"><span class="sub" style="font-size:12px;color:var(--ops-muted)">' + esc(t.notes) + "</span></div>" : "") +
@@ -1297,64 +1328,122 @@
 
   /* ------------------------------------------------------------ new job UI --- */
 
+  function leadOption(lead) {
+    return '<option value="' + esc(lead.id) + '">' + esc(lead.name) +
+      (lead.phone ? " · " + esc(lead.phone) : "") +
+      (lead.address ? " · " + esc(lead.address) : "") + "</option>";
+  }
+
+  // One <optgroup> per bucket so a long contact list stays readable and the ones already
+  // turned into a job are visibly out of the way instead of inviting a duplicate.
+  function leadGroups() {
+    var leads = state.leads || [];
+    var buckets = [
+      { label: "Ready to convert", of: function (l) { return !num(l.has_job) && LEAD_SELLING.indexOf(l.stage) >= 0; } },
+      { label: "Earlier in the pipeline", of: function (l) { return !num(l.has_job) && LEAD_SELLING.indexOf(l.stage) < 0 && l.stage !== "lost"; } },
+      { label: "Marked lost", of: function (l) { return !num(l.has_job) && l.stage === "lost"; } },
+      { label: "Already has a job", of: function (l) { return !!num(l.has_job); } }
+    ];
+    return buckets.map(function (b) {
+      var rows = leads.filter(b.of);
+      if (!rows.length) return "";
+      return '<optgroup label="' + esc(b.label) + '">' + rows.map(leadOption).join("") + "</optgroup>";
+    }).join("");
+  }
+
+  function pickSummary(lead) {
+    if (!lead) {
+      return '<span style="color:var(--ops-muted)">Nothing selected — type a customer name below and the job stands on its own.</span>';
+    }
+    return (num(lead.has_job)
+      ? '<b class="warn">This contact already has a job.</b> Creating another makes a second one for the same customer.<br>'
+      : "") +
+      "<b>" + esc(lead.name) + "</b> · " + esc(LEAD_STAGE[lead.stage] || lead.stage || "—") + "<br>" +
+      esc(lead.phone || "no phone on file") + " · " + esc(lead.address || "no address on file") +
+      (lead.package ? " · " + esc(lead.package) : "");
+  }
+
   function composeHtml() {
     var leads = state.leads || [];
-    return '<div class="jb-panel" id="jb-compose"><div class="jb-panel-head"><h3>New job</h3>' +
-      '<span class="right"><button type="button" class="jb-btn" data-act="cancel-new">Cancel</button></span></div>' +
+    var groups = leadGroups();
+    return '<div class="jb-panel"><div class="jb-panel-head"><h3>Customer</h3>' +
+      '<span class="right jb-chip stage">' + leads.length +
+      (leads.length === 1 ? " contact" : " contacts") + "</span></div>" +
       '<div class="jb-panel-body">' +
-      '<div class="jb-dl" style="grid-template-columns:1fr;gap:12px">' +
       '<label><span class="jb-lbl">From contact</span><br>' +
       '<select id="jb-new-lead" class="jb-search" style="max-width:none;width:100%">' +
-      '<option value="">— not from a contact —</option>' +
-      leads.map(function (l) {
-        return '<option value="' + esc(l.id) + '">' + esc(l.name) +
-          (l.address ? " · " + esc(l.address) : "") + (l.package ? " · " + esc(l.package) : "") + "</option>";
-      }).join("") + "</select></label>" +
-      '<label><span class="jb-lbl">Customer name</span><br>' +
+      '<option value="">— not from a contact —</option>' + groups + "</select></label>" +
+      '<div class="jb-note-bar" id="jb-new-pick" style="margin-top:10px"><span>' +
+      (groups
+        ? pickSummary(null)
+        : 'No contacts yet. <a href="/internal/leads.html">Add one in Contacts</a> and it appears here — ' +
+          "or type a customer name below.") +
+      "</span></div>" +
+      '<label style="display:block;margin-top:12px"><span class="jb-lbl">Customer name</span><br>' +
       '<input id="jb-new-name" class="jb-search" style="max-width:none;width:100%" maxlength="120" placeholder="Required if no contact is chosen"></label>' +
-      '<label><span class="jb-lbl">Package</span><br>' +
+      "</div></div>" +
+
+      '<div class="jb-panel"><div class="jb-panel-head"><h3>The deal</h3></div>' +
+      '<div class="jb-panel-body">' +
+      '<label style="display:block"><span class="jb-lbl">Package</span><br>' +
       '<input id="jb-new-pkg" class="jb-search" style="max-width:none;width:100%" maxlength="60" placeholder="LIWANAG / ILAW / SANDIGAN"></label>' +
-      '<label><span class="jb-lbl">Contract price (₱)</span><br>' +
+      '<label style="display:block;margin-top:12px"><span class="jb-lbl">Contract price (₱)</span><br>' +
       // No example figure here on purpose: the package ladder is not final and lives in
       // /api/quote-settings, so a placeholder number would quietly become a second source
       // of truth for the price.
       '<input id="jb-new-price" class="jb-search" style="max-width:none;width:100%" type="number" min="0" step="500" placeholder="from the accepted quote"></label>' +
-      '<label><span class="jb-lbl">Install date (optional — dates the whole checklist)</span><br>' +
+      '<label style="display:block;margin-top:12px"><span class="jb-lbl">Install date (optional — dates the whole checklist)</span><br>' +
       '<input id="jb-new-install" class="jb-search" style="max-width:none;width:100%" type="date"></label>' +
-      "</div>" +
+      "</div></div>" +
+
       '<div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">' +
       '<button type="button" class="jb-btn primary" data-act="create-job">Create job' +
       (state.templateSize ? " + " + state.templateSize + " tasks" : "") + "</button>" +
+      '<button type="button" class="jb-btn" data-act="cancel-new">Cancel</button>' +
       "</div>" +
       '<p style="margin:12px 0 0;color:var(--ops-muted);font-size:12.5px">' +
       "Choosing a contact copies its name, phone, address and package, so the same install is never typed twice. " +
-      "An off-grid package records net metering as N/A rather than leaving a gate open forever.</p>" +
-      "</div></div>";
+      "An off-grid package records net metering as N/A rather than leaving a gate open forever.</p>";
   }
 
   function openCompose() {
     state.composing = true;
-    var host = el("jb-compose-host");
-    host.innerHTML = composeHtml();
-    host.hidden = false;
+    state.lastFocus = document.activeElement;
+    var body = el("jb-nbody");
+    body.innerHTML = composeHtml();
+    el("jb-scrim").classList.add("open");
+    el("jb-new").classList.add("open");
+
     var pick = el("jb-new-lead");
+    var name = el("jb-new-name");
     if (pick) {
       pick.addEventListener("change", function () {
         var lead = state.leads.filter(function (l) { return String(l.id) === pick.value; })[0];
-        if (!lead) return;
-        if (lead.package) el("jb-new-pkg").value = lead.package;
-        el("jb-new-name").value = "";
+        el("jb-new-pick").innerHTML = "<span>" + pickSummary(lead) + "</span>";
+        // Prefill rather than blank the name: the field is what actually gets sent, so
+        // showing the contact's name is the difference between "it copied the contact"
+        // and a form that looks like it ignored the pick.
+        if (lead) {
+          name.value = lead.name || "";
+          if (lead.package) el("jb-new-pkg").value = lead.package;
+        } else if (state.pickedName && name.value === state.pickedName) {
+          name.value = "";
+        }
+        state.pickedName = lead ? lead.name || "" : "";
       });
+      pick.focus();
+    } else if (name) {
+      name.focus();
     }
-    var name = el("jb-new-name");
-    if (name) name.focus();
   }
 
   function closeCompose() {
     state.composing = false;
-    var host = el("jb-compose-host");
-    host.hidden = true;
-    host.innerHTML = "";
+    state.pickedName = "";
+    el("jb-new").classList.remove("open");
+    if (!state.openId) el("jb-scrim").classList.remove("open");
+    el("jb-nbody").innerHTML = "";
+    if (state.lastFocus && state.lastFocus.focus) state.lastFocus.focus();
   }
 
   function createJob() {
@@ -1376,8 +1465,7 @@
       survey_date: ""
     };
 
-    var btn = root.querySelector('[data-act="create-job"]') ||
-      document.querySelector('#jb-compose-host [data-act="create-job"]');
+    var btn = document.querySelector('#jb-nbody [data-act="create-job"]');
     if (btn) { btn.disabled = true; btn.textContent = "Creating…"; }
 
     send("POST", body).then(function (d) {
@@ -1453,6 +1541,11 @@
   }
 
   root.addEventListener("click", function (e) {
+    var killCo = e.target.closest && e.target.closest("[data-kill-company]");
+    if (killCo) {
+      deleteCompanyTask(killCo.getAttribute("data-kill-company"));
+      return;
+    }
     var act = e.target.closest && e.target.closest("[data-act]");
     if (act) {
       var name = act.getAttribute("data-act");
@@ -1468,14 +1561,17 @@
     if (row) { openJob(row.getAttribute("data-job")); return; }
   });
 
-  // Compose panel lives outside #jb-app so a re-render of the views cannot wipe it.
-  el("jb-compose-host").addEventListener("click", function (e) {
+  // The new-job drawer lives outside #jb-app so a re-render of the views cannot wipe a
+  // half-filled form underneath the user.
+  el("jb-nbody").addEventListener("click", function (e) {
     var act = e.target.closest && e.target.closest("[data-act]");
     if (!act) return;
     var name = act.getAttribute("data-act");
     if (name === "cancel-new") closeCompose();
     if (name === "create-job") createJob();
   });
+
+  el("jb-nclose").addEventListener("click", closeCompose);
 
   el("jb-views-host").addEventListener("click", function (e) {
     var btn = e.target.closest && e.target.closest("button[data-view]");
@@ -1498,14 +1594,22 @@
   /* -------------------------------------------------------- drawer events --- */
 
   el("jb-dclose").addEventListener("click", closeJob);
-  el("jb-scrim").addEventListener("click", closeJob);
+
+  // One scrim serves both drawers. The new-job form sits on top when both are open — a
+  // job created from the drawer opens its detail behind it — so it dismisses first.
+  function closeTopDrawer() {
+    if (state.composing) closeCompose();
+    else if (state.openId) closeJob();
+  }
+
+  el("jb-scrim").addEventListener("click", closeTopDrawer);
 
   // Escape has to work wherever focus sits, so the listener belongs on the document — but
   // the SPA router re-executes this script on every visit to the page, and a document
   // listener is never torn down with the view. Registering one permanent listener that
   // calls through a hook each load overwrites keeps exactly one, always pointing at the
   // current closure instead of stacking stale ones. (Same idea as theme.js's ready flag.)
-  window.__jbCloseDrawer = function () { if (state.openId) closeJob(); };
+  window.__jbCloseDrawer = function () { closeTopDrawer(); };
   if (!document.documentElement.dataset.jbKeysReady) {
     document.documentElement.dataset.jbKeysReady = "true";
     document.addEventListener("keydown", function (e) {

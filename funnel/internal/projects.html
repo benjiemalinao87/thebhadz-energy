@@ -48,10 +48,6 @@
       <button type="button" class="jb-btn primary" data-act="new-job">New job from contact</button>
     </div>
 
-    <!-- The new-job form lives outside #jb-app so re-rendering a view cannot wipe a
-         half-filled form underneath the user. -->
-    <div id="jb-compose-host" hidden></div>
-
     <!-- Every view renders into here. -->
     <div id="jb-app" aria-live="polite"></div>
 
@@ -81,6 +77,23 @@
       </div>
     </div>
     <div class="jb-dbody" id="jb-dbody"></div>
+  </aside>
+
+  <!-- New job. Its own drawer rather than an inline panel: the form is the same kind of
+       focused, one-thing-at-a-time surface as the job detail, and pushing the board down
+       to make room hid the very jobs you create against. Same scrim, same Escape. -->
+  <aside class="jb-drawer narrow" id="jb-new" role="dialog" aria-modal="true" aria-labelledby="jb-ntitle" tabindex="-1">
+    <div class="jb-dhead">
+      <div class="jb-dhead-top">
+        <div>
+          <span class="jb-code">NEW JOB</span>
+          <h2 id="jb-ntitle">Create a job</h2>
+          <div class="sub">One installation, from survey through warranty.</div>
+        </div>
+        <button type="button" class="jb-close" id="jb-nclose" aria-label="Close new job">✕</button>
+      </div>
+    </div>
+    <div class="jb-dbody" id="jb-nbody"></div>
   </aside>
 
   <div class="jb-toasts" id="jb-toasts" aria-live="polite"></div>

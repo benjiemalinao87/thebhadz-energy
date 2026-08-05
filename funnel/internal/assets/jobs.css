@@ -268,6 +268,7 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
 }
 .jb-note-bar.first { margin: 0 0 16px; }
 .jb-note-bar b { color: var(--ops-ink); }
+.jb-note-bar b.warn { color: var(--ops-rust); }
 .jb-note-bar code {
   font: 600 12.5px var(--ops-mono); background: var(--ops-surface-2);
   border: 1px solid var(--ops-line); border-radius: 4px; padding: 1px 5px;
@@ -290,6 +291,13 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
 .jb-mini .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .jb-mini .row .jb-date { margin-left: auto; font: 600 11px var(--ops-mono); color: var(--ops-muted); }
 .jb-mini .row .jb-date.late { color: var(--ops-rust); font-weight: 700; }
+.jb-mini .row .kill {
+  border: 0; background: transparent; cursor: pointer; padding: 2px 6px;
+  color: var(--ops-subtle); font: 700 13px/1 var(--ops-font); border-radius: 5px;
+}
+.jb-mini .row .kill:hover { color: var(--ops-rust); background: var(--ops-rust-soft); }
+.jb-mini .row .jb-date + .kill { margin-left: 0; }
+.jb-mini .row .jb-chip + .kill { margin-left: auto; }
 
 .jb-who { display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px var(--ops-font); color: var(--ops-muted); }
 .jb-who i {
@@ -313,6 +321,9 @@ table.jb-table { width: 100%; border-collapse: collapse; min-width: 940px; }
   display: flex; flex-direction: column;
 }
 .jb-drawer.open { transform: none; }
+/* The new-job form is one column of short fields; the detail drawer's width would leave
+   it swimming. */
+.jb-drawer.narrow { width: min(520px, 96vw); }
 
 .jb-dhead { padding: 18px 22px 0; background: var(--ops-surface); border-bottom: 1px solid var(--ops-line); }
 .jb-dhead-top { display: flex; align-items: flex-start; gap: 12px; }

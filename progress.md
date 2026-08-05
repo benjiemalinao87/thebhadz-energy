@@ -1,5 +1,10 @@
 # Progress
 
+## Jobs: delete company tasks from Company tab (2026-08-05) — done
+- Company tasks board was read-only mini-cards; `/api/projects` DELETE already existed
+- Added ✕ on each card → confirm → DELETE → reload company list
+- Local: hard-refresh Jobs → Company tasks; delete a test card
+
 ## Quote: remove Compliance checklist from customer copy + PDF (2026-08-04) — done
 - Dropped the printed checklist block from Quote Builder customer sheet and `_quote-pdf.js`
 - `/api/quote` no longer requires `checklist` in the payload; covering email wording updated
