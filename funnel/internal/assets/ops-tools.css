@@ -51,6 +51,10 @@ html[data-theme="dark"] .ops-alert.danger { color: #ffd9d3; background: #3a1d20;
   padding: 9px 10px; font: 14px var(--sans); border-radius: 0;
 }
 .ops-form textarea, .ops-card textarea { resize: vertical; line-height: 1.45; }
+/* A field the form derives for you (Finance's money direction, set by the transaction
+   type) is disabled rather than hidden — the value still matters to the reader. Dim it
+   so it reads as locked-on-purpose, not as a control that failed to load. */
+.ops-form :disabled { cursor: not-allowed; opacity: .68; }
 .ops-form input:focus, .ops-form select:focus, .ops-form textarea:focus,
 .ops-table input:focus, .ops-table select:focus, .ops-card input:focus, .ops-card select:focus, .ops-card textarea:focus { outline: 2px solid var(--sun); outline-offset: 1px; }
 .ops-form-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
