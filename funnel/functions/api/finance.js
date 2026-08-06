@@ -12,6 +12,8 @@ import { currentUser } from "../_auth.js";
 const DIRECTIONS = ["inflow", "outflow"];
 const STATUSES = ["paid", "committed"];
 const KINDS = ["opening_balance", "founder_contribution", "customer_payment", "expense", "installer_payment", "refund", "other"];
+// Kinds whose cash direction is unambiguous — enforced regardless of what the client sent.
+const DIRECTION_BY_KIND = { founder_contribution: "inflow", customer_payment: "inflow", expense: "outflow", installer_payment: "outflow" };
 const CONTRIBUTION_TYPES = ["", "capital", "founder_loan", "reimbursable"];
 const SETTINGS_ID = "finance-v1";
 
@@ -46,8 +48,8 @@ function cleanTransaction(input, existingId) {
   const amount = cents(input.amount_cents);
   const txnDate = date(input.txn_date);
   if (!amount || !txnDate) return null;
-  const direction = DIRECTIONS.includes(input.direction) ? input.direction : "outflow";
   const kind = KINDS.includes(input.kind) ? input.kind : "other";
+  const direction = DIRECTION_BY_KIND[kind] || (DIRECTIONS.includes(input.direction) ? input.direction : "outflow");
   const contributionType = CONTRIBUTION_TYPES.includes(input.contribution_type) ? input.contribution_type : "";
   if (kind === "founder_contribution" && !contributionType) return null;
   return {

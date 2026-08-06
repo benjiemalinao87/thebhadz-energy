@@ -3,6 +3,8 @@
 
   var apiUrl = "/api/finance";
   var receiptUrl = "/api/finance-receipt";
+  // Kinds whose cash direction is unambiguous; refund/other/opening_balance stay manual.
+  var DIRECTION_BY_KIND = { founder_contribution: "inflow", customer_payment: "inflow", expense: "outflow", installer_payment: "outflow" };
   var state = { transactions: [], summary: {}, settings: {}, projects: [] };
   var form = document.getElementById("fin-form");
   var dialog = document.getElementById("fin-dialog");
@@ -128,8 +130,10 @@
         if (!uploadResponse.ok || !uploadData.ok) throw new Error(uploadData.error || "Receipt upload failed.");
         receiptKey = uploadData.key;
       }
+      // A disabled select is excluded from FormData, so a locked direction comes from the map.
       var body = {
-        id: data.get("id") || undefined, txn_date: data.get("txn_date"), direction: data.get("direction"),
+        id: data.get("id") || undefined, txn_date: data.get("txn_date"),
+        direction: DIRECTION_BY_KIND[data.get("kind")] || data.get("direction"),
         kind: data.get("kind"), status: data.get("status"), amount_cents: toCents(data.get("amount")),
         category: data.get("category"), account: data.get("account"), counterparty: data.get("counterparty"),
         founder: data.get("founder"), contribution_type: data.get("contribution_type"),
@@ -192,7 +196,9 @@
   function toggleFounderFields() {
     var show = kind.value === "founder_contribution";
     document.querySelectorAll("[data-founder-field]").forEach(function (node) { node.hidden = !show; });
-    if (show) form.elements.direction.value = "inflow";
+    var forced = DIRECTION_BY_KIND[kind.value];
+    if (forced) form.elements.direction.value = forced;
+    form.elements.direction.disabled = Boolean(forced);
   }
 
   function selectTab(name) {
