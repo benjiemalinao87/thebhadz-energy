@@ -13,6 +13,19 @@ link. It is *not* secret — treat the link as internal, and know that anyone wi
 download and read the extension's source, including the outreach message templates. See
 §6 before deciding that is fine.
 
+## Live listing
+
+| | |
+|---|---|
+| **Status** | Published — unlisted (approved 2026-08-04) |
+| **Version** | 2.2.0 |
+| **Extension ID** | `afjppbbndaajhfcejkpeaiklcfakhapn` |
+| **Install URL** | <https://chromewebstore.google.com/detail/macc-field-kit/afjppbbndaajhfcejkpeaiklcfakhapn> |
+
+Share the install URL in the founder group channel and on `/internal/field-kit.html`.
+Anyone who still has a **Load unpacked** copy should remove it before installing from
+the Store — two copies means two toolbar icons and two separate offline queues.
+
 ---
 
 ## 1. The publisher account

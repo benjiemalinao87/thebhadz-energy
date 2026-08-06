@@ -115,23 +115,21 @@
 
   <section class="fk-step">
     <h2><span class="n">1</span> Get the extension</h2>
-    <p><span class="fk-pending">Chrome Web Store · in review</span></p>
-    <p>Submitted 4 August 2026. Once Google approves it, the install link goes here and in the
-      group channel — one click, and Chrome keeps it updated for you afterwards. Review usually
-      takes a few days.</p>
-    <p><b>Until then, load it from the repo:</b></p>
+    <p><b>Install from the Chrome Web Store</b> (published unlisted — not searchable, link only):</p>
+    <p><a href="https://chromewebstore.google.com/detail/macc-field-kit/afjppbbndaajhfcejkpeaiklcfakhapn"><b>Add MACC Field Kit to Chrome</b></a></p>
     <ol>
-      <li>Get the <code>solar city</code> repo onto your machine (<code>git pull</code> if you
-        already have it).</li>
-      <li>Open <code>chrome://extensions</code> and switch on <b>Developer mode</b>, top right.</li>
-      <li>Click <b>Load unpacked</b> and select the folder
-        <code>tools/product-scraper-extension</code>.</li>
+      <li>Open the link above → <b>Add to Chrome</b> → <b>Add extension</b>.</li>
       <li>Pin <b>MACC Field Kit</b> to the toolbar — puzzle-piece icon, then the pin.</li>
     </ol>
-    <p class="fk-note">Loaded this way, Chrome never updates it. When the group channel says a
-      new build landed: <code>git pull</code>, then <b>Reload</b> on the Field Kit card at
-      <code>chrome://extensions</code>. Once you install from the Store instead, remove the
-      unpacked copy — two copies means two icons and two separate offline queues.</p>
+    <p class="fk-note">Chrome keeps Store installs updated for you — nobody reloads anything.
+      If you still have an old <b>Load unpacked</b> copy from the repo, remove it at
+      <code>chrome://extensions</code> first — two copies means two icons and two separate
+      offline queues.</p>
+    <p><b>Developers only — load from the repo:</b> <code>chrome://extensions</code> →
+      <b>Developer mode</b> → <b>Load unpacked</b> →
+      <code>tools/product-scraper-extension</code>. Bump <code>version</code> in
+      <code>manifest.json</code> before every Store upload; unpacked builds need a manual
+      <b>Reload</b> after <code>git pull</code>.</p>
   </section>
 
   <section class="fk-step">

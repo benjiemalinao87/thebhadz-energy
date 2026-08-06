@@ -50,15 +50,14 @@ Safe to re-run; `schema.sql` only creates what's missing.
 > on Chrome for Android or iOS, and this will not run in Safari or Firefox. If you work
 > mainly from a phone, use **Copy row** into a spreadsheet and capture properly later.
 
-**Once the Chrome Web Store listing is live** (see
-`docs/chrome-web-store-listing.md`), steps 1–2 become: open the link from the group
-channel → **Add to Chrome**. Chrome keeps it updated from then on, and §3.3 stops
-applying to you. Until then:
+**Install from the Chrome Web Store** (published unlisted — link only, not searchable):
 
-1. Get the repo folder `tools/product-scraper-extension` onto your machine.
-2. Open `chrome://extensions` (works the same in Edge/Brave) → turn on **Developer mode**
-   (top right) → **Load unpacked** → select the `product-scraper-extension` folder.
-3. Pin **MACC Field Kit** to the toolbar (puzzle-piece icon → 📌).
+<https://chromewebstore.google.com/detail/macc-field-kit/afjppbbndaajhfcejkpeaiklcfakhapn>
+
+1. Open the link → **Add to Chrome** → **Add extension**.
+2. Pin **MACC Field Kit** to the toolbar (puzzle-piece icon → 📌).
+3. If you still have an old **Load unpacked** copy, remove it at `chrome://extensions`
+   first — two copies means two icons and two separate offline queues.
 4. Right-click the extension icon → **Options**:
    - Paste the Command Center address (the same URL you open for `/internal`).
    - Click **Save settings** → Chrome asks permission to let the extension talk to that
@@ -72,10 +71,12 @@ Done. There is no password or secret inside the extension — it rides on your o
 
 ### 3.3 Keeping it current
 
-Chrome does not update an unpacked extension. When the group channel says a new build
-landed: `git pull`, then `chrome://extensions` → **Reload** on the Field Kit card.
-Options → **This build** shows the version you're running, so you can check it against
-`manifest.json` in the repo.
+**Store install:** Chrome updates everyone within a few hours of a new package being
+approved — nobody reloads anything. Options → **This build** shows the version you are
+running.
+
+**Load unpacked** (developers only): Chrome never updates it. After `git pull`, open
+`chrome://extensions` → **Reload** on the Field Kit card.
 
 ## 4. Capturing (daily use)
 
