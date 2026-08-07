@@ -18,7 +18,19 @@
     surveys: "Surveys", manual: "Manual"
   };
 
-  var state = { goals: [], people: [], view: "board", editing: null };
+  var CAT_LABEL = {
+    general: "General", progress: "Progress", blocker: "Blocker",
+    decision: "Decision", win: "Win"
+  };
+
+  var state = { goals: [], people: [], view: "board", editing: null, notes: [], notesLoading: false };
+
+  var notesSec = document.getElementById("gl-notes");
+  var notesHint = document.getElementById("gl-notes-hint");
+  var notesList = document.getElementById("gl-notes-list");
+  var notesCount = document.getElementById("gl-notes-count");
+  var notesCompose = document.getElementById("gl-notes-compose");
+  var notesAdd = document.getElementById("gl-notes-add");
 
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
@@ -32,6 +44,21 @@
     var d = new Date(iso + "T00:00:00Z");
     if (isNaN(d)) return "—";
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()] + " " + d.getUTCDate();
+  }
+  /** e.g. 08/07/26 5:40 PM — Manila wall clock from an ISO instant. */
+  function fmtWhen(iso) {
+    if (!iso) return "—";
+    var ms = new Date(iso).getTime();
+    if (!isFinite(ms)) return "—";
+    var ph = new Date(ms + 8 * 60 * 60 * 1000);
+    var mo = String(ph.getUTCMonth() + 1).padStart(2, "0");
+    var day = String(ph.getUTCDate()).padStart(2, "0");
+    var yr = String(ph.getUTCFullYear()).slice(2);
+    var h = ph.getUTCHours();
+    var m = String(ph.getUTCMinutes()).padStart(2, "0");
+    var ap = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12; if (!h12) h12 = 12;
+    return mo + "/" + day + "/" + yr + " " + h12 + ":" + m + " " + ap;
   }
 
   function toast(kind, msg) {
@@ -74,6 +101,90 @@
     form.querySelector(".gl-manual").hidden = !manual;
   }
 
+  function hideNotesCompose() {
+    if (!notesCompose) return;
+    notesCompose.hidden = true;
+    notesCompose.reset();
+    notesCompose.elements.note_id.value = "";
+    if (notesAdd) notesAdd.hidden = false;
+  }
+
+  function showNotesCompose(note) {
+    if (!notesCompose) return;
+    notesCompose.hidden = false;
+    if (notesAdd) notesAdd.hidden = true;
+    notesCompose.elements.note_id.value = note ? note.id : "";
+    notesCompose.elements.body.value = note ? (note.body || "") : "";
+    notesCompose.elements.category.value = note && note.category ? note.category : "general";
+    notesCompose.elements.body.focus();
+  }
+
+  function renderNotes() {
+    if (!notesList || !notesCount) return;
+    var n = state.notes.length;
+    notesCount.textContent = n + (n === 1 ? " note" : " notes");
+    if (state.notesLoading) {
+      notesList.innerHTML = '<div class="gl-notes-empty">Loading notes…</div>';
+      return;
+    }
+    if (!n) {
+      notesList.innerHTML = '<div class="gl-notes-empty">No notes yet — add the first one above.</div>';
+      return;
+    }
+    notesList.innerHTML = state.notes.map(function (note) {
+      var cat = note.category || "general";
+      return '<div class="gl-notes-row" data-note-id="' + esc(note.id) + '">' +
+        '<div class="gl-notes-acts">' +
+          '<button type="button" data-note-act="edit" title="Edit" aria-label="Edit note">✎</button>' +
+          '<button type="button" class="del" data-note-act="del" title="Delete" aria-label="Delete note">🗑</button>' +
+        "</div>" +
+        '<div class="gl-notes-body">' + esc(note.body) + "</div>" +
+        '<div><span class="gl-notes-cat ' + esc(cat) + '">' + esc(CAT_LABEL[cat] || cat) + "</span></div>" +
+        '<div class="gl-notes-who" title="' + esc(note.author_name || "") + '">' +
+          esc(note.author_name || "—") + "</div>" +
+        '<div class="gl-notes-when">' + esc(fmtWhen(note.created_at)) + "</div>" +
+        '<div class="gl-notes-when">' + esc(fmtWhen(note.updated_at)) + "</div>" +
+      "</div>";
+    }).join("");
+  }
+
+  function loadNotes(goalId) {
+    state.notes = [];
+    state.notesLoading = true;
+    renderNotes();
+    return fetch(API + "?notes_for=" + encodeURIComponent(goalId), {
+      credentials: "same-origin", headers: { Accept: "application/json" }
+    }).then(function (r) {
+      if (r.status === 401) { location.href = "/login.html"; return null; }
+      return r.json();
+    }).then(function (d) {
+      state.notesLoading = false;
+      if (!d || !d.ok) throw new Error((d && d.error) || "Could not load notes.");
+      state.notes = d.notes || [];
+      renderNotes();
+      // Keep board badge roughly in sync while drawer is open.
+      var g = state.goals.filter(function (x) { return x.id === goalId; })[0];
+      if (g) g.notes_count = state.notes.length;
+    }).catch(function (err) {
+      state.notesLoading = false;
+      notesList.innerHTML = '<div class="gl-notes-empty">' + esc(err.message) + "</div>";
+    });
+  }
+
+  function setupNotesPanel(goal) {
+    hideNotesCompose();
+    if (goal && goal.id) {
+      notesSec.hidden = false;
+      notesHint.hidden = true;
+      loadNotes(goal.id);
+    } else {
+      notesSec.hidden = true;
+      notesHint.hidden = false;
+      state.notes = [];
+      state.notesLoading = false;
+    }
+  }
+
   function openDrawer(goal) {
     state.editing = goal || null;
     form.reset();
@@ -88,7 +199,6 @@
       form.elements.end_date.value = goal.end_date || "";
       form.elements.status.value = goal.status || "Backlog";
       form.elements.current_manual.value = goal.current_manual || 0;
-      form.elements.notes.value = goal.notes || "";
       fillPeople(goal.assignee_user_id);
     } else {
       var t = today();
@@ -100,6 +210,7 @@
       fillPeople("");
     }
     toggleManual();
+    setupNotesPanel(goal);
     scrim.classList.add("open");
     drawer.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
@@ -111,6 +222,8 @@
     drawer.classList.remove("open");
     drawer.setAttribute("aria-hidden", "true");
     state.editing = null;
+    state.notes = [];
+    hideNotesCompose();
   }
 
   function cardHtml(g) {
@@ -120,9 +233,12 @@
       : left < 0 ? Math.abs(left) + "d overdue"
       : left === 0 ? "due today"
       : left + "d left";
+    var nCount = Number(g.notes_count) || 0;
     return '<button type="button" class="gl-card ' + urg + '" data-id="' + esc(g.id) + '">' +
       '<div class="gl-meta"><span class="gl-chip metric">' + esc(METRIC_LABEL[g.metric] || g.metric) + "</span>" +
-      (due ? '<span>' + esc(due) + "</span>" : "") + "</div>" +
+      (due ? '<span>' + esc(due) + "</span>" : "") +
+      (nCount ? '<span title="' + nCount + ' note' + (nCount === 1 ? "" : "s") + '">💬 ' + nCount + "</span>" : "") +
+      "</div>" +
       "<h4>" + esc(g.title) + "</h4>" +
       '<div class="gl-bar"><i class="' + urg + '" style="width:' + (g.pct || 0) + '%"></i></div>' +
       '<div class="gl-meta"><span class="gl-prog">' + (g.current || 0) + " / " + (g.target || 1) +
@@ -224,9 +340,12 @@
   scrim.addEventListener("click", closeDrawer);
   form.elements.metric.addEventListener("change", toggleManual);
 
-  // Escape must work wherever focus sits. SPA re-runs this script on each visit, so a
-  // single document listener hooks through a window slot (same pattern as jobs.js).
-  window.__glCloseDrawer = closeDrawer;
+  // Escape: dismiss note composer first, then the drawer. SPA re-runs this script on
+  // each visit, so a single document listener hooks through a window slot.
+  window.__glCloseDrawer = function () {
+    if (notesCompose && !notesCompose.hidden) { hideNotesCompose(); return; }
+    closeDrawer();
+  };
   if (!document.documentElement.dataset.glKeysReady) {
     document.documentElement.dataset.glKeysReady = "true";
     document.addEventListener("keydown", function (e) {
@@ -260,7 +379,6 @@
       end_date: form.elements.end_date.value,
       status: form.elements.status.value,
       current_manual: Number(form.elements.current_manual.value) || 0,
-      notes: form.elements.notes.value.trim(),
       assignee_user_id: form.elements.assignee_user_id.value
         ? Number(form.elements.assignee_user_id.value) : null
     };
@@ -270,6 +388,13 @@
     req.then(function (d) {
       if (!d) return;
       toast("ok", id ? "Goal updated" : "Goal created");
+      // After create, reopen the same goal so founders can add notes immediately.
+      if (!id && d.goal) {
+        return load().then(function () {
+          var g = state.goals.filter(function (x) { return x.id === d.goal.id; })[0] || d.goal;
+          openDrawer(g);
+        });
+      }
       closeDrawer();
       return load();
     }).catch(function (err) { toast("bad", err.message); });
@@ -286,6 +411,63 @@
       return load();
     }).catch(function (err) { toast("bad", err.message); });
   });
+
+  // ---- line-item notes ----
+  if (notesAdd) {
+    notesAdd.addEventListener("click", function () { showNotesCompose(null); });
+  }
+  var notesCancel = document.getElementById("gl-notes-cancel");
+  if (notesCancel) notesCancel.addEventListener("click", hideNotesCompose);
+
+  if (notesCompose) {
+    notesCompose.addEventListener("submit", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var goalId = form.elements.id.value;
+      if (!goalId) return;
+      var noteId = notesCompose.elements.note_id.value;
+      var payload = {
+        resource: "note",
+        body: notesCompose.elements.body.value.trim(),
+        category: notesCompose.elements.category.value
+      };
+      if (!payload.body) { toast("bad", "Note text is required."); return; }
+      var req = noteId
+        ? send("PATCH", Object.assign({ id: noteId }, payload))
+        : send("POST", Object.assign({ goal_id: goalId }, payload));
+      req.then(function (d) {
+        if (!d) return;
+        toast("ok", noteId ? "Note updated" : "Note added");
+        hideNotesCompose();
+        return loadNotes(goalId);
+      }).catch(function (err) { toast("bad", err.message); });
+    });
+  }
+
+  if (notesList) {
+    notesList.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-note-act]");
+      if (!btn) return;
+      var row = btn.closest("[data-note-id]");
+      if (!row) return;
+      var noteId = row.getAttribute("data-note-id");
+      var note = state.notes.filter(function (x) { return x.id === noteId; })[0];
+      if (!note) return;
+      var act = btn.getAttribute("data-note-act");
+      if (act === "edit") {
+        showNotesCompose(note);
+        return;
+      }
+      if (act === "del") {
+        if (!confirm("Delete this note?")) return;
+        send("DELETE", { resource: "note", id: noteId }).then(function (d) {
+          if (!d) return;
+          toast("ok", "Note deleted");
+          return loadNotes(form.elements.id.value);
+        }).catch(function (err) { toast("bad", err.message); });
+      }
+    });
+  }
 
   load();
 })();

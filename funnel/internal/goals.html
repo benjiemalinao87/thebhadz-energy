@@ -46,63 +46,106 @@
           <button type="button" class="gl-close" id="gl-drawer-close" aria-label="Close">✕</button>
         </div>
       </div>
-      <form id="gl-form" class="gl-dform">
+      <div class="gl-dform">
         <div class="gl-dbody">
-          <input type="hidden" name="id" value="">
-          <label>Goal title
-            <input name="title" maxlength="120" required placeholder="Generate 2 leads this week">
-          </label>
-          <div class="gl-grid2">
-            <label>What to count
-              <select name="metric">
-                <option value="leads">New leads</option>
-                <option value="sold">Closed / sold leads</option>
-                <option value="deposits">Deposits banked</option>
-                <option value="surveys">Surveys done</option>
-                <option value="manual">Manual count</option>
-              </select>
+          <form id="gl-form" class="gl-goal-fields">
+            <input type="hidden" name="id" value="">
+            <label>Goal title
+              <input name="title" maxlength="120" required placeholder="Generate 2 leads this week">
             </label>
-            <label>Target number
-              <input name="target" type="number" min="1" step="1" value="2" required>
+            <div class="gl-grid2">
+              <label>What to count
+                <select name="metric">
+                  <option value="leads">New leads</option>
+                  <option value="sold">Closed / sold leads</option>
+                  <option value="deposits">Deposits banked</option>
+                  <option value="surveys">Surveys done</option>
+                  <option value="manual">Manual count</option>
+                </select>
+              </label>
+              <label>Target number
+                <input name="target" type="number" min="1" step="1" value="2" required>
+              </label>
+            </div>
+            <div class="gl-grid2">
+              <label>Start
+                <input name="start_date" type="date" required>
+              </label>
+              <label>End
+                <input name="end_date" type="date" required>
+              </label>
+            </div>
+            <div class="gl-grid2">
+              <label>Status
+                <select name="status">
+                  <option value="Backlog">Backlog</option>
+                  <option value="This week">This week</option>
+                  <option value="Doing">Doing</option>
+                  <option value="Done">Done</option>
+                  <option value="Missed">Missed</option>
+                </select>
+              </label>
+              <label>Assigned to
+                <select name="assignee_user_id">
+                  <option value="">— unassigned —</option>
+                </select>
+              </label>
+            </div>
+            <label class="gl-manual" hidden>Current count (manual only)
+              <input name="current_manual" type="number" min="0" step="1" value="0">
             </label>
-          </div>
-          <div class="gl-grid2">
-            <label>Start
-              <input name="start_date" type="date" required>
-            </label>
-            <label>End
-              <input name="end_date" type="date" required>
-            </label>
-          </div>
-          <div class="gl-grid2">
-            <label>Status
-              <select name="status">
-                <option value="Backlog">Backlog</option>
-                <option value="This week">This week</option>
-                <option value="Doing">Doing</option>
-                <option value="Done">Done</option>
-                <option value="Missed">Missed</option>
-              </select>
-            </label>
-            <label>Assigned to
-              <select name="assignee_user_id">
-                <option value="">— unassigned —</option>
-              </select>
-            </label>
-          </div>
-          <label class="gl-manual" hidden>Current count (manual only)
-            <input name="current_manual" type="number" min="0" step="1" value="0">
-          </label>
-          <label>Notes
-            <textarea name="notes" rows="3" maxlength="400" placeholder="Optional — what has to be true to hit this"></textarea>
-          </label>
+          </form>
+
+          <!-- Line-item notes sit outside the goal form (no nested forms). -->
+          <section class="gl-notes" id="gl-notes" hidden>
+            <div class="gl-notes-head">
+              <span class="gl-notes-label">Notes</span>
+              <span class="gl-notes-rule"></span>
+              <span class="gl-notes-count" id="gl-notes-count">0 notes</span>
+            </div>
+            <div class="gl-notes-panel">
+              <div class="gl-notes-cols" aria-hidden="true">
+                <span class="gl-notes-act"></span>
+                <span>Note</span>
+                <span>Category</span>
+                <span>Added by</span>
+                <span>Entered</span>
+                <span>Updated</span>
+              </div>
+              <button type="button" class="gl-notes-add" id="gl-notes-add" title="Add note">
+                <span class="gl-notes-plus" aria-hidden="true">+</span>
+                <span class="gl-notes-add-label">Add a note</span>
+              </button>
+              <div class="gl-notes-list" id="gl-notes-list"></div>
+              <form class="gl-notes-compose" id="gl-notes-compose" hidden>
+                <label class="gl-notes-compose-body">Note
+                  <textarea name="body" rows="3" maxlength="2000" required placeholder="What happened, what’s blocking, or what has to be true…"></textarea>
+                </label>
+                <label>Category
+                  <select name="category">
+                    <option value="general">General</option>
+                    <option value="progress">Progress</option>
+                    <option value="blocker">Blocker</option>
+                    <option value="decision">Decision</option>
+                    <option value="win">Win</option>
+                  </select>
+                </label>
+                <input type="hidden" name="note_id" value="">
+                <div class="gl-notes-compose-actions">
+                  <button type="button" class="gl-btn ghost" id="gl-notes-cancel">Cancel</button>
+                  <button type="submit" class="gl-btn primary" id="gl-notes-save">Save note</button>
+                </div>
+              </form>
+            </div>
+          </section>
+          <p class="gl-notes-hint" id="gl-notes-hint" hidden>Save this goal first, then founders can leave line-item notes on it.</p>
         </div>
         <div class="gl-dfoot">
           <button type="button" class="gl-btn danger" id="gl-delete" hidden>Delete</button>
           <span class="gl-spacer"></span>
-          <button type="submit" class="gl-btn primary" id="gl-save">Save goal</button>
+          <button type="submit" class="gl-btn primary" id="gl-save" form="gl-form">Save goal</button>
         </div>
-      </form>
+      </div>
     </aside>
 
     <div class="gl-toasts" id="gl-toasts" aria-live="polite"></div>

@@ -1,21 +1,27 @@
 /**
  * /api/goals — founder-gated countable goals (leads, deposits, surveys, sold, manual).
  *
- *   GET                         -> { ok, goals: [...enriched], people: [...] }
- *   POST   { title, metric?, target?, start_date, end_date, assignee_user_id?, … }
- *   PATCH  { id, …fields }      -> update (owner stays the creator)
- *   DELETE { id }               -> remove
+ *   GET                              -> { ok, goals: [...enriched], people: [...] }
+ *   GET  ?notes_for=<goal_id>        -> { ok, notes: [...] }  (line-item comments)
+ *   POST   { title, metric?, … }     -> create goal (owner from session)
+ *   POST   { resource: "note", goal_id, body, category? }
+ *   PATCH  { id, …fields }           -> update goal (owner stays the creator)
+ *   PATCH  { resource: "note", id, body?, category? }
+ *   DELETE { id }                    -> remove goal (+ its notes)
+ *   DELETE { resource: "note", id }  -> remove one note
  *
  * Progress for non-manual metrics is computed live from D1 — never stored as truth.
- * Owner always comes from the session on create.
+ * Owner always comes from the session on create. Note author always from session.
  */
 import { currentUser } from "../_auth.js";
 import { phToday } from "../_ph-date.js";
 
 const METRICS = ["leads", "deposits", "surveys", "sold", "manual"];
 const STATUSES = ["Backlog", "This week", "Doing", "Done", "Missed"];
+const NOTE_CATEGORIES = ["general", "progress", "blocker", "decision", "win"];
 const MAX_TITLE = 120;
 const MAX_NOTES = 400;
+const MAX_NOTE_BODY = 2000;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -71,6 +77,58 @@ async function migrate(env) {
   ).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_goals_end ON goals(end_date)`).run();
   await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status)`).run();
+  // Line-item comments on a goal (not the legacy single goals.notes blob).
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS goal_notes (
+       id               TEXT PRIMARY KEY,
+       goal_id          TEXT NOT NULL,
+       body             TEXT NOT NULL,
+       category         TEXT NOT NULL DEFAULT 'general',
+       author_user_id   INTEGER,
+       author_name      TEXT NOT NULL DEFAULT '',
+       created_at       TEXT NOT NULL,
+       updated_at       TEXT NOT NULL
+     )`
+  ).run();
+  await env.DB.prepare(
+    `CREATE INDEX IF NOT EXISTS idx_goal_notes_goal ON goal_notes(goal_id, datetime(created_at) DESC)`
+  ).run();
+}
+
+function noteCategory(value) {
+  const c = text(value, 40).toLowerCase();
+  return NOTE_CATEGORIES.includes(c) ? c : "general";
+}
+
+async function listNotes(env, goalId) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, goal_id, body, category, author_user_id, author_name, created_at, updated_at
+     FROM goal_notes WHERE goal_id = ?
+     ORDER BY datetime(created_at) DESC`
+  ).bind(goalId).all();
+  return results || [];
+}
+
+/** One-time lift of the old single-field notes blob into the first line item. */
+async function migrateLegacyNotes(env, goal) {
+  const existing = await listNotes(env, goal.id);
+  if (existing.length) return existing;
+  const legacy = text(goal.notes, MAX_NOTE_BODY);
+  if (!legacy) return existing;
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO goal_notes
+       (id, goal_id, body, category, author_user_id, author_name, created_at, updated_at)
+     VALUES (?, ?, ?, 'general', ?, ?, ?, ?)`
+  ).bind(
+    id, goal.id, legacy,
+    goal.owner_user_id || null, goal.owner_name || "",
+    goal.created_at || now, goal.updated_at || now
+  ).run();
+  // Clear the blob so we don't re-import on every open.
+  await env.DB.prepare(`UPDATE goals SET notes = '' WHERE id = ?`).bind(goal.id).run();
+  return listNotes(env, goal.id);
 }
 
 async function countMetric(env, metric, start, end) {
@@ -177,6 +235,15 @@ export async function onRequest(context) {
   await ensureSchema(env);
 
   if (request.method === "GET") {
+    const url = new URL(request.url);
+    const notesFor = text(url.searchParams.get("notes_for"), 80);
+    if (notesFor) {
+      const goal = await env.DB.prepare(`SELECT * FROM goals WHERE id = ?`).bind(notesFor).first();
+      if (!goal) return json({ ok: false, error: "Goal not found." }, 404);
+      const notes = await migrateLegacyNotes(env, goal);
+      return json({ ok: true, notes });
+    }
+
     const { results } = await env.DB.prepare(
       `SELECT id, title, metric, target, current_manual, start_date, end_date, status,
               owner_user_id, owner_name, assignee_user_id, assignee_name, notes,
@@ -191,7 +258,15 @@ export async function onRequest(context) {
     for (const row of rows) {
       const auto = await countMetric(env, row.metric, row.start_date, row.end_date);
       const current = auto === null ? Number(row.current_manual) || 0 : auto;
-      goals.push(enrich(row, current));
+      let notesCount = 0;
+      try {
+        const nc = await env.DB.prepare(
+          `SELECT COUNT(*) AS n FROM goal_notes WHERE goal_id = ?`
+        ).bind(row.id).first();
+        notesCount = Number(nc && nc.n) || 0;
+        if (!notesCount && text(row.notes, MAX_NOTE_BODY)) notesCount = 1;
+      } catch { /* table may be mid-migrate */ }
+      goals.push({ ...enrich(row, current), notes_count: notesCount });
     }
     const people = await env.DB.prepare(
       `SELECT id, name, email FROM users WHERE active = 1 ORDER BY name ASC, email ASC`
@@ -202,6 +277,33 @@ export async function onRequest(context) {
   if (request.method === "POST") {
     let body;
     try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+
+    if (body.resource === "note") {
+      const goalId = text(body.goal_id, 80);
+      if (!goalId) return json({ ok: false, error: "goal_id is required." }, 422);
+      const goal = await env.DB.prepare(`SELECT id FROM goals WHERE id = ?`).bind(goalId).first();
+      if (!goal) return json({ ok: false, error: "Goal not found." }, 404);
+      const noteBody = text(body.body, MAX_NOTE_BODY);
+      if (!noteBody) return json({ ok: false, error: "Note text is required." }, 422);
+      const category = noteCategory(body.category);
+      const now = new Date().toISOString();
+      const id = crypto.randomUUID();
+      const authorName = user.name || user.email || "";
+      await env.DB.prepare(
+        `INSERT INTO goal_notes
+           (id, goal_id, body, category, author_user_id, author_name, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(id, goalId, noteBody, category, user.id, authorName, now, now).run();
+      return json({
+        ok: true,
+        note: {
+          id, goal_id: goalId, body: noteBody, category,
+          author_user_id: user.id, author_name: authorName,
+          created_at: now, updated_at: now,
+        },
+      });
+    }
+
     const clean = cleanBody(body, null);
     if (!clean) return json({ ok: false, error: "Title, start date and end date are required." }, 422);
     const assignee = await resolvePerson(env, clean.assignee_user_id);
@@ -225,7 +327,7 @@ export async function onRequest(context) {
       goal: enrich({
         id, ...clean, owner_user_id: user.id, owner_name: user.name || user.email || "",
         assignee_user_id: assignee.id, assignee_name: assignee.name,
-        created_at: now, updated_at: now,
+        created_at: now, updated_at: now, notes_count: 0,
       }, current),
     });
   }
@@ -233,6 +335,30 @@ export async function onRequest(context) {
   if (request.method === "PATCH") {
     let body;
     try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+
+    if (body.resource === "note") {
+      const id = text(body.id, 80);
+      if (!id) return json({ ok: false, error: "A valid id is required." }, 422);
+      const existing = await env.DB.prepare(`SELECT * FROM goal_notes WHERE id = ?`).bind(id).first();
+      if (!existing) return json({ ok: false, error: "Note not found." }, 404);
+      const noteBody = body.body !== undefined ? text(body.body, MAX_NOTE_BODY) : existing.body;
+      if (!noteBody) return json({ ok: false, error: "Note text is required." }, 422);
+      const category = body.category !== undefined ? noteCategory(body.category) : existing.category;
+      const now = new Date().toISOString();
+      await env.DB.prepare(
+        `UPDATE goal_notes SET body = ?, category = ?, updated_at = ? WHERE id = ?`
+      ).bind(noteBody, category, now, id).run();
+      return json({
+        ok: true,
+        note: {
+          ...existing,
+          body: noteBody,
+          category,
+          updated_at: now,
+        },
+      });
+    }
+
     const id = text(body.id, 80);
     if (!id) return json({ ok: false, error: "A valid id is required." }, 422);
     const existing = await env.DB.prepare(`SELECT * FROM goals WHERE id = ?`).bind(id).first();
@@ -262,8 +388,18 @@ export async function onRequest(context) {
   if (request.method === "DELETE") {
     let body;
     try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON." }, 400); }
+
+    if (body.resource === "note") {
+      const id = text(body.id, 80);
+      if (!id) return json({ ok: false, error: "A valid id is required." }, 422);
+      const result = await env.DB.prepare(`DELETE FROM goal_notes WHERE id = ?`).bind(id).run();
+      if (!result.meta || result.meta.changes === 0) return json({ ok: false, error: "Note not found." }, 404);
+      return json({ ok: true });
+    }
+
     const id = text(body.id, 80);
     if (!id) return json({ ok: false, error: "A valid id is required." }, 422);
+    await env.DB.prepare(`DELETE FROM goal_notes WHERE goal_id = ?`).bind(id).run();
     const result = await env.DB.prepare(`DELETE FROM goals WHERE id = ?`).bind(id).run();
     if (!result.meta || result.meta.changes === 0) return json({ ok: false, error: "Goal not found." }, 404);
     return json({ ok: true });
