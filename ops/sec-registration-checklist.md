@@ -8,6 +8,33 @@ below are research-backed as of **2026-07-20** and marked HYPOTHESIS/unverified 
 source wasn't a primary government page — confirm against sec.gov.ph, bir.gov.ph, and
 your LGU before filing, since fees and processing rules change.
 
+## Map — two chains, don't confuse them
+
+Everything below belongs to one of two chains. **Chain 1 registers the company** (once, then
+renewed annually). **Chain 2 permits each installation** (repeated per job, per LGU, per
+homeowner). A complete Chain 1 does not let you energise a roof; a complete Chain 2 without
+Chain 1 is not a company. §7's deposit blocker sits across both.
+
+| Chain | Issuer | What it is | Do we need it? |
+|---|---|---|---|
+| 1 | **SEC** | Certificate of Incorporation | **Yes** — the company legally exists only from this date |
+| 1 | **BIR** | Certificate of Registration (2303) + invoices/ORs | **Yes** — before any legally receipted deposit |
+| 1 | Barangay | Business clearance | **Yes** — prerequisite to the Mayor's permit |
+| 1 | **BFP** | Fire Safety Inspection Certificate (FSIC) for the office/workshop | **Yes** — Mayor's permit cannot issue or renew without it (RA 9514) |
+| 1 | LGU (Mayor) | Mayor's / Business Permit | **Yes** — annual, per business address |
+| 1 | SSS · PhilHealth · Pag-IBIG | Employer registration | **Yes** — from the first employee, incl. a salaried founder |
+| 1 | **PCAB** (CIAP/DTI) | Contractor's licence + Sustaining Technical Employee | **Yes** — the licence to *contract* installation work |
+| 1 | **PRC** | REE/PEE and RME licences — held by people, not the company | **Yes** — Jundhel (REE, PRC 0050698) is the technical basis |
+| 1 | **DOE** | Solar-PV installer registry / RESC accreditation | **Not a legal blocker for private residential** — see §6 |
+| 2 | LGU building/electrical office | Electrical Permit → Certificate of Final Electrical Inspection (CFEI) | **Yes — every install** |
+| 2 | Signing professional | Sealed electrical plan + Certificate of Compliance | **Yes — every install** |
+| 2 | Distribution utility (ERC rules) | Net-metering agreement + bi-directional meter | **Grid-tied only** (LIWANAG); not applicable to pure off-grid ILAW |
+
+**Shortest true answer to "what do we legally need before taking a homeowner's deposit?"** —
+SEC + BIR + barangay/BFP/Mayor's permit for the business, **PCAB** for the contracting, a
+**PRC-licensed** signing professional, and per job the LGU **electrical permit + CFEI**, plus
+the **DU net-metering** application when the system is grid-tied. DOE is not on that list.
+
 ## 0. Decide the entity first (blocks everything else)
 
 | Question | Answer drives |
@@ -71,22 +98,68 @@ estimate, not a guarantee).
 - [ ] Mayor's/Business Permit — requires the SEC Certificate, BIR COR, barangay clearance, lease/title proof for the address, fire safety inspection certificate (FSIC), and (increasingly) a sanitary permit.
 - [ ] Register as employer with SSS, PhilHealth, and Pag-IBIG (mandatory the moment you have even one employee, including a founder drawing salary).
 
+### 5a. BFP — Fire Safety Inspection Certificate (FSIC)
+
+The FSIC is issued by the **Bureau of Fire Protection** under **RA 9514 (Fire Code of the
+Philippines, 2008)**. It certifies that the *premises* comply with fire safety rules. Two
+things to keep straight:
+
+- It applies to **our own office/workshop address**, and the **Mayor's/Business Permit
+  cannot be issued or renewed without it**. Validity is **one year**, so it rides the same
+  annual renewal cycle as the business permit.
+- It is **not** part of the per-install permit chain for an ordinary residential rooftop job.
+  That chain is the LGU **electrical permit → CFEI** (§6). BFP re-enters the picture for
+  commercial/industrial buildings and, plausibly, for battery/ESS rooms — confirm locally
+  rather than assume.
+
+- [ ] Obtain the building's **Occupancy Permit** (certified true copy, from the Office of the
+  Building Official) — normally the landlord's document; ask for it **before** signing a lease,
+  because a building without one cannot produce an FSIC and therefore cannot host a permitted
+  business.
+- [ ] File the FSIC application with the BFP station covering the address; pay the **fire code
+  fee** assessed by the city/municipal treasurer.
+- [ ] Pass inspection: serviced fire extinguishers with current tags/receipts, unobstructed
+  exits and exit signage, compliant electrical wiring.
+- [ ] Attach the FSIC to the Mayor's permit application; diary the renewal with the January
+  business-permit renewal.
+- [ ] **Before leasing a workshop:** ask BFP what occupancy classification and fire-protection
+  fit-out applies once we store batteries, lamination materials, or bulk stock — this is a
+  different assessment from a plain office, and it is a lease-decision input, not an
+  afterthought. UNVERIFIED.
+
+Typical documentary requirements seen across LGU/BFP guidance (verify with your station —
+lists vary): occupancy permit, previous year's FSIC (renewals), assessment of business tax
+from the treasurer, fire extinguisher inventory/ORs, as-built plans where the building
+deviated from approved plans, certificate of completion from the architect/engineer, and a
+fire insurance policy where applicable.
+
 ## 6. Solar/electrical-industry-specific licensing (do NOT skip — this is what unlocks the CLAUDE.md §7 "permit / net-metering checklist" gate for accepting deposits)
 
 These are separate from SEC/BIR/LGU and are what actually let you sign an install contract and get the distribution utility (e.g. Meralco) to approve net metering:
 
 - [ ] **PCAB (Philippine Contractors Accreditation Board) license** — required for commercial/residential electrical and structural (rooftop) installation contracting. Confirm required category/classification for solar EPC work with PCAB directly; this is a licensing step separate from SEC and typically requires a licensed professional (PEE/RME) on staff or as a named qualifier.
   - **We have this in-house:** **Jundhel Cabradilla, Registered Electrical Engineer, PRC No. 0050698**, 12 years as project electrical engineer / site supervisor — the intended **Sustaining Technical Employee**. Two things still to confirm with PCAB directly, not assume: (a) whether the category covering solar/electrical installation accepts an **REE** or requires a **PEE**; (b) the capacity threshold above which electrical plan sign-off must be done by a PEE rather than an REE (residential rooftop PV is expected to sit inside REE scope — verify). Once confirmed, the CLAUDE.md §7 licensed-sign-off blocker on accepting deposits is effectively cleared.
-- [ ] **DOE accreditation/registration** as a renewable-energy service/installation provider — DOE does not accredit on self-declaration; expect to show technical staff qualifications and a completed-installation track record. For a pre-track-record company, research whether DOE has a provisional/first-time-applicant pathway, or plan the first handful of installs under a licensed subcontractor/partner while accreditation is pending — do not imply DOE accreditation you don't yet hold in marketing copy (CLAUDE.md §1.6 — never promise/imply what isn't true).
+- [ ] **DOE registration / RESC accreditation** — **CORRECTED 2026-08-07.** An earlier revision of
+  this file treated DOE accreditation as a blocker on quoting a private homeowner. Public 2026
+  sources say it is **not legally mandated for private residential installations**. Where it
+  actually binds: **government procurement** — public agencies buying solar under **RA 9184** must
+  use DOE-listed installers — plus its value as a **trust signal** homeowners, DUs and financiers
+  check. The DOE registry listed ~**92 solar PV installers** (and 14 ESCOs doing solar PV) as of
+  Jan 2026; **RESC** (Renewable Energy Service Contractor) accreditation under the Renewable Energy
+  Act is the related company-level registration. Posture: **apply, don't wait for it** — it is not
+  on the critical path to the Mission, and blocking the first five installs on it would be
+  self-inflicted. Do **not** imply DOE accreditation until the certificate exists and its number can
+  be quoted (CLAUDE.md §1.6). UNVERIFIED against a primary doe.gov.ph page — confirm before either
+  claiming it or budgeting for it.
 - [ ] Employ or contract a **licensed electrician / Registered Master Electrician (RME)** for sign-off on every install — this is the specific checklist item CLAUDE.md §7 already blocks quotes/deposits on.
 - [ ] Distribution-utility (e.g. Meralco) **net-metering application** process and requirements — confirm current DU turnaround (a 2026 DOE circular reportedly mandates 10-working-day DU review and 3-working-day LGU electrical-permit/inspection turnaround; verify against the DOE circular text before quoting customers a timeline).
 - [ ] Electrical Permit + Certificate of Final Electrical Inspection from the LGU building/electrical office for each install.
 
 **Unverified — confirm before quoting any customer:** exact PCAB classification needed,
-DOE accreditation prerequisites for a first-time applicant, and current DU net-metering
-SLA. Treat every timeline figure here as HYPOTHESIS until confirmed with the primary
-source (pcab.gov.ph, doe.gov.ph, your target DU) and log the confirmed numbers in this
-file.
+DOE registry/RESC prerequisites, BFP fire code fee and workshop occupancy classification,
+and current DU net-metering SLA. Treat every timeline figure here as HYPOTHESIS until
+confirmed with the primary source (pcab.gov.ph, doe.gov.ph, the local BFP station, your
+target DU) and log the confirmed numbers in this file.
 
 ## 7. Rough cost & timeline planning numbers (unverified, 2026 market estimates)
 
@@ -99,7 +172,18 @@ file.
   before setting a customer-facing "we start installing on X date" commitment (CLAUDE.md
   §6 speed-of-light dates: don't pad, but don't commit to an unresearched constraint either).
 
-## 8. Sources (fetched 2026-07-20 — verify against primary .gov.ph pages before relying on any fee/timeline figure)
+## 8. Sources (fetched 2026-07-20, BFP/DOE/PCAB additions 2026-08-07 — verify against primary .gov.ph pages before relying on any fee/timeline figure)
+
+Added 2026-08-07 (BFP/FSIC, DOE registry status, PCAB categorisation):
+
+- [Fire Safety Inspection Certificate: compliance, fees, common causes of delay — Respicio & Co.](https://www.respicio.ph/commentaries/fire-safety-inspection-certificate-requirements-compliance-fees-and-common-causes-of-delay)
+- [Complete guide to the Fire Safety Inspection Certificate — Emerhub](https://emerhub.com/philippines/fire-safety-inspection-certificate/)
+- [BFP — issuance of FSIC for business permit (LGU procedure example)](https://angono.gov.ph/bureau-fire-protection-issuance-fire-safety-inspection-certificate-fsic-business-permit/)
+- [DOE-accredited solar installers in the Philippines — SolarPro](https://solarproinstall.com/doe-accredited-solar-installers-philippines/)
+- [How to choose a solar installer (DOE listing vs PCAB vs ERC) — Solar Scout PH](https://www.solarscout.ph/learn/how-to-choose-a-solar-installer-you-wont-regret-a-filipino-homeowners-guide-)
+- [Can new contractors apply directly for PCAB Category A? — Respicio & Co.](https://www.respicio.ph/commentaries/can-new-contractors-apply-directly-for-pcab-category-a-requirements-and-eligibility)
+
+Original set (fetched 2026-07-20):
 
 - [Business Registration In The Philippines 2026 — Philippine Hub Partners](https://philippinehubpartners.com/business-registration-philippines-sec-requirements-2026/)
 - [How to Register a Corporation in the Philippines (2026) — Romualdez Law Offices](https://romualdezlaw.com/how-to-register-a-corporation-in-the-philippines-2026-step-by-step-guide/)
@@ -119,5 +203,10 @@ file.
 - [ ] Founders decide entity type + name candidates (§0–1) — this week.
 - [ ] Log the decision in `ops/status.md` §4.
 - [ ] Named owner assigned for this checklist (CLAUDE.md §6 "pilot in command" — no name, not being done).
-- [ ] Confirm PCAB/DOE prerequisites (§6) before any install is quoted — this is the
-  actual blocker on legally accepting a deposit, not the SEC filing itself.
+- [ ] Confirm **PCAB** prerequisites (§6) before any install is quoted — PCAB plus the
+  PRC-licensed sign-off is the actual blocker on legally accepting a deposit, not the SEC
+  filing and **not** DOE registration.
+- [ ] Ask the target LGU's building/electrical office for its real electrical-permit + CFEI
+  paperwork list and fees — the per-install chain is what a homeowner's timeline depends on.
+- [ ] Ask the local BFP station for the FSIC document list and fire code fee for our office
+  address, and what changes for a workshop storing batteries/stock (§5a).

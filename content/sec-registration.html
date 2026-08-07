@@ -1,4 +1,4 @@
-    <p class="doc-eyebrow">SC-13 · SEC REGISTRATION <span class="rev">· REV A · 2026-07-20</span></p>
+    <p class="doc-eyebrow">SC-13 · SEC REGISTRATION <span class="rev">· REV B · 2026-08-07</span></p>
     <h1>Company registration: SEC, BIR, LGU &amp; solar-specific licensing</h1>
     <p class="lede">
       Internal ops checklist, not customer-facing. This is the legal-entity and licensing work that has
@@ -36,6 +36,32 @@
       <a href="founders-agreement-term-sheet.html">Founders' Agreement term sheet</a>.
       All are templates, not legal advice — lawyer/SEC-accredited-filer review before filing.
       How the founders run the company day to day lives in the <a href="founder-charter.html">Founder Charter</a>.
+    </div>
+
+    <h2><span class="sec">MAP</span>Two chains — don't confuse them</h2>
+    <p>
+      Everything below belongs to one of two chains. <strong>Chain 1 registers the company</strong> and is
+      done once (then renewed annually). <strong>Chain 2 permits each installation</strong> and is repeated
+      per job, per LGU, per homeowner. A complete Chain 1 does not let you energize a roof; a complete
+      Chain 2 without Chain 1 is not a company. The §7 deposit blocker sits across both.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Who issues what — company-level (once) vs per-install (every job)</caption>
+        <tr><th>Chain</th><th>Issuer</th><th>What you get</th><th>Needed for us?</th></tr>
+        <tr><td>1</td><td>SEC</td><td>Certificate of Incorporation</td><td><strong>Yes</strong> — the company legally exists only from this date</td></tr>
+        <tr><td>1</td><td>BIR</td><td>Certificate of Registration (2303) + invoices/ORs</td><td><strong>Yes</strong> — before any legally receipted deposit</td></tr>
+        <tr><td>1</td><td>Barangay</td><td>Barangay business clearance</td><td><strong>Yes</strong> — prerequisite to the Mayor's permit</td></tr>
+        <tr><td>1</td><td><strong>BFP</strong></td><td>Fire Safety Inspection Certificate (FSIC) for the <em>office/workshop</em></td><td><strong>Yes</strong> — the Mayor's permit will not issue or renew without it (RA 9514)</td></tr>
+        <tr><td>1</td><td>LGU (Mayor's office)</td><td>Mayor's / Business Permit</td><td><strong>Yes</strong> — annual, per business address</td></tr>
+        <tr><td>1</td><td>SSS · PhilHealth · Pag-IBIG</td><td>Employer registration</td><td><strong>Yes</strong> — from the first employee, including a salaried founder</td></tr>
+        <tr><td>1</td><td>PCAB (CIAP/DTI)</td><td>Contractor's licence with a Sustaining Technical Employee</td><td><strong>Yes</strong> — this is the licence to <em>contract</em> installation work</td></tr>
+        <tr><td>1</td><td>PRC</td><td>REE/PEE and RME licences held by named people, not by the company</td><td><strong>Yes</strong> — Jundhel (REE, PRC 0050698) is the named technical basis</td></tr>
+        <tr><td>1</td><td><strong>DOE</strong></td><td>Listing on the DOE registry of solar PV installers / RESC accreditation</td><td><strong>Not a legal blocker for private residential work</strong> — see §6</td></tr>
+        <tr><td>2</td><td>LGU building/electrical office</td><td>Electrical Permit, then Certificate of Final Electrical Inspection (CFEI)</td><td><strong>Yes — every install</strong></td></tr>
+        <tr><td>2</td><td>Signing professional</td><td>Signed/sealed electrical plan + Certificate of Compliance</td><td><strong>Yes — every install</strong></td></tr>
+        <tr><td>2</td><td>Distribution utility (under ERC rules)</td><td>Net-metering agreement + bi-directional meter</td><td><strong>Grid-tied jobs only</strong> (LIWANAG); irrelevant to a pure off-grid ILAW</td></tr>
+      </table>
     </div>
 
     <h2><span class="sec">§ 0</span>Decide the entity first</h2>
@@ -124,8 +150,28 @@
       <div class="step-head"><span class="step-num">05</span><h3>Permits at the address where you operate</h3></div>
       <div class="checklist" data-group="lgu">
         <div class="cl-item"><input type="checkbox" id="c25"><label for="c25">Barangay Clearance (business)</label></div>
-        <div class="cl-item"><input type="checkbox" id="c26"><label for="c26">Mayor's/Business Permit (needs SEC cert, BIR COR, barangay clearance, address proof, fire safety inspection cert, sanitary permit)</label></div>
+        <div class="cl-item"><input type="checkbox" id="c26"><label for="c26">Mayor's/Business Permit (needs SEC cert, BIR COR, barangay clearance, address proof, FSIC, sanitary permit)</label></div>
         <div class="cl-item"><input type="checkbox" id="c27"><label for="c27">Register as employer with SSS, PhilHealth, and Pag-IBIG</label></div>
+      </div>
+    </div>
+
+    <h3>BFP — the Fire Safety Inspection Certificate (FSIC)</h3>
+    <p>
+      The FSIC is a <strong>Bureau of Fire Protection</strong> clearance under RA 9514 (Fire Code of the
+      Philippines). It covers <em>our own premises</em> — the office and, later, the workshop — and the
+      Mayor's permit cannot be issued or renewed without it. Validity is one year, so it renews on the
+      same annual cycle as the business permit. It is <strong>not</strong> part of the per-install
+      permit chain for an ordinary residential rooftop job; that chain is the LGU electrical permit and
+      CFEI in §6.
+    </p>
+    <div class="step">
+      <div class="step-head"><span class="step-num">05b</span><h3>FSIC for the office/workshop address</h3><span class="time">annual</span></div>
+      <div class="checklist" data-group="bfp">
+        <div class="cl-item"><input type="checkbox" id="c37"><label for="c37">Get the building's Occupancy Permit (certified true copy) from the Office of the Building Official — the landlord usually holds this; ask for it <em>before</em> signing a lease</label></div>
+        <div class="cl-item"><input type="checkbox" id="c38"><label for="c38">File the FSIC application with the local BFP station covering the address; pay the fire code fee assessed by the city/municipal treasurer</label></div>
+        <div class="cl-item"><input type="checkbox" id="c39"><label for="c39">Pass the BFP inspection — serviced fire extinguishers with current tags/receipts, unobstructed exits, compliant wiring, exit signage</label></div>
+        <div class="cl-item"><input type="checkbox" id="c40"><label for="c40">File the FSIC with the Mayor's permit application; diary the renewal alongside the January business-permit renewal</label></div>
+        <div class="cl-item"><input type="checkbox" id="c41"><label for="c41"><strong>Confirm with BFP before leasing a workshop:</strong> a workshop storing batteries, EVA/lamination materials or bulk stock is assessed differently from a plain office — ask what occupancy classification and fire-protection fit-out (extinguisher class/count, storage separation) they will require <span class="unverified">EST</span></label></div>
       </div>
     </div>
 
@@ -139,11 +185,44 @@
       <div class="step-head"><span class="step-num">06</span><h3>PCAB, DOE, electrician, net metering</h3></div>
       <div class="checklist" data-group="solar">
         <div class="cl-item"><input type="checkbox" id="c28"><label for="c28">Confirm required PCAB (Philippine Contractors Accreditation Board) classification for solar EPC work and file for the license</label></div>
-        <div class="cl-item"><input type="checkbox" id="c29"><label for="c29">Research DOE renewable-energy installer accreditation prerequisites for a first-time applicant with no track record yet</label></div>
+        <div class="cl-item"><input type="checkbox" id="c29"><label for="c29">Register on the DOE solar-PV installer registry (see the DOE note below — trust signal + government work, not a legal blocker on private residential jobs)</label></div>
         <div class="cl-item"><input type="checkbox" id="c30"><label for="c30">Employ or contract a licensed electrician / Registered Master Electrician (RME) for install sign-off</label></div>
         <div class="cl-item"><input type="checkbox" id="c31"><label for="c31">Confirm current distribution-utility net-metering application process and turnaround (target DU, e.g. Meralco)</label></div>
         <div class="cl-item"><input type="checkbox" id="c32"><label for="c32">Know the Electrical Permit + Certificate of Final Electrical Inspection process for each install's LGU</label></div>
       </div>
+    </div>
+
+    <h3>PCAB — the one that actually gates contracting</h3>
+    <p>
+      PCAB (under CIAP/DTI) licenses the <em>business</em> to take construction and electrical
+      contracting work; PRC licenses the <em>people</em> who sign the plans. A new contractor with no
+      track record enters at the bottom category and needs a <strong>Sustaining Technical Employee</strong>
+      — we have one in-house: <strong>Jundhel Cabradilla, Registered Electrical Engineer, PRC No.
+      0050698</strong>, 12 years as project electrical engineer / site supervisor. Two questions still to
+      put to PCAB directly rather than assume: <strong>(a)</strong> does the classification covering solar
+      PV / electrical installation accept an <strong>REE</strong> as STE, or require a <strong>PEE</strong>;
+      <strong>(b)</strong> at what system capacity does plan sign-off hand off from an REE to a PEE
+      (residential rooftop is expected to sit inside REE scope — verify). Answer those and §7's
+      licensed-sign-off blocker on accepting a deposit is cleared. <span class="unverified">EST</span>
+    </p>
+
+    <h3>DOE — corrected: strongly wanted, not legally required <span class="unverified">EST</span></h3>
+    <p>
+      An earlier revision of this page treated DOE accreditation as a blocker on quoting. Public 2026
+      sources say otherwise: DOE listing is <strong>not legally mandated for private residential
+      installations</strong>. Where it does bind is <strong>government procurement</strong> — public
+      agencies buying solar under RA 9184 are required to use DOE-listed installers — and as a
+      <strong>trust signal</strong> a scam-wary homeowner (and some DUs and financiers) will check. The
+      DOE registry listed roughly 92 solar PV installers as of Jan 2026, so it is a real, attainable
+      list, and RESC accreditation under the Renewable Energy Act is the related company-level
+      registration. Treat it as: <em>apply, don't wait for it</em>.
+    </p>
+    <div class="callout danger">
+      <span class="label">Honesty rule (§1.6)</span>
+      Do not print, imply, or let a Messenger reply suggest "DOE-accredited" until the certificate
+      exists and its number can be quoted. Same for PCAB. The legally required set for a private
+      residential rooftop job is PCAB + a PRC-licensed signing professional + the LGU electrical permit
+      and CFEI + (grid-tied only) the DU net-metering approval — say that, and nothing more.
     </div>
 
     <h2><span class="sec">§ 7</span>Rough costs &amp; timeline <span class="unverified">EST</span></h2>
@@ -153,6 +232,7 @@
         <tr><th>Item</th><th>Estimate</th></tr>
         <tr><td>SEC + BIR + LGU registration, small domestic corp</td><td class="mono">₱25,000–₱130,000</td></tr>
         <tr><td>Name reservation → Certificate of Incorporation via eSPARC</td><td class="mono">5–10 business days</td></tr>
+        <tr><td>BFP fire code fee (FSIC)</td><td class="mono">assessed by the city/municipal treasurer against the business tax — ask the BFP station covering the address</td></tr>
         <tr><td>PCAB / DOE accreditation timeline</td><td class="mono">not yet researched — confirm before any customer-facing start date</td></tr>
       </table>
     </div>
@@ -164,7 +244,8 @@
         <div class="cl-item"><input type="checkbox" id="c33"><label for="c33">Founders decide entity type + name candidates (§0–1) this week</label></div>
         <div class="cl-item"><input type="checkbox" id="c34"><label for="c34">Log the decision in <code>ops/status.md</code> §4</label></div>
         <div class="cl-item"><input type="checkbox" id="c35"><label for="c35">Assign a named owner for this checklist ("pilot in command" — §6)</label></div>
-        <div class="cl-item"><input type="checkbox" id="c36"><label for="c36">Confirm PCAB/DOE prerequisites (§6) before any install is quoted</label></div>
+        <div class="cl-item"><input type="checkbox" id="c36"><label for="c36">Confirm PCAB prerequisites (§6) before any install is quoted — this, not DOE, is the contracting gate</label></div>
+        <div class="cl-item"><input type="checkbox" id="c42"><label for="c42">Ask the target LGU's building/electrical office for its actual electrical-permit + CFEI paperwork list and fees — the per-install chain is what a homeowner's timeline depends on</label></div>
       </div>
     </div>
 
