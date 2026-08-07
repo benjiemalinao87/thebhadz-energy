@@ -7,8 +7,9 @@
 
   var root = document.getElementById("gl-app");
   var form = document.getElementById("gl-form");
-  var dialog = document.getElementById("gl-dialog");
-  if (!root || !form || !dialog) return;
+  var drawer = document.getElementById("gl-drawer");
+  var scrim = document.getElementById("gl-scrim");
+  if (!root || !form || !drawer || !scrim) return;
 
   var API = "/api/goals";
   var LANES = ["Backlog", "This week", "Doing", "Done", "Missed"];
@@ -73,11 +74,11 @@
     form.querySelector(".gl-manual").hidden = !manual;
   }
 
-  function openDialog(goal) {
+  function openDrawer(goal) {
     state.editing = goal || null;
     form.reset();
     form.elements.id.value = goal ? goal.id : "";
-    document.getElementById("gl-dialog-title").textContent = goal ? "Edit goal" : "New goal";
+    document.getElementById("gl-drawer-title").textContent = goal ? "Edit goal" : "New goal";
     document.getElementById("gl-delete").hidden = !goal;
     if (goal) {
       form.elements.title.value = goal.title || "";
@@ -99,11 +100,16 @@
       fillPeople("");
     }
     toggleManual();
-    if (typeof dialog.showModal === "function") dialog.showModal();
+    scrim.classList.add("open");
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    drawer.focus();
   }
 
-  function closeDialog() {
-    if (dialog.open) dialog.close();
+  function closeDrawer() {
+    scrim.classList.remove("open");
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
     state.editing = null;
   }
 
@@ -213,9 +219,20 @@
       });
   }
 
-  document.getElementById("gl-new").addEventListener("click", function () { openDialog(null); });
-  document.getElementById("gl-dialog-close").addEventListener("click", closeDialog);
+  document.getElementById("gl-new").addEventListener("click", function () { openDrawer(null); });
+  document.getElementById("gl-drawer-close").addEventListener("click", closeDrawer);
+  scrim.addEventListener("click", closeDrawer);
   form.elements.metric.addEventListener("change", toggleManual);
+
+  // Escape must work wherever focus sits. SPA re-runs this script on each visit, so a
+  // single document listener hooks through a window slot (same pattern as jobs.js).
+  window.__glCloseDrawer = closeDrawer;
+  if (!document.documentElement.dataset.glKeysReady) {
+    document.documentElement.dataset.glKeysReady = "true";
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && typeof window.__glCloseDrawer === "function") window.__glCloseDrawer();
+    });
+  }
 
   document.querySelector(".gl-views").addEventListener("click", function (e) {
     var btn = e.target.closest("[data-view]");
@@ -225,11 +242,11 @@
   });
 
   root.addEventListener("click", function (e) {
-    if (e.target.closest("[data-act='new']")) { openDialog(null); return; }
+    if (e.target.closest("[data-act='new']")) { openDrawer(null); return; }
     var card = e.target.closest("[data-id]");
     if (!card) return;
     var g = state.goals.filter(function (x) { return x.id === card.getAttribute("data-id"); })[0];
-    if (g) openDialog(g);
+    if (g) openDrawer(g);
   });
 
   form.addEventListener("submit", function (e) {
@@ -253,7 +270,7 @@
     req.then(function (d) {
       if (!d) return;
       toast("ok", id ? "Goal updated" : "Goal created");
-      closeDialog();
+      closeDrawer();
       return load();
     }).catch(function (err) { toast("bad", err.message); });
   });
@@ -265,7 +282,7 @@
     send("DELETE", { id: id }).then(function (d) {
       if (!d) return;
       toast("ok", "Goal deleted");
-      closeDialog();
+      closeDrawer();
       return load();
     }).catch(function (err) { toast("bad", err.message); });
   });
